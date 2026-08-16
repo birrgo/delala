@@ -27,13 +27,28 @@
             --text-muted: #64748B;
         }
 
-        * { font-family: var(--font-main); }
+        * { font-family: var(--font-main); box-sizing: border-box; }
         body {
             font-family: var(--font-main);
             background-color: var(--bg-body);
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
         }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
 
         .post-form-card {
             background: var(--card-bg);
@@ -41,8 +56,7 @@
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border-color);
-            margin-top: 12px;
-            margin-bottom: 24px;
+            margin: 12px 16px 24px;
         }
 
         .step-indicator {
@@ -255,7 +269,6 @@
         .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
         .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
-        /* Modal Overlay */
         .metal-modal-overlay {
             position: fixed;
             top: 0;
@@ -273,10 +286,7 @@
             transition: opacity 0.25s ease-in-out;
         }
 
-        .metal-modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
 
         .metal-modal-card {
             width: 88%;
@@ -293,9 +303,7 @@
             transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .metal-modal-overlay.active .metal-modal-card {
-            transform: scale(1) translateY(0);
-        }
+        .metal-modal-overlay.active .metal-modal-card { transform: scale(1) translateY(0); }
 
         .metal-icon-wrapper {
             width: 58px;
@@ -352,7 +360,7 @@
         </header>
 
         <main class="app-content">
-            <form class="post-form-card" id="step1Form">
+            <div class="post-form-card" id="step1Form">
                 <div class="step-indicator">
                     <div class="step-node active" id="node-1">1</div>
                     <div class="step-node" id="node-2">2</div>
@@ -450,7 +458,7 @@
                         </button>
                     </div>
                 </div>
-            </form>
+            </div>
 
             <footer class="verified-footer-shield">
                 <span class="footer-shield-text">Delala Marketplace Verified</span>
@@ -502,20 +510,26 @@
     <script>
         let uploadedBase64Images = ["", "", ""];
 
-        function showErrorModal(message, title = "Validation Error") {
+        window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
             document.getElementById('errorModalMessage').innerText = message;
             document.getElementById('errorModalOverlay').classList.add('active');
-        }
+        };
 
-        function closeErrorModal() {
+        window.closeErrorModal = function() {
             document.getElementById('errorModalOverlay').classList.remove('active');
-        }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             setupImageUploaders();
             setupAutoFillListeners();
+            restoreSavedDraft();
+
+            // Handle hash-based navigation when coming back from Step 3
+            if (window.location.hash === '#step2') {
+                switchToStep2();
+            }
 
             document.getElementById('btnNext1').addEventListener('click', () => {
                 const category = document.getElementById('rentalType').value;
@@ -527,20 +541,15 @@
                     showErrorModal("Please upload at least 1 property image to continue.");
                     return;
                 }
-                document.getElementById('stepPage1').classList.remove('active');
-                document.getElementById('stepPage2').classList.add('active');
-                document.getElementById('node-1').classList.remove('active');
-                document.getElementById('node-2').classList.add('active');
+                saveDraftToSession();
+                switchToStep2();
             });
 
             document.getElementById('btnBack2').addEventListener('click', () => {
-                document.getElementById('stepPage2').classList.remove('active');
-                document.getElementById('stepPage1').classList.add('active');
-                document.getElementById('node-2').classList.remove('active');
-                document.getElementById('node-1').classList.add('active');
+                saveDraftToSession();
+                switchToStep1();
             });
 
-            /* DIRECT REDIRECT: Saves draft and opens rentalpost1.html without saying 'completed' */
             document.getElementById('btnNext2').addEventListener('click', () => {
                 const title = document.getElementById('postTitle').value.trim();
                 const price = document.getElementById('rentalPrice').value;
@@ -550,21 +559,85 @@
                     return;
                 }
 
-                const draftData = {
-                    rentalType: document.getElementById('rentalType').value,
-                    images: uploadedBase64Images.filter(img => img !== ""),
-                    imageUrl: uploadedBase64Images[0] || "",
-                    title: title,
-                    price: Number(price),
-                    paymentPeriod: document.getElementById('paymentPeriod').value,
-                    body: document.getElementById('postContent').value.trim(),
-                    categorySpecificDetails: getCategoryDetails()
-                };
-
-                sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
+                saveDraftToSession();
                 window.location.href = 'rentalpost1.html';
             });
         });
+
+        function switchToStep1() {
+            document.getElementById('stepPage2').classList.remove('active');
+            document.getElementById('stepPage1').classList.add('active');
+            document.getElementById('node-2').classList.remove('active');
+            document.getElementById('node-1').classList.add('active');
+            window.location.hash = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchToStep2() {
+            document.getElementById('stepPage1').classList.remove('active');
+            document.getElementById('stepPage2').classList.add('active');
+            document.getElementById('node-1').classList.remove('active');
+            document.getElementById('node-2').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveDraftToSession() {
+            const draftData = {
+                rentalType: document.getElementById('rentalType').value,
+                images: uploadedBase64Images.filter(img => img !== ""),
+                imageUrl: uploadedBase64Images[0] || "",
+                title: document.getElementById('postTitle').value.trim(),
+                price: Number(document.getElementById('rentalPrice').value) || 0,
+                paymentPeriod: document.getElementById('paymentPeriod').value,
+                body: document.getElementById('postContent').value.trim(),
+                categorySpecificDetails: getCategoryDetails()
+            };
+            sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
+        }
+
+        function restoreSavedDraft() {
+            const rawDraft = sessionStorage.getItem('delalaDraftPart1');
+            if (!rawDraft) return;
+
+            try {
+                const draft = JSON.parse(rawDraft);
+                if (draft.rentalType) {
+                    document.getElementById('rentalType').value = draft.rentalType;
+                    renderCategorySpecificFields();
+                }
+                if (draft.images && Array.isArray(draft.images)) {
+                    draft.images.forEach((img, idx) => {
+                        if (img && idx < 3) {
+                            uploadedBase64Images[idx] = img;
+                            const preview = document.getElementById(`preview${idx + 1}`);
+                            if (preview) {
+                                preview.src = img;
+                                preview.style.display = 'block';
+                            }
+                        }
+                    });
+                }
+                if (draft.title) document.getElementById('postTitle').value = draft.title;
+                if (draft.price) document.getElementById('rentalPrice').value = draft.price;
+                if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
+                if (draft.body) document.getElementById('postContent').value = draft.body;
+
+                if (draft.categorySpecificDetails) {
+                    const c = draft.categorySpecificDetails;
+                    if (c.roomCount && document.getElementById('roomCount')) document.getElementById('roomCount').value = c.roomCount;
+                    if (c.livingStatus && document.getElementById('livingStatus')) document.getElementById('livingStatus').value = c.livingStatus;
+                    if (c.shopSize && document.getElementById('shopSize')) document.getElementById('shopSize').value = c.shopSize;
+                    if (c.shopFloor && document.getElementById('shopFloor')) document.getElementById('shopFloor').value = c.shopFloor;
+                    if (c.vehicleModel && document.getElementById('vehicleModel')) document.getElementById('vehicleModel').value = c.vehicleModel;
+                    if (c.transmissionType && document.getElementById('transmissionType')) document.getElementById('transmissionType').value = c.transmissionType;
+                    if (c.equipmentType && document.getElementById('equipmentType')) document.getElementById('equipmentType').value = c.equipmentType;
+                    if (c.itemQuantity && document.getElementById('itemQuantity')) document.getElementById('itemQuantity').value = c.itemQuantity;
+                    if (c.specItemType && document.getElementById('specItemType')) document.getElementById('specItemType').value = c.specItemType;
+                }
+            } catch (err) {
+                console.error("Failed to parse cached session draft", err);
+            }
+        }
 
         function getCategoryDetails() {
             const cat = document.getElementById('rentalType').value;
@@ -701,21 +774,20 @@
                 renderCategorySpecificFields();
                 const selected = rentalType.value;
 
-                if (selected === 'House / Apartment') {
-                    postTitle.value = 'House / Apartment for Rent';
-                    if (!postContent.value) postContent.value = `[Property Overview]: Residential rental.\n\n[Features & Facilities]: Water & electricity available, good accessibility, fully secure locality.`;
-                } else if (selected === 'Commercial Shop') {
-                    postTitle.value = 'Commercial Shop / Office Space';
-                    if (!postContent.value) postContent.value = `[Commercial Overview]: Commercial space suitable for business activities.\n\n[Features & Facilities]: High customer foot traffic, power supply available.`;
-                } else if (selected === 'Vehicle') {
-                    postTitle.value = 'Car / Vehicle Rental';
-                    if (!postContent.value) postContent.value = `[Vehicle Overview]: Well-maintained vehicle available for rent.\n\n[Terms]: Clean condition, ready for immediate service.`;
-                } else if (selected === 'Event Equipment') {
-                    postTitle.value = 'Event Equipment for Rent';
-                    if (!postContent.value) postContent.value = `[Equipment Overview]: Quality rental items for events and ceremonies.\n\n[Terms]: Available for daily or event-based rental agreements.`;
-                } else if (selected === 'Other Rental') {
-                    postTitle.value = 'Rental Listing';
-                    if (!postContent.value) postContent.value = `[Rental Overview]: Item available for rent.\n\n[Terms]: Contact for further details and terms.`;
+                if (!postTitle.value) {
+                    if (selected === 'House / Apartment') postTitle.value = 'House / Apartment for Rent';
+                    else if (selected === 'Commercial Shop') postTitle.value = 'Commercial Shop / Office Space';
+                    else if (selected === 'Vehicle') postTitle.value = 'Car / Vehicle Rental';
+                    else if (selected === 'Event Equipment') postTitle.value = 'Event Equipment for Rent';
+                    else if (selected === 'Other Rental') postTitle.value = 'Rental Listing';
+                }
+
+                if (!postContent.value) {
+                    if (selected === 'House / Apartment') postContent.value = `[Property Overview]: Residential rental.\n\n[Features & Facilities]: Water & electricity available, good accessibility, fully secure locality.`;
+                    else if (selected === 'Commercial Shop') postContent.value = `[Commercial Overview]: Commercial space suitable for business activities.\n\n[Features & Facilities]: High customer foot traffic, power supply available.`;
+                    else if (selected === 'Vehicle') postContent.value = `[Vehicle Overview]: Well-maintained vehicle available for rent.\n\n[Terms]: Clean condition, ready for immediate service.`;
+                    else if (selected === 'Event Equipment') postContent.value = `[Equipment Overview]: Quality rental items for events and ceremonies.\n\n[Terms]: Available for daily or event-based rental agreements.`;
+                    else if (selected === 'Other Rental') postContent.value = `[Rental Overview]: Item available for rent.\n\n[Terms]: Contact for further details and terms.`;
                 }
             });
         }

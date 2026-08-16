@@ -30,10 +30,10 @@
             --danger-color: #EF4444;
             --danger-bg: #FEF2F2;
             --danger-border: #FCA5A5;
-            --success-color: #0F172A;
         }
 
         * { font-family: var(--font-main); box-sizing: border-box; }
+
         body {
             font-family: var(--font-main);
             background-color: var(--bg-body);
@@ -43,7 +43,6 @@
             padding: 0;
         }
 
-        /* HEADER & TOP NAV */
         .nav-header {
             display: flex;
             align-items: center;
@@ -53,11 +52,7 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .header-left-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
 
         .header-back-btn {
             background: none;
@@ -71,25 +66,10 @@
             border-radius: 8px;
         }
 
-        .header-back-btn:active {
-            background: #F1F5F9;
-        }
+        .header-back-btn:active { background: #F1F5F9; }
 
-        .header-title-text {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin: 0;
-        }
-
-        .header-live-clock-badge {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            background: #F1F5F9;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
 
         .post-form-card {
             background: var(--card-bg);
@@ -122,7 +102,7 @@
         .step-node {
             position: relative;
             z-index: 2;
-            background: #FFFFFF;
+            background: #F1F5F9;
             border: 2px solid var(--border-color);
             color: var(--text-muted);
             width: 32px;
@@ -173,6 +153,7 @@
             font-weight: 500;
             color: var(--text-main);
             outline: none;
+            box-sizing: border-box;
             transition: all 0.2s ease;
         }
 
@@ -207,126 +188,10 @@
             gap: 8px;
             cursor: pointer;
             margin-bottom: 14px;
+            text-decoration: none;
         }
 
-        .map-wrapper {
-            display: none;
-        }
-
-        .map-wrapper.fullscreen {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 999999;
-            margin: 0;
-            background: #000;
-        }
-
-        .map-wrapper.fullscreen #rentalMap { 
-            width: 100vw;
-            height: 100vh; 
-            border-radius: 0; 
-        }
-
-        .map-close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000000;
-            background: #FFFFFF;
-            color: var(--primary-dark);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .leaflet-control-container .leaflet-control-attribution {
-            display: none !important;
-        }
-
-        body:has(.map-wrapper.fullscreen) .nav-header,
-        body:has(.map-wrapper.fullscreen) .bottom-nav {
-            display: none !important;
-        }
-
-        body:has(.map-wrapper.fullscreen) {
-            overflow: hidden;
-        }
-
-        .save-location-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000000;
-            background: var(--primary-dark);
-            color: #FFFFFF;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 25px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.3s ease, background 0.3s ease;
-        }
-
-        .save-location-btn:disabled {
-            background: #64748B;
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .map-gps-btn {
-            position: absolute;
-            bottom: 110px;
-            right: 20px;
-            z-index: 1000000;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #1E293B;
-            color: #38BDF8;
-            border: 2px solid #38BDF8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-
-        .map-gps-btn.tracking-active {
-            background: #0284C7;
-            color: #FFFFFF;
-            border-color: #38BDF8;
-            animation: pulseGps 1.5s infinite;
-        }
-
-        @keyframes pulseGps {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
-            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
-        }
-
-        .map-gps-btn:active {
-            transform: scale(0.92);
-        }
-
-        .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .leaflet-control-container .leaflet-control-attribution { display: none !important; }
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
@@ -346,6 +211,7 @@
 
         .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
         .submit-post-btn { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+        .submit-post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .bottom-nav {
             position: fixed;
@@ -492,6 +358,8 @@
             cursor: pointer;
         }
 
+        .modal-btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
         .preview-section {
             background: #F8FAFC;
             padding: 12px;
@@ -506,6 +374,15 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             margin-bottom: 6px;
+        }
+
+        .preview-map-box {
+            width: 100%;
+            height: 160px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
         }
 
         .error-modal-card {
@@ -560,7 +437,7 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <button type="button" class="header-back-btn" onclick="window.location.href='rentalpost.html'" title="Back to Part 1">
+                <button type="button" class="header-back-btn" id="globalHeaderBackBtn" title="Back">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
                 <h1 class="header-title-text">Delala - Post Rental</h1>
@@ -581,11 +458,10 @@
                 <div class="form-step-page active" id="stepPage3">
                     <div class="step-title">Step 3: Location Details</div>
 
-                    <button type="button" class="detect-loc-btn" id="detectLocBtn">
+                    <a href="map.html" class="detect-loc-btn" id="gpsDetectBtn">
                         📡 Detect Real-Time GPS Location
-                    </button>
+                    </a>
 
-                    <!-- Auto-filled from Realtime GPS only (Read-only) -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="locCountry">Country (Auto GPS)</label>
@@ -597,7 +473,6 @@
                         </div>
                     </div>
 
-                    <!-- Auto-filled from Realtime GPS only (Read-only) -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="locZone">Zone / Area (Auto GPS)</label>
@@ -609,7 +484,6 @@
                         </div>
                     </div>
 
-                    <!-- User Editable or Auto-Detected -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="locSubcity">Subcity / Woreda *</label>
@@ -625,7 +499,7 @@
                     <input type="hidden" id="rentalLng">
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" onclick="window.location.href='rentalpost.html'">
+                        <button type="button" class="btn-prev" id="btnBackToStep2">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                             Back
                         </button>
@@ -707,33 +581,6 @@
         </nav>
     </div>
 
-    <!-- FULLSCREEN MAP CONTAINER -->
-    <div class="map-wrapper" id="mapContainer">
-        <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" title="Close Map">✕</button>
-        <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
-            📡 Finding GPS Fix...
-        </button>
-        <div id="rentalMap"></div>
-        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Toggle Real-Time Tracking">
-            <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-        </button>
-    </div>
-
-    <!-- CONFIRMATION POPUP MODAL -->
-    <div class="modal-overlay" id="confirmLocationModalOverlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Confirm Real-Time GPS Location</h3>
-                <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
-            </div>
-            <div class="modal-body" id="locationConfirmBody"></div>
-            <div class="modal-footer">
-                <button type="button" class="modal-btn-cancel" id="retrackLocationBtn">Re-Sync GPS</button>
-                <button type="button" class="modal-btn-confirm" id="acceptLocationBtn">Confirm & Save</button>
-            </div>
-        </div>
-    </div>
-
     <!-- PREVIEW MODAL -->
     <div class="modal-overlay" id="previewModalOverlay">
         <div class="modal-card">
@@ -777,14 +624,14 @@
         import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
-            authDomain: "hulum-e358c.firebaseapp.com",
-            databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
-            projectId: "hulum-e358c",
-            storageBucket: "hulum-e358c.firebasestorage.app",
-            messagingSenderId: "678316597629",
-            appId: "1:678316597629:web:dc6af499b8054a424aac14",
-            measurementId: "G-097P51SP2B"
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -792,49 +639,29 @@
         const db = getDatabase(app);
 
         let currentUser = null;
-        let leafletMap, leafletMarker;
+        let previewMapInstance = null;
         let pendingPayload = null;
-
-        // REAL-TIME GPS TRACKING VARIABLES ONLY
-        let watchPositionId = null;
         let isLocationTracked = false;
-        let currentTrackedLat = null;
-        let currentTrackedLng = null;
-        let currentTrackedAccuracy = null;
-        let currentAddressInfo = null;
-
-        // Default initial map focus: Addis Ababa, Bole
-        const BOLE_LAT = 9.0034;
-        const BOLE_LNG = 38.7881;
 
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
-            initLeafletMap();
+            loadSavedFormData();
 
             onAuthStateChanged(auth, (user) => { currentUser = user; });
 
-            document.getElementById('detectLocBtn').addEventListener('click', triggerDetectAndFullscreen);
-            document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
-            document.getElementById('closeMapFullscreenBtn').addEventListener('click', closeMapFullscreen);
-            
-            // GPS Button Starts/Stops Realtime Tracking
-            document.getElementById('mapGpsBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleRealtimeTracking();
+            document.getElementById('gpsDetectBtn').addEventListener('click', () => {
+                savePart2FormData();
             });
 
-            // Confirmation Modal Actions
-            document.getElementById('closeLocationModalCross').addEventListener('click', () => {
-                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+            document.getElementById('btnBackToStep2').addEventListener('click', goBackToRentalPostStep2);
+            document.getElementById('globalHeaderBackBtn').addEventListener('click', () => {
+                if (document.getElementById('stepPage4').classList.contains('active')) {
+                    switchToStep3();
+                } else {
+                    goBackToRentalPostStep2();
+                }
             });
-            document.getElementById('retrackLocationBtn').addEventListener('click', () => {
-                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-                startRealtimeTracking();
-            });
-            document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationAndExit);
 
-            // Validation for Next Page
             document.getElementById('btnNext3').addEventListener('click', () => {
                 const country = document.getElementById('locCountry').value.trim();
                 const region = document.getElementById('locRegion').value.trim();
@@ -853,27 +680,98 @@
                     return;
                 }
 
-                document.getElementById('stepPage3').classList.remove('active');
-                document.getElementById('stepPage4').classList.add('active');
-                document.getElementById('node-3').classList.remove('active');
-                document.getElementById('node-4').classList.add('active');
+                savePart2FormData();
+                switchToStep4();
             });
 
             document.getElementById('btnBack4').addEventListener('click', () => {
-                document.getElementById('stepPage4').classList.remove('active');
-                document.getElementById('stepPage3').classList.add('active');
-                document.getElementById('node-4').classList.remove('active');
-                document.getElementById('node-3').classList.add('active');
+                savePart2FormData();
+                switchToStep3();
             });
 
             document.getElementById('step2Form').addEventListener('submit', openPreviewModal);
-
             document.getElementById('closeModalCross').addEventListener('click', closeModal);
             document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
             document.getElementById('confirmPublishBtn').addEventListener('click', executeFirebasePublish);
-
             document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
+
+            const formInputs = document.querySelectorAll('.form-input');
+            formInputs.forEach(input => {
+                input.addEventListener('input', savePart2FormData);
+            });
         });
+
+        function switchToStep3() {
+            document.getElementById('stepPage4').classList.remove('active');
+            document.getElementById('stepPage3').classList.add('active');
+            document.getElementById('node-4').classList.remove('active');
+            document.getElementById('node-3').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchToStep4() {
+            document.getElementById('stepPage3').classList.remove('active');
+            document.getElementById('stepPage4').classList.add('active');
+            document.getElementById('node-3').classList.remove('active');
+            document.getElementById('node-4').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function savePart2FormData() {
+            const formData = {
+                subcity: document.getElementById('locSubcity').value,
+                uniqueName: document.getElementById('locUniqueName').value,
+                phone: document.getElementById('contactPhone').value,
+                telegram: document.getElementById('contactTelegram').value,
+                whatsapp: document.getElementById('contactWhatsApp').value,
+                email: document.getElementById('contactEmail').value,
+                instagram: document.getElementById('contactInstagram').value
+            };
+            sessionStorage.setItem('delalaDraftPart2', JSON.stringify(formData));
+        }
+
+        function loadSavedFormData() {
+            const rawGps = sessionStorage.getItem('selectedGpsLocation');
+            if (rawGps) {
+                try {
+                    const parsed = JSON.parse(rawGps);
+                    if (parsed.lat && parsed.lng) {
+                        document.getElementById('rentalLat').value = Number(parsed.lat).toFixed(6);
+                        document.getElementById('rentalLng').value = Number(parsed.lng).toFixed(6);
+                        isLocationTracked = true;
+                    }
+                    if (parsed.address) {
+                        const addr = parsed.address;
+                        document.getElementById('locCountry').value = addr.country || '';
+                        document.getElementById('locRegion').value = addr.region || '';
+                        document.getElementById('locZone').value = addr.zone || '';
+                        document.getElementById('locCity').value = addr.city || '';
+                        if (addr.subcity) {
+                            document.getElementById('locSubcity').value = addr.subcity;
+                        }
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
+            if (rawPart2) {
+                try {
+                    const p2 = JSON.parse(rawPart2);
+                    if (p2.subcity && !document.getElementById('locSubcity').value) document.getElementById('locSubcity').value = p2.subcity;
+                    if (p2.uniqueName) document.getElementById('locUniqueName').value = p2.uniqueName;
+                    if (p2.phone) document.getElementById('contactPhone').value = p2.phone;
+                    if (p2.telegram) document.getElementById('contactTelegram').value = p2.telegram;
+                    if (p2.whatsapp) document.getElementById('contactWhatsApp').value = p2.whatsapp;
+                    if (p2.email) document.getElementById('contactEmail').value = p2.email;
+                    if (p2.instagram) document.getElementById('contactInstagram').value = p2.instagram;
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        function goBackToRentalPostStep2() {
+            savePart2FormData();
+            window.location.href = 'rentalpost.html#step2';
+        }
 
         function showErrorModal(title, message) {
             document.getElementById('errorModalTitle').innerText = title;
@@ -883,210 +781,6 @@
 
         function closeErrorModal() {
             document.getElementById('errorModalOverlay').style.display = 'none';
-        }
-
-        function initLeafletMap() {
-            leafletMap = L.map('rentalMap', {
-                attributionControl: false,
-                dragging: true,
-                touchZoom: true,
-                doubleClickZoom: false,
-                scrollWheelZoom: true,
-                boxZoom: false
-            }).setView([BOLE_LAT, BOLE_LNG], 14);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(leafletMap);
-
-            // Non-draggable marker exclusively controlled by GPS
-            leafletMarker = L.marker([BOLE_LAT, BOLE_LNG], { draggable: false }).addTo(leafletMap);
-        }
-
-        function enableSaveButton() {
-            const saveBtn = document.getElementById('saveLocationBtn');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = `✓ Use GPS Location`;
-        }
-
-        function toggleRealtimeTracking() {
-            if (watchPositionId !== null) {
-                stopRealtimeTracking();
-            } else {
-                startRealtimeTracking();
-            }
-        }
-
-        function startRealtimeTracking() {
-            if (!navigator.geolocation) {
-                showErrorModal("GPS Error", "Geolocation is not supported by your device or browser.");
-                return;
-            }
-
-            const gpsBtn = document.getElementById('mapGpsBtn');
-            gpsBtn.classList.add('tracking-active');
-
-            if (watchPositionId !== null) {
-                navigator.geolocation.clearWatch(watchPositionId);
-            }
-
-            const geoOptions = {
-                enableHighAccuracy: true,
-                timeout: 30000,
-                maximumAge: 10000
-            };
-
-            // Request permission explicitly and try high accuracy with low accuracy fallback
-            navigator.geolocation.getCurrentPosition(
-                (pos) => processGpsSuccess(pos),
-                (err) => {
-                    console.warn("High accuracy attempt failed, switching to network location fallback...", err);
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => processGpsSuccess(pos),
-                        (err2) => handleGpsError(err2),
-                        { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
-                    );
-                },
-                geoOptions
-            );
-
-            // Establish continuous tracking watch
-            watchPositionId = navigator.geolocation.watchPosition(
-                (pos) => processGpsSuccess(pos),
-                (err) => console.warn("Watch position update warning:", err),
-                geoOptions
-            );
-        }
-
-        function processGpsSuccess(pos) {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const accuracy = pos.coords.accuracy;
-
-            currentTrackedLat = lat;
-            currentTrackedLng = lng;
-            currentTrackedAccuracy = accuracy;
-            isLocationTracked = true;
-
-            if (leafletMap && leafletMarker) {
-                leafletMap.setView([lat, lng], 17);
-                leafletMarker.setLatLng([lat, lng]);
-            }
-
-            enableSaveButton();
-            updateLocationInputs(lat, lng);
-            reverseGeocodeOSM(lat, lng);
-        }
-
-        function handleGpsError(err) {
-            stopRealtimeTracking();
-            if (err.code === 1) {
-                showErrorModal("Permission Blocked", "Location permission was denied. Please enable location access in your browser or device settings.");
-            } else if (err.code === 2) {
-                showErrorModal("GPS Signal Unavailable", "Unable to acquire a valid GPS fix. Please step outside or reconnect your mobile network.");
-            } else {
-                showErrorModal("GPS Connection Timeout", "Real-time location request timed out. Tap the GPS target button to try again.");
-            }
-        }
-
-        function stopRealtimeTracking() {
-            if (watchPositionId !== null) {
-                navigator.geolocation.clearWatch(watchPositionId);
-                watchPositionId = null;
-            }
-            document.getElementById('mapGpsBtn').classList.remove('tracking-active');
-        }
-
-        function triggerDetectAndFullscreen() {
-            const container = document.getElementById('mapContainer');
-            container.classList.add('fullscreen');
-            setTimeout(() => { 
-                if (leafletMap) {
-                    leafletMap.invalidateSize(); 
-                    leafletMap.setView([BOLE_LAT, BOLE_LNG], 14);
-                    leafletMarker.setLatLng([BOLE_LAT, BOLE_LNG]);
-                }
-                startRealtimeTracking();
-            }, 250);
-        }
-
-        function closeMapFullscreen() {
-            stopRealtimeTracking();
-            document.getElementById('mapContainer').classList.remove('fullscreen');
-        }
-
-        function promptLocationConfirmation() {
-            if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
-                showErrorModal("Acquiring GPS Signal", "Please wait while real-time GPS locks onto your current location.");
-                return;
-            }
-
-            const modalBody = document.getElementById('locationConfirmBody');
-            const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Live Sensor Fix";
-            const city = currentAddressInfo?.city || document.getElementById('locCity').value || 'Addis Ababa';
-            const country = currentAddressInfo?.country || document.getElementById('locCountry').value || 'Ethiopia';
-            const region = currentAddressInfo?.region || document.getElementById('locRegion').value || 'Addis Ababa';
-
-            modalBody.innerHTML = `
-                <div class="preview-section">
-                    <div class="preview-section-title">REAL-TIME GPS COORDINATES</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Accuracy: <strong>${accuracyText}</strong></div>
-                </div>
-                <div class="preview-section">
-                    <div class="preview-section-title">DETECTED ADDRESS</div>
-                    <div style="font-size:13px; font-weight:700; color:var(--primary-dark);">${city}, ${region}</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Country: ${country}</div>
-                </div>
-                <p style="font-size:11px; color:var(--text-muted); margin:0;">Confirm if this real-time location matches where your rental item is available.</p>
-            `;
-
-            document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
-        }
-
-        function saveLocationAndExit() {
-            document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-            stopRealtimeTracking();
-
-            updateLocationInputs(currentTrackedLat, currentTrackedLng);
-
-            const container = document.getElementById('mapContainer');
-            container.classList.remove('fullscreen');
-        }
-
-        function reverseGeocodeOSM(lat, lng) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.address) {
-                        const addr = data.address;
-                        
-                        const country = addr.country || "Ethiopia";
-                        const region = addr.state || addr.region || addr.province || "Addis Ababa";
-                        const zone = addr.county || addr.state_district || addr.zone || "Bole";
-                        const city = addr.city || addr.town || addr.village || "Addis Ababa";
-                        const subcity = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || "";
-
-                        currentAddressInfo = { country, region, zone, city, subcity };
-
-                        document.getElementById('locCountry').value = country;
-                        document.getElementById('locRegion').value = region;
-                        document.getElementById('locZone').value = zone;
-                        document.getElementById('locCity').value = city;
-                        
-                        if (subcity) {
-                            document.getElementById('locSubcity').value = subcity;
-                        }
-                    }
-                })
-                .catch(err => console.error("Geocoding failed:", err));
-        }
-
-        function updateLocationInputs(lat, lng) {
-            document.getElementById('rentalLat').value = typeof lat === 'number' ? lat.toFixed(6) : lat;
-            document.getElementById('rentalLng').value = typeof lng === 'number' ? lng.toFixed(6) : lng;
         }
 
         function openPreviewModal(e) {
@@ -1105,7 +799,7 @@
 
             const rawDraft = sessionStorage.getItem('delalaDraftPart1');
             if (!rawDraft) {
-                showErrorModal("Draft Missing", "Part 1 details were not found.");
+                showErrorModal("Draft Missing", "Part 1 details were not found. Redirecting...");
                 setTimeout(() => { window.location.href = "rentalpost.html"; }, 2000);
                 return;
             }
@@ -1113,9 +807,14 @@
             const part1Data = JSON.parse(rawDraft);
 
             pendingPayload = {
-                ...part1Data,
-                ...part1Data.categorySpecificDetails,
-                category: "Rental",
+                rentalType: part1Data.rentalType || "Rental",
+                images: part1Data.images || [],
+                imageUrl: part1Data.imageUrl || "",
+                title: part1Data.title || "",
+                price: part1Data.price || 0,
+                paymentPeriod: part1Data.paymentPeriod || "Month",
+                body: part1Data.body || "",
+                categorySpecificDetails: part1Data.categorySpecificDetails || {},
                 locationDetails: {
                     country: document.getElementById('locCountry').value.trim(),
                     region: document.getElementById('locRegion').value.trim(),
@@ -1133,17 +832,48 @@
                 likes: 0,
                 userId: currentUser ? currentUser.uid : "anonymous",
                 authorName: currentUser ? (currentUser.displayName || "User") : "Anonymous User",
-                timestamp: Date.now()
+                createdAt: Date.now()
             };
-
-            delete pendingPayload.categorySpecificDetails;
 
             renderModalContent(pendingPayload);
             document.getElementById('previewModalOverlay').style.display = 'flex';
+
+            setTimeout(() => {
+                initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
+            }, 300);
         }
 
         function closeModal() {
             document.getElementById('previewModalOverlay').style.display = 'none';
+            if (previewMapInstance) {
+                previewMapInstance.remove();
+                previewMapInstance = null;
+            }
+        }
+
+        function initPreviewMap(lat, lng) {
+            const mapContainerNode = document.getElementById('userPreviewMap');
+            if (!mapContainerNode) return;
+
+            if (previewMapInstance) {
+                previewMapInstance.remove();
+            }
+
+            previewMapInstance = L.map('userPreviewMap', {
+                attributionControl: false,
+                zoomControl: false,
+                dragging: false,
+                scrollWheelZoom: false,
+                touchZoom: false
+            }).setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19
+            }).addTo(previewMapInstance);
+
+            L.marker([lat, lng]).addTo(previewMapInstance)
+                .bindPopup("Exact Rental Location")
+                .openPopup();
         }
 
         function renderModalContent(data) {
@@ -1165,16 +895,17 @@
                 <div class="preview-section">
                     <div class="preview-section-title">LISTING DETAILS</div>
                     <div style="font-size:14px; font-weight:800; color:var(--primary-dark);">${data.title || 'Untitled Rental'}</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${data.price ? data.price + ' ETB' : 'Price Negotiable'}</div>
-                    <p style="margin:6px 0 0; color:var(--text-muted); font-size:11px; line-height:1.4;">${data.description || 'No description provided.'}</p>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${data.price ? data.price + ' ETB / ' + data.paymentPeriod : 'Price Negotiable'}</div>
+                    <p style="margin:6px 0 0; color:var(--text-muted); font-size:11px; line-height:1.4;">${data.body || 'No description provided.'}</p>
                 </div>
 
                 <div class="preview-section">
-                    <div class="preview-section-title">GPS LOCATION DETAILS</div>
-                    <div style="font-weight:700;">${data.locationDetails.city}, ${data.locationDetails.region} (${data.locationDetails.country})</div>
+                    <div class="preview-section-title">EXACT MAP LOCATION DETECTED FOR USERS</div>
+                    <div style="font-weight:700; color:var(--primary-dark);">${data.locationDetails.city}, ${data.locationDetails.region} (${data.locationDetails.country})</div>
                     <div style="color:var(--text-muted); margin-top:2px;">${data.locationDetails.zone} • ${data.locationDetails.subcity}</div>
                     <div style="color:var(--text-muted); font-style:italic;">Landmark: ${data.locationDetails.uniqueName}</div>
                     <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Coordinates: ${data.location.latitude}, ${data.location.longitude}</div>
+                    <div id="userPreviewMap" class="preview-map-box"></div>
                 </div>
 
                 <div class="preview-section">
@@ -1200,12 +931,16 @@
                 submitBtn.disabled = true;
                 submitBtn.innerText = "Publishing Listing...";
 
-                const postsRef = ref(db, 'delalaListings');
+                const postsRef = ref(db, 'posts');
                 const newPostRef = push(postsRef);
 
                 await set(newPostRef, pendingPayload);
+
                 sessionStorage.removeItem('delalaDraftPart1');
-                window.location.href = "profile.html";
+                sessionStorage.removeItem('delalaDraftPart2');
+                sessionStorage.removeItem('selectedGpsLocation');
+
+                window.location.href = "rental.html";
 
             } catch (err) {
                 console.error(err);
@@ -1214,7 +949,7 @@
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Review & Publish";
                 closeModal();
-                showErrorModal("Publish Failed", "An error occurred while publishing your listing. Please try again.");
+                showErrorModal("Publish Failed", "An error occurred while publishing your listing. Please try again: " + err.message);
             }
         }
 
