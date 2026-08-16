@@ -135,6 +135,13 @@
             box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
         }
 
+        .form-input[readonly] {
+            background-color: #F1F5F9;
+            color: #475569;
+            cursor: not-allowed;
+            border-color: #CBD5E1;
+        }
+
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
 
@@ -177,6 +184,10 @@
             border-radius: 0; 
         }
 
+        .leaflet-control-container .leaflet-control-attribution {
+            display: none !important;
+        }
+
         body:has(.map-wrapper.fullscreen) .nav-header,
         body:has(.map-wrapper.fullscreen) .bottom-nav {
             display: none !important;
@@ -207,7 +218,7 @@
 
         .map-gps-btn {
             position: absolute;
-            bottom: 20px;
+            bottom: 60px;
             right: 20px;
             z-index: 1000;
             width: 44px;
@@ -220,6 +231,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .map-gps-btn svg { width: 22px; height: 22px; fill: currentColor; }
@@ -475,39 +487,42 @@
                     <div class="step-title">Step 3: Location Details</div>
 
                     <button type="button" class="detect-loc-btn" id="detectLocBtn">
-                        📍 Open Fullscreen Map & Auto-Detect Location
+                        📍 Select / Detect Location From Map
                     </button>
 
+                    <!-- Auto-filled from map only (Read-only) -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="locCountry">Country *</label>
-                            <input type="text" class="form-input" id="locCountry" value="Ethiopia" required>
+                            <label class="form-label" for="locCountry">Country (Auto from Map)</label>
+                            <input type="text" class="form-input" id="locCountry" readonly placeholder="Select on map..." required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="locRegion">Region *</label>
-                            <input type="text" class="form-input" id="locRegion" placeholder="e.g. Oromia / Addis Ababa" required>
+                            <label class="form-label" for="locRegion">Region (Auto from Map)</label>
+                            <input type="text" class="form-input" id="locRegion" readonly placeholder="Select on map..." required>
                         </div>
                     </div>
 
+                    <!-- Auto-filled from map only (Read-only) -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="locZone">Zone / Sub-City Area *</label>
-                            <input type="text" class="form-input" id="locZone" placeholder="e.g. East Shewa / Bole" required>
+                            <label class="form-label" for="locZone">Zone / Area (Auto from Map)</label>
+                            <input type="text" class="form-input" id="locZone" readonly placeholder="Select on map..." required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="locCity">City / Town *</label>
-                            <input type="text" class="form-input" id="locCity" placeholder="e.g. Adama / Addis Ababa" required>
+                            <label class="form-label" for="locCity">City / Town (Auto from Map)</label>
+                            <input type="text" class="form-input" id="locCity" readonly placeholder="Select on map..." required>
                         </div>
                     </div>
 
+                    <!-- User Editable or Auto-Detected -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="locSubcity">Subcity / Woreda *</label>
-                            <input type="text" class="form-input" id="locSubcity" placeholder="e.g. Woreda 03 / Subcity" required>
+                            <input type="text" class="form-input" id="locSubcity" placeholder="Auto-detected or enter manually" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="locUniqueName">Unique Place / Landmark *</label>
-                            <input type="text" class="form-input" id="locUniqueName" placeholder="e.g. Near Central Square" required>
+                            <input type="text" class="form-input" id="locUniqueName" placeholder="Enter landmark manually" required>
                         </div>
                     </div>
 
@@ -529,7 +544,7 @@
                 <!-- PAGE 4 -->
                 <div class="form-step-page" id="stepPage4">
                     <div class="step-title">Step 4: Contact Information</div>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Please fill at least 1 contact method. You can fill more if you want.</p>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Fill at least 1 contact method. All others are optional.</p>
 
                     <div class="form-group">
                         <label class="form-label" for="contactPhone">Phone Number</label>
@@ -538,7 +553,7 @@
 
                     <div class="form-group">
                         <label class="form-label" for="contactTelegram">Telegram Username</label>
-                        <input type="text" class="form-input" id="contactTelegram" placeholder="e.g. @username or https://t.me/username">
+                        <input type="text" class="form-input" id="contactTelegram" placeholder="e.g. @username or t.me/username">
                     </div>
 
                     <div class="form-group">
@@ -615,9 +630,7 @@
                 <h3>Review Delala Listing</h3>
                 <button type="button" class="modal-close-btn" id="closeModalCross">✕</button>
             </div>
-            <div class="modal-body" id="modalPreviewContent">
-                <!-- Dynamically Populated -->
-            </div>
+            <div class="modal-body" id="modalPreviewContent"></div>
             <div class="modal-footer">
                 <button type="button" class="modal-btn-cancel" id="cancelModalBtn">Edit Info</button>
                 <button type="button" class="modal-btn-confirm" id="confirmPublishBtn">Confirm & Publish</button>
@@ -681,13 +694,23 @@
             document.getElementById('saveLocationBtn').addEventListener('click', saveLocationAndExit);
             document.getElementById('mapGpsBtn').addEventListener('click', fetchLiveGpsPosition);
 
+            // Validation for Next Page
             document.getElementById('btnNext3').addEventListener('click', () => {
+                const country = document.getElementById('locCountry').value.trim();
                 const region = document.getElementById('locRegion').value.trim();
+                const zone = document.getElementById('locZone').value.trim();
                 const city = document.getElementById('locCity').value.trim();
+                const subcity = document.getElementById('locSubcity').value.trim();
+                const uniqueName = document.getElementById('locUniqueName').value.trim();
                 const lat = document.getElementById('rentalLat').value;
 
-                if (!region || !city || !lat) {
-                    showErrorModal("Location Required", "Please tap 'Open Fullscreen Map' to pick your location pin before proceeding.");
+                if (!country || !region || !zone || !city) {
+                    showErrorModal("Map Selection Required", "Please tap 'Select / Detect Location From Map' and pick a location to auto-fill Country, Region, Zone, and City.");
+                    return;
+                }
+
+                if (!subcity || !uniqueName) {
+                    showErrorModal("Missing Fields", "Please make sure Subcity and Unique Place / Landmark are filled out.");
                     return;
                 }
 
@@ -727,16 +750,16 @@
             const defaultLat = 8.5400;
             const defaultLng = 39.2700;
 
-            leafletMap = L.map('rentalMap').setView([defaultLat, defaultLng], 14);
+            leafletMap = L.map('rentalMap', {
+                attributionControl: false
+            }).setView([defaultLat, defaultLng], 14);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
-                subdomains: 'abcd',
-                attribution: '&copy; OpenStreetMap &copy; CARTO'
+                subdomains: 'abcd'
             }).addTo(leafletMap);
 
             leafletMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(leafletMap);
-            updateLocationInputs(defaultLat, defaultLng);
 
             leafletMap.on('click', (e) => {
                 const { lat, lng } = e.latlng;
@@ -782,18 +805,24 @@
             container.classList.remove('fullscreen');
         }
 
+        // STRICT REVERSE GEOCODING ROUTING
         function reverseGeocodeOSM(lat, lng) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.address) {
                         const addr = data.address;
-                        if (addr.country) document.getElementById('locCountry').value = addr.country;
-                        if (addr.state || addr.region) document.getElementById('locRegion').value = addr.state || addr.region;
-                        if (addr.county || addr.state_district) document.getElementById('locZone').value = addr.county || addr.state_district;
-                        if (addr.city || addr.town || addr.village) document.getElementById('locCity').value = addr.city || addr.town || addr.village;
-                        if (addr.suburb || addr.city_district) document.getElementById('locSubcity').value = addr.suburb || addr.city_district;
-                        if (addr.amenity || addr.road) document.getElementById('locUniqueName').value = addr.amenity || addr.road;
+                        
+                        // STRICTLY POPULATE READ-ONLY MAP FIELDS ONLY
+                        document.getElementById('locCountry').value = addr.country || "Ethiopia";
+                        document.getElementById('locRegion').value = addr.state || addr.region || addr.province || "Oromia";
+                        document.getElementById('locZone').value = addr.county || addr.state_district || addr.zone || "East Shewa";
+                        document.getElementById('locCity').value = addr.city || addr.town || addr.village || "Adama";
+                        
+                        // Subcity is auto-detected into the editable field
+                        if (addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter) {
+                            document.getElementById('locSubcity').value = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter;
+                        }
                     }
                 });
         }
@@ -819,7 +848,7 @@
 
             const rawDraft = sessionStorage.getItem('delalaDraftPart1');
             if (!rawDraft) {
-                showErrorModal("Draft Missing", "Part 1 details were not found. You will be redirected to restart.");
+                showErrorModal("Draft Missing", "Part 1 details were not found.");
                 setTimeout(() => { window.location.href = "rentalpost.html"; }, 2000);
                 return;
             }
