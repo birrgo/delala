@@ -216,13 +216,14 @@
             gap: 6px;
         }
 
+        /* GPS Button Moved Upwards */
         .map-gps-btn {
             position: absolute;
-            bottom: 60px;
+            bottom: 110px; /* Moved up from 60px */
             right: 20px;
-            z-index: 1000;
-            width: 44px;
-            height: 44px;
+            z-index: 1000000;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: #1E293B;
             color: #38BDF8;
@@ -231,10 +232,16 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
-        .map-gps-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        .map-gps-btn:active {
+            transform: scale(0.92);
+            background: #0F172A;
+        }
+
+        .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
@@ -692,7 +699,13 @@
 
             document.getElementById('detectLocBtn').addEventListener('click', triggerDetectAndFullscreen);
             document.getElementById('saveLocationBtn').addEventListener('click', saveLocationAndExit);
-            document.getElementById('mapGpsBtn').addEventListener('click', fetchLiveGpsPosition);
+            
+            // Explicit Event Listener for GPS Button
+            document.getElementById('mapGpsBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fetchLiveGpsPosition();
+            });
 
             // Validation for Next Page
             document.getElementById('btnNext3').addEventListener('click', () => {
@@ -702,7 +715,6 @@
                 const city = document.getElementById('locCity').value.trim();
                 const subcity = document.getElementById('locSubcity').value.trim();
                 const uniqueName = document.getElementById('locUniqueName').value.trim();
-                const lat = document.getElementById('rentalLat').value;
 
                 if (!country || !region || !zone || !city) {
                     showErrorModal("Map Selection Required", "Please tap 'Select / Detect Location From Map' and pick a location to auto-fill Country, Region, Zone, and City.");
@@ -775,25 +787,43 @@
             });
         }
 
+        // FULLY FUNCTIONAL GPS DETECT & RE-CENTER
         function fetchLiveGpsPosition() {
-            if (!navigator.geolocation) return showErrorModal("GPS Error", "Geolocation is not supported by your browser.");
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                leafletMap.setView([lat, lng], 17);
-                leafletMarker.setLatLng([lat, lng]);
-                updateLocationInputs(lat, lng);
-                reverseGeocodeOSM(lat, lng);
-            }, () => showErrorModal("Location Error", "Unable to fetch your current GPS position. Please select manually on the map."), { enableHighAccuracy: true });
+            if (!navigator.geolocation) {
+                showErrorModal("GPS Error", "Geolocation is not supported by your device or browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    if (leafletMap && leafletMarker) {
+                        leafletMap.setView([lat, lng], 17);
+                        leafletMarker.setLatLng([lat, lng]);
+                    }
+
+                    updateLocationInputs(lat, lng);
+                    reverseGeocodeOSM(lat, lng);
+                },
+                (err) => {
+                    console.warn("GPS Location error:", err);
+                    showErrorModal("GPS Error", "Unable to retrieve current location. Please turn on device location services or choose manually on the map.");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         }
 
         function triggerDetectAndFullscreen() {
             const container = document.getElementById('mapContainer');
             container.classList.add('fullscreen');
             setTimeout(() => { 
-                if (leafletMap) leafletMap.invalidateSize(); 
-            }, 200);
-            fetchLiveGpsPosition();
+                if (leafletMap) {
+                    leafletMap.invalidateSize(); 
+                }
+                fetchLiveGpsPosition();
+            }, 250);
         }
 
         function saveLocationAndExit() {
@@ -805,7 +835,6 @@
             container.classList.remove('fullscreen');
         }
 
-        // STRICT REVERSE GEOCODING ROUTING
         function reverseGeocodeOSM(lat, lng) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                 .then(res => res.json())
@@ -813,18 +842,17 @@
                     if (data && data.address) {
                         const addr = data.address;
                         
-                        // STRICTLY POPULATE READ-ONLY MAP FIELDS ONLY
                         document.getElementById('locCountry').value = addr.country || "Ethiopia";
                         document.getElementById('locRegion').value = addr.state || addr.region || addr.province || "Oromia";
                         document.getElementById('locZone').value = addr.county || addr.state_district || addr.zone || "East Shewa";
                         document.getElementById('locCity').value = addr.city || addr.town || addr.village || "Adama";
                         
-                        // Subcity is auto-detected into the editable field
                         if (addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter) {
                             document.getElementById('locSubcity').value = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter;
                         }
                     }
-                });
+                })
+                .catch(err => console.error("Geocoding failed:", err));
         }
 
         function updateLocationInputs(lat, lng) {
