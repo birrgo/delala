@@ -43,14 +43,61 @@
             padding: 0;
         }
 
+        /* HEADER & TOP NAV */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-back-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            border-radius: 8px;
+        }
+
+        .header-back-btn:active {
+            background: #F1F5F9;
+        }
+
+        .header-title-text {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .header-live-clock-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: #F1F5F9;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
         .post-form-card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border-color);
-            margin-top: 12px;
-            margin-bottom: 24px;
+            margin: 12px 16px 24px;
         }
 
         .step-indicator {
@@ -184,6 +231,25 @@
             border-radius: 0; 
         }
 
+        .map-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000000;
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
         .leaflet-control-container .leaflet-control-attribution {
             display: none !important;
         }
@@ -197,7 +263,6 @@
             overflow: hidden;
         }
 
-        /* Save Button State CSS */
         .save-location-btn {
             position: absolute;
             top: 20px;
@@ -225,7 +290,6 @@
             box-shadow: none;
         }
 
-        /* Live tracking active GPS button */
         .map-gps-btn {
             position: absolute;
             bottom: 110px;
@@ -496,6 +560,9 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
+                <button type="button" class="header-back-btn" onclick="window.location.href='rentalpost.html'" title="Back to Part 1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
                 <h1 class="header-title-text">Delala - Post Rental</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
@@ -642,6 +709,7 @@
 
     <!-- FULLSCREEN MAP CONTAINER -->
     <div class="map-wrapper" id="mapContainer">
+        <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" title="Close Map">✕</button>
         <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
             🔒 Track Location First
         </button>
@@ -735,6 +803,10 @@
         let currentTrackedAccuracy = null;
         let currentAddressInfo = null;
 
+        // Default initial map focus: Addis Ababa, Bole
+        const BOLE_LAT = 9.0034;
+        const BOLE_LNG = 38.7881;
+
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             initLeafletMap();
@@ -743,6 +815,7 @@
 
             document.getElementById('detectLocBtn').addEventListener('click', triggerDetectAndFullscreen);
             document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
+            document.getElementById('closeMapFullscreenBtn').addEventListener('click', closeMapFullscreen);
             
             // GPS Button Starts/Stops Realtime Tracking
             document.getElementById('mapGpsBtn').addEventListener('click', (e) => {
@@ -813,19 +886,17 @@
         }
 
         function initLeafletMap() {
-            const defaultLat = 8.5400;
-            const defaultLng = 39.2700;
-
+            // Set default view explicitly to Addis Ababa, Bole
             leafletMap = L.map('rentalMap', {
                 attributionControl: false
-            }).setView([defaultLat, defaultLng], 14);
+            }).setView([BOLE_LAT, BOLE_LNG], 14);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
                 subdomains: 'abcd'
             }).addTo(leafletMap);
 
-            leafletMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(leafletMap);
+            leafletMarker = L.marker([BOLE_LAT, BOLE_LNG], { draggable: true }).addTo(leafletMap);
 
             leafletMap.on('click', (e) => {
                 const { lat, lng } = e.latlng;
@@ -876,33 +947,63 @@
                 navigator.geolocation.clearWatch(watchPositionId);
             }
 
-            watchPositionId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    const accuracy = pos.coords.accuracy;
+            const geoOptions = {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 10000
+            };
 
-                    currentTrackedLat = lat;
-                    currentTrackedLng = lng;
-                    currentTrackedAccuracy = accuracy;
-                    isLocationTracked = true;
-
-                    if (leafletMap && leafletMarker) {
-                        leafletMap.setView([lat, lng], 17);
-                        leafletMarker.setLatLng([lat, lng]);
-                    }
-
-                    enableSaveButton();
-                    updateLocationInputs(lat, lng);
-                    reverseGeocodeOSM(lat, lng);
-                },
+            // Request permission explicitly and try high accuracy with low accuracy fallback
+            navigator.geolocation.getCurrentPosition(
+                (pos) => processGpsSuccess(pos),
                 (err) => {
-                    console.warn("Realtime GPS error:", err);
-                    stopRealtimeTracking();
-                    showErrorModal("GPS Tracking Error", "Unable to establish real-time location. Make sure device location/GPS permissions are enabled.");
+                    console.warn("High accuracy attempt failed, switching to low accuracy network fallback...", err);
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => processGpsSuccess(pos),
+                        (err2) => handleGpsError(err2),
+                        { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
+                    );
                 },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                geoOptions
             );
+
+            // Establish continuous tracking watch
+            watchPositionId = navigator.geolocation.watchPosition(
+                (pos) => processGpsSuccess(pos),
+                (err) => console.warn("Watch position update warning:", err),
+                geoOptions
+            );
+        }
+
+        function processGpsSuccess(pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy;
+
+            currentTrackedLat = lat;
+            currentTrackedLng = lng;
+            currentTrackedAccuracy = accuracy;
+            isLocationTracked = true;
+
+            if (leafletMap && leafletMarker) {
+                leafletMap.setView([lat, lng], 17);
+                leafletMarker.setLatLng([lat, lng]);
+            }
+
+            enableSaveButton();
+            updateLocationInputs(lat, lng);
+            reverseGeocodeOSM(lat, lng);
+        }
+
+        function handleGpsError(err) {
+            stopRealtimeTracking();
+            if (err.code === 1) {
+                showErrorModal("Permission Blocked", "Location permission denied. Please allow location access in your browser settings to detect your exact location.");
+            } else if (err.code === 2) {
+                showErrorModal("GPS Signal Weak", "Unable to establish GPS signal. Try moving to an open area or place the map pin manually.");
+            } else {
+                showErrorModal("GPS Timeout", "Location request timed out. You can manually drag the pin on the map to choose your location.");
+            }
         }
 
         function stopRealtimeTracking() {
@@ -919,9 +1020,16 @@
             setTimeout(() => { 
                 if (leafletMap) {
                     leafletMap.invalidateSize(); 
+                    leafletMap.setView([BOLE_LAT, BOLE_LNG], 14);
+                    leafletMarker.setLatLng([BOLE_LAT, BOLE_LNG]);
                 }
                 startRealtimeTracking();
             }, 250);
+        }
+
+        function closeMapFullscreen() {
+            stopRealtimeTracking();
+            document.getElementById('mapContainer').classList.remove('fullscreen');
         }
 
         function promptLocationConfirmation() {
@@ -932,9 +1040,9 @@
 
             const modalBody = document.getElementById('locationConfirmBody');
             const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Manual Marker Placement";
-            const city = currentAddressInfo?.city || document.getElementById('locCity').value || 'Detected Area';
+            const city = currentAddressInfo?.city || document.getElementById('locCity').value || 'Addis Ababa';
             const country = currentAddressInfo?.country || document.getElementById('locCountry').value || 'Ethiopia';
-            const region = currentAddressInfo?.region || document.getElementById('locRegion').value || 'Region';
+            const region = currentAddressInfo?.region || document.getElementById('locRegion').value || 'Addis Ababa';
 
             modalBody.innerHTML = `
                 <div class="preview-section">
@@ -972,9 +1080,9 @@
                         const addr = data.address;
                         
                         const country = addr.country || "Ethiopia";
-                        const region = addr.state || addr.region || addr.province || "Oromia";
-                        const zone = addr.county || addr.state_district || addr.zone || "East Shewa";
-                        const city = addr.city || addr.town || addr.village || "Adama";
+                        const region = addr.state || addr.region || addr.province || "Addis Ababa";
+                        const zone = addr.county || addr.state_district || addr.zone || "Bole";
+                        const city = addr.city || addr.town || addr.village || "Addis Ababa";
                         const subcity = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || "";
 
                         currentAddressInfo = { country, region, zone, city, subcity };
