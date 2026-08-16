@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="notranslate" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="google" content="notranslate">
+    
+    <!-- ADVANCED SEO BLOCK -->
+    <title>Log In | Delala Ethiopia</title>
+    <meta name="description" content="Log in to your Delala account using your registered phone number and PIN to access secure mobile services in Ethiopia.">
+    <meta name="keywords" content="Delala login, access Delala account, mobile portal Ethiopia, secure wallet">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://delala-1b582.web.app/login.html">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Log In | Delala Mobile Platform">
+    <meta property="og:description" content="Access your Delala account safely and instantly.">
+    <meta property="og:url" content="https://delala-1b582.web.app/login.html">
+    <meta property="og:site_name" content="Delala">
+
+    <!-- Schema.org WebPage Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Log In to Delala",
+      "url": "https://delala-1b582.web.app/login.html",
+      "description": "Secure login portal for existing Delala users in Ethiopia.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Delala"
+      }
+    }
+    </script>
+
+    <!-- PWA Root App Integration Linkage -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- PWA / Mobile App Meta Tags -->
+    <meta name="theme-color" content="#1e232a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- FAVICON LOGO -->
+    <link rel="icon" href="delala-logo.png" type="image/png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Preload fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="register.css">
+</head>
+<body>
+
+    <!-- Country Selection Modal -->
+    <div class="modal-overlay" id="countryModalOverlay">
+        <div class="modal-card">
+            <div class="modal-search-wrapper">
+                <input type="text" id="modalSearchInput" class="modal-search" placeholder="Search country or code..." autocomplete="off">
+            </div>
+            <div class="country-list-scroll" id="countryListScroll"></div>
+        </div>
+    </div>
+
+    <!-- Metallic Wave Accent - Top -->
+    <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0H375V65C375 65 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
+        <defs>
+            <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#1e293b"/>
+                <stop offset="1" stop-color="#0f172a"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Metallic Wave Accent - Bottom -->
+    <svg class="bg-wave bg-wave-bottom" viewBox="0 0 375 90" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M375 90H0V70C120 62 250 55 375 65V90Z" fill="#0b0f14"/>
+    </svg>
+
+    <div class="toast-container" id="toast-message" role="alert"></div>
+
+    <!-- Header Top Area with Back Button -->
+    <div class="header-top-area">
+        <button id="navBackBtn" class="back-btn" aria-label="Go back" title="Go back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- App View Wrapper -->
+    <main class="app-view">
+        <div class="app-content-wrapper">
+            <header class="header-content">
+                <h1 id="screen-title">Welcome Back to <span class="metallic-title-accent">Delala App</span></h1>
+                <p>Log in using your registered phone number and 6-digit PIN.</p>
+                
+                <a href="register.html" class="top-login-link">Don't have an account? <span>Register</span></a>
+            </header>
+
+            <form class="registration-form" id="loginForm">
+                
+                <div class="input-group phone-input-wrapper">
+                    <label class="field-label" for="loginPhone">Phone Number <span class="label-highlight">*</span></label>
+                    
+                    <div class="country-trigger" id="countryTriggerBtn">
+                        <span class="trigger-flag" id="currentFlag">🇪🇹</span>
+                        <span class="trigger-code" id="currentCode">+251</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+
+                    <input type="tel" id="loginPhone" class="input-box phone-indent" placeholder="9xxxxxxxx" required autocomplete="off">
+                    <div class="input-icon-right" style="pointer-events: none;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="field-label" for="loginPin">Security Pin (6-digits) <span class="label-highlight">*</span></label>
+                    <input type="password" id="loginPin" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" class="input-box" placeholder="••••••" required autocomplete="off">
+                    <div class="input-icon-right">
+                        <button type="button" class="pin-toggle-btn" id="toggleLoginPin" aria-label="Toggle PIN Visibility">
+                            <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-action-area">
+                    <button type="submit" id="submitBtn" class="btn-submit">Log In</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- FIREBASE & LOGIN LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getDatabase, 
+            ref, 
+            get 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+          authDomain: "delala-1b582.firebaseapp.com",
+          databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+          projectId: "delala-1b582",
+          storageBucket: "delala-1b582.firebasestorage.app",
+          messagingSenderId: "1073041850834",
+          appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+          measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const countries = [
+            { name: "Australia", code: "+61", flag: "🇦🇺", maxLen: 9 },
+            { name: "Bahrain", code: "+973", flag: "🇧🇭", maxLen: 8 },
+            { name: "Canada", code: "+1", flag: "🇨🇦", maxLen: 10 },
+            { name: "Djibouti", code: "+253", flag: "🇩🇯", maxLen: 8 },
+            { name: "Egypt", code: "+20", flag: "🇪🇬", maxLen: 10 },
+            { name: "Eritrea", code: "+291", flag: "🇪🇷", maxLen: 7 },
+            { name: "Ethiopia", code: "+251", flag: "🇪🇹", maxLen: 9 },
+            { name: "France", code: "+33", flag: "🇫🇷", maxLen: 9 },
+            { name: "Germany", code: "+49", flag: "🇩🇪", maxLen: 11 },
+            { name: "Israel", code: "+972", flag: "🇮🇱", maxLen: 9 },
+            { name: "Italy", code: "+39", flag: "🇮🇹", maxLen: 10 },
+            { name: "Jordan", code: "+962", flag: "🇯🇴", maxLen: 9 },
+            { name: "Kenya", code: "+254", flag: "🇰🇪", maxLen: 9 },
+            { name: "Kuwait", code: "+965", flag: "🇰🇼", maxLen: 8 },
+            { name: "Oman", code: "+968", flag: "🇴🇲", maxLen: 8 },
+            { name: "Saudi Arabia", code: "+966", flag: "🇸🇦", maxLen: 9 },
+            { name: "Somalia", code: "+252", flag: "🇸🇴", maxLen: 9 },
+            { name: "South Africa", code: "+27", flag: "🇿🇦", maxLen: 9 },
+            { name: "Sudan", code: "+249", flag: "🇸🇩", maxLen: 9 },
+            { name: "Turkey", code: "+90", flag: "🇹🇷", maxLen: 10 },
+            { name: "United Arab Emirates", code: "+971", flag: "🇦🇪", maxLen: 9 },
+            { name: "United Kingdom", code: "+44", flag: "🇬🇧", maxLen: 10 },
+            { name: "United States", code: "+1", flag: "🇺🇸", maxLen: 10 }
+        ];
+
+        let activeSelectedPrefix = "+251";
+        let activeMaxPhoneLength = 9;
+
+        const overlay = document.getElementById('countryModalOverlay');
+        const listScrollContainer = document.getElementById('countryListScroll');
+        const searchInput = document.getElementById('modalSearchInput');
+
+        async function hashPin(pin) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function populateCountries(filterText = "") {
+            listScrollContainer.innerHTML = "";
+            const cleanFilter = filterText.toLowerCase().trim();
+            const filtered = countries.filter(c => 
+                c.name.toLowerCase().includes(cleanFilter) || 
+                c.code.includes(cleanFilter)
+            );
+
+            filtered.forEach(country => {
+                const row = document.createElement('div');
+                row.className = 'country-item';
+                row.innerHTML = `
+                    <span class="item-flag">${country.flag}</span>
+                    <span class="item-name">${country.name}</span>
+                    <span class="item-code">${country.code}</span>
+                `;
+                row.addEventListener('click', () => {
+                    document.getElementById('currentFlag').innerText = country.flag;
+                    document.getElementById('currentCode').innerText = country.code;
+                    activeSelectedPrefix = country.code;
+                    activeMaxPhoneLength = country.maxLen;
+
+                    const phoneInput = document.getElementById('loginPhone');
+                    phoneInput.maxLength = activeMaxPhoneLength;
+                    if (phoneInput.value.length > activeMaxPhoneLength) {
+                        phoneInput.value = phoneInput.value.slice(0, activeMaxPhoneLength);
+                    }
+                    closeCountryModal();
+                });
+                listScrollContainer.appendChild(row);
+            });
+        }
+
+        function openCountryModal() {
+            populateCountries();
+            searchInput.value = "";
+            overlay.classList.add('active');
+        }
+
+        function closeCountryModal() {
+            overlay.classList.remove('active');
+        }
+
+        document.getElementById('countryTriggerBtn').addEventListener('click', openCountryModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeCountryModal();
+        });
+        searchInput.addEventListener('input', (e) => {
+            populateCountries(e.target.value);
+        });
+
+        function setupPinToggle(btnId, inputId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if (!btn || !input) return;
+
+            const eyeOpenSVG = `
+                <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>`;
+            const eyeClosedSVG = `
+                <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>`;
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.innerHTML = isPassword ? eyeClosedSVG : eyeOpenSVG;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            localStorage.setItem('delala_last_page', 'login.html');
+            setupPinToggle('toggleLoginPin', 'loginPin');
+
+            const phoneInput = document.getElementById('loginPhone');
+            phoneInput.maxLength = activeMaxPhoneLength;
+        });
+
+        document.getElementById('loginPhone').addEventListener('input', (e) => {
+            let cleanVal = e.target.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+            if (cleanVal.length > activeMaxPhoneLength) {
+                cleanVal = cleanVal.slice(0, activeMaxPhoneLength);
+            }
+            e.target.value = cleanVal;
+        });
+
+        function showNotification(message, isSuccess = false) {
+            const toast = document.getElementById('toast-message');
+            toast.innerText = message;
+            toast.style.background = isSuccess ? 'rgba(16, 185, 129, 0.95)' : 'rgba(223, 34, 34, 0.95)';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3500);
+        }
+
+        document.getElementById('navBackBtn').addEventListener('click', () => {
+            window.location.href = "index.html"; 
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const rawPhone = document.getElementById('loginPhone').value.trim();
+            const pin = document.getElementById('loginPin').value;
+
+            let cleanPhone = rawPhone.replace(/^0+/, '');
+            
+            if (cleanPhone.length !== activeMaxPhoneLength) {
+                showNotification(`Please enter a valid ${activeMaxPhoneLength}-digit phone number.`);
+                return;
+            }
+
+            if (!/^\d{6}$/.test(pin)) {
+                showNotification("Please enter a valid 6-digit PIN.");
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Authenticating...";
+
+                // Fetch user data using localPhoneRef key in database
+                const userSnapshot = await get(ref(db, 'users/' + cleanPhone));
+                
+                if (!userSnapshot.exists()) {
+                    showNotification("No account found with this phone number.");
+                    return;
+                }
+
+                const userData = userSnapshot.val();
+                const hashedInputPin = await hashPin(pin);
+
+                if (userData.securityPin !== hashedInputPin) {
+                    showNotification("Incorrect PIN code. Please try again.");
+                    return;
+                }
+
+                // Authentication Success
+                showNotification("Login successful! Redirecting...", true);
+                localStorage.setItem('auth_session_phone', cleanPhone);
+                localStorage.setItem('delala_last_page', 'rental.html');
+
+                setTimeout(() => {
+                    window.location.href = "rental.html";
+                }, 1200);
+
+            } catch (error) {
+                console.error("Authentication Error:", error);
+                showNotification(`Login failed: ${error.message || 'Check network connection'}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Log In";
+            }
+        });
+    </script>
+</body>
+</html>

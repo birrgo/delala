@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Select Category to Post</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+    <style>
+        /* Category Selection Grid Styles */
+        .category-selection-container {
+            margin-top: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .category-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: var(--card-shadow, 0 4px 12px rgba(0,0,0,0.05));
+            border: 1px solid var(--border-light, #E2E8F0);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .category-card:active {
+            transform: scale(0.98);
+            border-color: #0F172A;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .category-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0F172A;
+            flex-shrink: 0;
+        }
+
+        .category-icon-box svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .category-text-details h3 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 3px 0;
+        }
+
+        .category-text-details p {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748B;
+            margin: 0;
+        }
+
+        .arrow-action-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #94A3B8;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        /* Standardized Light Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #E2E8F0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            color: #0F172A;
+        }
+
+        .nav-item .icon-bg svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Standardized Light Theme Curved Center FAB Button */
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item-post-center.active .post-fab-btn {
+            box-shadow: 0 6px 16px rgba(30, 41, 59, 0.35), 0 0 0 5px #FFFFFF;
+        }
+
+        .post-fab-btn:active {
+            transform: scale(0.92);
+        }
+
+        .post-fab-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+            stroke-width: 2.8;
+        }
+
+        .post-fab-label {
+            margin-top: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <!-- Header -->
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Choose Category</h1>
+            </div>
+            
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-content">
+            <div class="category-selection-container">
+                
+                <!-- 1. Rental Option -->
+                <a href="rentalpost.html" class="category-card">
+                    <div class="category-info">
+                        <div class="category-icon-box">
+                            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        </div>
+                        <div class="category-text-details">
+                            <h3>Rental Item</h3>
+                            <p>Houses, apartments, vehicles & equipment</p>
+                        </div>
+                    </div>
+                    <div class="arrow-action-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </a>
+
+                <!-- 2. Selling Option -->
+                <a href="sellingpost.html" class="category-card">
+                    <div class="category-info">
+                        <div class="category-icon-box">
+                            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        </div>
+                        <div class="category-text-details">
+                            <h3>Selling Item</h3>
+                            <p>Electronics, vehicles, goods & real estate</p>
+                        </div>
+                    </div>
+                    <div class="arrow-action-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </a>
+
+                <!-- 3. Job Vacancy Option -->
+                <a href="vacancypost.html" class="category-card">
+                    <div class="category-info">
+                        <div class="category-icon-box">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        </div>
+                        <div class="category-text-details">
+                            <h3>Job Vacancy</h3>
+                            <p>Full-time, part-time & contract job offers</p>
+                        </div>
+                    </div>
+                    <div class="arrow-action-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </a>
+
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Hulum Secure Matrix Verified</span>
+            </footer>
+        </main>
+
+        <!-- Matched Standardized Bottom Navigation Menu -->
+        <nav class="bottom-nav">
+            <!-- 1. Rental -->
+            <a id="nav-rental" href="rental.html" class="nav-item">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <span>Rental</span>
+            </a>
+
+            <!-- 2. Selling -->
+            <a id="nav-selling" href="selling.html" class="nav-item">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <span>Selling</span>
+            </a>
+
+            <!-- 5th Curved Center Post Button (Active Tab) -->
+            <a id="nav-post" href="post.html" class="nav-item-post-center active" aria-label="Post Item">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+
+            <!-- 3. Job Vacancy -->
+            <a id="nav-vacancy" href="vacancy.html" class="nav-item">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </div>
+                <span>Vacancy</span>
+            </a>
+
+            <!-- 4. Profile -->
+            <a id="nav-profile" href="profile.html" class="nav-item">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initiateLiveInterfaceClocks();
+        });
+
+        function initiateLiveInterfaceClocks() {
+            const cornerClockNode = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                const now = new Date();
+                if (cornerClockNode) {
+                    cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

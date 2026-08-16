@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Post Job Vacancy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+    
+    <!-- Leaflet OpenStreetMap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    
+    <style>
+        .post-form-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--card-shadow, 0 4px 12px rgba(0,0,0,0.05));
+            border: 1px solid var(--border-light, #E2E8F0);
+            margin-top: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-dark, #0F172A);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light, #E2E8F0);
+            background: var(--bg-light, #F8FAFC);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark, #0F172A);
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary-burgundy, #0F172A);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Leaflet Map Styling */
+        #vacancyMap {
+            width: 100%;
+            height: 220px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light, #E2E8F0);
+            margin-bottom: 8px;
+            z-index: 1;
+        }
+
+        .map-hint {
+            font-size: 10px;
+            color: #64748B;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .submit-post-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: var(--metallic-sheen, linear-gradient(135deg, #1E293B, #334155));
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .submit-post-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* Standardized Light Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #E2E8F0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            color: #0F172A;
+        }
+
+        .nav-item .icon-bg svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Standardized Light Theme Curved Center FAB Button */
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item-post-center.active .post-fab-btn {
+            box-shadow: 0 6px 16px rgba(30, 41, 59, 0.35), 0 0 0 5px #FFFFFF;
+        }
+
+        .post-fab-btn:active {
+            transform: scale(0.92);
+        }
+
+        .post-fab-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+            stroke-width: 2.8;
+        }
+
+        .post-fab-label {
+            margin-top: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <!-- Alert Notification Popup Modal -->
+        <div class="custom-popup-overlay" id="customPopupModule">
+            <div class="custom-popup-modal">
+                <span class="popup-status-icon" id="popupIconNode">ℹ️</span>
+                <h3 class="popup-main-title" id="popupTitleNode">Status Alert</h3>
+                <p class="popup-body-desc" id="popupDescNode">Notification update context.</p>
+                <button class="popup-dismiss-action" id="closePopupBtn">Continue</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Post Job Vacancy</h1>
+            </div>
+            
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-content">
+            <form class="post-form-card" id="createVacancyPostForm">
+                
+                <!-- 1. Category Field -->
+                <div class="form-group">
+                    <label class="form-label" for="jobCategory">Job Sector / Field</label>
+                    <select class="form-select" id="jobCategory" required>
+                        <option value="IT & Software">IT & Software Development</option>
+                        <option value="Sales & Marketing">Sales & Marketing</option>
+                        <option value="Accounting & Finance">Accounting & Finance</option>
+                        <option value="Customer Service">Customer Service / Support</option>
+                        <option value="Hotel & Restaurant">Hotel, Restaurant & Tourism</option>
+                        <option value="Construction & Engineering">Construction & Engineering</option>
+                        <option value="Healthcare & Medical">Healthcare & Medical</option>
+                        <option value="Other Industry">Other Industry</option>
+                    </select>
+                </div>
+
+                <!-- 2. Position Title & Company -->
+                <div class="form-group">
+                    <label class="form-label" for="postTitle">Job Position Title</label>
+                    <input type="text" class="form-input" id="postTitle" placeholder="e.g., Senior Frontend Developer" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="companyName">Company / Organization Name</label>
+                    <input type="text" class="form-input" id="companyName" placeholder="e.g., BirrGo Technologies" required>
+                </div>
+
+                <!-- 3. Job Type & Salary -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="jobType">Job Type</label>
+                        <select class="form-select" id="jobType" required>
+                            <option value="Full-Time">Full-Time</option>
+                            <option value="Part-Time">Part-Time</option>
+                            <option value="Contract">Contract / Project</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="jobSalary">Salary (ETB / Negotiable)</label>
+                        <input type="text" class="form-input" id="jobSalary" placeholder="e.g. 25,000 / Negotiable" required>
+                    </div>
+                </div>
+
+                <!-- 4. Interactive Office / Work Location Map -->
+                <div class="form-group">
+                    <label class="form-label">Office / Job Location Pin</label>
+                    <span class="map-hint">Tap on the map to set workplace location or drag the marker</span>
+                    <div id="vacancyMap"></div>
+                    
+                    <div class="form-row" style="margin-top: 8px;">
+                        <input type="text" class="form-input" id="vacancyLat" placeholder="Latitude" readonly required>
+                        <input type="text" class="form-input" id="vacancyLng" placeholder="Longitude" readonly required>
+                    </div>
+                </div>
+
+                <!-- 5. Description & Requirements -->
+                <div class="form-group">
+                    <label class="form-label" for="postContent">Job Description & Requirements</label>
+                    <textarea class="form-textarea" id="postContent" placeholder="List key responsibilities, required skills, educational qualification, experience, and application deadline..." required></textarea>
+                </div>
+
+                <!-- 6. Media & Application Link -->
+                <div class="form-group">
+                    <label class="form-label" for="postImageUrl">Company Logo / Poster URL (Optional)</label>
+                    <input type="url" class="form-input" id="postImageUrl" placeholder="https://example.com/logo.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="postRedirectUrl">Apply Link / Email / Telegram / Phone</label>
+                    <input type="url" class="form-input" id="postRedirectUrl" placeholder="https://t.me/hr_username or mailto:hr@company.com" required>
+                </div>
+
+                <button type="submit" class="submit-post-btn" id="submitBtn">Publish Job Vacancy</button>
+            </form>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Hulum Secure Matrix Verified</span>
+            </footer>
+        </main>
+
+        <!-- Matched Bottom Navigation Menu -->
+        <nav class="bottom-nav">
+            <a id="nav-rental" href="rental.html" class="nav-item" data-filter="Rental">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <span>Rental</span>
+            </a>
+
+            <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <span>Selling</span>
+            </a>
+
+            <a id="nav-post" href="vacancypost.html" class="nav-item-post-center active" aria-label="Post Item">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+
+            <a id="nav-vacancy" href="vacancy.html" class="nav-item active" data-filter="Job Vacancy">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </div>
+                <span>Vacancy</span>
+            </a>
+
+            <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Leaflet OpenStreetMap JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
+            authDomain: "hulum-e358c.firebaseapp.com",
+            databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
+            projectId: "hulum-e358c",
+            storageBucket: "hulum-e358c.firebasestorage.app",
+            messagingSenderId: "678316597629",
+            appId: "1:678316597629:web:dc6af499b8054a424aac14",
+            measurementId: "G-097P51SP2B"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let map, marker;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initiateLiveInterfaceClocks();
+            initLeafletMap();
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+            });
+
+            const closeBtn = document.getElementById('closePopupBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    document.getElementById('customPopupModule').classList.remove('show-popup');
+                });
+            }
+
+            const postForm = document.getElementById('createVacancyPostForm');
+            if (postForm) {
+                postForm.addEventListener('submit', handleFormSubmit);
+            }
+        });
+
+        function initiateLiveInterfaceClocks() {
+            const cornerClockNode = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                const now = new Date();
+                if (cornerClockNode) {
+                    cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                }
+            }, 1000);
+        }
+
+        function initLeafletMap() {
+            const defaultLat = 9.0300;
+            const defaultLng = 38.7400;
+
+            map = L.map('vacancyMap').setView([defaultLat, defaultLng], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+            updateLocationInputs(defaultLat, defaultLng);
+
+            marker.on('dragend', function () {
+                const latLng = marker.getLatLng();
+                updateLocationInputs(latLng.lat, latLng.lng);
+            });
+
+            map.on('click', function (e) {
+                marker.setLatLng(e.latlng);
+                updateLocationInputs(e.latlng.lat, e.latlng.lng);
+            });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const userLat = pos.coords.latitude;
+                    const userLng = pos.coords.longitude;
+                    map.setView([userLat, userLng], 14);
+                    marker.setLatLng([userLat, userLng]);
+                    updateLocationInputs(userLat, userLng);
+                }, () => {
+                    // Fallback to default
+                });
+            }
+        }
+
+        function updateLocationInputs(lat, lng) {
+            document.getElementById('vacancyLat').value = typeof lat === 'number' ? lat.toFixed(6) : lat;
+            document.getElementById('vacancyLng').value = typeof lng === 'number' ? lng.toFixed(6) : lng;
+        }
+
+        function showNotificationPopup(title, description, icon = "ℹ️") {
+            const popup = document.getElementById('customPopupModule');
+            const iconNode = document.getElementById('popupIconNode');
+            const titleNode = document.getElementById('popupTitleNode');
+            const descNode = document.getElementById('popupDescNode');
+
+            if (popup && titleNode && descNode) {
+                if (iconNode) iconNode.innerText = icon;
+                titleNode.innerText = title;
+                descNode.innerText = description;
+                popup.classList.add('show-popup');
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const jobCategory = document.getElementById('jobCategory').value;
+            const title = document.getElementById('postTitle').value.trim();
+            const companyName = document.getElementById('companyName').value.trim();
+            const jobType = document.getElementById('jobType').value;
+            const jobSalary = document.getElementById('jobSalary').value.trim();
+            const lat = document.getElementById('vacancyLat').value;
+            const lng = document.getElementById('vacancyLng').value;
+            const content = document.getElementById('postContent').value.trim();
+            const imageUrl = document.getElementById('postImageUrl').value.trim();
+            const redirectUrl = document.getElementById('postRedirectUrl').value.trim();
+
+            if (!title || !companyName || !content || !lat || !lng) {
+                showNotificationPopup("Required Fields", "Please fill in title, company name, location, and job details.", "⚠️");
+                return;
+            }
+
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Publishing Vacancy...";
+                }
+
+                const postsRef = ref(db, 'hulumNews');
+                const newPostRef = push(postsRef);
+
+                const newPostData = {
+                    title: title,
+                    companyName: companyName,
+                    body: content,
+                    category: "Job Vacancy",
+                    jobCategory: jobCategory,
+                    jobType: jobType,
+                    salary: jobSalary,
+                    location: {
+                        latitude: Number(lat),
+                        longitude: Number(lng)
+                    },
+                    imageUrl: imageUrl || "",
+                    link: redirectUrl || "",
+                    views: 0,
+                    likes: 0,
+                    userId: currentUser ? currentUser.uid : "anonymous",
+                    authorName: currentUser ? (currentUser.displayName || "User") : "Anonymous User",
+                    timestamp: Date.now()
+                };
+
+                await set(newPostRef, newPostData);
+
+                showNotificationPopup("Success!", "Your job vacancy post has been published with location data.", "✅");
+                document.getElementById('createVacancyPostForm').reset();
+
+            } catch (error) {
+                console.error("Failed to publish vacancy post:", error);
+                showNotificationPopup("Error", "Could not submit job vacancy. Please try again.", "❌");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Publish Job Vacancy";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

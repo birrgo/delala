@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BirrGo - Verification Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            950: '#022c22',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
+
+    <div class="max-w-6xl mx-auto space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+                    🔑 Verification Matrix
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Configure global registration credentials, monitor real-time verification logs, and send secure custom OTPs.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="register.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-xl text-xs font-semibold tracking-wide transition">
+                    ← Registration Portal
+                </a>
+                <a href="dashboard.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-xl text-xs font-semibold tracking-wide transition">
+                    Core Dashboard
+                </a>
+                <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-full">
+                    Admin Session Active
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-slate-900/50 border border-slate-800/80 p-6 rounded-2xl shadow-xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-200">System Gateway</h2>
+                        <button type="button" id="saveConfigBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg transition-all shadow-md">
+                            💾 Save Sync
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400">Brevo API Key (v3)</label>
+                            <input type="password" id="apiKey" required placeholder="xkeysib-..." 
+                                class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs text-slate-300 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400">Sender Authorized Email</label>
+                            <input type="email" id="senderEmail" required placeholder="admin@birrgo.com" 
+                                class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs text-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400">Brevo Template ID</label>
+                            <input type="number" id="templateId" required placeholder="e.g., 3" 
+                                class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs text-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400">Sender Identity Display Name</label>
+                            <input type="text" id="senderName" placeholder="BirrGo Secure Portal" 
+                                class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs text-slate-300">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 border border-slate-800/80 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h2 class="text-lg font-bold text-slate-200">Force Bypass Override</h2>
+                    
+                    <form id="otpForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400">Target Email</label>
+                            <input type="email" id="recipientEmail" required placeholder="user@example.com" 
+                                class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs text-slate-300">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400">OTP Generation</label>
+                                <input type="text" value="Auto-Generated" readonly
+                                    class="mt-1 w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-center font-semibold tracking-wide text-slate-500 focus:outline-none cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400">Expiry (Mins)</label>
+                                <input type="number" id="expiryMinutes" required value="15" readonly
+                                    class="mt-1 w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400 focus:outline-none cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="dispatchOtpBtn" class="w-full mt-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg">
+                            Dispatch Secure Backend OTP
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/20">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-200">Live Verification & Registration Logs</h3>
+                            <p class="text-xs text-slate-500">Real-time sync feeding active OTP transactions and registered user records from Firebase.</p>
+                        </div>
+                        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" title="Connected to Firebase"></span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <th class="p-4 font-semibold">User Email</th>
+                                    <th class="p-4 font-semibold text-center">Active OTP</th>
+                                    <th class="p-4 font-semibold text-center">Expiry / Reg Date</th>
+                                    <th class="p-4 font-semibold text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody" class="divide-y divide-slate-800/60">
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-slate-500">Awaiting database handshake...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="hidden fixed bottom-6 right-6 p-4 rounded-xl text-xs font-semibold shadow-2xl max-w-sm transition-all duration-300 transform scale-95 border"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getDatabase, 
+            ref, 
+            get, 
+            set, 
+            onValue
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const statusDiv = document.getElementById('statusMessage');
+        let storedApiKey = "";
+
+        // Cache database state locally for real-time combined rendering
+        let otpsCache = {};
+        let usersCache = {};
+
+        function sanitizeEmail(email) {
+            return email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+        }
+
+        function desanitizeEmailKey(key) {
+            const parts = key.split('_at_');
+            if (parts.length < 2) return key;
+            return `${parts[0].replace(/_/g, '.')}@${parts[1].replace(/_/g, '.')}`;
+        }
+
+        // Initialize real-time sync for both OTP requests and registered users
+        function initializeLiveLogs() {
+            const otpsRef = ref(db, 'otps');
+            const usersRef = ref(db, 'users');
+
+            onValue(otpsRef, (snapshot) => {
+                otpsCache = snapshot.exists() ? snapshot.val() : {};
+                renderCombinedTable();
+            }, (error) => handleDbError(error));
+
+            onValue(usersRef, (snapshot) => {
+                usersCache = snapshot.exists() ? snapshot.val() : {};
+                renderCombinedTable();
+            }, (error) => handleDbError(error));
+        }
+
+        function renderCombinedTable() {
+            const tbody = document.getElementById('logsTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            const combinedKeys = new Set([...Object.keys(otpsCache), ...Object.keys(usersCache)]);
+
+            if (combinedKeys.size === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-slate-500">No verification requests or user accounts found.</td>
+                    </tr>`;
+                return;
+            }
+
+            combinedKeys.forEach((key) => {
+                const otpRecord = otpsCache[key] || {};
+                const userRecord = usersCache[key] || {};
+
+                const currentTime = Date.now();
+                const isExpired = otpRecord.expiresAt && currentTime > otpRecord.expiresAt;
+                const isRegistered = Boolean(userRecord.emailAddress || userRecord.accountId || otpRecord.verified);
+
+                let statusBadge = "";
+                if (isRegistered) {
+                    statusBadge = `<span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">Registered / Verified</span>`;
+                } else if (isExpired) {
+                    statusBadge = `<span class="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-2.5 py-1 rounded-full font-bold">Expired</span>`;
+                } else {
+                    statusBadge = `<span class="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-bold animate-pulse">Pending OTP</span>`;
+                }
+
+                const displayEmail = userRecord.emailAddress || desanitizeEmailKey(key);
+                const timestamp = userRecord.createdAt || otpRecord.expiresAt || otpRecord.createdAt;
+                const dateFormatted = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-slate-300 font-mono">${displayEmail}</td>
+                    <td class="p-4 text-center font-bold tracking-widest text-emerald-400 font-mono text-sm">${otpRecord.otp || '------'}</td>
+                    <td class="p-4 text-center text-slate-400 font-mono">${dateFormatted}</td>
+                    <td class="p-4 text-right">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleDbError(error) {
+            const tbody = document.getElementById('logsTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-rose-400 font-semibold bg-rose-950/20 border border-rose-900/30">
+                            🔒 Database Access Blocked: Check Firebase Database Rules.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        async function loadBrevoSettings() {
+            try {
+                const settingsRef = ref(db, 'admin/settings/brevo');
+                const snapshot = await get(settingsRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const apiKeyEl = document.getElementById('apiKey');
+                    const senderEmailEl = document.getElementById('senderEmail');
+                    const templateIdEl = document.getElementById('templateId');
+                    const senderNameEl = document.getElementById('senderName');
+
+                    if (data.apiKey && apiKeyEl) {
+                        storedApiKey = data.apiKey;
+                        apiKeyEl.value = "••••••••••••••••••••••••••••••••";
+                    }
+                    if (data.senderEmail && senderEmailEl) senderEmailEl.value = data.senderEmail;
+                    if (data.templateId && templateIdEl) templateIdEl.value = data.templateId;
+                    if (data.senderName && senderNameEl) senderNameEl.value = data.senderName;
+                }
+            } catch (error) {
+                console.error("Failed configuration handshake:", error);
+            }
+        }
+
+        const saveConfigBtn = document.getElementById('saveConfigBtn');
+        if (saveConfigBtn) {
+            saveConfigBtn.addEventListener('click', async () => {
+                const apiKeyValue = document.getElementById('apiKey').value.trim();
+                const senderEmail = document.getElementById('senderEmail').value.trim();
+                const templateIdInput = document.getElementById('templateId').value.trim();
+                const senderName = document.getElementById('senderName').value.trim();
+
+                let finalApiKey = apiKeyValue.includes("••••") ? storedApiKey : apiKeyValue;
+
+                if (!finalApiKey || !senderEmail || !templateIdInput) {
+                    showToast("Fill in all credentials before saving.", "red");
+                    return;
+                }
+
+                try {
+                    await set(ref(db, 'admin/settings/brevo'), {
+                        apiKey: finalApiKey,
+                        senderEmail,
+                        templateId: parseInt(templateIdInput, 10),
+                        senderName: senderName || "BirrGo Security",
+                        updatedAt: Date.now()
+                    });
+                    storedApiKey = finalApiKey;
+                    document.getElementById('apiKey').value = "••••••••••••••••••••••••••••••••";
+                    showToast("Configuration saved successfully!", "green");
+                } catch (error) {
+                    showToast(`Sync Failed: ${error.message}`, "red");
+                }
+            });
+        }
+
+        const otpForm = document.getElementById('otpForm');
+        if (otpForm) {
+            otpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const dispatchBtn = document.getElementById('dispatchOtpBtn');
+                const recipientEmail = document.getElementById('recipientEmail').value.trim();
+
+                if (!recipientEmail) {
+                    showToast("Please enter a recipient email address.", "red");
+                    return;
+                }
+
+                if (dispatchBtn) dispatchBtn.disabled = true;
+
+                try {
+                    const sanitizedEmailKey = sanitizeEmail(recipientEmail);
+                    const otpVerifySnapshot = await get(ref(db, `otps/${sanitizedEmailKey}`));
+                    const userSnapshot = await get(ref(db, `users/${sanitizedEmailKey}`));
+                    
+                    if ((otpVerifySnapshot.exists() && otpVerifySnapshot.val().verified === true) || userSnapshot.exists()) {
+                        showToast("This email is already registered and verified.", "red");
+                        if (dispatchBtn) dispatchBtn.disabled = false;
+                        return;
+                    }
+
+                    showToast("Initiating secure send pipeline...", "green");
+
+                    const response = await fetch('https://delala-otp-backend.onrender.com/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: recipientEmail })
+                    });
+
+                    if (response.ok) {
+                        showToast(`Success! OTP dispatched to ${recipientEmail}`, "green");
+                        document.getElementById('recipientEmail').value = "";
+                    } else {
+                        const errResponse = await response.json().catch(() => ({}));
+                        throw new Error(errResponse.error || `Server status: ${response.status}`);
+                    }
+                } catch (error) {
+                    showToast(`Pipeline Error: ${error.message}`, "red");
+                } finally {
+                    if (dispatchBtn) dispatchBtn.disabled = false;
+                }
+            });
+        }
+
+        function showToast(msg, type) {
+            if (!statusDiv) return;
+            statusDiv.className = "fixed bottom-6 right-6 p-4 rounded-xl text-xs font-semibold shadow-2xl max-w-sm border transition-all duration-300 transform scale-100 block z-50 " + 
+                (type === "green" ? "bg-emerald-950/90 border-emerald-800 text-emerald-400" : "bg-rose-950/90 border-rose-800 text-rose-400");
+            statusDiv.textContent = msg;
+            setTimeout(() => { statusDiv.className = "hidden"; }, 6000);
+        }
+
+        loadBrevoSettings();
+        initializeLiveLogs();
+    </script>
+</body>
+</html>
