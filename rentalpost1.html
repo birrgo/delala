@@ -30,6 +30,7 @@
             --danger-color: #EF4444;
             --danger-bg: #FEF2F2;
             --danger-border: #FCA5A5;
+            --success-color: #0F172A;
         }
 
         * { font-family: var(--font-main); box-sizing: border-box; }
@@ -74,7 +75,7 @@
         .step-node {
             position: relative;
             z-index: 2;
-            background: #F1F5F9;
+            background: #FFFFFF;
             border: 2px solid var(--border-color);
             color: var(--text-muted);
             width: 32px;
@@ -92,12 +93,6 @@
             border-color: var(--primary-dark);
             color: #FFFFFF;
             box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
-        }
-
-        .step-node.completed {
-            background: #10B981;
-            border-color: #10B981;
-            color: #FFFFFF;
         }
 
         .form-step-page { display: none; }
@@ -161,50 +156,54 @@
         }
 
         .map-wrapper {
-            position: relative;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
-        #rentalMap {
-            width: 100%;
-            height: 220px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background: #111;
-            z-index: 1;
+            display: none;
         }
 
         .map-wrapper.fullscreen {
+            display: block;
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 9999;
+            z-index: 999999;
             margin: 0;
             background: #000;
         }
 
-        .map-wrapper.fullscreen #rentalMap { height: 100vh; border-radius: 0; }
+        .map-wrapper.fullscreen #rentalMap { 
+            width: 100vw;
+            height: 100vh; 
+            border-radius: 0; 
+        }
 
-        .exit-fullscreen-btn {
-            display: none;
+        body:has(.map-wrapper.fullscreen) .nav-header,
+        body:has(.map-wrapper.fullscreen) .bottom-nav {
+            display: none !important;
+        }
+
+        body:has(.map-wrapper.fullscreen) {
+            overflow: hidden;
+        }
+
+        .save-location-btn {
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 10000;
-            background: rgba(15, 23, 42, 0.85);
-            color: #FFF;
-            border: 1px solid #FFF;
-            padding: 10px 16px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
+            z-index: 1000000;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        .map-wrapper.fullscreen .exit-fullscreen-btn { display: block; }
 
         .map-gps-btn {
             position: absolute;
@@ -224,7 +223,6 @@
         }
 
         .map-gps-btn svg { width: 22px; height: 22px; fill: currentColor; }
-        .map-hint { font-size: 11px; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 6px; }
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
@@ -305,7 +303,6 @@
         .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
         .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
-        /* Shared Modal Base Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -407,7 +404,6 @@
             margin-bottom: 6px;
         }
 
-        /* Dedicated Error Popup Styling */
         .error-modal-card {
             max-width: 380px;
             text-align: center;
@@ -468,8 +464,8 @@
         <main class="app-content">
             <form class="post-form-card" id="step2Form">
                 <div class="step-indicator">
-                    <div class="step-node completed">1</div>
-                    <div class="step-node completed">2</div>
+                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
                     <div class="step-node active" id="node-3">3</div>
                     <div class="step-node" id="node-4">4</div>
                 </div>
@@ -479,7 +475,7 @@
                     <div class="step-title">Step 3: Location Details</div>
 
                     <button type="button" class="detect-loc-btn" id="detectLocBtn">
-                        📍 Detect Location & Auto-Fill
+                        📍 Open Fullscreen Map & Auto-Detect Location
                     </button>
 
                     <div class="form-row">
@@ -515,23 +511,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Property Location Pin (OpenStreetMap Dark)</label>
-                        <span class="map-hint">Tap/Drag pin on map OR enter coordinates manually:</span>
-                        
-                        <div class="map-wrapper" id="mapContainer">
-                            <button type="button" class="exit-fullscreen-btn" id="exitFullscreenBtn">✕ Close Full Screen Map</button>
-                            <div id="rentalMap"></div>
-                            <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Center to My Location">
-                                <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-                            </button>
-                        </div>
-                        
-                        <div class="form-row" style="margin-top: 8px;">
-                            <input type="text" class="form-input" id="rentalLat" placeholder="Latitude *" required>
-                            <input type="text" class="form-input" id="rentalLng" placeholder="Longitude *" required>
-                        </div>
-                    </div>
+                    <input type="hidden" id="rentalLat">
+                    <input type="hidden" id="rentalLng">
 
                     <div class="step-actions">
                         <button type="button" class="btn-prev" onclick="window.location.href='rentalpost.html'">
@@ -616,6 +597,17 @@
         </nav>
     </div>
 
+    <!-- FULLSCREEN MAP CONTAINER -->
+    <div class="map-wrapper" id="mapContainer">
+        <button type="button" class="save-location-btn" id="saveLocationBtn">
+            ✓ Save Location
+        </button>
+        <div id="rentalMap"></div>
+        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Center to My Location">
+            <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+    </div>
+
     <!-- PREVIEW MODAL -->
     <div class="modal-overlay" id="previewModalOverlay">
         <div class="modal-card">
@@ -686,7 +678,7 @@
             onAuthStateChanged(auth, (user) => { currentUser = user; });
 
             document.getElementById('detectLocBtn').addEventListener('click', triggerDetectAndFullscreen);
-            document.getElementById('exitFullscreenBtn').addEventListener('click', closeFullscreenMap);
+            document.getElementById('saveLocationBtn').addEventListener('click', saveLocationAndExit);
             document.getElementById('mapGpsBtn').addEventListener('click', fetchLiveGpsPosition);
 
             document.getElementById('btnNext3').addEventListener('click', () => {
@@ -695,13 +687,13 @@
                 const lat = document.getElementById('rentalLat').value;
 
                 if (!region || !city || !lat) {
-                    showErrorModal("Location Required", "Please fill in all location fields and set your property pin before proceeding.");
+                    showErrorModal("Location Required", "Please tap 'Open Fullscreen Map' to pick your location pin before proceeding.");
                     return;
                 }
 
                 document.getElementById('stepPage3').classList.remove('active');
                 document.getElementById('stepPage4').classList.add('active');
-                document.getElementById('node-3').classList.add('completed');
+                document.getElementById('node-3').classList.remove('active');
                 document.getElementById('node-4').classList.add('active');
             });
 
@@ -709,19 +701,15 @@
                 document.getElementById('stepPage4').classList.remove('active');
                 document.getElementById('stepPage3').classList.add('active');
                 document.getElementById('node-4').classList.remove('active');
-                document.getElementById('node-3').classList.remove('completed');
                 document.getElementById('node-3').classList.add('active');
             });
 
-            // Handle submission trigger modal preview
             document.getElementById('step2Form').addEventListener('submit', openPreviewModal);
 
-            // Preview Modal Actions
             document.getElementById('closeModalCross').addEventListener('click', closeModal);
             document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
             document.getElementById('confirmPublishBtn').addEventListener('click', executeFirebasePublish);
 
-            // Error Modal Dismiss
             document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
         });
 
@@ -779,13 +767,19 @@
         function triggerDetectAndFullscreen() {
             const container = document.getElementById('mapContainer');
             container.classList.add('fullscreen');
-            setTimeout(() => { leafletMap.invalidateSize(); }, 300);
+            setTimeout(() => { 
+                if (leafletMap) leafletMap.invalidateSize(); 
+            }, 200);
             fetchLiveGpsPosition();
         }
 
-        function closeFullscreenMap() {
-            document.getElementById('mapContainer').classList.remove('fullscreen');
-            setTimeout(() => { leafletMap.invalidateSize(); }, 300);
+        function saveLocationAndExit() {
+            const pos = leafletMarker.getLatLng();
+            updateLocationInputs(pos.lat, pos.lng);
+            reverseGeocodeOSM(pos.lat, pos.lng);
+
+            const container = document.getElementById('mapContainer');
+            container.classList.remove('fullscreen');
         }
 
         function reverseGeocodeOSM(lat, lng) {
