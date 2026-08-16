@@ -197,6 +197,7 @@
             overflow: hidden;
         }
 
+        /* Save Button State CSS */
         .save-location-btn {
             position: absolute;
             top: 20px;
@@ -214,12 +215,20 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: opacity 0.3s ease, background 0.3s ease;
         }
 
-        /* GPS Button Moved Upwards */
+        .save-location-btn:disabled {
+            background: #64748B;
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Live tracking active GPS button */
         .map-gps-btn {
             position: absolute;
-            bottom: 110px; /* Moved up from 60px */
+            bottom: 110px;
             right: 20px;
             z-index: 1000000;
             width: 48px;
@@ -236,9 +245,21 @@
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
+        .map-gps-btn.tracking-active {
+            background: #0284C7;
+            color: #FFFFFF;
+            border-color: #38BDF8;
+            animation: pulseGps 1.5s infinite;
+        }
+
+        @keyframes pulseGps {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
         .map-gps-btn:active {
             transform: scale(0.92);
-            background: #0F172A;
         }
 
         .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
@@ -331,7 +352,7 @@
             height: 100vh;
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(4px);
-            z-index: 10000;
+            z-index: 10000000;
             align-items: center;
             justify-content: center;
             padding: 16px;
@@ -621,13 +642,28 @@
 
     <!-- FULLSCREEN MAP CONTAINER -->
     <div class="map-wrapper" id="mapContainer">
-        <button type="button" class="save-location-btn" id="saveLocationBtn">
-            ✓ Save Location
+        <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
+            🔒 Track Location First
         </button>
         <div id="rentalMap"></div>
-        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Center to My Location">
+        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Toggle Real-Time Tracking">
             <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
         </button>
+    </div>
+
+    <!-- CONFIRMATION POPUP MODAL -->
+    <div class="modal-overlay" id="confirmLocationModalOverlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Confirm Tracked Location</h3>
+                <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
+            </div>
+            <div class="modal-body" id="locationConfirmBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn-cancel" id="retrackLocationBtn">Re-Track</button>
+                <button type="button" class="modal-btn-confirm" id="acceptLocationBtn">Confirm & Save</button>
+            </div>
+        </div>
     </div>
 
     <!-- PREVIEW MODAL -->
@@ -691,6 +727,14 @@
         let leafletMap, leafletMarker;
         let pendingPayload = null;
 
+        // REAL-TIME GPS TRACKING VARIABLES
+        let watchPositionId = null;
+        let isLocationTracked = false;
+        let currentTrackedLat = null;
+        let currentTrackedLng = null;
+        let currentTrackedAccuracy = null;
+        let currentAddressInfo = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             initLeafletMap();
@@ -698,14 +742,24 @@
             onAuthStateChanged(auth, (user) => { currentUser = user; });
 
             document.getElementById('detectLocBtn').addEventListener('click', triggerDetectAndFullscreen);
-            document.getElementById('saveLocationBtn').addEventListener('click', saveLocationAndExit);
+            document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
             
-            // Explicit Event Listener for GPS Button
+            // GPS Button Starts/Stops Realtime Tracking
             document.getElementById('mapGpsBtn').addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                fetchLiveGpsPosition();
+                toggleRealtimeTracking();
             });
+
+            // Confirmation Modal Actions
+            document.getElementById('closeLocationModalCross').addEventListener('click', () => {
+                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+            });
+            document.getElementById('retrackLocationBtn').addEventListener('click', () => {
+                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+                startRealtimeTracking();
+            });
+            document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationAndExit);
 
             // Validation for Next Page
             document.getElementById('btnNext3').addEventListener('click', () => {
@@ -717,7 +771,7 @@
                 const uniqueName = document.getElementById('locUniqueName').value.trim();
 
                 if (!country || !region || !zone || !city) {
-                    showErrorModal("Map Selection Required", "Please tap 'Select / Detect Location From Map' and pick a location to auto-fill Country, Region, Zone, and City.");
+                    showErrorModal("Map Selection Required", "Please tap 'Select / Detect Location From Map' and track your location to auto-fill details.");
                     return;
                 }
 
@@ -776,43 +830,87 @@
             leafletMap.on('click', (e) => {
                 const { lat, lng } = e.latlng;
                 leafletMarker.setLatLng([lat, lng]);
-                updateLocationInputs(lat, lng);
-                reverseGeocodeOSM(lat, lng);
+                handleManualMarkerPosition(lat, lng);
             });
 
             leafletMarker.on('dragend', () => {
                 const pos = leafletMarker.getLatLng();
-                updateLocationInputs(pos.lat, pos.lng);
-                reverseGeocodeOSM(pos.lat, pos.lng);
+                handleManualMarkerPosition(pos.lat, pos.lng);
             });
         }
 
-        // FULLY FUNCTIONAL GPS DETECT & RE-CENTER
-        function fetchLiveGpsPosition() {
+        function handleManualMarkerPosition(lat, lng) {
+            currentTrackedLat = lat;
+            currentTrackedLng = lng;
+            currentTrackedAccuracy = null;
+            isLocationTracked = true;
+            enableSaveButton();
+            updateLocationInputs(lat, lng);
+            reverseGeocodeOSM(lat, lng);
+        }
+
+        function enableSaveButton() {
+            const saveBtn = document.getElementById('saveLocationBtn');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `✓ Save Location`;
+        }
+
+        function toggleRealtimeTracking() {
+            if (watchPositionId !== null) {
+                stopRealtimeTracking();
+            } else {
+                startRealtimeTracking();
+            }
+        }
+
+        function startRealtimeTracking() {
             if (!navigator.geolocation) {
                 showErrorModal("GPS Error", "Geolocation is not supported by your device or browser.");
                 return;
             }
 
-            navigator.geolocation.getCurrentPosition(
+            const gpsBtn = document.getElementById('mapGpsBtn');
+            gpsBtn.classList.add('tracking-active');
+
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+            }
+
+            watchPositionId = navigator.geolocation.watchPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
+                    const accuracy = pos.coords.accuracy;
+
+                    currentTrackedLat = lat;
+                    currentTrackedLng = lng;
+                    currentTrackedAccuracy = accuracy;
+                    isLocationTracked = true;
 
                     if (leafletMap && leafletMarker) {
                         leafletMap.setView([lat, lng], 17);
                         leafletMarker.setLatLng([lat, lng]);
                     }
 
+                    enableSaveButton();
                     updateLocationInputs(lat, lng);
                     reverseGeocodeOSM(lat, lng);
                 },
                 (err) => {
-                    console.warn("GPS Location error:", err);
-                    showErrorModal("GPS Error", "Unable to retrieve current location. Please turn on device location services or choose manually on the map.");
+                    console.warn("Realtime GPS error:", err);
+                    stopRealtimeTracking();
+                    showErrorModal("GPS Tracking Error", "Unable to establish real-time location. Make sure device location/GPS permissions are enabled.");
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
+        }
+
+        function stopRealtimeTracking() {
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+            document.getElementById('mapGpsBtn').classList.remove('tracking-active');
         }
 
         function triggerDetectAndFullscreen() {
@@ -822,14 +920,45 @@
                 if (leafletMap) {
                     leafletMap.invalidateSize(); 
                 }
-                fetchLiveGpsPosition();
+                startRealtimeTracking();
             }, 250);
         }
 
+        function promptLocationConfirmation() {
+            if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
+                showErrorModal("Track Location First", "Please wait until your location is tracked on the map.");
+                return;
+            }
+
+            const modalBody = document.getElementById('locationConfirmBody');
+            const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Manual Marker Placement";
+            const city = currentAddressInfo?.city || document.getElementById('locCity').value || 'Detected Area';
+            const country = currentAddressInfo?.country || document.getElementById('locCountry').value || 'Ethiopia';
+            const region = currentAddressInfo?.region || document.getElementById('locRegion').value || 'Region';
+
+            modalBody.innerHTML = `
+                <div class="preview-section">
+                    <div class="preview-section-title">GPS COORDINATES</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Accuracy: <strong>${accuracyText}</strong></div>
+                </div>
+                <div class="preview-section">
+                    <div class="preview-section-title">RESOLVED ADDRESS</div>
+                    <div style="font-size:13px; font-weight:700; color:var(--primary-dark);">${city}, ${region}</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Country: ${country}</div>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); margin:0;">Please confirm if this exact location accurately reflects where your rental item is located.</p>
+            `;
+
+            document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
+        }
+
         function saveLocationAndExit() {
-            const pos = leafletMarker.getLatLng();
-            updateLocationInputs(pos.lat, pos.lng);
-            reverseGeocodeOSM(pos.lat, pos.lng);
+            document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+            stopRealtimeTracking();
+
+            updateLocationInputs(currentTrackedLat, currentTrackedLng);
 
             const container = document.getElementById('mapContainer');
             container.classList.remove('fullscreen');
@@ -842,13 +971,21 @@
                     if (data && data.address) {
                         const addr = data.address;
                         
-                        document.getElementById('locCountry').value = addr.country || "Ethiopia";
-                        document.getElementById('locRegion').value = addr.state || addr.region || addr.province || "Oromia";
-                        document.getElementById('locZone').value = addr.county || addr.state_district || addr.zone || "East Shewa";
-                        document.getElementById('locCity').value = addr.city || addr.town || addr.village || "Adama";
+                        const country = addr.country || "Ethiopia";
+                        const region = addr.state || addr.region || addr.province || "Oromia";
+                        const zone = addr.county || addr.state_district || addr.zone || "East Shewa";
+                        const city = addr.city || addr.town || addr.village || "Adama";
+                        const subcity = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || "";
+
+                        currentAddressInfo = { country, region, zone, city, subcity };
+
+                        document.getElementById('locCountry').value = country;
+                        document.getElementById('locRegion').value = region;
+                        document.getElementById('locZone').value = zone;
+                        document.getElementById('locCity').value = city;
                         
-                        if (addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter) {
-                            document.getElementById('locSubcity').value = addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter;
+                        if (subcity) {
+                            document.getElementById('locSubcity').value = subcity;
                         }
                     }
                 })
