@@ -253,12 +253,12 @@
 
         .distance-pill {
             font-size: 11px;
-            background: #F1F5F9;
-            color: #0F172A;
-            border: 1px solid #E2E8F0;
+            background: #ECFDF5;
+            color: #047857;
+            border: 1px solid #A7F3D0;
             padding: 3px 8px;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.01em;
         }
 
@@ -289,10 +289,9 @@
         .featured-broadcast-card {
             cursor: pointer;
             scroll-margin-top: 70px;
-            contain: content; /* Improves layout rendering speed */
+            contain: content;
         }
 
-        /* Prevents Cumulative Layout Shift (CLS) on dynamic image loads */
         .broadcast-image-frame {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -464,7 +463,6 @@
         let isGpsActive = false;
         let activeCategoryFilter = 'all';
 
-        // DOM Nodes Cache to eliminate redundant element lookup overhead
         const DOM = {};
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -584,7 +582,10 @@
             const listToRender = (isGpsActive && currentUserCoordinates) 
                 ? [...filtered].map(item => {
                     const coords = extractItemCoordinates(item);
-                    return { ...item, _calculatedDistance: coords ? calculateHaversineDistance(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng) : Infinity };
+                    return { 
+                        ...item, 
+                        _calculatedDistance: coords ? calculateHaversineDistance(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng) : Infinity 
+                    };
                 }).sort((a, b) => a._calculatedDistance - b._calculatedDistance)
                 : filtered;
 
@@ -602,7 +603,6 @@
         }
 
         function initiateLiveInterfaceClocks() {
-            // Clock interface optimized to reduce DOM thrashing
             setInterval(() => {
                 const now = new Date();
                 if (DOM.cornerClockNode) {
@@ -612,7 +612,6 @@
                 }
             }, 1000);
 
-            // Throttle timestamp updates to every 10 seconds to save CPU cycles
             setInterval(() => {
                 const clockNodes = document.querySelectorAll('.timestamp-log-text[data-timestamp]');
                 clockNodes.forEach(node => {
@@ -655,14 +654,15 @@
         }
 
         function extractItemCoordinates(item) {
-            if (item.latitude && item.longitude) {
-                return { lat: parseFloat(item.latitude), lng: parseFloat(item.longitude) };
-            }
-            if (item.locationDetails?.lat && item.locationDetails?.lng) {
-                return { lat: parseFloat(item.locationDetails.lat), lng: parseFloat(item.locationDetails.lng) };
-            }
-            if (item.coordinates?.lat && item.coordinates?.lng) {
-                return { lat: parseFloat(item.coordinates.lat), lng: parseFloat(item.coordinates.lng) };
+            const rawLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
+            const rawLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
+
+            if (rawLat !== undefined && rawLng !== undefined) {
+                const parsedLat = parseFloat(rawLat);
+                const parsedLng = parseFloat(rawLng);
+                if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+                    return { lat: parsedLat, lng: parsedLng };
+                }
             }
             return null;
         }
@@ -670,7 +670,7 @@
         function setupGpsDetectionControl() {
             if (!DOM.gpsBtn) return;
 
-            DOM.gpsBtn.addEventListener('click', () => {
+            DOM.gpsBtn.addEventListener('click', async () => {
                 if (isGpsActive) {
                     isGpsActive = false;
                     DOM.gpsBtn.classList.remove('active-gps');
@@ -681,6 +681,22 @@
                 if (!navigator.geolocation) {
                     triggerSystemAlert("GPS Unsupported", "Geolocation services are not supported by your browser.", "⚠️");
                     return;
+                }
+
+                if (navigator.permissions && navigator.permissions.query) {
+                    try {
+                        const status = await navigator.permissions.query({ name: 'geolocation' });
+                        if (status.state === 'denied') {
+                            triggerSystemAlert(
+                                "Location Permission Required", 
+                                "Location access is currently blocked. Please open your device/browser settings to allow location access for this website.", 
+                                "📍"
+                            );
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn("Permissions API check failed, falling back to navigator.geolocation:", e);
+                    }
                 }
 
                 DOM.gpsBtn.style.opacity = "0.5";
@@ -699,9 +715,13 @@
                     (error) => {
                         DOM.gpsBtn.style.opacity = "1";
                         let errMsg = "Unable to retrieve position.";
-                        if (error.code === error.PERMISSION_DENIED) errMsg = "Location permission was denied.";
-                        else if (error.code === error.POSITION_UNAVAILABLE) errMsg = "Location information is unavailable.";
-                        else if (error.code === error.TIMEOUT) errMsg = "Location request timed out.";
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errMsg = "Location permission request was denied. Please allow location access to sort listings by distance.";
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            errMsg = "Location information is unavailable.";
+                        } else if (error.code === error.TIMEOUT) {
+                            errMsg = "Location request timed out. Please try again.";
+                        }
                         triggerSystemAlert("GPS Error", errMsg, "📍");
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -917,7 +937,6 @@
 
             let imageHTML = "";
             if (allImages.length > 0) {
-                // Native Lazy Loading & Async Decoding for Image Fast-Rendering
                 imageHTML = `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
             }
 
@@ -933,7 +952,7 @@
                     const displayKm = distVal < 1 ? `${Math.round(distVal * 1000)} m away` : `${distVal.toFixed(1)} km away`;
                     distanceBadge = `<span class="distance-pill">📍 ${displayKm}</span>`;
                 } else {
-                    distanceBadge = `<span class="distance-pill" style="color:#64748B; border-color:#E2E8F0;">📍 Distance Unknown</span>`;
+                    distanceBadge = `<span class="distance-pill" style="color:#64748B; border-color:#E2E8F0; background:#F1F5F9;">📍 Distance Unknown</span>`;
                 }
             }
 
