@@ -654,16 +654,27 @@
         }
 
         function extractItemCoordinates(item) {
-            const rawLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
-            const rawLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
+            // 1. Primary check: Strict match to database rules schema (location.latitude, location.longitude)
+            if (item.location && typeof item.location === 'object') {
+                const lat = parseFloat(item.location.latitude);
+                const lng = parseFloat(item.location.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    return { lat, lng };
+                }
+            }
 
-            if (rawLat !== undefined && rawLng !== undefined) {
-                const parsedLat = parseFloat(rawLat);
-                const parsedLng = parseFloat(rawLng);
+            // 2. Fallback check: Direct root-level or legacy location fields
+            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
+            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
+
+            if (fallbackLat !== undefined && fallbackLng !== undefined) {
+                const parsedLat = parseFloat(fallbackLat);
+                const parsedLng = parseFloat(fallbackLng);
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
                     return { lat: parsedLat, lng: parsedLng };
                 }
             }
+
             return null;
         }
 
