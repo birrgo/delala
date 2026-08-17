@@ -55,9 +55,7 @@
             right: 20px;
             z-index: 1000;
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 12px;
+            align-items: center;
         }
 
         .map-close-btn {
@@ -74,30 +72,6 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             text-decoration: none;
-        }
-
-        .save-location-btn {
-            background: var(--primary-dark);
-            color: #FFFFFF;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.3s ease, background 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .save-location-btn:disabled {
-            background: #64748B;
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
         }
 
         /* Distance Banner Floating Bar */
@@ -218,54 +192,6 @@
             gap: 12px;
         }
 
-        .modal-footer {
-            padding: 14px 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            background: #F8FAFC;
-        }
-
-        .modal-btn-cancel {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            background: #FFFFFF;
-            color: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .modal-btn-confirm {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            background: var(--primary-dark);
-            color: #FFFFFF;
-            border: none;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .preview-section {
-            background: #F8FAFC;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .preview-section-title {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
         .error-modal-card {
             max-width: 380px;
             text-align: center;
@@ -322,32 +248,14 @@
         </div>
 
         <div class="top-right-controls">
-            <!-- Redirect back to rental.html -->
+            <!-- Close Button returning directly to rental.html -->
             <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rental.html'" title="Close Map">✕</button>
-            <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
-                Done
-            </button>
         </div>
 
         <div id="rentalMap"></div>
         <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Toggle Real-Time Tracking">
             <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
         </button>
-    </div>
-
-    <!-- CONFIRMATION POPUP MODAL -->
-    <div class="modal-overlay" id="confirmLocationModalOverlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Confirm Real-Time GPS Location</h3>
-                <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
-            </div>
-            <div class="modal-body" id="locationConfirmBody"></div>
-            <div class="modal-footer">
-                <button type="button" class="modal-btn-cancel" id="retrackLocationBtn">Re-Sync GPS</button>
-                <button type="button" class="modal-btn-confirm" id="acceptLocationBtn">Confirm & Save</button>
-            </div>
-        </div>
     </div>
 
     <!-- ERROR MODAL -->
@@ -375,7 +283,7 @@
     <!-- Firebase App and Database SDK Modules -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, child, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, child, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -392,12 +300,6 @@
 
         let leafletMap, userMarker, rentalMarker, routePolyline;
         let watchPositionId = null;
-        let isLocationTracked = false;
-        let currentTrackedLat = null;
-        let currentTrackedLng = null;
-        let currentTrackedAccuracy = null;
-        let currentAddressInfo = null;
-        let currentCalculatedDistance = null;
 
         let rentalLat = null;
         let rentalLng = null;
@@ -414,7 +316,6 @@
 
             initLeafletMap();
             
-            // Render database location passed via URL or fetch via postId
             if (!isNaN(queryLat) && !isNaN(queryLng)) {
                 setRentalPostLocation(queryLat, queryLng, postTitle);
                 startRealtimeTracking();
@@ -424,17 +325,7 @@
                 startRealtimeTracking();
             }
 
-            document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
             document.getElementById('mapGpsBtn').addEventListener('click', toggleRealtimeTracking);
-
-            document.getElementById('closeLocationModalCross').addEventListener('click', () => {
-                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-            });
-            document.getElementById('retrackLocationBtn').addEventListener('click', () => {
-                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-                startRealtimeTracking();
-            });
-            document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationAndExit);
             document.getElementById('dismissErrorBtn').addEventListener('click', () => {
                 document.getElementById('errorModalOverlay').style.display = 'none';
             });
@@ -496,12 +387,6 @@
             }
         }
 
-        function enableSaveButton() {
-            const saveBtn = document.getElementById('saveLocationBtn');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = `✓ Done`;
-        }
-
         function toggleRealtimeTracking() {
             if (watchPositionId !== null) {
                 stopRealtimeTracking();
@@ -551,12 +436,6 @@
         function processGpsSuccess(pos) {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
-            const accuracy = pos.coords.accuracy;
-
-            currentTrackedLat = lat;
-            currentTrackedLng = lng;
-            currentTrackedAccuracy = accuracy;
-            isLocationTracked = true;
 
             if (leafletMap && userMarker) {
                 userMarker.setLatLng([lat, lng]);
@@ -567,9 +446,6 @@
             } else if (leafletMap) {
                 leafletMap.setView([lat, lng], 17);
             }
-
-            enableSaveButton();
-            reverseGeocodeOSM(lat, lng);
         }
 
         function calculateAndDrawRoadRoute(userLat, userLng, destLat, destLng) {
@@ -581,11 +457,8 @@
                     if (data && data.routes && data.routes.length > 0) {
                         const route = data.routes[0];
                         const distanceInKm = (route.distance / 1000).toFixed(2);
-                        
-                        // Bold distance string representation
-                        currentCalculatedDistance = `<strong>${distanceInKm} km</strong>`;
 
-                        document.getElementById('roadDistanceVal').innerHTML = currentCalculatedDistance;
+                        document.getElementById('roadDistanceVal').innerHTML = `<strong>${distanceInKm} km</strong>`;
                         document.getElementById('distanceBanner').style.display = 'flex';
 
                         if (routePolyline) {
@@ -622,98 +495,6 @@
                 watchPositionId = null;
             }
             document.getElementById('mapGpsBtn').classList.remove('tracking-active');
-        }
-
-        function promptLocationConfirmation() {
-            if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
-                showErrorModal("Acquiring GPS Signal", "Please wait while real-time GPS locks onto your current location.");
-                return;
-            }
-
-            const modalBody = document.getElementById('locationConfirmBody');
-            const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Live Sensor Fix";
-            const city = currentAddressInfo?.city || 'Addis Ababa';
-            const country = currentAddressInfo?.country || 'Ethiopia';
-            const region = currentAddressInfo?.region || 'Addis Ababa';
-            const distanceText = currentCalculatedDistance || 'N/A';
-
-            modalBody.innerHTML = `
-                <div class="preview-section">
-                    <div class="preview-section-title">ROAD DISTANCE TO RENTAL POST</div>
-                    <div style="font-size:14px; color:var(--primary-dark);">Distance: ${distanceText}</div>
-                </div>
-                <div class="preview-section">
-                    <div class="preview-section-title">REAL-TIME GPS COORDINATES</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Accuracy: <strong>${accuracyText}</strong></div>
-                </div>
-                <div class="preview-section">
-                    <div class="preview-section-title">DETECTED ADDRESS</div>
-                    <div style="font-size:13px; font-weight:700; color:var(--primary-dark);">${city}, ${region}</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Country: ${country}</div>
-                </div>
-            `;
-
-            document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
-        }
-
-        async function saveLocationAndExit() {
-            document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-            stopRealtimeTracking();
-
-            const locationData = {
-                lat: currentTrackedLat,
-                lng: currentTrackedLng,
-                address: currentAddressInfo || {}
-            };
-
-            sessionStorage.setItem('selectedGpsLocation', JSON.stringify(locationData));
-
-            if (postId) {
-                try {
-                    const postLocationRef = ref(db, `posts/${postId}/location`);
-                    const postLocationDetailsRef = ref(db, `posts/${postId}/locationDetails`);
-
-                    await update(postLocationRef, {
-                        latitude: currentTrackedLat,
-                        longitude: currentTrackedLng
-                    });
-
-                    if (currentAddressInfo) {
-                        await update(postLocationDetailsRef, {
-                            country: currentAddressInfo.country || "Ethiopia",
-                            region: currentAddressInfo.region || "",
-                            zone: currentAddressInfo.zone || "",
-                            city: currentAddressInfo.city || "",
-                            subcity: currentAddressInfo.subcity || "",
-                            uniqueName: `${currentAddressInfo.city || ''}-${currentAddressInfo.subcity || ''}`
-                        });
-                    }
-                } catch (err) {
-                    console.error("Error updating database location:", err);
-                }
-            }
-
-            window.location.href = "rental.html";
-        }
-
-        function reverseGeocodeOSM(lat, lng) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.address) {
-                        const addr = data.address;
-                        currentAddressInfo = {
-                            country: addr.country || "Ethiopia",
-                            region: addr.state || addr.region || addr.province || "Addis Ababa",
-                            zone: addr.county || addr.state_district || addr.zone || "Bole",
-                            city: addr.city || addr.town || addr.village || "Addis Ababa",
-                            subcity: addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || ""
-                        };
-                    }
-                })
-                .catch(err => console.error("Geocoding failed:", err));
         }
 
         function showErrorModal(title, message) {
