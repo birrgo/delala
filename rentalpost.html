@@ -520,8 +520,28 @@
             document.getElementById('errorModalOverlay').classList.remove('active');
         };
 
+        // User Account Verification Function
+        function getAuthenticatedUser() {
+            const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
+            const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
+            
+            if (!userPhone) {
+                showErrorModal("You must be logged in to create a post. Redirecting to login...", "Account Required");
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return null;
+            }
+            return { phone: userPhone, id: userId || userPhone };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
+            
+            // Check User Session state on load
+            const currentUser = getAuthenticatedUser();
+            if (!currentUser) return;
+
             setupImageUploaders();
             setupAutoFillListeners();
             restoreSavedDraft();
@@ -532,6 +552,8 @@
             }
 
             document.getElementById('btnNext1').addEventListener('click', () => {
+                if (!getAuthenticatedUser()) return;
+
                 const category = document.getElementById('rentalType').value;
                 if (!category) {
                     showErrorModal("Please select a Rental Category before proceeding.");
@@ -551,6 +573,8 @@
             });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
+                if (!getAuthenticatedUser()) return;
+
                 const title = document.getElementById('postTitle').value.trim();
                 const price = document.getElementById('rentalPrice').value;
 
@@ -582,7 +606,12 @@
         }
 
         function saveDraftToSession() {
+            const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
+            const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
+
             const draftData = {
+                postedByPhone: userPhone,
+                userId: userId,
                 rentalType: document.getElementById('rentalType').value,
                 images: uploadedBase64Images.filter(img => img !== ""),
                 imageUrl: uploadedBase64Images[0] || "",

@@ -330,9 +330,12 @@
             padding: 14px 20px;
             border-top: 1px solid var(--border-color);
             display: flex;
+            flex-direction: column;
             gap: 10px;
             background: #F8FAFC;
         }
+
+        .modal-footer-btns { display: flex; gap: 10px; width: 100%; }
 
         .modal-btn-cancel {
             flex: 1;
@@ -359,6 +362,37 @@
         }
 
         .modal-btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .progress-container {
+            display: none;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .progress-text-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563EB, #0F172A);
+            transition: width 0.2s ease-in-out;
+            border-radius: 10px;
+        }
 
         .preview-section {
             background: #F8FAFC;
@@ -590,8 +624,20 @@
             </div>
             <div class="modal-body" id="modalPreviewContent"></div>
             <div class="modal-footer">
-                <button type="button" class="modal-btn-cancel" id="cancelModalBtn">Edit Info</button>
-                <button type="button" class="modal-btn-confirm" id="confirmPublishBtn">Confirm & Publish</button>
+                <div class="progress-container" id="publishProgressBox">
+                    <div class="progress-text-row">
+                        <span id="progressStatusLabel">Publishing Post...</span>
+                        <span id="percentText">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer-btns">
+                    <button type="button" class="modal-btn-cancel" id="cancelModalBtn">Edit Info</button>
+                    <button type="button" class="modal-btn-confirm" id="confirmPublishBtn">Confirm & Publish</button>
+                </div>
             </div>
         </div>
     </div>
@@ -621,7 +667,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -643,11 +689,33 @@
         let pendingPayload = null;
         let isLocationTracked = false;
 
+        function sanitizePath(value) {
+            return (value || "").toString().replace(/[.#$\[\]]/g, "_");
+        }
+
+        function getAccountDetails() {
+            const phone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
+            let id = currentUser ? currentUser.uid : (localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId'));
+            
+            if (!id && phone) {
+                id = sanitizePath(phone);
+            } else if (!id) {
+                id = "anonymous";
+            } else {
+                id = sanitizePath(id);
+            }
+
+            return { phone, id };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             loadSavedFormData();
 
-            onAuthStateChanged(auth, (user) => { currentUser = user; });
+            onAuthStateChanged(auth, (user) => { 
+                currentUser = user; 
+                loadSavedFormData();
+            });
 
             document.getElementById('gpsDetectBtn').addEventListener('click', () => {
                 savePart2FormData();
@@ -718,7 +786,10 @@
         }
 
         function savePart2FormData() {
+            const acc = getAccountDetails();
             const formData = {
+                postedByPhone: acc.phone,
+                userId: acc.id,
                 subcity: document.getElementById('locSubcity').value,
                 uniqueName: document.getElementById('locUniqueName').value,
                 phone: document.getElementById('contactPhone').value,
@@ -765,6 +836,11 @@
                     if (p2.email) document.getElementById('contactEmail').value = p2.email;
                     if (p2.instagram) document.getElementById('contactInstagram').value = p2.instagram;
                 } catch(e) { console.error(e); }
+            } else {
+                const acc = getAccountDetails();
+                if (acc.phone && !document.getElementById('contactPhone').value) {
+                    document.getElementById('contactPhone').value = acc.phone;
+                }
             }
         }
 
@@ -805,6 +881,7 @@
             }
 
             const part1Data = JSON.parse(rawDraft);
+            const acc = getAccountDetails();
 
             pendingPayload = {
                 rentalType: part1Data.rentalType || "Rental",
@@ -830,8 +907,9 @@
                 contactInfo: { phone, telegram, whatsapp, email, instagram },
                 views: 0,
                 likes: 0,
-                userId: currentUser ? currentUser.uid : "anonymous",
-                authorName: currentUser ? (currentUser.displayName || "User") : "Anonymous User",
+                userId: acc.id,
+                postedByPhone: acc.phone || phone,
+                authorName: currentUser ? (currentUser.displayName || "User") : "Verified User",
                 createdAt: Date.now()
             };
 
@@ -923,33 +1001,63 @@
             if (!pendingPayload) return;
 
             const confirmBtn = document.getElementById('confirmPublishBtn');
+            const cancelBtn = document.getElementById('cancelModalBtn');
             const submitBtn = document.getElementById('submitBtn');
+            const progressBox = document.getElementById('publishProgressBox');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const percentText = document.getElementById('percentText');
 
             try {
                 confirmBtn.disabled = true;
-                confirmBtn.innerText = "Publishing...";
+                cancelBtn.disabled = true;
                 submitBtn.disabled = true;
-                submitBtn.innerText = "Publishing Listing...";
+                progressBox.style.display = 'block';
 
-                const postsRef = ref(db, 'posts');
-                const newPostRef = push(postsRef);
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.floor(Math.random() * 12) + 5;
+                        if (progress > 90) progress = 90;
+                        progressBarFill.style.width = progress + '%';
+                        percentText.innerText = progress + '%';
+                    }
+                }, 150);
 
-                await set(newPostRef, pendingPayload);
+                const newPostRef = push(ref(db, 'posts'));
+                const newPostKey = newPostRef.key;
+
+                const acc = getAccountDetails();
+                const userAccountId = acc.id;
+
+                const updates = {};
+                updates[`/posts/${newPostKey}`] = { ...pendingPayload, id: newPostKey };
+                
+                if (userAccountId && userAccountId !== "anonymous") {
+                    updates[`/users/${userAccountId}/posts/${newPostKey}`] = { ...pendingPayload, id: newPostKey };
+                }
+
+                await update(ref(db), updates);
+
+                clearInterval(progressInterval);
+                progressBarFill.style.width = '100%';
+                percentText.innerText = '100%';
 
                 sessionStorage.removeItem('delalaDraftPart1');
                 sessionStorage.removeItem('delalaDraftPart2');
                 sessionStorage.removeItem('selectedGpsLocation');
 
-                window.location.href = "rental.html";
+                setTimeout(() => {
+                    window.location.href = "rental.html";
+                }, 600);
 
             } catch (err) {
                 console.error(err);
                 confirmBtn.disabled = false;
-                confirmBtn.innerText = "Confirm & Publish";
+                cancelBtn.disabled = false;
                 submitBtn.disabled = false;
-                submitBtn.innerText = "Review & Publish";
+                progressBox.style.display = 'none';
                 closeModal();
-                showErrorModal("Publish Failed", "An error occurred while publishing your listing. Please try again: " + err.message);
+                showErrorModal("Publish Failed", "An error occurred while publishing your listing: " + err.message);
             }
         }
 
