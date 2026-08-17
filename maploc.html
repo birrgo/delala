@@ -7,8 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- MapLibre GL CSS (Modern Vector Map) -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="news.css">
+    
     <style>
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
@@ -100,10 +103,6 @@
             font-size: 16px;
         }
 
-        .leaflet-control-container .leaflet-control-attribution {
-            display: none !important;
-        }
-
         .map-gps-btn {
             position: absolute;
             bottom: 40px;
@@ -139,6 +138,16 @@
         .map-gps-btn:active { transform: scale(0.92); }
         .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
+        /* Custom User Location Marker Pulsing Dot */
+        .user-location-dot {
+            width: 18px;
+            height: 18px;
+            background-color: #38BDF8;
+            border: 3px solid #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+        }
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -171,17 +180,6 @@
             from { transform: scale(0.92); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--primary-dark); }
-        .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); font-weight: 700; }
 
         .modal-body {
             padding: 16px 20px;
@@ -248,7 +246,6 @@
         </div>
 
         <div class="top-right-controls">
-            <!-- Close Button returning directly to rental.html -->
             <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rental.html'" title="Close Map">✕</button>
         </div>
 
@@ -278,7 +275,8 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- MapLibre GL JS Library -->
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 
     <!-- Firebase App and Database SDK Modules -->
     <script type="module">
@@ -298,7 +296,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let leafletMap, userMarker, rentalMarker, routePolyline;
+        let map, userMarker, rentalMarker;
         let watchPositionId = null;
 
         let rentalLat = null;
@@ -314,7 +312,7 @@
             let queryLng = parseFloat(urlParams.get('lng'));
             postTitle = urlParams.get('title') || 'Rental Post';
 
-            initLeafletMap();
+            initMapLibreMap();
             
             if (!isNaN(queryLat) && !isNaN(queryLng)) {
                 setRentalPostLocation(queryLat, queryLng, postTitle);
@@ -331,43 +329,41 @@
             });
         });
 
-        function initLeafletMap() {
-            leafletMap = L.map('rentalMap', {
-                attributionControl: false,
-                dragging: true,
-                touchZoom: true,
-                doubleClickZoom: false,
-                scrollWheelZoom: true,
-                boxZoom: false
-            }).setView([9.0034, 38.7881], 14);
+        function initMapLibreMap() {
+            // Free Dark Vector Tiles from CartoDB
+            map = new maplibregl.Map({
+                container: 'rentalMap',
+                style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                center: [38.7881, 9.0034], // [lng, lat]
+                zoom: 14,
+                attributionControl: false
+            });
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(leafletMap);
+            // Create custom HTML dot element for user position
+            const userDot = document.createElement('div');
+            userDot.className = 'user-location-dot';
 
-            userMarker = L.marker([9.0034, 38.7881], { draggable: false }).addTo(leafletMap);
+            userMarker = new maplibregl.Marker({ element: userDot })
+                .setLngLat([38.7881, 9.0034])
+                .addTo(map);
         }
 
         function setRentalPostLocation(lat, lng, title) {
             rentalLat = lat;
             rentalLng = lng;
 
-            const rentalIcon = L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            });
+            if (rentalMarker) rentalMarker.remove();
 
-            if (rentalMarker) leafletMap.removeLayer(rentalMarker);
+            const popup = new maplibregl.Popup({ offset: 25 })
+                .setHTML(`<b>${title}</b><br>Saved Post Location`);
 
-            rentalMarker = L.marker([rentalLat, rentalLng], { icon: rentalIcon }).addTo(leafletMap);
-            rentalMarker.bindPopup(`<b>${title}</b><br>Saved Post Location`).openPopup();
-            
-            leafletMap.setView([rentalLat, rentalLng], 15);
+            rentalMarker = new maplibregl.Marker({ color: '#EF4444' })
+                .setLngLat([rentalLng, rentalLat])
+                .setPopup(popup)
+                .addTo(map);
+
+            rentalMarker.togglePopup();
+            map.flyTo({ center: [rentalLng, rentalLat], zoom: 15 });
         }
 
         async function fetchRentalDataFromFirebase(id) {
@@ -437,14 +433,14 @@
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
 
-            if (leafletMap && userMarker) {
-                userMarker.setLatLng([lat, lng]);
+            if (map && userMarker) {
+                userMarker.setLngLat([lng, lat]);
             }
 
             if (rentalLat && rentalLng) {
                 calculateAndDrawRoadRoute(lat, lng, rentalLat, rentalLng);
-            } else if (leafletMap) {
-                leafletMap.setView([lat, lng], 17);
+            } else if (map) {
+                map.flyTo({ center: [lng, lat], zoom: 17 });
             }
         }
 
@@ -461,18 +457,41 @@
                         document.getElementById('roadDistanceVal').innerHTML = `<strong>${distanceInKm} km</strong>`;
                         document.getElementById('distanceBanner').style.display = 'flex';
 
-                        if (routePolyline) {
-                            leafletMap.removeLayer(routePolyline);
+                        const geojson = {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': route.geometry
+                        };
+
+                        if (map.getSource('route')) {
+                            map.getSource('route').setData(geojson);
+                        } else {
+                            map.addSource('route', {
+                                'type': 'geojson',
+                                'data': geojson
+                            });
+
+                            map.addLayer({
+                                'id': 'route',
+                                'type': 'line',
+                                'source': 'route',
+                                'layout': {
+                                    'line-join': 'round',
+                                    'line-cap': 'round'
+                                },
+                                'paint': {
+                                    'line-color': '#38BDF8',
+                                    'line-width': 5,
+                                    'line-opacity': 0.9
+                                }
+                            });
                         }
 
-                        const routeCoordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                        routePolyline = L.polyline(routeCoordinates, { color: '#38BDF8', weight: 5, opacity: 0.9 }).addTo(leafletMap);
+                        const bounds = new maplibregl.LngLatBounds()
+                            .extend([userLng, userLat])
+                            .extend([destLng, destLat]);
 
-                        const bounds = L.latLngBounds([
-                            [userLat, userLng],
-                            [destLat, destLng]
-                        ]);
-                        leafletMap.fitBounds(bounds, { padding: [60, 60] });
+                        map.fitBounds(bounds, { padding: 80 });
                     }
                 })
                 .catch(err => console.error("OSRM Route Error:", err));
