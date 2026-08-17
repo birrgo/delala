@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
     <style>
-        /* Light Bottom Nav matched to First Code */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -37,9 +36,7 @@
             text-align: center;
         }
 
-        .nav-item.active {
-            color: #0F172A;
-        }
+        .nav-item.active { color: #0F172A; }
 
         .nav-item .icon-bg svg {
             width: 22px;
@@ -49,7 +46,6 @@
             stroke-width: 2;
         }
 
-        /* Light Theme Curved Center FAB Button */
         .nav-item-post-center {
             position: relative;
             top: -14px;
@@ -76,9 +72,7 @@
             cursor: pointer;
         }
 
-        .post-fab-btn:active {
-            transform: scale(0.92);
-        }
+        .post-fab-btn:active { transform: scale(0.92); }
 
         .post-fab-btn svg {
             width: 22px;
@@ -94,7 +88,6 @@
             color: #334155;
         }
 
-        /* Responsive Grid for All Detail Parameters */
         .post-details-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -125,7 +118,6 @@
             word-break: break-word;
         }
 
-        /* Multiple Images Carousel Styling */
         .multi-image-gallery {
             display: flex;
             gap: 8px;
@@ -136,9 +128,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .multi-image-gallery::-webkit-scrollbar {
-            height: 4px;
-        }
+        .multi-image-gallery::-webkit-scrollbar { height: 4px; }
 
         .multi-image-gallery::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
@@ -161,7 +151,6 @@
             object-fit: cover;
         }
 
-        /* Category Specific Details Table */
         .category-specs-container {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -203,6 +192,15 @@
         .contact-btn-whatsapp { background: #25D366; color: #ffffff; }
         .contact-btn-email { background: #EF4444; color: #ffffff; }
         .contact-btn-instagram { background: #E1306C; color: #ffffff; }
+
+        .infinite-scroll-trigger {
+            text-align: center;
+            padding: 18px;
+            font-size: 12px;
+            color: #38BDF8;
+            font-weight: 700;
+            min-height: 50px;
+        }
     </style>
 </head>
 <body>
@@ -265,10 +263,10 @@
         </header>
 
         <main class="app-content">
-            <div class="broadcasts-container" id="broadcastsContainer">
-                <div class="featured-broadcast-card">
-                    <h2 class="broadcast-title" style="font-size:14px; text-align:center; color: var(--text-muted);">Loading all user listings...</h2>
-                </div>
+            <div class="broadcasts-container" id="broadcastsContainer"></div>
+
+            <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
+                ⏳ Loading...
             </div>
 
             <footer class="verified-footer-shield">
@@ -276,7 +274,6 @@
             </footer>
         </main>
 
-        <!-- Bottom Navigation Menu -->
         <nav class="bottom-nav">
             <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
                 <div class="icon-bg">
@@ -320,7 +317,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -336,14 +333,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let rawNewsCache = {}; 
+        let lastLoadedTimestamp = null;
+        let lastLoadedKey = null;
+        let isLoading = false;
+        let hasMoreItems = true;
+        let loadedCount = 0;
+        
         let localCachedBroadcasts = [];
         let cardClockIntervalId = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            streamLiveAdminUpdatesLog();
+        document.addEventListener('DOMContentLoaded', async () => {
             setupSearchEngineControls();
             setupNewsReaderModalControls();
+            setupInfiniteScrollObserver();
 
             const closeBtn = document.getElementById('closePopupBtn');
             if (closeBtn) {
@@ -353,6 +355,12 @@
             }
             
             initiateLiveInterfaceClocks();
+
+            // Load initial post and immediately pre-fetch the second item
+            await fetchSingleNextItem();
+            if (hasMoreItems) {
+                fetchSingleNextItem();
+            }
         });
 
         function initiateLiveInterfaceClocks() {
@@ -361,7 +369,6 @@
             if (cardClockIntervalId) clearInterval(cardClockIntervalId);
             cardClockIntervalId = setInterval(() => {
                 const now = new Date();
-                
                 if (cornerClockNode) {
                     cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
                         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
@@ -418,50 +425,106 @@
             return list;
         }
 
-        function streamLiveAdminUpdatesLog() {
-            const newsNodes = ['posts', 'delalaListings'];
+        async function fetchSingleNextItem() {
+            if (isLoading || !hasMoreItems) return;
+            isLoading = true;
 
-            newsNodes.forEach(nodePath => {
-                const nodeRef = ref(db, nodePath);
-                
-                onValue(nodeRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        Object.keys(data).forEach(key => {
-                            const val = data[key];
-                            if (typeof val === 'object' && val !== null) {
-                                if (isRentalCategory(val)) {
-                                    rawNewsCache[`${nodePath}/${key}`] = { 
-                                        id: key, 
-                                        _dbPath: nodePath,
-                                        ...val 
-                                    };
-                                }
-                            }
-                        });
-                    } else {
-                        Object.keys(rawNewsCache).forEach(k => {
-                            if (k.startsWith(nodePath)) delete rawNewsCache[k];
-                        });
+            const triggerEl = document.getElementById('infiniteScrollTrigger');
+            if (triggerEl) triggerEl.innerText = `⏳ Loading...`;
+
+            const nodePaths = ['posts', 'delalaListings'];
+            let validRentalItem = null;
+
+            try {
+                while (!validRentalItem && hasMoreItems) {
+                    let fetchedListings = [];
+
+                    for (const nodePath of nodePaths) {
+                        let dbQuery;
+                        const baseRef = ref(db, nodePath);
+
+                        if (lastLoadedTimestamp !== null) {
+                            dbQuery = query(
+                                baseRef,
+                                orderByChild('createdAt'),
+                                endBefore(lastLoadedTimestamp, lastLoadedKey),
+                                limitToLast(5)
+                            );
+                        } else {
+                            dbQuery = query(
+                                baseRef,
+                                orderByChild('createdAt'),
+                                limitToLast(5)
+                            );
+                        }
+
+                        const snapshot = await get(dbQuery);
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnap) => {
+                                fetchedListings.push({
+                                    id: childSnap.key,
+                                    _dbPath: nodePath,
+                                    ...childSnap.val()
+                                });
+                            });
+                        }
                     }
 
-                    rebuildAndRenderBroadcastsCache();
-                }, (error) => {
-                    console.error(`Database Node Error (${nodePath}):`, error);
-                });
-            });
+                    if (fetchedListings.length === 0) {
+                        hasMoreItems = false;
+                        break;
+                    }
+
+                    // Sort descending by timestamp
+                    fetchedListings.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+
+                    for (const rawItem of fetchedListings) {
+                        lastLoadedTimestamp = rawItem.createdAt || rawItem.timestamp || 0;
+                        lastLoadedKey = rawItem.id;
+
+                        if (isRentalCategory(rawItem)) {
+                            validRentalItem = rawItem;
+                            break;
+                        }
+                    }
+                }
+
+                if (!validRentalItem) {
+                    hasMoreItems = false;
+                    if (triggerEl) {
+                        triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
+                    }
+                    if (localCachedBroadcasts.length === 0) {
+                        renderEmptyState();
+                    }
+                    isLoading = false;
+                    return;
+                }
+
+                loadedCount++;
+                localCachedBroadcasts.push(validRentalItem);
+                appendSingleItemToUI(validRentalItem);
+
+                if (triggerEl) triggerEl.innerText = "⏳ Loading next item...";
+
+            } catch (error) {
+                console.error("Error loading post:", error);
+            } finally {
+                isLoading = false;
+            }
         }
 
-        function rebuildAndRenderBroadcastsCache() {
-            localCachedBroadcasts = Object.values(rawNewsCache).filter(item => isRentalCategory(item));
-            
-            localCachedBroadcasts.sort((a, b) => {
-                let timeA = a.createdAt || a.timestamp || 0;
-                let timeB = b.createdAt || b.timestamp || 0;
-                return timeB - timeA;
-            });
+        function setupInfiniteScrollObserver() {
+            const triggerEl = document.getElementById('infiniteScrollTrigger');
+            if (!triggerEl) return;
 
-            renderFilteredBroadcasts();
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isLoading && hasMoreItems) {
+                    fetchSingleNextItem();
+                }
+            }, { rootMargin: '300px', threshold: 0.1 });
+
+            observer.observe(triggerEl);
         }
 
         function renderEmptyState() {
@@ -475,6 +538,16 @@
                     <p class="broadcast-body-text">There are currently no active rental listings available in the database.</p>
                 </article>
             `;
+        }
+
+        function appendSingleItemToUI(item) {
+            const container = document.getElementById('broadcastsContainer');
+            if (!container) return;
+
+            const card = document.createElement('article');
+            card.className = "featured-broadcast-card";
+            card.innerHTML = buildSingleNewsCardHTML(item);
+            container.appendChild(card);
         }
 
         function buildSingleNewsCardHTML(item) {
@@ -497,7 +570,7 @@
 
             let imageHTML = "";
             if (allImages.length > 0) {
-                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}')"><img src="${allImages[0]}" onload="this.classList.add('loaded')"></div>`;
+                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}')"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
             }
 
             return `
@@ -532,7 +605,6 @@
             const allImages = extractAllImages(item);
             const author = item.authorName || item.userId || "Verified User";
             
-            // Location Info
             let locationParts = [];
             if (item.locationDetails) {
                 if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
@@ -544,12 +616,10 @@
             }
             const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
 
-            // Coordinates Extraction
             let lat = item.location?.latitude || item.latitude || null;
             let lng = item.location?.longitude || item.longitude || null;
             let geoCoordinates = (lat && lng) ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : "N/A";
 
-            // Map Card Preview and Redirection setup
             const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
             
             let mapPreviewHTML = `
@@ -567,7 +637,6 @@
                 </div>
             `;
 
-            // Contact Info Parsing
             let phone = "", telegram = "", whatsapp = "", email = "", instagram = "";
             if (item.contactInfo) {
                 phone = item.contactInfo.phone || "";
@@ -586,7 +655,7 @@
                 allImages.forEach((imgUrl, idx) => {
                     imageGalleryHTML += `
                         <div class="gallery-img-container">
-                            <img src="${imgUrl}" alt="Photo ${idx + 1}" onclick="window.open('${imgUrl}', '_blank')">
+                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
                             <span style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">${idx + 1}/${allImages.length}</span>
                         </div>
                     `;
@@ -687,25 +756,6 @@
                     readerOverlay.classList.remove('active-reader');
                 });
             }
-        }
-
-        function renderFilteredBroadcasts() {
-            const container = document.getElementById('broadcastsContainer');
-            if (!container) return;
-            
-            container.innerHTML = "";
-
-            if (localCachedBroadcasts.length === 0) {
-                renderEmptyState();
-                return;
-            }
-
-            localCachedBroadcasts.forEach((item) => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                container.appendChild(card);
-            });
         }
 
         function setupSearchEngineControls() {
