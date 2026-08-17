@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Map View</title>
+    <title>Delala - Select Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="news.css">
+    
     <style>
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
@@ -49,7 +52,6 @@
             height: 100vh; 
         }
 
-        /* Top-Right Control Container for stacked alignment */
         .top-right-controls {
             position: absolute;
             top: 20px;
@@ -77,7 +79,6 @@
             text-decoration: none;
         }
 
-        /* Done button positioned underneath the close button */
         .save-location-btn {
             background: var(--primary-dark);
             color: #FFFFFF;
@@ -100,10 +101,6 @@
             opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
-        }
-
-        .leaflet-control-container .leaflet-control-attribution {
-            display: none !important;
         }
 
         .map-gps-btn {
@@ -140,6 +137,16 @@
 
         .map-gps-btn:active { transform: scale(0.92); }
         .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Custom User Marker Style */
+        .user-location-dot {
+            width: 18px;
+            height: 18px;
+            background-color: #38BDF8;
+            border: 3px solid #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+        }
 
         .modal-overlay {
             display: none;
@@ -292,7 +299,6 @@
 <body>
 
     <div class="map-wrapper" id="mapContainer">
-        <!-- Top Right Container holding X button and Done button stacked -->
         <div class="top-right-controls">
             <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rentalpost1.html'" title="Close Map">✕</button>
             <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
@@ -341,9 +347,10 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- MapLibre GL JS Library -->
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <script>
-        let leafletMap, leafletMarker;
+        let map, mapMarker;
         let watchPositionId = null;
         let isLocationTracked = false;
         let currentTrackedLat = null;
@@ -355,7 +362,7 @@
         const BOLE_LNG = 38.7881;
 
         document.addEventListener('DOMContentLoaded', () => {
-            initLeafletMap();
+            initMapLibreMap();
             startRealtimeTracking();
 
             document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
@@ -374,22 +381,22 @@
             });
         });
 
-        function initLeafletMap() {
-            leafletMap = L.map('rentalMap', {
-                attributionControl: false,
-                dragging: true,
-                touchZoom: true,
-                doubleClickZoom: false,
-                scrollWheelZoom: true,
-                boxZoom: false
-            }).setView([BOLE_LAT, BOLE_LNG], 14);
+        function initMapLibreMap() {
+            map = new maplibregl.Map({
+                container: 'rentalMap',
+                style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                center: [BOLE_LNG, BOLE_LAT], // [lng, lat]
+                zoom: 14,
+                attributionControl: false
+            });
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(leafletMap);
+            // Create custom pulsing dot marker for GPS location
+            const userDot = document.createElement('div');
+            userDot.className = 'user-location-dot';
 
-            leafletMarker = L.marker([BOLE_LAT, BOLE_LNG], { draggable: false }).addTo(leafletMap);
+            mapMarker = new maplibregl.Marker({ element: userDot })
+                .setLngLat([BOLE_LNG, BOLE_LAT])
+                .addTo(map);
         }
 
         function enableSaveButton() {
@@ -454,9 +461,9 @@
             currentTrackedAccuracy = accuracy;
             isLocationTracked = true;
 
-            if (leafletMap && leafletMarker) {
-                leafletMap.setView([lat, lng], 17);
-                leafletMarker.setLatLng([lat, lng]);
+            if (map && mapMarker) {
+                map.flyTo({ center: [lng, lat], zoom: 17 });
+                mapMarker.setLngLat([lng, lat]);
             }
 
             enableSaveButton();
