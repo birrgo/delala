@@ -93,6 +93,116 @@
             font-weight: 700;
             color: #334155;
         }
+
+        /* Responsive Grid for All Detail Parameters */
+        .post-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-detail-label {
+            font-size: 10px;
+            color: #94A3B8;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .post-detail-value {
+            font-weight: 600;
+            color: #F8FAFC;
+            word-break: break-word;
+        }
+
+        /* Multiple Images Carousel Styling */
+        .multi-image-gallery {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 8px;
+            margin: 12px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .multi-image-gallery::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .multi-image-gallery::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .gallery-img-container {
+            flex: 0 0 85%;
+            scroll-snap-align: center;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 190px;
+            background: #0f172a;
+            position: relative;
+        }
+
+        .gallery-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Category Specific Details Table */
+        .category-specs-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 12px 0;
+        }
+
+        .category-specs-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #38BDF8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .contact-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .contact-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .contact-btn-phone { background: #10B981; color: #ffffff; }
+        .contact-btn-telegram { background: #0088cc; color: #ffffff; }
+        .contact-btn-whatsapp { background: #25D366; color: #ffffff; }
+        .contact-btn-email { background: #EF4444; color: #ffffff; }
+        .contact-btn-instagram { background: #E1306C; color: #ffffff; }
     </style>
 </head>
 <body>
@@ -119,7 +229,7 @@
 
         <div class="full-news-modal-overlay" id="fullNewsModalOverlay">
             <div class="news-reader-header">
-                <h2 style="font-size: 15px; font-weight: 800;">Full Article Details</h2>
+                <h2 style="font-size: 15px; font-weight: 800;">Complete Rental Information</h2>
                 <button class="close-reader-btn" id="closeNewsReaderBtn" aria-label="Close Reader">
                     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
@@ -131,13 +241,13 @@
             <div class="search-box-header">
                 <div class="search-input-wrapper">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Enter Post Code..." autocomplete="off">
+                    <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Search Title, City, or Category..." autocomplete="off">
                 </div>
                 <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
             </div>
             <div class="search-results-area" id="searchResultsArea">
                 <div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">
-                    Type a post code above to find updates quickly.
+                    Type to search rental items...
                 </div>
             </div>
         </div>
@@ -149,7 +259,7 @@
             
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
 
-            <button class="search-action-btn" id="openSearchBtn" aria-label="Search News">
+            <button class="search-action-btn" id="openSearchBtn" aria-label="Search Items">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
         </header>
@@ -157,18 +267,17 @@
         <main class="app-content">
             <div class="broadcasts-container" id="broadcastsContainer">
                 <div class="featured-broadcast-card">
-                    <h2 class="broadcast-title" style="font-size:14px; text-align:center; color: var(--text-muted);">Connecting to Secure Node...</h2>
+                    <h2 class="broadcast-title" style="font-size:14px; text-align:center; color: var(--text-muted);">Loading all user listings...</h2>
                 </div>
             </div>
 
             <footer class="verified-footer-shield">
-                <span class="footer-shield-text">Hulum Secure Matrix Verified</span>
+                <span class="footer-shield-text">Delala Secure Matrix Verified</span>
             </footer>
         </main>
 
-        <!-- Bottom Navigation Menu matched to Delala structure -->
+        <!-- Bottom Navigation Menu -->
         <nav class="bottom-nav">
-            <!-- 1. Rental (Active Tab) -->
             <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -176,7 +285,6 @@
                 <span>Rental</span>
             </a>
 
-            <!-- 2. Selling -->
             <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
@@ -184,7 +292,6 @@
                 <span>Selling</span>
             </a>
 
-            <!-- 5th Curved Center Post Button -->
             <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -195,7 +302,6 @@
                 <span class="post-fab-label">Post</span>
             </a>
 
-            <!-- 3. Job Vacancy -->
             <a id="nav-vacancy" href="vacancy.html" class="nav-item" data-filter="Job Vacancy">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
@@ -203,7 +309,6 @@
                 <span>Vacancy</span>
             </a>
 
-            <!-- 4. Profile -->
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -218,14 +323,14 @@
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
-            authDomain: "hulum-e358c.firebaseapp.com",
-            databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
-            projectId: "hulum-e358c",
-            storageBucket: "hulum-e358c.firebasestorage.app",
-            messagingSenderId: "678316597629",
-            appId: "1:678316597629:web:dc6af499b8054a424aac14",
-            measurementId: "G-097P51SP2B"
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -249,13 +354,6 @@
             
             initiateLiveInterfaceClocks();
         });
-
-        function getYouTubeEmbedUrl(url) {
-            if (!url) return null;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
-        }
 
         function initiateLiveInterfaceClocks() {
             const cornerClockNode = document.getElementById('topCornerLiveClock');
@@ -290,16 +388,38 @@
             });
         }
 
-        function isRentalCategory(item, nodePath) {
-            if (nodePath.toLowerCase().includes('rental')) {
-                return true;
-            }
+        function isRentalCategory(item) {
+            if (!item) return false;
+            const rType = String(item.rentalType || '').trim().toLowerCase();
             const cat = String(item.category || '').trim().toLowerCase();
-            return cat === 'rental' || cat === 'rent' || cat === 'rentals';
+            return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
+        }
+
+        function extractAllImages(item) {
+            let list = [];
+            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
+                list.push(item.imageUrl.trim());
+            }
+            if (item.images) {
+                if (Array.isArray(item.images)) {
+                    item.images.forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                } else if (typeof item.images === 'object') {
+                    Object.values(item.images).forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                }
+            }
+            return list;
         }
 
         function streamLiveAdminUpdatesLog() {
-            const newsNodes = ['hulumNews', 'hulumNews/Rental', 'newNews/rental'];
+            const newsNodes = ['posts', 'delalaListings'];
 
             newsNodes.forEach(nodePath => {
                 const nodeRef = ref(db, nodePath);
@@ -310,7 +430,7 @@
                         Object.keys(data).forEach(key => {
                             const val = data[key];
                             if (typeof val === 'object' && val !== null) {
-                                if (isRentalCategory(val, nodePath)) {
+                                if (isRentalCategory(val)) {
                                     rawNewsCache[`${nodePath}/${key}`] = { 
                                         id: key, 
                                         _dbPath: nodePath,
@@ -333,17 +453,12 @@
         }
 
         function rebuildAndRenderBroadcastsCache() {
-            localCachedBroadcasts = Object.values(rawNewsCache).filter(item => isRentalCategory(item, item._dbPath || ''));
+            localCachedBroadcasts = Object.values(rawNewsCache).filter(item => isRentalCategory(item));
             
             localCachedBroadcasts.sort((a, b) => {
-                let timeA = a.updatedAt || a.createdAtTimestamp || a.timestamp || 0;
-                let timeB = b.updatedAt || b.createdAtTimestamp || b.timestamp || 0;
-                
-                if (!timeA && a.date) timeA = new Date(a.date).getTime() || 0;
-                if (!timeB && b.date) timeB = new Date(b.date).getTime() || 0;
-
-                if (timeA !== 0 || timeB !== 0) return timeB - timeA;
-                return b.id.localeCompare(a.id);
+                let timeA = a.createdAt || a.timestamp || 0;
+                let timeB = b.createdAt || b.timestamp || 0;
+                return timeB - timeA;
             });
 
             renderFilteredBroadcasts();
@@ -356,49 +471,47 @@
             container.innerHTML = `
                 <article class="featured-broadcast-card">
                     <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                    <h2 class="broadcast-title">No Items Listed</h2>
-                    <p class="broadcast-body-text">There are currently no items posted for rent.</p>
+                    <h2 class="broadcast-title">No Rental Items Found</h2>
+                    <p class="broadcast-body-text">There are currently no active rental listings available in the database.</p>
                 </article>
             `;
         }
 
         function buildSingleNewsCardHTML(item) {
-            const headline = item.title || item.newsTitle || "Rental Item";
-            const fullContent = item.content || item.message || "";
-            const category = item.category || "Rental";
-            const imageUrl = item.imageUrl || item.image || "";
+            const headline = item.title || "Rental Item";
+            const fullContent = item.body || item.content || item.description || "";
+            const category = item.rentalType || item.category || "Rental";
+            const allImages = extractAllImages(item);
 
             const maxPreviewLen = 120;
             const isLongText = fullContent.length > maxPreviewLen;
             const previewContent = isLongText ? fullContent.substring(0, maxPreviewLen).trim() + "..." : fullContent;
 
-            let numericalTime = item.updatedAt || item.createdAtTimestamp || item.timestamp;
+            let numericalTime = item.createdAt || item.timestamp || Date.now();
+            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
 
-            if (!numericalTime && item.date) {
-                const parsed = new Date(item.date).getTime();
-                if (!isNaN(parsed)) numericalTime = parsed;
+            let priceTag = "";
+            if (item.price) {
+                priceTag = `<div style="font-weight: 800; color: #10B981; font-size: 15px; margin-top: 4px;">ETB ${Number(item.price).toLocaleString()} <span style="font-size:11px; color:#94A3B8; font-weight:normal;">/ ${item.paymentPeriod || 'period'}</span></div>`;
             }
 
-            if (!numericalTime) numericalTime = Date.now(); 
-
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
-            const pillBadgeClass = "spotlight-pill";
-
             let imageHTML = "";
-            if (imageUrl && imageUrl.trim().length > 0) {
-                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}')"><img src="${imageUrl}" onload="this.classList.add('loaded')"></div>`;
+            if (allImages.length > 0) {
+                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}')"><img src="${allImages[0]}" onload="this.classList.add('loaded')"></div>`;
             }
 
             return `
                 <div class="badge-meta-row">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="${pillBadgeClass}">${category}</span>
+                        <span class="spotlight-pill">${category}</span>
+                        ${allImages.length > 1 ? `<span style="font-size:10px; background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:10px; color:#fff;">📷 ${allImages.length} Photos</span>` : ''}
                     </div>
                     <span class="timestamp-log-text" data-timestamp="${numericalTime}">${initialFormattedClock}</span>
                 </div>
                 ${imageHTML}
                 <div class="clickable-news-content" onclick="openFullNewsReader('${item.id}')">
                     <h2 class="broadcast-title">${headline}</h2>
+                    ${priceTag}
                     <p class="broadcast-body-text">${previewContent}</p>
                 </div>
             `;
@@ -413,66 +526,153 @@
 
             if (!readerOverlay || !readerBody) return;
 
-            const headline = item.title || item.newsTitle || "Rental Item";
-            const fullContent = item.content || item.message || "";
-            const category = item.category || "Rental";
-            const imageUrl = item.imageUrl || item.image || "";
-            const videoUrl = item.videoUrl || item.youtubeUrl || item.youtubeId || "";
+            const headline = item.title || "Rental Item";
+            const fullContent = item.body || item.content || item.description || "No additional description provided.";
+            const category = item.rentalType || item.category || "Rental";
+            const allImages = extractAllImages(item);
+            const author = item.authorName || item.userId || "Verified User";
             
-            const duplicateCoverInArticle = Boolean(item.duplicateCoverInArticle ?? item.duplicateImageInArticle ?? item.duplicateImage ?? true);
+            // Location Info
+            let locationParts = [];
+            if (item.locationDetails) {
+                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
+                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
+                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
+                if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
+                if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
+                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
+            }
+            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
+
+            // Coordinates Extraction
+            let lat = item.location?.latitude || item.latitude || null;
+            let lng = item.location?.longitude || item.longitude || null;
+            let geoCoordinates = (lat && lng) ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : "N/A";
+
+            // Map Card Preview and Redirection setup
+            const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
             
-            const targetRedirectUrl = item.link || item.redirectUrl || "";
-            const customActionLabel = item.actionButtonLabel || item.buttonLabel || "Contact Owner / View Details";
-
-            let numericalTime = item.updatedAt || item.createdAtTimestamp || item.timestamp;
-            if (!numericalTime && item.date) {
-                const parsed = new Date(item.date).getTime();
-                if (!isNaN(parsed)) numericalTime = parsed;
-            }
-            if (!numericalTime) numericalTime = Date.now();
-
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
-            const pillBadgeClass = "spotlight-pill";
-
-            let imageHTML = "";
-            if (imageUrl && imageUrl.trim().length > 0 && duplicateCoverInArticle) {
-                imageHTML = `<div class="reader-image-frame"><img src="${imageUrl.trim()}" alt="${headline}"></div>`;
-            }
-
-            let videoHTML = "";
-            const embedUrl = getYouTubeEmbedUrl(videoUrl);
-            if (embedUrl) {
-                videoHTML = `
-                    <div class="reader-video-container">
-                        <iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-                    </div>
-                `;
-            }
-
-            let redirectBtnHTML = "";
-            if (targetRedirectUrl && targetRedirectUrl.trim().length > 0) {
-                redirectBtnHTML = `
-                    <div style="margin-top:20px;">
-                        <a href="${targetRedirectUrl.trim()}" target="_blank" rel="noopener noreferrer" class="redirect-link-btn" style="width:100%; justify-content:center;">
-                            <span>${customActionLabel}</span>
-                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            let mapPreviewHTML = `
+                <div style="margin-top: 14px;">
+                    <div class="category-specs-title">Location Preview</div>
+                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 12px; color: #E2E8F0; font-weight: 600;">📍 ${fullLocationStr}</span>
+                            <span style="font-size: 11px; color: #38BDF8; font-weight: 700;">${geoCoordinates}</span>
+                        </div>
+                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; text-align: center; margin-top: 4px;">
+                            🗺️ Open Location Map
                         </a>
                     </div>
+                </div>
+            `;
+
+            // Contact Info Parsing
+            let phone = "", telegram = "", whatsapp = "", email = "", instagram = "";
+            if (item.contactInfo) {
+                phone = item.contactInfo.phone || "";
+                telegram = item.contactInfo.telegram || "";
+                whatsapp = item.contactInfo.whatsapp || "";
+                email = item.contactInfo.email || "";
+                instagram = item.contactInfo.instagram || "";
+            }
+
+            let numericalTime = item.createdAt || item.timestamp || Date.now();
+            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
+
+            let imageGalleryHTML = "";
+            if (allImages.length > 0) {
+                imageGalleryHTML = `<div class="multi-image-gallery">`;
+                allImages.forEach((imgUrl, idx) => {
+                    imageGalleryHTML += `
+                        <div class="gallery-img-container">
+                            <img src="${imgUrl}" alt="Photo ${idx + 1}" onclick="window.open('${imgUrl}', '_blank')">
+                            <span style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">${idx + 1}/${allImages.length}</span>
+                        </div>
+                    `;
+                });
+                imageGalleryHTML += `</div>`;
+            }
+
+            let categorySpecsHTML = "";
+            if (item.categorySpecificDetails && typeof item.categorySpecificDetails === 'object') {
+                categorySpecsHTML = `
+                    <div class="category-specs-container">
+                        <div class="category-specs-title">Specific Property Specifications</div>
+                        <div class="post-details-grid" style="margin:0; background:none; padding:0; border:none;">
                 `;
+                Object.keys(item.categorySpecificDetails).forEach(key => {
+                    const val = item.categorySpecificDetails[key];
+                    categorySpecsHTML += `
+                        <div class="post-detail-item">
+                            <span class="post-detail-label">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span class="post-detail-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
+                        </div>
+                    `;
+                });
+                categorySpecsHTML += `</div></div>`;
+            }
+
+            let contactButtons = "";
+            if (phone || telegram || whatsapp || email || instagram) {
+                contactButtons = `<div class="contact-links-container">`;
+                if (phone) contactButtons += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
+                if (telegram) contactButtons += `<a href="https://t.me/${telegram.replace('@','')}" target="_blank" class="contact-btn contact-btn-telegram">✈️ Telegram (${telegram})</a>`;
+                if (whatsapp) contactButtons += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="contact-btn contact-btn-whatsapp">💬 WhatsApp</a>`;
+                if (email) contactButtons += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner</a>`;
+                if (instagram) contactButtons += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
+                contactButtons += `</div>`;
             }
 
             readerBody.innerHTML = `
                 <div class="reader-meta-bar">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="${pillBadgeClass}">${category}</span>
+                        <span class="spotlight-pill">${category}</span>
+                        <span style="font-size:10px; color:#94A3B8;">ID: ${item.id}</span>
                     </div>
                     <span class="timestamp-log-text">${initialFormattedClock}</span>
                 </div>
-                <h1 class="reader-title">${headline}</h1>
-                ${imageHTML}
-                ${videoHTML}
-                <div class="reader-full-body">${fullContent}</div>
-                ${redirectBtnHTML}
+
+                <h1 class="reader-title" style="margin-top:8px;">${headline}</h1>
+
+                ${imageGalleryHTML}
+
+                <div class="post-details-grid">
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Price Rate</span>
+                        <span class="post-detail-value" style="color:#10B981;">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Payment Term</span>
+                        <span class="post-detail-value">${item.paymentPeriod || 'N/A'}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Full Location</span>
+                        <span class="post-detail-value">${fullLocationStr}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">GPS Coordinates</span>
+                        <span class="post-detail-value">${geoCoordinates}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Posted By</span>
+                        <span class="post-detail-value">${author}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Views / Likes</span>
+                        <span class="post-detail-value">👁️ ${item.views || 0} | ❤️ ${item.likes || 0}</span>
+                    </div>
+                </div>
+
+                ${categorySpecsHTML}
+                ${mapPreviewHTML}
+
+                <div style="margin-top:14px;">
+                    <div class="category-specs-title">Full Description</div>
+                    <div class="reader-full-body" style="font-size:13px; line-height:1.6; color:#E2E8F0;">${fullContent}</div>
+                </div>
+
+                ${contactButtons}
             `;
 
             readerOverlay.classList.add('active-reader');
@@ -547,24 +747,26 @@
             if (!cleanQuery) {
                 resultsArea.innerHTML = `
                     <div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">
-                        Type a post code above to find updates quickly.
+                        Type a keyword, city, or title above to find rental items.
                     </div>
                 `;
                 return;
             }
 
             const matchedNews = localCachedBroadcasts.filter(item => {
-                const code = String(item.newsCode || item.code || item.id || '').toLowerCase();
-                const title = String(item.title || item.newsTitle || '').toLowerCase();
-                const content = String(item.content || item.message || '').toLowerCase();
+                const code = String(item.id || '').toLowerCase();
+                const title = String(item.title || '').toLowerCase();
+                const content = String(item.body || item.content || '').toLowerCase();
+                const city = String(item.locationDetails?.city || '').toLowerCase();
+                const rentalType = String(item.rentalType || '').toLowerCase();
 
-                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery);
+                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || city.includes(cleanQuery) || rentalType.includes(cleanQuery);
             });
 
             if (matchedNews.length === 0) {
                 resultsArea.innerHTML = `
                     <div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">
-                        No updates matching "<strong>${cleanQuery}</strong>" found.
+                        No rental listings matching "<strong>${cleanQuery}</strong>" found.
                     </div>
                 `;
                 return;

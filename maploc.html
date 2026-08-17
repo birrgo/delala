@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Map View</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="news.css">
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+            --danger-bg: #FEF2F2;
+            --danger-border: #FCA5A5;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: #000000;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .map-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            background: #000;
+        }
+
+        #rentalMap { 
+            width: 100vw;
+            height: 100vh; 
+        }
+
+        .top-right-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .map-close-btn {
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+        }
+
+        .save-location-btn {
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.3s ease, background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .save-location-btn:disabled {
+            background: #64748B;
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Distance Banner Floating Bar */
+        .distance-card-banner {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.92);
+            color: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .distance-card-banner strong {
+            color: #38BDF8;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .leaflet-control-container .leaflet-control-attribution {
+            display: none !important;
+        }
+
+        .map-gps-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #1E293B;
+            color: #38BDF8;
+            border: 2px solid #38BDF8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .map-gps-btn.tracking-active {
+            background: #0284C7;
+            color: #FFFFFF;
+            border-color: #38BDF8;
+            animation: pulseGps 1.5s infinite;
+        }
+
+        @keyframes pulseGps {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        .map-gps-btn:active { transform: scale(0.92); }
+        .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+        .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); font-weight: 700; }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background: #F8FAFC;
+        }
+
+        .modal-btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .preview-section {
+            background: #F8FAFC;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .error-modal-card {
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid var(--danger-border);
+        }
+
+        .error-badge-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 8px auto 0 auto;
+        }
+
+        .error-badge-icon svg { width: 28px; height: 28px; stroke: currentColor; }
+
+        .error-modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-top: 8px;
+        }
+
+        .error-modal-msg {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .btn-error-dismiss {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--danger-color);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="map-wrapper" id="mapContainer">
+        <!-- Road Distance Banner -->
+        <div class="distance-card-banner" id="distanceBanner">
+            <span>Distance to Post:</span> <strong id="roadDistanceVal">Calculating...</strong>
+        </div>
+
+        <div class="top-right-controls">
+            <!-- Redirect back to rental.html -->
+            <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rental.html'" title="Close Map">✕</button>
+            <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
+                Done
+            </button>
+        </div>
+
+        <div id="rentalMap"></div>
+        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Toggle Real-Time Tracking">
+            <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+    </div>
+
+    <!-- CONFIRMATION POPUP MODAL -->
+    <div class="modal-overlay" id="confirmLocationModalOverlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Confirm Real-Time GPS Location</h3>
+                <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
+            </div>
+            <div class="modal-body" id="locationConfirmBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn-cancel" id="retrackLocationBtn">Re-Sync GPS</button>
+                <button type="button" class="modal-btn-confirm" id="acceptLocationBtn">Confirm & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ERROR MODAL -->
+    <div class="modal-overlay" id="errorModalOverlay">
+        <div class="modal-card error-modal-card">
+            <div class="modal-body" style="padding: 24px 20px 16px;">
+                <div class="error-badge-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="error-modal-title" id="errorModalTitle">GPS Error</div>
+                <p class="error-modal-msg" id="errorModalMessage">Unable to retrieve real-time location.</p>
+            </div>
+            <div class="modal-footer" style="padding: 12px 20px 20px; background: transparent; border: none;">
+                <button type="button" class="btn-error-dismiss" id="dismissErrorBtn">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Firebase App and Database SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, child, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let leafletMap, userMarker, rentalMarker, routePolyline;
+        let watchPositionId = null;
+        let isLocationTracked = false;
+        let currentTrackedLat = null;
+        let currentTrackedLng = null;
+        let currentTrackedAccuracy = null;
+        let currentAddressInfo = null;
+        let currentCalculatedDistance = null;
+
+        let rentalLat = null;
+        let rentalLng = null;
+        let postId = null;
+        let postTitle = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            postId = urlParams.get('postId');
+            
+            let queryLat = parseFloat(urlParams.get('lat'));
+            let queryLng = parseFloat(urlParams.get('lng'));
+            postTitle = urlParams.get('title') || 'Rental Post';
+
+            initLeafletMap();
+            
+            // Render database location passed via URL or fetch via postId
+            if (!isNaN(queryLat) && !isNaN(queryLng)) {
+                setRentalPostLocation(queryLat, queryLng, postTitle);
+                startRealtimeTracking();
+            } else if (postId) {
+                fetchRentalDataFromFirebase(postId);
+            } else {
+                startRealtimeTracking();
+            }
+
+            document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
+            document.getElementById('mapGpsBtn').addEventListener('click', toggleRealtimeTracking);
+
+            document.getElementById('closeLocationModalCross').addEventListener('click', () => {
+                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+            });
+            document.getElementById('retrackLocationBtn').addEventListener('click', () => {
+                document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+                startRealtimeTracking();
+            });
+            document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationAndExit);
+            document.getElementById('dismissErrorBtn').addEventListener('click', () => {
+                document.getElementById('errorModalOverlay').style.display = 'none';
+            });
+        });
+
+        function initLeafletMap() {
+            leafletMap = L.map('rentalMap', {
+                attributionControl: false,
+                dragging: true,
+                touchZoom: true,
+                doubleClickZoom: false,
+                scrollWheelZoom: true,
+                boxZoom: false
+            }).setView([9.0034, 38.7881], 14);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd'
+            }).addTo(leafletMap);
+
+            userMarker = L.marker([9.0034, 38.7881], { draggable: false }).addTo(leafletMap);
+        }
+
+        function setRentalPostLocation(lat, lng, title) {
+            rentalLat = lat;
+            rentalLng = lng;
+
+            const rentalIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            if (rentalMarker) leafletMap.removeLayer(rentalMarker);
+
+            rentalMarker = L.marker([rentalLat, rentalLng], { icon: rentalIcon }).addTo(leafletMap);
+            rentalMarker.bindPopup(`<b>${title}</b><br>Saved Post Location`).openPopup();
+            
+            leafletMap.setView([rentalLat, rentalLng], 15);
+        }
+
+        async function fetchRentalDataFromFirebase(id) {
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `posts/${id}`));
+                if (snapshot.exists()) {
+                    const post = snapshot.val();
+                    if (post.location && post.location.latitude && post.location.longitude) {
+                        setRentalPostLocation(post.location.latitude, post.location.longitude, post.title || 'Rental Item');
+                    }
+                }
+            } catch (err) {
+                console.error("Firebase read error:", err);
+            } finally {
+                startRealtimeTracking();
+            }
+        }
+
+        function enableSaveButton() {
+            const saveBtn = document.getElementById('saveLocationBtn');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `✓ Done`;
+        }
+
+        function toggleRealtimeTracking() {
+            if (watchPositionId !== null) {
+                stopRealtimeTracking();
+            } else {
+                startRealtimeTracking();
+            }
+        }
+
+        function startRealtimeTracking() {
+            if (!navigator.geolocation) {
+                showErrorModal("GPS Error", "Geolocation is not supported by your device or browser.");
+                return;
+            }
+
+            const gpsBtn = document.getElementById('mapGpsBtn');
+            gpsBtn.classList.add('tracking-active');
+
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+            }
+
+            const geoOptions = {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 1000
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => processGpsSuccess(pos),
+                (err) => {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => processGpsSuccess(pos),
+                        (err2) => handleGpsError(err2),
+                        { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
+                    );
+                },
+                geoOptions
+            );
+
+            watchPositionId = navigator.geolocation.watchPosition(
+                (pos) => processGpsSuccess(pos),
+                (err) => console.warn("Watch position update warning:", err),
+                geoOptions
+            );
+        }
+
+        function processGpsSuccess(pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy;
+
+            currentTrackedLat = lat;
+            currentTrackedLng = lng;
+            currentTrackedAccuracy = accuracy;
+            isLocationTracked = true;
+
+            if (leafletMap && userMarker) {
+                userMarker.setLatLng([lat, lng]);
+            }
+
+            if (rentalLat && rentalLng) {
+                calculateAndDrawRoadRoute(lat, lng, rentalLat, rentalLng);
+            } else if (leafletMap) {
+                leafletMap.setView([lat, lng], 17);
+            }
+
+            enableSaveButton();
+            reverseGeocodeOSM(lat, lng);
+        }
+
+        function calculateAndDrawRoadRoute(userLat, userLng, destLat, destLng) {
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${destLng},${destLat}?overview=full&geometries=geojson`;
+
+            fetch(osrmUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.routes && data.routes.length > 0) {
+                        const route = data.routes[0];
+                        const distanceInKm = (route.distance / 1000).toFixed(2);
+                        
+                        // Bold distance string representation
+                        currentCalculatedDistance = `<strong>${distanceInKm} km</strong>`;
+
+                        document.getElementById('roadDistanceVal').innerHTML = currentCalculatedDistance;
+                        document.getElementById('distanceBanner').style.display = 'flex';
+
+                        if (routePolyline) {
+                            leafletMap.removeLayer(routePolyline);
+                        }
+
+                        const routeCoordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        routePolyline = L.polyline(routeCoordinates, { color: '#38BDF8', weight: 5, opacity: 0.9 }).addTo(leafletMap);
+
+                        const bounds = L.latLngBounds([
+                            [userLat, userLng],
+                            [destLat, destLng]
+                        ]);
+                        leafletMap.fitBounds(bounds, { padding: [60, 60] });
+                    }
+                })
+                .catch(err => console.error("OSRM Route Error:", err));
+        }
+
+        function handleGpsError(err) {
+            stopRealtimeTracking();
+            if (err.code === 1) {
+                showErrorModal("Permission Blocked", "Location permission was denied. Please enable location access in settings.");
+            } else if (err.code === 2) {
+                showErrorModal("GPS Signal Unavailable", "Unable to acquire a valid GPS fix.");
+            } else {
+                showErrorModal("GPS Connection Timeout", "Real-time location request timed out.");
+            }
+        }
+
+        function stopRealtimeTracking() {
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+            document.getElementById('mapGpsBtn').classList.remove('tracking-active');
+        }
+
+        function promptLocationConfirmation() {
+            if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
+                showErrorModal("Acquiring GPS Signal", "Please wait while real-time GPS locks onto your current location.");
+                return;
+            }
+
+            const modalBody = document.getElementById('locationConfirmBody');
+            const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Live Sensor Fix";
+            const city = currentAddressInfo?.city || 'Addis Ababa';
+            const country = currentAddressInfo?.country || 'Ethiopia';
+            const region = currentAddressInfo?.region || 'Addis Ababa';
+            const distanceText = currentCalculatedDistance || 'N/A';
+
+            modalBody.innerHTML = `
+                <div class="preview-section">
+                    <div class="preview-section-title">ROAD DISTANCE TO RENTAL POST</div>
+                    <div style="font-size:14px; color:var(--primary-dark);">Distance: ${distanceText}</div>
+                </div>
+                <div class="preview-section">
+                    <div class="preview-section-title">REAL-TIME GPS COORDINATES</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Accuracy: <strong>${accuracyText}</strong></div>
+                </div>
+                <div class="preview-section">
+                    <div class="preview-section-title">DETECTED ADDRESS</div>
+                    <div style="font-size:13px; font-weight:700; color:var(--primary-dark);">${city}, ${region}</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Country: ${country}</div>
+                </div>
+            `;
+
+            document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
+        }
+
+        async function saveLocationAndExit() {
+            document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+            stopRealtimeTracking();
+
+            const locationData = {
+                lat: currentTrackedLat,
+                lng: currentTrackedLng,
+                address: currentAddressInfo || {}
+            };
+
+            sessionStorage.setItem('selectedGpsLocation', JSON.stringify(locationData));
+
+            if (postId) {
+                try {
+                    const postLocationRef = ref(db, `posts/${postId}/location`);
+                    const postLocationDetailsRef = ref(db, `posts/${postId}/locationDetails`);
+
+                    await update(postLocationRef, {
+                        latitude: currentTrackedLat,
+                        longitude: currentTrackedLng
+                    });
+
+                    if (currentAddressInfo) {
+                        await update(postLocationDetailsRef, {
+                            country: currentAddressInfo.country || "Ethiopia",
+                            region: currentAddressInfo.region || "",
+                            zone: currentAddressInfo.zone || "",
+                            city: currentAddressInfo.city || "",
+                            subcity: currentAddressInfo.subcity || "",
+                            uniqueName: `${currentAddressInfo.city || ''}-${currentAddressInfo.subcity || ''}`
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error updating database location:", err);
+                }
+            }
+
+            window.location.href = "rental.html";
+        }
+
+        function reverseGeocodeOSM(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const addr = data.address;
+                        currentAddressInfo = {
+                            country: addr.country || "Ethiopia",
+                            region: addr.state || addr.region || addr.province || "Addis Ababa",
+                            zone: addr.county || addr.state_district || addr.zone || "Bole",
+                            city: addr.city || addr.town || addr.village || "Addis Ababa",
+                            subcity: addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || ""
+                        };
+                    }
+                })
+                .catch(err => console.error("Geocoding failed:", err));
+        }
+
+        function showErrorModal(title, message) {
+            document.getElementById('errorModalTitle').innerText = title;
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModalOverlay').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
