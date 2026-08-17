@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Post Rental Item (Part 2 - Contact)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="news.css">
+
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+            --danger-bg: #FEF2F2;
+            --danger-border: #FCA5A5;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+
+        .header-back-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            border-radius: 8px;
+        }
+
+        .header-back-btn:active { background: #F1F5F9; }
+
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 2;
+            background: #F1F5F9;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .step-node.active {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+        }
+
+        .form-step-page { display: none; }
+        .form-step-page.active { display: block; }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #F8FAFC;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-dark);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+        }
+
+        .leaflet-control-container .leaflet-control-attribution { display: none !important; }
+
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+
+        .btn-prev, .submit-post-btn {
+            flex: 1;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
+        .submit-post-btn { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+        .submit-post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 10000000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+        .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); font-weight: 700; }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #F8FAFC;
+        }
+
+        .modal-footer-btns { display: flex; gap: 10px; width: 100%; }
+
+        .modal-btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .progress-container {
+            display: none;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .progress-text-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563EB, #0F172A);
+            transition: width 0.2s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .preview-section {
+            background: #F8FAFC;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .preview-map-box {
+            width: 100%;
+            height: 160px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .error-modal-card {
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid var(--danger-border);
+        }
+
+        .error-badge-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 8px auto 0 auto;
+        }
+
+        .error-badge-icon svg { width: 28px; height: 28px; stroke: currentColor; }
+
+        .error-modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-top: 8px;
+        }
+
+        .error-modal-msg {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .btn-error-dismiss {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--danger-color);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <button type="button" class="header-back-btn" id="globalHeaderBackBtn" title="Back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="header-title-text">Delala - Post Rental</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <form class="post-form-card" id="step2Form">
+                <div class="step-indicator">
+                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
+                    <div class="step-node" id="node-3">3</div>
+                    <div class="step-node active" id="node-4">4</div>
+                </div>
+
+                <!-- PAGE 4 -->
+                <div class="form-step-page active" id="stepPage4">
+                    <div class="step-title">Step 4: Contact Information</div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Fill at least 1 contact method. All others are optional.</p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactPhone">Phone Number</label>
+                        <input type="tel" class="form-input" id="contactPhone" placeholder="e.g. +251911223344">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactTelegram">Telegram Username</label>
+                        <input type="text" class="form-input" id="contactTelegram" placeholder="e.g. @username or t.me/username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactWhatsApp">WhatsApp Number</label>
+                        <input type="tel" class="form-input" id="contactWhatsApp" placeholder="e.g. +251911223344">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactEmail">Email Address</label>
+                        <input type="email" class="form-input" id="contactEmail" placeholder="e.g. example@domain.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactInstagram">Instagram Profile</label>
+                        <input type="text" class="form-input" id="contactInstagram" placeholder="e.g. @username or instagram.com/user">
+                    </div>
+
+                    <div class="step-actions">
+                        <button type="button" class="btn-prev" id="btnBack4">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Back
+                        </button>
+                        <button type="submit" class="submit-post-btn" id="submitBtn">Review & Publish</button>
+                    </div>
+                </div>
+            </form>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="rental.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                <span>Rental</span>
+            </a>
+            <a href="selling.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+                <span>Selling</span>
+            </a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="vacancy.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+                <span>Vacancy</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- PREVIEW MODAL -->
+    <div class="modal-overlay" id="previewModalOverlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Review Delala Listing</h3>
+                <button type="button" class="modal-close-btn" id="closeModalCross">✕</button>
+            </div>
+            <div class="modal-body" id="modalPreviewContent"></div>
+            <div class="modal-footer">
+                <div class="progress-container" id="publishProgressBox">
+                    <div class="progress-text-row">
+                        <span id="progressStatusLabel">Publishing Post...</span>
+                        <span id="percentText">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer-btns">
+                    <button type="button" class="modal-btn-cancel" id="cancelModalBtn">Edit Info</button>
+                    <button type="button" class="modal-btn-confirm" id="confirmPublishBtn">Confirm & Publish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ERROR MODAL -->
+    <div class="modal-overlay" id="errorModalOverlay">
+        <div class="modal-card error-modal-card">
+            <div class="modal-body" style="padding: 24px 20px 16px;">
+                <div class="error-badge-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="error-modal-title" id="errorModalTitle">Missing Information</div>
+                <p class="error-modal-msg" id="errorModalMessage">Please review required details and try again.</p>
+            </div>
+            <div class="modal-footer" style="padding: 12px 20px 20px; background: transparent; border: none;">
+                <button type="button" class="btn-error-dismiss" id="dismissErrorBtn">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let previewMapInstance = null;
+        let pendingPayload = null;
+
+        function sanitizePath(value) {
+            return (value || "").toString().replace(/[.#$\[\]]/g, "_");
+        }
+
+        function getAccountDetails() {
+            const phone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
+            let id = currentUser ? currentUser.uid : (localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId'));
+            
+            if (!id && phone) {
+                id = sanitizePath(phone);
+            } else if (!id) {
+                id = "anonymous";
+            } else {
+                id = sanitizePath(id);
+            }
+
+            return { phone, id };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            loadSavedFormData();
+
+            onAuthStateChanged(auth, (user) => { 
+                currentUser = user; 
+                loadSavedFormData();
+            });
+
+            document.getElementById('btnBack4').addEventListener('click', () => {
+                savePart2FormData();
+                window.location.href = 'rentalpost1.html';
+            });
+            
+            document.getElementById('globalHeaderBackBtn').addEventListener('click', () => {
+                savePart2FormData();
+                window.location.href = 'rentalpost1.html';
+            });
+
+            document.getElementById('step2Form').addEventListener('submit', openPreviewModal);
+            document.getElementById('closeModalCross').addEventListener('click', closeModal);
+            document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+            document.getElementById('confirmPublishBtn').addEventListener('click', executeFirebasePublish);
+            document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
+
+            const formInputs = document.querySelectorAll('.form-input');
+            formInputs.forEach(input => {
+                input.addEventListener('input', savePart2FormData);
+            });
+        });
+
+        function savePart2FormData() {
+            const acc = getAccountDetails();
+            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
+            let existingData = {};
+            if (rawPart2) {
+                try { existingData = JSON.parse(rawPart2); } catch(e) {}
+            }
+
+            const formData = {
+                ...existingData,
+                postedByPhone: acc.phone,
+                userId: acc.id,
+                phone: document.getElementById('contactPhone').value,
+                telegram: document.getElementById('contactTelegram').value,
+                whatsapp: document.getElementById('contactWhatsApp').value,
+                email: document.getElementById('contactEmail').value,
+                instagram: document.getElementById('contactInstagram').value
+            };
+            sessionStorage.setItem('delalaDraftPart2', JSON.stringify(formData));
+        }
+
+        function loadSavedFormData() {
+            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
+            if (rawPart2) {
+                try {
+                    const p2 = JSON.parse(rawPart2);
+                    if (p2.phone) document.getElementById('contactPhone').value = p2.phone;
+                    if (p2.telegram) document.getElementById('contactTelegram').value = p2.telegram;
+                    if (p2.whatsapp) document.getElementById('contactWhatsApp').value = p2.whatsapp;
+                    if (p2.email) document.getElementById('contactEmail').value = p2.email;
+                    if (p2.instagram) document.getElementById('contactInstagram').value = p2.instagram;
+                } catch(e) { console.error(e); }
+            } else {
+                const acc = getAccountDetails();
+                if (acc.phone && !document.getElementById('contactPhone').value) {
+                    document.getElementById('contactPhone').value = acc.phone;
+                }
+            }
+        }
+
+        function showErrorModal(title, message) {
+            document.getElementById('errorModalTitle').innerText = title;
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModalOverlay').style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModalOverlay').style.display = 'none';
+        }
+
+        function openPreviewModal(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('contactPhone').value.trim();
+            const telegram = document.getElementById('contactTelegram').value.trim();
+            const whatsapp = document.getElementById('contactWhatsApp').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const instagram = document.getElementById('contactInstagram').value.trim();
+
+            if (!phone && !telegram && !whatsapp && !email && !instagram) {
+                showErrorModal("Contact Required", "Please fill in at least 1 contact method before publishing.");
+                return;
+            }
+
+            const rawDraft = sessionStorage.getItem('delalaDraftPart1');
+            if (!rawDraft) {
+                showErrorModal("Draft Missing", "Part 1 details were not found. Redirecting...");
+                setTimeout(() => { window.location.href = "rentalpost.html"; }, 2000);
+                return;
+            }
+
+            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
+            const part2Data = rawPart2 ? JSON.parse(rawPart2) : {};
+            const rawGps = sessionStorage.getItem('selectedGpsLocation');
+            const gpsData = rawGps ? JSON.parse(rawGps) : {};
+
+            const part1Data = JSON.parse(rawDraft);
+            const acc = getAccountDetails();
+
+            pendingPayload = {
+                rentalType: part1Data.rentalType || "Rental",
+                images: part1Data.images || [],
+                imageUrl: part1Data.imageUrl || "",
+                title: part1Data.title || "",
+                price: part1Data.price || 0,
+                paymentPeriod: part1Data.paymentPeriod || "Month",
+                body: part1Data.body || "",
+                categorySpecificDetails: part1Data.categorySpecificDetails || {},
+                locationDetails: {
+                    country: (gpsData.address && gpsData.address.country) || "",
+                    region: (gpsData.address && gpsData.address.region) || "",
+                    zone: (gpsData.address && gpsData.address.zone) || "",
+                    city: (gpsData.address && gpsData.address.city) || "",
+                    subcity: part2Data.subcity || "",
+                    uniqueName: part2Data.uniqueName || ""
+                },
+                location: {
+                    latitude: Number(gpsData.lat || 0),
+                    longitude: Number(gpsData.lng || 0)
+                },
+                contactInfo: { phone, telegram, whatsapp, email, instagram },
+                views: 0,
+                likes: 0,
+                userId: acc.id,
+                postedByPhone: acc.phone || phone,
+                authorName: currentUser ? (currentUser.displayName || "User") : "Verified User",
+                createdAt: Date.now()
+            };
+
+            renderModalContent(pendingPayload);
+            document.getElementById('previewModalOverlay').style.display = 'flex';
+
+            setTimeout(() => {
+                initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
+            }, 300);
+        }
+
+        function closeModal() {
+            document.getElementById('previewModalOverlay').style.display = 'none';
+            if (previewMapInstance) {
+                previewMapInstance.remove();
+                previewMapInstance = null;
+            }
+        }
+
+        function initPreviewMap(lat, lng) {
+            const mapContainerNode = document.getElementById('userPreviewMap');
+            if (!mapContainerNode) return;
+
+            if (previewMapInstance) {
+                previewMapInstance.remove();
+            }
+
+            previewMapInstance = L.map('userPreviewMap', {
+                attributionControl: false,
+                zoomControl: false,
+                dragging: false,
+                scrollWheelZoom: false,
+                touchZoom: false
+            }).setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19
+            }).addTo(previewMapInstance);
+
+            L.marker([lat, lng]).addTo(previewMapInstance)
+                .bindPopup("Exact Rental Location")
+                .openPopup();
+        }
+
+        function renderModalContent(data) {
+            const container = document.getElementById('modalPreviewContent');
+
+            let imagesHTML = '';
+            if (data.images && data.images.length > 0) {
+                imagesHTML = `
+                <div class="preview-section">
+                    <div class="preview-section-title">ATTACHED IMAGES</div>
+                    <div style="display:flex; gap:8px; overflow-x:auto; padding-top:4px;">
+                        ${data.images.map(img => `<img src="${img}" style="width:64px; height:64px; border-radius:10px; object-fit:cover; border:1px solid var(--border-color);">`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = `
+                ${imagesHTML}
+                <div class="preview-section">
+                    <div class="preview-section-title">LISTING DETAILS</div>
+                    <div style="font-size:14px; font-weight:800; color:var(--primary-dark);">${data.title || 'Untitled Rental'}</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${data.price ? data.price + ' ETB / ' + data.paymentPeriod : 'Price Negotiable'}</div>
+                    <p style="margin:6px 0 0; color:var(--text-muted); font-size:11px; line-height:1.4;">${data.body || 'No description provided.'}</p>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">EXACT MAP LOCATION DETECTED FOR USERS</div>
+                    <div style="font-weight:700; color:var(--primary-dark);">${data.locationDetails.city}, ${data.locationDetails.region} (${data.locationDetails.country})</div>
+                    <div style="color:var(--text-muted); margin-top:2px;">${data.locationDetails.zone} • ${data.locationDetails.subcity}</div>
+                    <div style="color:var(--text-muted); font-style:italic;">Landmark: ${data.locationDetails.uniqueName}</div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Coordinates: ${data.location.latitude}, ${data.location.longitude}</div>
+                    <div id="userPreviewMap" class="preview-map-box"></div>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">CONTACT INFORMATION</div>
+                    ${data.contactInfo.phone ? `<div>📞 Phone: <strong>${data.contactInfo.phone}</strong></div>` : ''}
+                    ${data.contactInfo.telegram ? `<div>✈️ Telegram: <strong>${data.contactInfo.telegram}</strong></div>` : ''}
+                    ${data.contactInfo.whatsapp ? `<div>💬 WhatsApp: <strong>${data.contactInfo.whatsapp}</strong></div>` : ''}
+                    ${data.contactInfo.email ? `<div>✉️ Email: <strong>${data.contactInfo.email}</strong></div>` : ''}
+                    ${data.contactInfo.instagram ? `<div>📷 Instagram: <strong>${data.contactInfo.instagram}</strong></div>` : ''}
+                </div>
+            `;
+        }
+
+        async function executeFirebasePublish() {
+            if (!pendingPayload) return;
+
+            const confirmBtn = document.getElementById('confirmPublishBtn');
+            const cancelBtn = document.getElementById('cancelModalBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressBox = document.getElementById('publishProgressBox');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const percentText = document.getElementById('percentText');
+
+            try {
+                confirmBtn.disabled = true;
+                cancelBtn.disabled = true;
+                submitBtn.disabled = true;
+                progressBox.style.display = 'block';
+
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.floor(Math.random() * 12) + 5;
+                        if (progress > 90) progress = 90;
+                        progressBarFill.style.width = progress + '%';
+                        percentText.innerText = progress + '%';
+                    }
+                }, 150);
+
+                const newPostRef = push(ref(db, 'posts'));
+                const newPostKey = newPostRef.key;
+
+                const acc = getAccountDetails();
+                const userAccountId = acc.id;
+
+                const updates = {};
+                updates[`/posts/${newPostKey}`] = { ...pendingPayload, id: newPostKey };
+                
+                if (userAccountId && userAccountId !== "anonymous") {
+                    updates[`/users/${userAccountId}/posts/${newPostKey}`] = { ...pendingPayload, id: newPostKey };
+                }
+
+                await update(ref(db), updates);
+
+                clearInterval(progressInterval);
+                progressBarFill.style.width = '100%';
+                percentText.innerText = '100%';
+
+                sessionStorage.removeItem('delalaDraftPart1');
+                sessionStorage.removeItem('delalaDraftPart2');
+                sessionStorage.removeItem('selectedGpsLocation');
+
+                setTimeout(() => {
+                    window.location.href = "rental.html";
+                }, 600);
+
+            } catch (err) {
+                console.error(err);
+                confirmBtn.disabled = false;
+                cancelBtn.disabled = false;
+                submitBtn.disabled = false;
+                progressBox.style.display = 'none';
+                closeModal();
+                showErrorModal("Publish Failed", "An error occurred while publishing your listing: " + err.message);
+            }
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
