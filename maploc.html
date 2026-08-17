@@ -17,7 +17,7 @@
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --primary-dark: #0F172A;
             --primary-accent: #2563EB;
-            --bg-body: #F8FAFC;
+            --bg-body: #FFFFFF;
             --card-bg: #FFFFFF;
             --border-color: #E2E8F0;
             --text-main: #0F172A;
@@ -30,7 +30,7 @@
         * { font-family: var(--font-main); box-sizing: border-box; }
         body {
             font-family: var(--font-main);
-            background-color: #000000;
+            background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
             padding: 0;
@@ -44,7 +44,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
-            background: #000;
+            background: #FFFFFF;
         }
 
         #rentalMap { 
@@ -73,7 +73,7 @@
             justify-content: center;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             text-decoration: none;
         }
 
@@ -84,12 +84,12 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.92);
+            background: rgba(15, 23, 42, 0.90);
             color: #FFFFFF;
             padding: 10px 18px;
             border-radius: 30px;
             font-size: 13px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(8px);
             display: none;
@@ -111,28 +111,28 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: #1E293B;
-            color: #38BDF8;
-            border: 2px solid #38BDF8;
+            background: #FFFFFF;
+            color: #2563EB;
+            border: 2px solid #2563EB;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .map-gps-btn.tracking-active {
-            background: #0284C7;
+            background: #2563EB;
             color: #FFFFFF;
-            border-color: #38BDF8;
+            border-color: #2563EB;
             animation: pulseGps 1.5s infinite;
         }
 
         @keyframes pulseGps {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
-            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
 
         .map-gps-btn:active { transform: scale(0.92); }
@@ -142,10 +142,10 @@
         .user-location-dot {
             width: 18px;
             height: 18px;
-            background-color: #38BDF8;
+            background-color: #2563EB;
             border: 3px solid #FFFFFF;
             border-radius: 50%;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.6);
         }
 
         .modal-overlay {
@@ -155,7 +155,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(4px);
             z-index: 10000;
             align-items: center;
@@ -171,7 +171,7 @@
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -246,7 +246,7 @@
         </div>
 
         <div class="top-right-controls">
-            <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rental.html'" title="Close Map">✕</button>
+            <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" title="Close Map">✕</button>
         </div>
 
         <div id="rentalMap"></div>
@@ -302,15 +302,33 @@
         let rentalLat = null;
         let rentalLng = null;
         let postId = null;
+        let itemPath = null;
         let postTitle = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            postId = urlParams.get('postId');
+            
+            // Standardize item ID and collection path parsing
+            postId = urlParams.get('id') || urlParams.get('postId');
+            itemPath = urlParams.get('path') || 'posts';
             
             let queryLat = parseFloat(urlParams.get('lat'));
             let queryLng = parseFloat(urlParams.get('lng'));
             postTitle = urlParams.get('title') || 'Rental Post';
+
+            // Configure close button back-navigation URL dynamically
+            const closeBtn = document.getElementById('closeMapFullscreenBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    if (postId) {
+                        window.location.href = `rentalfull.html?id=${encodeURIComponent(postId)}&path=${encodeURIComponent(itemPath)}`;
+                    } else if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = 'rental.html';
+                    }
+                });
+            }
 
             initMapLibreMap();
             
@@ -318,7 +336,7 @@
                 setRentalPostLocation(queryLat, queryLng, postTitle);
                 startRealtimeTracking();
             } else if (postId) {
-                fetchRentalDataFromFirebase(postId);
+                fetchRentalDataFromFirebase(postId, itemPath);
             } else {
                 startRealtimeTracking();
             }
@@ -330,16 +348,14 @@
         });
 
         function initMapLibreMap() {
-            // Free Dark Vector Tiles from CartoDB
             map = new maplibregl.Map({
                 container: 'rentalMap',
-                style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-                center: [38.7881, 9.0034], // [lng, lat]
+                style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+                center: [38.7881, 9.0034],
                 zoom: 14,
                 attributionControl: false
             });
 
-            // Create custom HTML dot element for user position
             const userDot = document.createElement('div');
             userDot.className = 'user-location-dot';
 
@@ -366,14 +382,24 @@
             map.flyTo({ center: [rentalLng, rentalLat], zoom: 15 });
         }
 
-        async function fetchRentalDataFromFirebase(id) {
+        async function fetchRentalDataFromFirebase(id, path) {
             try {
                 const dbRef = ref(db);
-                const snapshot = await get(child(dbRef, `posts/${id}`));
+                let targetPath = path || 'posts';
+                let snapshot = await get(child(dbRef, `${targetPath}/${id}`));
+
+                // Fallback check
+                if (!snapshot.exists()) {
+                    targetPath = targetPath === 'posts' ? 'delalaListings' : 'posts';
+                    snapshot = await get(child(dbRef, `${targetPath}/${id}`));
+                }
+
                 if (snapshot.exists()) {
                     const post = snapshot.val();
-                    if (post.location && post.location.latitude && post.location.longitude) {
-                        setRentalPostLocation(post.location.latitude, post.location.longitude, post.title || 'Rental Item');
+                    let lat = post.location?.latitude || post.latitude;
+                    let lng = post.location?.longitude || post.longitude;
+                    if (lat && lng) {
+                        setRentalPostLocation(lat, lng, post.title || 'Rental Item');
                     }
                 }
             } catch (err) {
@@ -480,7 +506,7 @@
                                     'line-cap': 'round'
                                 },
                                 'paint': {
-                                    'line-color': '#38BDF8',
+                                    'line-color': '#2563EB',
                                     'line-width': 5,
                                     'line-opacity': 0.9
                                 }

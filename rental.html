@@ -225,16 +225,6 @@
             </div>
         </div>
 
-        <div class="full-news-modal-overlay" id="fullNewsModalOverlay">
-            <div class="news-reader-header">
-                <h2 style="font-size: 15px; font-weight: 800;">Complete Rental Information</h2>
-                <button class="close-reader-btn" id="closeNewsReaderBtn" aria-label="Close Reader">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <div class="news-reader-content" id="fullNewsReaderBody"></div>
-        </div>
-
         <div class="search-modal-overlay" id="searchModalOverlay">
             <div class="search-box-header">
                 <div class="search-input-wrapper">
@@ -333,18 +323,17 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        const BATCH_LIMIT = 15;
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
         let hasMoreItems = true;
-        let loadedCount = 0;
         
         let localCachedBroadcasts = [];
         let cardClockIntervalId = null;
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             setupSearchEngineControls();
-            setupNewsReaderModalControls();
             setupInfiniteScrollObserver();
 
             const closeBtn = document.getElementById('closePopupBtn');
@@ -355,12 +344,7 @@
             }
             
             initiateLiveInterfaceClocks();
-
-            // Load initial post and immediately pre-fetch the second item
-            await fetchSingleNextItem();
-            if (hasMoreItems) {
-                fetchSingleNextItem();
-            }
+            fetchItemsBatch();
         });
 
         function initiateLiveInterfaceClocks() {
@@ -425,7 +409,7 @@
             return list;
         }
 
-        async function fetchSingleNextItem() {
+        async function fetchItemsBatch() {
             if (isLoading || !hasMoreItems) return;
             isLoading = true;
 
@@ -433,63 +417,45 @@
             if (triggerEl) triggerEl.innerText = `⏳ Loading...`;
 
             const nodePaths = ['posts', 'delalaListings'];
-            let validRentalItem = null;
 
             try {
-                while (!validRentalItem && hasMoreItems) {
-                    let fetchedListings = [];
+                const fetchPromises = nodePaths.map(async (nodePath) => {
+                    const baseRef = ref(db, nodePath);
+                    let dbQuery;
 
-                    for (const nodePath of nodePaths) {
-                        let dbQuery;
-                        const baseRef = ref(db, nodePath);
+                    if (lastLoadedTimestamp !== null) {
+                        dbQuery = query(
+                            baseRef,
+                            orderByChild('createdAt'),
+                            endBefore(lastLoadedTimestamp, lastLoadedKey),
+                            limitToLast(BATCH_LIMIT)
+                        );
+                    } else {
+                        dbQuery = query(
+                            baseRef,
+                            orderByChild('createdAt'),
+                            limitToLast(BATCH_LIMIT)
+                        );
+                    }
 
-                        if (lastLoadedTimestamp !== null) {
-                            dbQuery = query(
-                                baseRef,
-                                orderByChild('createdAt'),
-                                endBefore(lastLoadedTimestamp, lastLoadedKey),
-                                limitToLast(5)
-                            );
-                        } else {
-                            dbQuery = query(
-                                baseRef,
-                                orderByChild('createdAt'),
-                                limitToLast(5)
-                            );
-                        }
-
-                        const snapshot = await get(dbQuery);
-                        if (snapshot.exists()) {
-                            snapshot.forEach((childSnap) => {
-                                fetchedListings.push({
-                                    id: childSnap.key,
-                                    _dbPath: nodePath,
-                                    ...childSnap.val()
-                                });
+                    const snapshot = await get(dbQuery);
+                    const results = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnap) => {
+                            results.push({
+                                id: childSnap.key,
+                                _dbPath: nodePath,
+                                ...childSnap.val()
                             });
-                        }
+                        });
                     }
+                    return results;
+                });
 
-                    if (fetchedListings.length === 0) {
-                        hasMoreItems = false;
-                        break;
-                    }
+                const rawResults = await Promise.all(fetchPromises);
+                const fetchedListings = rawResults.flat();
 
-                    // Sort descending by timestamp
-                    fetchedListings.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
-
-                    for (const rawItem of fetchedListings) {
-                        lastLoadedTimestamp = rawItem.createdAt || rawItem.timestamp || 0;
-                        lastLoadedKey = rawItem.id;
-
-                        if (isRentalCategory(rawItem)) {
-                            validRentalItem = rawItem;
-                            break;
-                        }
-                    }
-                }
-
-                if (!validRentalItem) {
+                if (fetchedListings.length === 0) {
                     hasMoreItems = false;
                     if (triggerEl) {
                         triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
@@ -497,18 +463,38 @@
                     if (localCachedBroadcasts.length === 0) {
                         renderEmptyState();
                     }
-                    isLoading = false;
                     return;
                 }
 
-                loadedCount++;
-                localCachedBroadcasts.push(validRentalItem);
-                appendSingleItemToUI(validRentalItem);
+                fetchedListings.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
 
-                if (triggerEl) triggerEl.innerText = "⏳ Loading next item...";
+                const validItems = [];
+                for (const rawItem of fetchedListings) {
+                    const currentTS = rawItem.createdAt || rawItem.timestamp || 0;
+                    if (lastLoadedTimestamp === null || currentTS < lastLoadedTimestamp) {
+                        lastLoadedTimestamp = currentTS;
+                        lastLoadedKey = rawItem.id;
+                    }
+
+                    if (isRentalCategory(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
+                        validItems.push(rawItem);
+                    }
+                }
+
+                if (validItems.length > 0) {
+                    localCachedBroadcasts.push(...validItems);
+                    appendBatchToUI(validItems);
+                } else if (hasMoreItems) {
+                    isLoading = false;
+                    return fetchItemsBatch();
+                }
+
+                if (triggerEl) {
+                    triggerEl.innerText = hasMoreItems ? "⏳ Scroll for more..." : "All items loaded.";
+                }
 
             } catch (error) {
-                console.error("Error loading post:", error);
+                console.error("Error loading posts:", error);
             } finally {
                 isLoading = false;
             }
@@ -520,9 +506,9 @@
 
             const observer = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && !isLoading && hasMoreItems) {
-                    fetchSingleNextItem();
+                    fetchItemsBatch();
                 }
-            }, { rootMargin: '300px', threshold: 0.1 });
+            }, { rootMargin: '200px', threshold: 0.1 });
 
             observer.observe(triggerEl);
         }
@@ -540,14 +526,18 @@
             `;
         }
 
-        function appendSingleItemToUI(item) {
+        function appendBatchToUI(items) {
             const container = document.getElementById('broadcastsContainer');
             if (!container) return;
 
-            const card = document.createElement('article');
-            card.className = "featured-broadcast-card";
-            card.innerHTML = buildSingleNewsCardHTML(item);
-            container.appendChild(card);
+            const fragment = document.createDocumentFragment();
+            items.forEach(item => {
+                const card = document.createElement('article');
+                card.className = "featured-broadcast-card";
+                card.innerHTML = buildSingleNewsCardHTML(item);
+                fragment.appendChild(card);
+            });
+            container.appendChild(fragment);
         }
 
         function buildSingleNewsCardHTML(item) {
@@ -570,7 +560,7 @@
 
             let imageHTML = "";
             if (allImages.length > 0) {
-                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}')"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
+                imageHTML = `<div class="broadcast-image-frame" onclick="openFullNewsReader('${item.id}', '${item._dbPath}')"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
             }
 
             return `
@@ -582,7 +572,7 @@
                     <span class="timestamp-log-text" data-timestamp="${numericalTime}">${initialFormattedClock}</span>
                 </div>
                 ${imageHTML}
-                <div class="clickable-news-content" onclick="openFullNewsReader('${item.id}')">
+                <div class="clickable-news-content" onclick="openFullNewsReader('${item.id}', '${item._dbPath}')">
                     <h2 class="broadcast-title">${headline}</h2>
                     ${priceTag}
                     <p class="broadcast-body-text">${previewContent}</p>
@@ -590,173 +580,9 @@
             `;
         }
 
-        window.openFullNewsReader = function(itemId) {
-            const item = localCachedBroadcasts.find(n => n.id === itemId);
-            if (!item) return;
-
-            const readerOverlay = document.getElementById('fullNewsModalOverlay');
-            const readerBody = document.getElementById('fullNewsReaderBody');
-
-            if (!readerOverlay || !readerBody) return;
-
-            const headline = item.title || "Rental Item";
-            const fullContent = item.body || item.content || item.description || "No additional description provided.";
-            const category = item.rentalType || item.category || "Rental";
-            const allImages = extractAllImages(item);
-            const author = item.authorName || item.userId || "Verified User";
-            
-            let locationParts = [];
-            if (item.locationDetails) {
-                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
-                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
-                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
-                if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
-                if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
-                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
-            }
-            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
-
-            let lat = item.location?.latitude || item.latitude || null;
-            let lng = item.location?.longitude || item.longitude || null;
-            let geoCoordinates = (lat && lng) ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : "N/A";
-
-            const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
-            
-            let mapPreviewHTML = `
-                <div style="margin-top: 14px;">
-                    <div class="category-specs-title">Location Preview</div>
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 12px; color: #E2E8F0; font-weight: 600;">📍 ${fullLocationStr}</span>
-                            <span style="font-size: 11px; color: #38BDF8; font-weight: 700;">${geoCoordinates}</span>
-                        </div>
-                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; text-align: center; margin-top: 4px;">
-                            🗺️ Open Location Map
-                        </a>
-                    </div>
-                </div>
-            `;
-
-            let phone = "", telegram = "", whatsapp = "", email = "", instagram = "";
-            if (item.contactInfo) {
-                phone = item.contactInfo.phone || "";
-                telegram = item.contactInfo.telegram || "";
-                whatsapp = item.contactInfo.whatsapp || "";
-                email = item.contactInfo.email || "";
-                instagram = item.contactInfo.instagram || "";
-            }
-
-            let numericalTime = item.createdAt || item.timestamp || Date.now();
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
-
-            let imageGalleryHTML = "";
-            if (allImages.length > 0) {
-                imageGalleryHTML = `<div class="multi-image-gallery">`;
-                allImages.forEach((imgUrl, idx) => {
-                    imageGalleryHTML += `
-                        <div class="gallery-img-container">
-                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
-                            <span style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">${idx + 1}/${allImages.length}</span>
-                        </div>
-                    `;
-                });
-                imageGalleryHTML += `</div>`;
-            }
-
-            let categorySpecsHTML = "";
-            if (item.categorySpecificDetails && typeof item.categorySpecificDetails === 'object') {
-                categorySpecsHTML = `
-                    <div class="category-specs-container">
-                        <div class="category-specs-title">Specific Property Specifications</div>
-                        <div class="post-details-grid" style="margin:0; background:none; padding:0; border:none;">
-                `;
-                Object.keys(item.categorySpecificDetails).forEach(key => {
-                    const val = item.categorySpecificDetails[key];
-                    categorySpecsHTML += `
-                        <div class="post-detail-item">
-                            <span class="post-detail-label">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                            <span class="post-detail-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
-                        </div>
-                    `;
-                });
-                categorySpecsHTML += `</div></div>`;
-            }
-
-            let contactButtons = "";
-            if (phone || telegram || whatsapp || email || instagram) {
-                contactButtons = `<div class="contact-links-container">`;
-                if (phone) contactButtons += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
-                if (telegram) contactButtons += `<a href="https://t.me/${telegram.replace('@','')}" target="_blank" class="contact-btn contact-btn-telegram">✈️ Telegram (${telegram})</a>`;
-                if (whatsapp) contactButtons += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="contact-btn contact-btn-whatsapp">💬 WhatsApp</a>`;
-                if (email) contactButtons += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner</a>`;
-                if (instagram) contactButtons += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
-                contactButtons += `</div>`;
-            }
-
-            readerBody.innerHTML = `
-                <div class="reader-meta-bar">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="spotlight-pill">${category}</span>
-                        <span style="font-size:10px; color:#94A3B8;">ID: ${item.id}</span>
-                    </div>
-                    <span class="timestamp-log-text">${initialFormattedClock}</span>
-                </div>
-
-                <h1 class="reader-title" style="margin-top:8px;">${headline}</h1>
-
-                ${imageGalleryHTML}
-
-                <div class="post-details-grid">
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Price Rate</span>
-                        <span class="post-detail-value" style="color:#10B981;">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Payment Term</span>
-                        <span class="post-detail-value">${item.paymentPeriod || 'N/A'}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Full Location</span>
-                        <span class="post-detail-value">${fullLocationStr}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">GPS Coordinates</span>
-                        <span class="post-detail-value">${geoCoordinates}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Posted By</span>
-                        <span class="post-detail-value">${author}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Views / Likes</span>
-                        <span class="post-detail-value">👁️ ${item.views || 0} | ❤️ ${item.likes || 0}</span>
-                    </div>
-                </div>
-
-                ${categorySpecsHTML}
-                ${mapPreviewHTML}
-
-                <div style="margin-top:14px;">
-                    <div class="category-specs-title">Full Description</div>
-                    <div class="reader-full-body" style="font-size:13px; line-height:1.6; color:#E2E8F0;">${fullContent}</div>
-                </div>
-
-                ${contactButtons}
-            `;
-
-            readerOverlay.classList.add('active-reader');
+        window.openFullNewsReader = function(itemId, path) {
+            window.location.href = `rentalfull.html?id=${encodeURIComponent(itemId)}&path=${encodeURIComponent(path || 'posts')}`;
         };
-
-        function setupNewsReaderModalControls() {
-            const closeBtn = document.getElementById('closeNewsReaderBtn');
-            const readerOverlay = document.getElementById('fullNewsModalOverlay');
-
-            if (closeBtn && readerOverlay) {
-                closeBtn.addEventListener('click', () => {
-                    readerOverlay.classList.remove('active-reader');
-                });
-            }
-        }
 
         function setupSearchEngineControls() {
             const openBtn = document.getElementById('openSearchBtn');
@@ -823,12 +649,14 @@
             }
 
             resultsArea.innerHTML = '';
+            const fragment = document.createDocumentFragment();
             matchedNews.forEach((item) => {
                 const card = document.createElement('article');
                 card.className = "featured-broadcast-card";
                 card.innerHTML = buildSingleNewsCardHTML(item);
-                resultsArea.appendChild(card);
+                fragment.appendChild(card);
             });
+            resultsArea.appendChild(fragment);
         }
     </script>
 </body>

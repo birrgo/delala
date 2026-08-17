@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Rental Article Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+    <style>
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #E2E8F0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+
+        .nav-item .icon-bg svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn:active { transform: scale(0.92); }
+
+        .post-fab-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+            stroke-width: 2.8;
+        }
+
+        .post-fab-label {
+            margin-top: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .post-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-detail-label {
+            font-size: 10px;
+            color: #94A3B8;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .post-detail-value {
+            font-weight: 600;
+            color: #F8FAFC;
+            word-break: break-word;
+        }
+
+        .multi-image-gallery {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 8px;
+            margin: 12px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .multi-image-gallery::-webkit-scrollbar { height: 4px; }
+
+        .multi-image-gallery::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .gallery-img-container {
+            flex: 0 0 85%;
+            scroll-snap-align: center;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 190px;
+            background: #0f172a;
+            position: relative;
+        }
+
+        .gallery-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .category-specs-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 12px 0;
+        }
+
+        .category-specs-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #38BDF8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .contact-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .contact-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .contact-btn-phone { background: #10B981; color: #ffffff; }
+        .contact-btn-telegram { background: #0088cc; color: #ffffff; }
+        .contact-btn-whatsapp { background: #25D366; color: #ffffff; }
+        .contact-btn-email { background: #EF4444; color: #ffffff; }
+        .contact-btn-instagram { background: #E1306C; color: #ffffff; }
+
+        .full-article-view {
+            padding: 16px;
+            padding-bottom: 90px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
+            <defs>
+                <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#081B38"/>
+                    <stop offset="1" stop-color="#0F2C59"/>
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <header class="nav-header">
+            <div class="header-left-group" style="display:flex; align-items:center; gap:10px;">
+                <a href="rental.html" style="color:#ffffff; text-decoration:none; display:flex; align-items:center;">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </a>
+                <h1 class="header-title-text" style="font-size: 15px; font-weight: 800;">Complete Rental Information</h1>
+            </div>
+            
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content full-article-view">
+            <div id="fullNewsReaderBody">
+                <div style="text-align:center; padding:40px 20px; color:#38BDF8; font-weight:700;">⏳ Loading Item Details...</div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <span>Rental</span>
+            </a>
+
+            <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <span>Selling</span>
+            </a>
+
+            <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+
+            <a id="nav-vacancy" href="vacancy.html" class="nav-item" data-filter="Job Vacancy">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </div>
+                <span>Vacancy</span>
+            </a>
+
+            <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let cardClockIntervalId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initiateLiveInterfaceClocks();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const itemId = urlParams.get('id');
+            const itemPath = urlParams.get('path') || 'posts';
+
+            if (itemId) {
+                await loadItemDetails(itemId, itemPath);
+            } else {
+                renderErrorState("Invalid item ID parameter.");
+            }
+        });
+
+        function initiateLiveInterfaceClocks() {
+            const cornerClockNode = document.getElementById('topCornerLiveClock');
+            
+            if (cardClockIntervalId) clearInterval(cardClockIntervalId);
+            cardClockIntervalId = setInterval(() => {
+                const now = new Date();
+                if (cornerClockNode) {
+                    cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                }
+            }, 1000);
+        }
+
+        function formatExactTimestampWithSeconds(baseEpoch) {
+            const dateObj = new Date(baseEpoch);
+            if (isNaN(dateObj.getTime())) return "Recent";
+            return dateObj.toLocaleDateString(undefined, { 
+                month: 'short', day: 'numeric', year: 'numeric' 
+            }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        }
+
+        function extractAllImages(item) {
+            let list = [];
+            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
+                list.push(item.imageUrl.trim());
+            }
+            if (item.images) {
+                if (Array.isArray(item.images)) {
+                    item.images.forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                } else if (typeof item.images === 'object') {
+                    Object.values(item.images).forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                }
+            }
+            return list;
+        }
+
+        async function loadItemDetails(itemId, dbPath) {
+            const readerBody = document.getElementById('fullNewsReaderBody');
+            try {
+                let actualPath = dbPath;
+                let snapshot = await get(ref(db, `${actualPath}/${itemId}`));
+                
+                // Fallback check in second collection if not found in given path
+                if (!snapshot.exists()) {
+                    actualPath = dbPath === 'posts' ? 'delalaListings' : 'posts';
+                    snapshot = await get(ref(db, `${actualPath}/${itemId}`));
+                }
+
+                if (!snapshot.exists()) {
+                    renderErrorState("Rental item not found.");
+                    return;
+                }
+
+                const item = { id: itemId, ...snapshot.val() };
+                renderFullItemHTML(item, actualPath);
+
+            } catch (err) {
+                console.error("Error loading item full view:", err);
+                renderErrorState("Error fetching listing details.");
+            }
+        }
+
+        function renderErrorState(msg) {
+            const readerBody = document.getElementById('fullNewsReaderBody');
+            if (readerBody) {
+                readerBody.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:#EF4444; font-weight:700;">
+                        ⚠️ ${msg}
+                    </div>
+                `;
+            }
+        }
+
+        function renderFullItemHTML(item, itemPath) {
+            const readerBody = document.getElementById('fullNewsReaderBody');
+            if (!readerBody) return;
+
+            const headline = item.title || "Rental Item";
+            const fullContent = item.body || item.content || item.description || "No additional description provided.";
+            const category = item.rentalType || item.category || "Rental";
+            const allImages = extractAllImages(item);
+            const author = item.authorName || item.userId || "Verified User";
+            
+            let locationParts = [];
+            if (item.locationDetails) {
+                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
+                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
+                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
+                if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
+                if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
+                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
+            }
+            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
+
+            let lat = item.location?.latitude || item.latitude || null;
+            let lng = item.location?.longitude || item.longitude || null;
+            let geoCoordinates = (lat && lng) ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : "N/A";
+
+            // Pass id and path so maploc.html can return back seamlessly
+            const mapRedirectUrl = `maploc.html?id=${encodeURIComponent(item.id)}&path=${encodeURIComponent(itemPath)}&lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
+            
+            let mapPreviewHTML = `
+                <div style="margin-top: 14px;">
+                    <div class="category-specs-title">Location Preview</div>
+                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 12px; color: #E2E8F0; font-weight: 600;">📍 ${fullLocationStr}</span>
+                            <span style="font-size: 11px; color: #38BDF8; font-weight: 700;">${geoCoordinates}</span>
+                        </div>
+                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; text-align: center; margin-top: 4px;">
+                            🗺️ Open Location Map
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            let phone = "", telegram = "", whatsapp = "", email = "", instagram = "";
+            if (item.contactInfo) {
+                phone = item.contactInfo.phone || "";
+                telegram = item.contactInfo.telegram || "";
+                whatsapp = item.contactInfo.whatsapp || "";
+                email = item.contactInfo.email || "";
+                instagram = item.contactInfo.instagram || "";
+            }
+
+            let numericalTime = item.createdAt || item.timestamp || Date.now();
+            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
+
+            let imageGalleryHTML = "";
+            if (allImages.length > 0) {
+                imageGalleryHTML = `<div class="multi-image-gallery">`;
+                allImages.forEach((imgUrl, idx) => {
+                    imageGalleryHTML += `
+                        <div class="gallery-img-container">
+                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
+                            <span style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">${idx + 1}/${allImages.length}</span>
+                        </div>
+                    `;
+                });
+                imageGalleryHTML += `</div>`;
+            }
+
+            let categorySpecsHTML = "";
+            if (item.categorySpecificDetails && typeof item.categorySpecificDetails === 'object') {
+                categorySpecsHTML = `
+                    <div class="category-specs-container">
+                        <div class="category-specs-title">Specific Property Specifications</div>
+                        <div class="post-details-grid" style="margin:0; background:none; padding:0; border:none;">
+                `;
+                Object.keys(item.categorySpecificDetails).forEach(key => {
+                    const val = item.categorySpecificDetails[key];
+                    categorySpecsHTML += `
+                        <div class="post-detail-item">
+                            <span class="post-detail-label">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span class="post-detail-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
+                        </div>
+                    `;
+                });
+                categorySpecsHTML += `</div></div>`;
+            }
+
+            let contactButtons = "";
+            if (phone || telegram || whatsapp || email || instagram) {
+                contactButtons = `<div class="contact-links-container">`;
+                if (phone) contactButtons += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
+                if (telegram) contactButtons += `<a href="https://t.me/${telegram.replace('@','')}" target="_blank" class="contact-btn contact-btn-telegram">✈️ Telegram (${telegram})</a>`;
+                if (whatsapp) contactButtons += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="contact-btn contact-btn-whatsapp">💬 WhatsApp</a>`;
+                if (email) contactButtons += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner</a>`;
+                if (instagram) contactButtons += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
+                contactButtons += `</div>`;
+            }
+
+            readerBody.innerHTML = `
+                <div class="reader-meta-bar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span class="spotlight-pill">${category}</span>
+                        <span style="font-size:10px; color:#94A3B8;">ID: ${item.id}</span>
+                    </div>
+                    <span class="timestamp-log-text">${initialFormattedClock}</span>
+                </div>
+
+                <h1 class="reader-title" style="margin-top:8px; font-size:18px; color:#FFFFFF; font-weight:800;">${headline}</h1>
+
+                ${imageGalleryHTML}
+
+                <div class="post-details-grid">
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Price Rate</span>
+                        <span class="post-detail-value" style="color:#10B981;">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Payment Term</span>
+                        <span class="post-detail-value">${item.paymentPeriod || 'N/A'}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Full Location</span>
+                        <span class="post-detail-value">${fullLocationStr}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">GPS Coordinates</span>
+                        <span class="post-detail-value">${geoCoordinates}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Posted By</span>
+                        <span class="post-detail-value">${author}</span>
+                    </div>
+                    <div class="post-detail-item">
+                        <span class="post-detail-label">Views / Likes</span>
+                        <span class="post-detail-value">👁️ ${item.views || 0} | ❤️ ${item.likes || 0}</span>
+                    </div>
+                </div>
+
+                ${categorySpecsHTML}
+                ${mapPreviewHTML}
+
+                <div style="margin-top:14px;">
+                    <div class="category-specs-title">Full Description</div>
+                    <div class="reader-full-body" style="font-size:13px; line-height:1.6; color:#E2E8F0;">${fullContent}</div>
+                </div>
+
+                ${contactButtons}
+            `;
+        }
+    </script>
+</body>
+</html>
