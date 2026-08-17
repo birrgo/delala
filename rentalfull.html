@@ -6,9 +6,14 @@
     <title>Hulum - Rental Article Details</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
     <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -61,18 +66,15 @@
             width: 46px;
             height: 46px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1E293B, #334155);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            background: #0F172A;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
             border: none;
             cursor: pointer;
         }
-
-        .post-fab-btn:active { transform: scale(0.92); }
 
         .post-fab-btn svg {
             width: 22px;
@@ -88,59 +90,88 @@
             color: #334155;
         }
 
-        .post-details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin: 12px 0;
-            font-size: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .full-article-view {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 16px 12px 100px 12px;
+            color: #000000;
         }
 
-        .post-detail-item {
+        #fullNewsReaderBody {
+            width: 100%;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        .info-terms-list {
             display: flex;
             flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 14px 0;
+            background: #F8FAFC;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
         }
 
-        .post-detail-label {
-            font-size: 10px;
-            color: #94A3B8;
+        .info-term-item {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .info-term-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-term-label {
+            font-size: 0.72rem;
+            color: #64748B;
             text-transform: uppercase;
             font-weight: 700;
+            letter-spacing: 0.05em;
         }
 
-        .post-detail-value {
-            font-weight: 600;
-            color: #F8FAFC;
+        .info-term-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0F172A;
             word-break: break-word;
+            margin-top: 2px;
         }
 
         .multi-image-gallery {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             padding-bottom: 8px;
-            margin: 12px 0;
+            margin: 14px 0 6px 0;
             -webkit-overflow-scrolling: touch;
         }
 
         .multi-image-gallery::-webkit-scrollbar { height: 4px; }
 
         .multi-image-gallery::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: #CBD5E1;
             border-radius: 4px;
         }
 
         .gallery-img-container {
-            flex: 0 0 85%;
-            scroll-snap-align: center;
-            border-radius: 10px;
+            flex: 0 0 100%;
+            width: 100%;
+            box-sizing: border-box;
+            scroll-snap-align: start;
+            border-radius: 14px;
             overflow: hidden;
-            height: 190px;
+            height: 260px;
             background: #0f172a;
             position: relative;
         }
@@ -149,42 +180,115 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+        }
+
+        .image-action-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0 16px 0;
+            width: 100%;
+            box-sizing: border-box;
+            background: #F8FAFC;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .img-action-btn {
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            color: #0F172A;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .img-action-btn:hover {
+            background: #E2E8F0;
+            transform: scale(1.05);
+        }
+
+        .img-action-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #0F172A;
+            stroke-width: 2.2;
+            fill: none;
         }
 
         .category-specs-container {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 12px 0;
+            width: 100%;
+            box-sizing: border-box;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 14px 0;
         }
 
         .category-specs-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #38BDF8;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748B;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
         }
 
-        .contact-links-container {
+        .reader-full-body {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #1E293B;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-line;
+            background: #F8FAFC;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .contact-trigger-btn {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px;
+            border-radius: 12px;
+            background: #0F172A;
+            border: none;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            font-weight: 700;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             gap: 8px;
-            margin-top: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
         }
 
         .contact-btn {
             width: 100%;
+            box-sizing: border-box;
             justify-content: center;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 0.92rem;
         }
 
         .contact-btn-phone { background: #10B981; color: #ffffff; }
@@ -193,9 +297,87 @@
         .contact-btn-email { background: #EF4444; color: #ffffff; }
         .contact-btn-instagram { background: #E1306C; color: #ffffff; }
 
-        .full-article-view {
-            padding: 16px;
-            padding-bottom: 90px;
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .modal-title {
+            color: #DC2626;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .modal-body {
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .modal-confirm-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0F172A;
+            border: none;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-back-btn {
+            width: 100%;
+            padding: 11px;
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            border-radius: 10px;
+            color: #0F172A;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .back-nav-btn {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -214,10 +396,10 @@
 
         <header class="nav-header">
             <div class="header-left-group" style="display:flex; align-items:center; gap:10px;">
-                <a href="rental.html" style="color:#ffffff; text-decoration:none; display:flex; align-items:center;">
+                <button class="back-nav-btn" id="goBackBtn" aria-label="Go Back">
                     <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </a>
-                <h1 class="header-title-text" style="font-size: 15px; font-weight: 800;">Complete Rental Information</h1>
+                </button>
+                <h1 class="header-title-text" style="font-size: 15px; font-weight: 700;">Rental Details</h1>
             </div>
             
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
@@ -225,7 +407,7 @@
 
         <main class="app-content full-article-view">
             <div id="fullNewsReaderBody">
-                <div style="text-align:center; padding:40px 20px; color:#38BDF8; font-weight:700;">⏳ Loading Item Details...</div>
+                <div style="text-align:center; padding:40px 20px; color:#64748B; font-weight:600;">⏳ Loading Item Details...</div>
             </div>
         </main>
 
@@ -270,6 +452,25 @@
         </nav>
     </div>
 
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modalWarningSection">
+                <div class="modal-title">⚠️ ጥብቅ ማስጠንቀቂያ!</div>
+                <div class="modal-body">
+                    ሕጋዊ ስምምነት ሳይፈረም ምንም ዓይነት ክፍያ እንዳይፈጸም እናስነብባለን። ከማጭበርበር ድርጊቶች ራስዎን ይጠብቁ።
+                </div>
+                <button class="modal-confirm-btn" onclick="showPopupContacts()">Continue to Contacts</button>
+                <button class="modal-back-btn" onclick="closeWarningModal()">Cancel</button>
+            </div>
+            
+            <div id="modalContactSection" style="display: none;">
+                <div class="modal-title" style="color: #0F172A;">📞 Contact Options</div>
+                <div id="popupContactButtonsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;"></div>
+                <button class="modal-back-btn" onclick="showPopupWarning()">← Back to Warning</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -297,12 +498,46 @@
             const itemId = urlParams.get('id');
             const itemPath = urlParams.get('path') || 'posts';
 
+            const backBtn = document.getElementById('goBackBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    if (document.referrer && document.referrer.includes('rental.html')) {
+                        window.history.back();
+                    } else if (itemId) {
+                        window.location.href = `rental.html?returnId=${encodeURIComponent(itemId)}`;
+                    } else {
+                        window.location.href = 'rental.html';
+                    }
+                });
+            }
+
             if (itemId) {
                 await loadItemDetails(itemId, itemPath);
             } else {
                 renderErrorState("Invalid item ID parameter.");
             }
         });
+
+        window.triggerContactPopup = function() {
+            showPopupWarning();
+            const modalNode = document.getElementById('warningModal');
+            if (modalNode) modalNode.style.display = 'flex';
+        };
+
+        window.closeWarningModal = function() {
+            const modalNode = document.getElementById('warningModal');
+            if (modalNode) modalNode.style.display = 'none';
+        };
+
+        window.showPopupContacts = function() {
+            document.getElementById('modalWarningSection').style.display = 'none';
+            document.getElementById('modalContactSection').style.display = 'block';
+        };
+
+        window.showPopupWarning = function() {
+            document.getElementById('modalWarningSection').style.display = 'block';
+            document.getElementById('modalContactSection').style.display = 'none';
+        };
 
         function initiateLiveInterfaceClocks() {
             const cornerClockNode = document.getElementById('topCornerLiveClock');
@@ -320,7 +555,7 @@
 
         function formatExactTimestampWithSeconds(baseEpoch) {
             const dateObj = new Date(baseEpoch);
-            if (isNaN(dateObj.getTime())) return "Recent";
+            if (isNaN(dateObj.getTime())) return "recent";
             return dateObj.toLocaleDateString(undefined, { 
                 month: 'short', day: 'numeric', year: 'numeric' 
             }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
@@ -352,15 +587,12 @@
         }
 
         async function loadItemDetails(itemId, dbPath) {
-            const readerBody = document.getElementById('fullNewsReaderBody');
             try {
-                let actualPath = dbPath;
-                let snapshot = await get(ref(db, `${actualPath}/${itemId}`));
+                let snapshot = await get(ref(db, `${dbPath}/${itemId}`));
                 
-                // Fallback check in second collection if not found in given path
                 if (!snapshot.exists()) {
-                    actualPath = dbPath === 'posts' ? 'delalaListings' : 'posts';
-                    snapshot = await get(ref(db, `${actualPath}/${itemId}`));
+                    const fallbackPath = dbPath === 'posts' ? 'delalaListings' : 'posts';
+                    snapshot = await get(ref(db, `${fallbackPath}/${itemId}`));
                 }
 
                 if (!snapshot.exists()) {
@@ -369,7 +601,7 @@
                 }
 
                 const item = { id: itemId, ...snapshot.val() };
-                renderFullItemHTML(item, actualPath);
+                renderFullItemHTML(item);
 
             } catch (err) {
                 console.error("Error loading item full view:", err);
@@ -388,7 +620,7 @@
             }
         }
 
-        function renderFullItemHTML(item, itemPath) {
+        function renderFullItemHTML(item) {
             const readerBody = document.getElementById('fullNewsReaderBody');
             if (!readerBody) return;
 
@@ -396,7 +628,8 @@
             const fullContent = item.body || item.content || item.description || "No additional description provided.";
             const category = item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
-            const author = item.authorName || item.userId || "Verified User";
+            
+            const postedByUserName = item.authorName || item.postedBy || item.userName || item.name || item.userId || "Verified User";
             
             let locationParts = [];
             if (item.locationDetails) {
@@ -407,25 +640,20 @@
                 if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
                 if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
             }
-            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
+            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : (item.location || 'Not Specified');
 
             let lat = item.location?.latitude || item.latitude || null;
             let lng = item.location?.longitude || item.longitude || null;
-            let geoCoordinates = (lat && lng) ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : "N/A";
 
-            // Pass id and path so maploc.html can return back seamlessly
-            const mapRedirectUrl = `maploc.html?id=${encodeURIComponent(item.id)}&path=${encodeURIComponent(itemPath)}&lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
+            const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
             
             let mapPreviewHTML = `
-                <div style="margin-top: 14px;">
+                <div style="margin-top: 16px; width: 100%; box-sizing: border-box;">
                     <div class="category-specs-title">Location Preview</div>
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 12px; color: #E2E8F0; font-weight: 600;">📍 ${fullLocationStr}</span>
-                            <span style="font-size: 11px; color: #38BDF8; font-weight: 700;">${geoCoordinates}</span>
-                        </div>
-                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; text-align: center; margin-top: 4px;">
-                            🗺️ Open Location Map
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 0.95rem; color: #0F172A; font-weight: 600;">📍 ${fullLocationStr}</span>
+                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 12px; background: #0F172A; color: #FFFFFF; font-size: 0.92rem; font-weight: 700; text-decoration: none; border-radius: 10px; text-align: center; margin-top: 4px;">
+                            Open Location Map
                         </a>
                     </div>
                 </div>
@@ -450,92 +678,123 @@
                     imageGalleryHTML += `
                         <div class="gallery-img-container">
                             <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
-                            <span style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">${idx + 1}/${allImages.length}</span>
+                            <span style="position:absolute; bottom:10px; right:10px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.72rem; padding:4px 8px; border-radius:6px; font-weight:700;">${idx + 1} / ${allImages.length}</span>
                         </div>
                     `;
                 });
                 imageGalleryHTML += `</div>`;
             }
 
+            const firstImg = allImages.length > 0 ? allImages[0] : '#';
+            
+            let imageActionBarHTML = `
+                <div class="image-action-bar">
+                    <button class="img-action-btn" title="View Fullscreen" onclick="if('${firstImg}' !== '#') window.open('${firstImg}', '_blank')">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <button class="img-action-btn" title="Like" onclick="alert('Liked!')">
+                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </button>
+                    <button class="img-action-btn" title="Comment" onclick="alert('Comments opened')">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </button>
+                    <button class="img-action-btn" title="Share" onclick="if(navigator.share){navigator.share({title:'${headline.replace(/'/g, "\\'")}',url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('Link copied!')}">
+                        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    </button>
+                </div>
+            `;
+
             let categorySpecsHTML = "";
             if (item.categorySpecificDetails && typeof item.categorySpecificDetails === 'object') {
                 categorySpecsHTML = `
                     <div class="category-specs-container">
-                        <div class="category-specs-title">Specific Property Specifications</div>
-                        <div class="post-details-grid" style="margin:0; background:none; padding:0; border:none;">
+                        <div class="category-specs-title">Property Specifications</div>
+                        <div class="info-terms-list" style="margin:0; background:none; padding:0; border:none; box-shadow:none;">
                 `;
                 Object.keys(item.categorySpecificDetails).forEach(key => {
                     const val = item.categorySpecificDetails[key];
                     categorySpecsHTML += `
-                        <div class="post-detail-item">
-                            <span class="post-detail-label">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                            <span class="post-detail-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
+                        <div class="info-term-item">
+                            <span class="info-term-label">${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
+                            <span class="info-term-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
                         </div>
                     `;
                 });
                 categorySpecsHTML += `</div></div>`;
             }
 
-            let contactButtons = "";
-            if (phone || telegram || whatsapp || email || instagram) {
-                contactButtons = `<div class="contact-links-container">`;
-                if (phone) contactButtons += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
-                if (telegram) contactButtons += `<a href="https://t.me/${telegram.replace('@','')}" target="_blank" class="contact-btn contact-btn-telegram">✈️ Telegram (${telegram})</a>`;
-                if (whatsapp) contactButtons += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="contact-btn contact-btn-whatsapp">💬 WhatsApp</a>`;
-                if (email) contactButtons += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner</a>`;
-                if (instagram) contactButtons += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
-                contactButtons += `</div>`;
+            let contactButtonsHTML = `
+                <button id="contactTriggerBtn" class="contact-trigger-btn" onclick="triggerContactPopup()">
+                    📞 Contact Us
+                </button>
+            `;
+
+            let popupButtonsContent = "";
+            if (phone) popupButtonsContent += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
+            if (telegram) popupButtonsContent += `<a href="https://t.me/${telegram.replace('@','')}" target="_blank" class="contact-btn contact-btn-telegram">✈️ Telegram (${telegram})</a>`;
+            if (whatsapp) popupButtonsContent += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="contact-btn contact-btn-whatsapp">💬 WhatsApp</a>`;
+            if (email) popupButtonsContent += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner</a>`;
+            if (instagram) popupButtonsContent += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
+            
+            if (!popupButtonsContent) {
+                popupButtonsContent = `<div style="font-size:0.85rem; color:#64748B; padding:10px 0;">No direct contact information provided for this listing.</div>`;
+            }
+
+            const popupContainerList = document.getElementById('popupContactButtonsList');
+            if (popupContainerList) {
+                popupContainerList.innerHTML = popupButtonsContent;
             }
 
             readerBody.innerHTML = `
-                <div class="reader-meta-bar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="spotlight-pill">${category}</span>
-                        <span style="font-size:10px; color:#94A3B8;">ID: ${item.id}</span>
+                <div class="reader-meta-bar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; width:100%;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="spotlight-pill" style="font-size:0.75rem; padding:4px 8px; background:#0F172A; color:#FFF; border-radius:6px; font-weight:700;">${category}</span>
+                        <span style="font-size:0.75rem; color:#64748B;">ID: ${item.id}</span>
                     </div>
-                    <span class="timestamp-log-text">${initialFormattedClock}</span>
+                    <span class="timestamp-log-text" style="font-size:0.75rem; color:#64748B;">${initialFormattedClock}</span>
                 </div>
 
-                <h1 class="reader-title" style="margin-top:8px; font-size:18px; color:#FFFFFF; font-weight:800;">${headline}</h1>
+                <h1 class="reader-title" style="margin-top:6px; font-size:1.3rem; color:#0F172A; font-weight:800; line-height:1.35; width:100%; box-sizing:border-box;">${headline}</h1>
 
                 ${imageGalleryHTML}
+                ${imageActionBarHTML}
 
-                <div class="post-details-grid">
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Price Rate</span>
-                        <span class="post-detail-value" style="color:#10B981;">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
+                <div class="info-terms-list">
+                    <div class="info-term-item">
+                        <span class="info-term-label">Location</span>
+                        <span class="info-term-value">${fullLocationStr}</span>
                     </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Payment Term</span>
-                        <span class="post-detail-value">${item.paymentPeriod || 'N/A'}</span>
+
+                    <div class="info-term-item">
+                        <span class="info-term-label">Price Rate</span>
+                        <span class="info-term-value">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
                     </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Full Location</span>
-                        <span class="post-detail-value">${fullLocationStr}</span>
+
+                    <div class="info-term-item">
+                        <span class="info-term-label">Payment Term</span>
+                        <span class="info-term-value">${item.paymentPeriod || item.paymentTerm || 'N/A'}</span>
                     </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">GPS Coordinates</span>
-                        <span class="post-detail-value">${geoCoordinates}</span>
+
+                    <div class="info-term-item">
+                        <span class="info-term-label">Posted By</span>
+                        <span class="info-term-value">${postedByUserName}</span>
                     </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Posted By</span>
-                        <span class="post-detail-value">${author}</span>
-                    </div>
-                    <div class="post-detail-item">
-                        <span class="post-detail-label">Views / Likes</span>
-                        <span class="post-detail-value">👁️ ${item.views || 0} | ❤️ ${item.likes || 0}</span>
+
+                    <div class="info-term-item">
+                        <span class="info-term-label">Views / Likes</span>
+                        <span class="info-term-value">${item.views || 0} views • ${item.likes || 0} likes</span>
                     </div>
                 </div>
 
                 ${categorySpecsHTML}
                 ${mapPreviewHTML}
 
-                <div style="margin-top:14px;">
+                <div style="margin-top:16px; width:100%; box-sizing:border-box;">
                     <div class="category-specs-title">Full Description</div>
-                    <div class="reader-full-body" style="font-size:13px; line-height:1.6; color:#E2E8F0;">${fullContent}</div>
+                    <div class="reader-full-body">${fullContent}</div>
                 </div>
 
-                ${contactButtons}
+                ${contactButtonsHTML}
             `;
         }
     </script>
