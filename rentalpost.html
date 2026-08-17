@@ -6,7 +6,7 @@
     <title>Delala - Post Rental Item (Part 1)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
 
     <script>
@@ -101,8 +101,7 @@
             box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
         }
 
-        .form-step-page { display: none; }
-        .form-step-page.active { display: block; }
+        .form-step-page { display: block; }
 
         .step-title {
             font-size: 15px;
@@ -122,29 +121,29 @@
             margin-bottom: 6px;
         }
 
-        .form-input, .form-select, .form-textarea {
+        .category-select-trigger {
             width: 100%;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             background: #F8FAFC;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             color: var(--text-main);
             outline: none;
-            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
             transition: all 0.2s ease;
         }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .category-select-trigger:focus {
             border-color: var(--primary-dark);
             background: #FFFFFF;
             box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
         }
-
-        .form-textarea { resize: vertical; min-height: 100px; }
-        .form-row { display: flex; gap: 12px; }
-        .form-row .form-group { flex: 1; }
 
         .image-upload-grid {
             display: grid;
@@ -192,7 +191,7 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .btn-next {
+        .btn-next {
             flex: 1;
             padding: 13px;
             border-radius: 12px;
@@ -204,10 +203,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -269,18 +268,129 @@
         .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
         .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
+        .category-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 14, 20, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .category-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .category-modal-card {
+            width: 88%;
+            max-width: 340px;
+            background: linear-gradient(145deg, #38414e, #1e2530, #131821);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 20px 45px rgba(0, 0, 0, 0.85);
+            transform: scale(0.88) translateY(12px);
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .category-modal-overlay.active .category-modal-card { transform: scale(1) translateY(0); }
+
+        .category-modal-header {
+            padding: 14px 16px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #94A3B8;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-modal-list {
+            display: flex;
+            flex-direction: column;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .category-item:last-child { border-bottom: none; }
+        .category-item:hover, .category-item.selected {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .category-text-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #E2E8F0;
+        }
+
+        .category-text-en {
+            display: inline-block;
+            width: 115px;
+        }
+
+        .category-text-am {
+            color: #CBD5E1;
+            font-weight: 500;
+        }
+
+        .custom-radio {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .category-item.selected .custom-radio {
+            border-color: #38BDF8;
+            background: #38BDF8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+
+        .category-item.selected .custom-radio::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #FFFFFF;
+        }
+
         .metal-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(10, 12, 16, 0.75);
-            backdrop-filter: blur(6px);
+            background: rgba(15, 18, 22, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: 10000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.25s ease-in-out;
@@ -289,60 +399,40 @@
         .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
 
         .metal-modal-card {
-            width: 88%;
-            max-width: 350px;
-            background: linear-gradient(145deg, #3a3f47, #1e2228, #121418);
-            border-radius: 18px;
-            padding: 24px 20px 20px;
+            width: 85%;
+            max-width: 320px;
+            background: linear-gradient(135deg, #4A5568, #2D3748, #1A202C);
+            border-radius: 16px;
+            padding: 20px 16px 16px;
             box-sizing: border-box;
             text-align: center;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
-            transform: scale(0.85) translateY(10px);
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #718096;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 15px 35px rgba(0, 0, 0, 0.7);
         }
 
-        .metal-modal-overlay.active .metal-modal-card { transform: scale(1) translateY(0); }
-
         .metal-icon-wrapper {
-            width: 58px;
-            height: 58px;
-            margin: 0 auto 14px;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #e62e2e, #800f0f);
+            background: linear-gradient(135deg, #718096, #2D3748);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #501010;
+            border: 1px solid #A0AEC0;
         }
 
-        .metal-icon-wrapper svg { width: 28px; height: 28px; stroke: #ffffff; }
-
-        .metal-modal-title {
-            font-size: 15px;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #e2e8f0;
-            margin: 0 0 8px;
-        }
-
-        .metal-modal-message {
-            font-size: 12px;
-            font-weight: 500;
-            color: #94a3b8;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
+        .metal-icon-wrapper svg { width: 22px; height: 22px; stroke: #E2E8F0; }
+        .metal-modal-title { font-size: 13px; font-weight: 800; color: #E2E8F0; margin: 0 0 6px; text-transform: uppercase; }
+        .metal-modal-message { font-size: 11px; font-weight: 500; color: #CBD5E0; margin-bottom: 16px; }
         .metal-modal-btn {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: linear-gradient(180deg, #525966 0%, #2a2e37 50%, #1a1d23 100%);
-            color: #f1f5f9;
-            font-size: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #718096;
+            background: linear-gradient(180deg, #4A5568 0%, #2D3748 100%);
+            color: #EDF2F7;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
@@ -368,20 +458,16 @@
                     <div class="step-node" id="node-4">4</div>
                 </div>
 
-                <!-- PAGE 1 -->
-                <div class="form-step-page active" id="stepPage1">
+                <div class="form-step-page" id="stepPage1">
                     <div class="step-title">Step 1: Category & Images</div>
 
                     <div class="form-group">
-                        <label class="form-label" for="rentalType">Rental Category *</label>
-                        <select class="form-select" id="rentalType" required>
-                            <option value="" disabled selected>Select Category</option>
-                            <option value="House / Apartment">House / Apartment</option>
-                            <option value="Commercial Shop">Commercial Shop / Office</option>
-                            <option value="Vehicle">Vehicle Rental</option>
-                            <option value="Event Equipment">Event Equipment</option>
-                            <option value="Other Rental">Other Rental Item</option>
-                        </select>
+                        <label class="form-label">Rental Category *</label>
+                        <button type="button" class="category-select-trigger" id="categoryTrigger">
+                            <span id="selectedCategoryText">Select Category / ዘርፍ ይምረጡ</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <input type="hidden" id="rentalType" value="">
                     </div>
 
                     <div class="form-group">
@@ -411,49 +497,6 @@
                     <div class="step-actions">
                         <button type="button" class="btn-next" id="btnNext1">
                             Next: Info 
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- PAGE 2 -->
-                <div class="form-step-page" id="stepPage2">
-                    <div class="step-title">Step 2: Listing Details</div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., 2 Bedroom Apartment in Bole" required>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 15000" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Period *</label>
-                            <select class="form-select" id="paymentPeriod" required>
-                                <option value="Month">Per Month</option>
-                                <option value="Day">Per Day</option>
-                                <option value="Year">Per Year</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="dynamicCategoryFieldsContainer"></div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, amenities, water/electric access, or rules (optional)..."></textarea>
-                    </div>
-
-                    <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBack2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
-                        <button type="button" class="btn-next" id="btnNext2">
-                            Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </div>
@@ -491,7 +534,73 @@
         </nav>
     </div>
 
-    <!-- Error Modal Overlay -->
+    <div class="category-modal-overlay" id="categoryModalOverlay">
+        <div class="category-modal-card">
+            <div class="category-modal-header">
+                <span>Select Category / ዘርፍ ይምረጡ</span>
+                <div class="custom-radio"></div>
+            </div>
+            <div class="category-modal-list">
+                <div class="category-item" data-val="Residential Property" data-label="Residential Property — የመኖሪያ ቤት">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Residential Property</span>
+                        <span>—</span>
+                        <span class="category-text-am">የመኖሪያ ቤት</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Workplace" data-label="Workplace — የሥራ ቦታ">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Workplace</span>
+                        <span>—</span>
+                        <span class="category-text-am">የሥራ ቦታ</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Vehicle" data-label="Vehicle — ተሽከርካሪ">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Vehicle</span>
+                        <span>—</span>
+                        <span class="category-text-am">ተሽከርካሪ</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Event Equipment" data-label="Event Equipment — የፕሮግራም ዕቃዎች">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Event Equipment</span>
+                        <span>—</span>
+                        <span class="category-text-am">የፕሮግራም ዕቃዎች</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Clothing" data-label="Clothing — አልባሳት">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Clothing</span>
+                        <span>—</span>
+                        <span class="category-text-am">አልባሳት</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Machinery" data-label="Machinery — ማሽን">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Machinery</span>
+                        <span>—</span>
+                        <span class="category-text-am">ማሽን</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+                <div class="category-item" data-val="Miscellaneous Items" data-label="Miscellaneous Items — ሌሎች ነገሮች">
+                    <div class="category-text-group">
+                        <span class="category-text-en">Miscellaneous Items</span>
+                        <span>—</span>
+                        <span class="category-text-am">ሌሎች ነገሮች</span>
+                    </div>
+                    <div class="custom-radio"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="metal-modal-overlay" id="errorModalOverlay">
         <div class="metal-modal-card">
             <div class="metal-icon-wrapper">
@@ -520,7 +629,6 @@
             document.getElementById('errorModalOverlay').classList.remove('active');
         };
 
-        // User Account Verification Function
         function getAuthenticatedUser() {
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
@@ -538,18 +646,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             
-            // Check User Session state on load
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
             setupImageUploaders();
-            setupAutoFillListeners();
+            setupCategoryModal();
             restoreSavedDraft();
-
-            // Handle hash-based navigation when coming back from Step 3
-            if (window.location.hash === '#step2') {
-                switchToStep2();
-            }
 
             document.getElementById('btnNext1').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
@@ -563,64 +665,101 @@
                     showErrorModal("Please upload at least 1 property image to continue.");
                     return;
                 }
+                
                 saveDraftToSession();
-                switchToStep2();
-            });
 
-            document.getElementById('btnBack2').addEventListener('click', () => {
-                saveDraftToSession();
-                switchToStep1();
-            });
-
-            document.getElementById('btnNext2').addEventListener('click', () => {
-                if (!getAuthenticatedUser()) return;
-
-                const title = document.getElementById('postTitle').value.trim();
-                const price = document.getElementById('rentalPrice').value;
-
-                if (!title || !price) {
-                    showErrorModal("Please fill in both the listing title and rental price.");
-                    return;
+                // Dedicated Single Redirect Routing for Categories
+                if (category === "Residential Property") {
+                    window.location.href = 'renthome.html';
+                } else if (category === "Workplace") {
+                    window.location.href = 'rentwork.html';
+                } else if (category === "Vehicle") {
+                    window.location.href = 'rentcar.html';
+                } else if (category === "Machinery") {
+                    window.location.href = 'rentmachine.html';
+                } else if (category === "Event Equipment") {
+                    window.location.href = 'rentevent.html';
+                } else if (category === "Clothing") {
+                    window.location.href = 'rentcloth.html';
+                } else if (category === "Miscellaneous Items") {
+                    window.location.href = 'rentother.html';
+                } else {
+                    window.location.href = 'rentalpost4.html';
                 }
-
-                saveDraftToSession();
-                window.location.href = 'rentalpost1.html';
             });
         });
 
-        function switchToStep1() {
-            document.getElementById('stepPage2').classList.remove('active');
-            document.getElementById('stepPage1').classList.add('active');
-            document.getElementById('node-2').classList.remove('active');
-            document.getElementById('node-1').classList.add('active');
-            window.location.hash = '';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function setupCategoryModal() {
+            const trigger = document.getElementById('categoryTrigger');
+            const overlay = document.getElementById('categoryModalOverlay');
+            const items = document.querySelectorAll('.category-item');
+            const hiddenInput = document.getElementById('rentalType');
+            const displayText = document.getElementById('selectedCategoryText');
+
+            trigger.addEventListener('click', () => {
+                overlay.classList.add('active');
+            });
+
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    const selectedVal = item.getAttribute('data-val');
+                    const selectedLabel = item.getAttribute('data-label');
+                    const currentVal = hiddenInput.value;
+
+                    if (currentVal && currentVal !== selectedVal) {
+                        handleCategoryChange(selectedVal);
+                    }
+
+                    items.forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+
+                    hiddenInput.value = selectedVal;
+                    displayText.innerText = selectedLabel;
+
+                    saveDraftToSession();
+                    overlay.classList.remove('active');
+                });
+            });
         }
 
-        function switchToStep2() {
-            document.getElementById('stepPage1').classList.remove('active');
-            document.getElementById('stepPage2').classList.add('active');
-            document.getElementById('node-1').classList.remove('active');
-            document.getElementById('node-2').classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function handleCategoryChange(newCategory) {
+            let draftData = {};
+            const rawDraft = sessionStorage.getItem('delalaDraftPart1');
+            if (rawDraft) {
+                try { draftData = JSON.parse(rawDraft); } catch (e) {}
+            }
+
+            draftData.categoryChanged = true;
+            draftData.previousCategory = draftData.rentalType || "";
+            draftData.rentalType = newCategory;
+
+            sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
         }
 
         function saveDraftToSession() {
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
-            const draftData = {
-                postedByPhone: userPhone,
-                userId: userId,
-                rentalType: document.getElementById('rentalType').value,
-                images: uploadedBase64Images.filter(img => img !== ""),
-                imageUrl: uploadedBase64Images[0] || "",
-                title: document.getElementById('postTitle').value.trim(),
-                price: Number(document.getElementById('rentalPrice').value) || 0,
-                paymentPeriod: document.getElementById('paymentPeriod').value,
-                body: document.getElementById('postContent').value.trim(),
-                categorySpecificDetails: getCategoryDetails()
-            };
+            let draftData = {};
+            const rawDraft = sessionStorage.getItem('delalaDraftPart1');
+            if (rawDraft) {
+                try { draftData = JSON.parse(rawDraft); } catch (e) {}
+            }
+
+            const activeImages = uploadedBase64Images.filter(img => img !== "");
+
+            draftData.postedByPhone = userPhone;
+            draftData.userId = userId;
+            draftData.rentalType = document.getElementById('rentalType').value;
+            draftData.images = activeImages;
+            draftData.imageUrl = activeImages[0] || "";
+
             sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
         }
 
@@ -632,7 +771,12 @@
                 const draft = JSON.parse(rawDraft);
                 if (draft.rentalType) {
                     document.getElementById('rentalType').value = draft.rentalType;
-                    renderCategorySpecificFields();
+                    const selectedItem = document.querySelector(`.category-item[data-val="${draft.rentalType}"]`);
+                    if (selectedItem) {
+                        document.querySelectorAll('.category-item').forEach(i => i.classList.remove('selected'));
+                        selectedItem.classList.add('selected');
+                        document.getElementById('selectedCategoryText').innerText = selectedItem.getAttribute('data-label');
+                    }
                 }
                 if (draft.images && Array.isArray(draft.images)) {
                     draft.images.forEach((img, idx) => {
@@ -646,133 +790,9 @@
                         }
                     });
                 }
-                if (draft.title) document.getElementById('postTitle').value = draft.title;
-                if (draft.price) document.getElementById('rentalPrice').value = draft.price;
-                if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
-                if (draft.body) document.getElementById('postContent').value = draft.body;
-
-                if (draft.categorySpecificDetails) {
-                    const c = draft.categorySpecificDetails;
-                    if (c.roomCount && document.getElementById('roomCount')) document.getElementById('roomCount').value = c.roomCount;
-                    if (c.livingStatus && document.getElementById('livingStatus')) document.getElementById('livingStatus').value = c.livingStatus;
-                    if (c.shopSize && document.getElementById('shopSize')) document.getElementById('shopSize').value = c.shopSize;
-                    if (c.shopFloor && document.getElementById('shopFloor')) document.getElementById('shopFloor').value = c.shopFloor;
-                    if (c.vehicleModel && document.getElementById('vehicleModel')) document.getElementById('vehicleModel').value = c.vehicleModel;
-                    if (c.transmissionType && document.getElementById('transmissionType')) document.getElementById('transmissionType').value = c.transmissionType;
-                    if (c.equipmentType && document.getElementById('equipmentType')) document.getElementById('equipmentType').value = c.equipmentType;
-                    if (c.itemQuantity && document.getElementById('itemQuantity')) document.getElementById('itemQuantity').value = c.itemQuantity;
-                    if (c.specItemType && document.getElementById('specItemType')) document.getElementById('specItemType').value = c.specItemType;
-                }
             } catch (err) {
                 console.error("Failed to parse cached session draft", err);
             }
-        }
-
-        function getCategoryDetails() {
-            const cat = document.getElementById('rentalType').value;
-            if (cat === 'House / Apartment') {
-                return {
-                    roomCount: document.getElementById('roomCount')?.value || "",
-                    livingStatus: document.getElementById('livingStatus')?.value || ""
-                };
-            } else if (cat === 'Commercial Shop') {
-                return {
-                    shopSize: document.getElementById('shopSize')?.value || "",
-                    shopFloor: document.getElementById('shopFloor')?.value || ""
-                };
-            } else if (cat === 'Vehicle') {
-                return {
-                    vehicleModel: document.getElementById('vehicleModel')?.value || "",
-                    transmissionType: document.getElementById('transmissionType')?.value || ""
-                };
-            } else if (cat === 'Event Equipment') {
-                return {
-                    equipmentType: document.getElementById('equipmentType')?.value || "",
-                    itemQuantity: document.getElementById('itemQuantity')?.value || ""
-                };
-            }
-            return { specItemType: document.getElementById('specItemType')?.value || "" };
-        }
-
-        function renderCategorySpecificFields() {
-            const category = document.getElementById('rentalType').value;
-            const container = document.getElementById('dynamicCategoryFieldsContainer');
-            if (!container) return;
-
-            let html = '';
-            if (category === 'House / Apartment') {
-                html = `
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="roomCount">Number of Rooms *</label>
-                            <select class="form-select" id="roomCount" required>
-                                <option value="1 Room / Studio">1 Room / Studio</option>
-                                <option value="2 Bedrooms">2 Bedrooms</option>
-                                <option value="3 Bedrooms">3 Bedrooms</option>
-                                <option value="4+ Bedrooms">4+ Bedrooms</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="livingStatus">Living Arrangement *</label>
-                            <select class="form-select" id="livingStatus" required>
-                                <option value="Full House / Entire Place">Full House / Entire Place</option>
-                                <option value="Living with Owner / Landlord">Living with Owner / Landlord</option>
-                                <option value="Shared Apartment">Shared Apartment</option>
-                            </select>
-                        </div>
-                    </div>`;
-            } else if (category === 'Commercial Shop') {
-                html = `
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="shopSize">Approx. Size (sqm) *</label>
-                            <input type="text" class="form-input" id="shopSize" placeholder="e.g. 45 sqm" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="shopFloor">Floor Level *</label>
-                            <select class="form-select" id="shopFloor" required>
-                                <option value="Ground Floor">Ground Floor</option>
-                                <option value="1st Floor">1st Floor</option>
-                                <option value="2nd Floor & Above">2nd Floor & Above</option>
-                                <option value="Basement">Basement</option>
-                            </select>
-                        </div>
-                    </div>`;
-            } else if (category === 'Vehicle') {
-                html = `
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="vehicleModel">Vehicle Brand & Model *</label>
-                            <input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Toyota Corolla / Vitz" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="transmissionType">Transmission *</label>
-                            <select class="form-select" id="transmissionType" required>
-                                <option value="Automatic">Automatic</option>
-                                <option value="Manual">Manual</option>
-                            </select>
-                        </div>
-                    </div>`;
-            } else if (category === 'Event Equipment') {
-                html = `
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="equipmentType">Equipment Category *</label>
-                            <input type="text" class="form-input" id="equipmentType" placeholder="e.g. Chairs, Tents, Sound System" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="itemQuantity">Quantity Available *</label>
-                            <input type="number" class="form-input" id="itemQuantity" placeholder="e.g. 50 Sets" required>
-                        </div>
-                    </div>`;
-            } else {
-                html = `
-                    <div class="form-group">
-                        <label class="form-label" for="specItemType">Item Specifics *</label>
-                        <input type="text" class="form-input" id="specItemType" placeholder="Specify item type or category details" required>
-                    </div>`;
-            }
-            container.innerHTML = html;
         }
 
         function setupImageUploaders() {
@@ -787,37 +807,11 @@
                             uploadedBase64Images[idx - 1] = event.target.result;
                             preview.src = event.target.result;
                             preview.style.display = 'block';
+                            saveDraftToSession();
                         };
                         reader.readAsDataURL(file);
                     }
                 });
-            });
-        }
-
-        function setupAutoFillListeners() {
-            const rentalType = document.getElementById('rentalType');
-            const postTitle = document.getElementById('postTitle');
-            const postContent = document.getElementById('postContent');
-
-            rentalType.addEventListener('change', () => {
-                renderCategorySpecificFields();
-                const selected = rentalType.value;
-
-                if (!postTitle.value) {
-                    if (selected === 'House / Apartment') postTitle.value = 'House / Apartment for Rent';
-                    else if (selected === 'Commercial Shop') postTitle.value = 'Commercial Shop / Office Space';
-                    else if (selected === 'Vehicle') postTitle.value = 'Car / Vehicle Rental';
-                    else if (selected === 'Event Equipment') postTitle.value = 'Event Equipment for Rent';
-                    else if (selected === 'Other Rental') postTitle.value = 'Rental Listing';
-                }
-
-                if (!postContent.value) {
-                    if (selected === 'House / Apartment') postContent.value = `[Property Overview]: Residential rental.\n\n[Features & Facilities]: Water & electricity available, good accessibility, fully secure locality.`;
-                    else if (selected === 'Commercial Shop') postContent.value = `[Commercial Overview]: Commercial space suitable for business activities.\n\n[Features & Facilities]: High customer foot traffic, power supply available.`;
-                    else if (selected === 'Vehicle') postContent.value = `[Vehicle Overview]: Well-maintained vehicle available for rent.\n\n[Terms]: Clean condition, ready for immediate service.`;
-                    else if (selected === 'Event Equipment') postContent.value = `[Equipment Overview]: Quality rental items for events and ceremonies.\n\n[Terms]: Available for daily or event-based rental agreements.`;
-                    else if (selected === 'Other Rental') postContent.value = `[Rental Overview]: Item available for rent.\n\n[Terms]: Contact for further details and terms.`;
-                }
             });
         }
 
