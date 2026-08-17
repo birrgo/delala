@@ -437,10 +437,14 @@
     </div>
 
     <script>
-        // Set to true if user is logged in, false if guest
-        const isLoggedIn = false;
+        // Check local storage for active authentication session key
+        const userPhoneSession = localStorage.getItem('auth_session_phone');
+        const isLoggedIn = Boolean(userPhoneSession && userPhoneSession.trim().length > 0);
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Track routing history
+            localStorage.setItem('delala_last_page', 'post.html');
+
             initiateLiveInterfaceClocks();
             setupAccessControl();
         });
