@@ -6,7 +6,7 @@
     <title>Delala - Profile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
     <style>
         /* Profile Page Components & Overrides */
@@ -206,6 +206,85 @@
             font-weight: 600;
         }
 
+        /* 3-Line Menu Header Styling & Dropdown Menu */
+        .menu-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-action-btn {
+            background: transparent;
+            border: none;
+            color: #0F172A;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .menu-action-btn:active {
+            background-color: #F1F5F9;
+        }
+
+        .menu-action-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+        }
+
+        .profile-menu-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #FFFFFF;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+            padding: 6px;
+            display: none;
+            flex-direction: column;
+            z-index: 1050;
+        }
+
+        .profile-menu-dropdown.show {
+            display: flex;
+        }
+
+        .dropdown-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #DC2626;
+            font-size: 13px;
+            font-weight: 700;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .dropdown-menu-item:active {
+            background: #FEF2F2;
+        }
+
+        .dropdown-menu-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
         /* Standardized Light Bottom Nav */
         .bottom-nav {
             position: fixed;
@@ -302,12 +381,23 @@
             <div class="header-left-group" style="justify-content: flex-end;">
                 <div class="header-live-clock-badge" id="topCornerLiveClock">11:02:18 am</div>
 
-                <button class="search-action-btn" id="openSearchBtn" aria-label="Search Profile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
+                <!-- 3-Line Hamburger Menu Icon & Dropdown -->
+                <div class="menu-wrapper">
+                    <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                            <line x1="4" y1="18" x2="20" y2="18"></line>
+                        </svg>
+                    </button>
+                    
+                    <div class="profile-menu-dropdown" id="profileMenuDropdown">
+                        <button class="dropdown-menu-item" id="logoutBtn">
+                            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -321,9 +411,9 @@
                 </div>
 
                 <h1 class="profile-display-name" id="userDisplayName">
-                    User <span class="verified-dot-badge">✓</span>
+                    Guest User
                 </h1>
-                <p class="profile-username" id="userHandle">@user</p>
+                <p class="profile-username" id="userHandle">@guest</p>
 
                 <!-- Metrics Row -->
                 <div class="stats-metrics-row">
@@ -362,7 +452,7 @@
 
             <!-- Dynamic Post Grid from Firebase -->
             <main class="posts-grid" id="postsGridContainer">
-                <div class="empty-grid-msg">Loading posts...</div>
+                <div class="empty-grid-msg">Please login to view profile posts.</div>
             </main>
         </div>
 
@@ -410,7 +500,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // Correct Delala Firebase App Configuration
@@ -432,7 +522,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             initLiveClock();
             setupAuthListener();
+            setupMenuHandlers();
         });
+
+        // Global handler to trigger profile rendering when phone authentication succeeds
+        window.handleNewLogin = function(phoneNum) {
+            localStorage.removeItem('user_logged_out');
+            if (phoneNum) {
+                localStorage.setItem('auth_session_phone', phoneNum);
+                fetchUserByPhone(phoneNum);
+            } else if (auth.currentUser) {
+                fetchUserDataAndPosts(auth.currentUser.uid, auth.currentUser);
+            }
+        };
 
         function initLiveClock() {
             const clockNode = document.getElementById('topCornerLiveClock');
@@ -448,6 +550,40 @@
             setInterval(updateTime, 1000);
         }
 
+        function setupMenuHandlers() {
+            const menuBtn = document.getElementById('openMenuBtn');
+            const dropdown = document.getElementById('profileMenuDropdown');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    // Set flag indicating manual logout state
+                    localStorage.setItem('user_logged_out', 'true');
+                    localStorage.removeItem('auth_session_phone');
+                    sessionStorage.clear();
+                    
+                    // Sign out from Firebase Auth
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Sign out error:", error);
+                } finally {
+                    // Redirect directly to rental.html
+                    window.location.href = 'rental.html';
+                }
+            });
+        }
+
         function formatCount(count) {
             const num = parseInt(count) || 0;
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -455,17 +591,58 @@
             return num.toLocaleString();
         }
 
-        function setupAuthListener() {
+        function renderLoggedOutGuestState() {
+            const displayNameNode = document.getElementById('userDisplayName');
+            if (displayNameNode) {
+                displayNameNode.innerHTML = 'Guest User';
+            }
+            
+            document.getElementById('userHandle').innerText = "@guest";
+            document.getElementById('userAvatarImg').src = 's.png';
+            document.getElementById('followingCount').innerText = '0';
+            document.getElementById('followersCount').innerText = '0';
+            document.getElementById('likesCount').innerText = '0';
+
+            document.getElementById('postsGridContainer').innerHTML = `
+                <div class="empty-grid-msg">No account logged in. Please sign in again.</div>
+            `;
+        }
+
+        function evaluateAuthState(user) {
+            // Check current persistent storage states
+            const isLoggedOut = localStorage.getItem('user_logged_out') === 'true';
             const sessionPhone = localStorage.getItem('auth_session_phone');
 
+            if (user) {
+                localStorage.removeItem('user_logged_out');
+                fetchUserDataAndPosts(user.uid, user);
+            } else if (sessionPhone) {
+                // Phone sessions bypass the user_logged_out state if an active phone number exists
+                localStorage.removeItem('user_logged_out');
+                fetchUserByPhone(sessionPhone);
+            } else if (isLoggedOut) {
+                renderLoggedOutGuestState();
+            } else {
+                renderLoggedOutGuestState();
+            }
+        }
+
+        function setupAuthListener() {
+            // Listen to Firebase Auth state changes
             onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    fetchUserDataAndPosts(user.uid, user);
-                } else if (sessionPhone) {
-                    fetchUserByPhone(sessionPhone);
-                } else {
-                    fetchLatestCreatedUserPreview();
+                evaluateAuthState(user);
+            });
+
+            // Listen to storage events across tabs or local updates
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
+                    evaluateAuthState(auth.currentUser);
                 }
+            });
+
+            // Custom event listener for instant single-page login updates
+            window.addEventListener('login_success', () => {
+                evaluateAuthState(auth.currentUser);
             });
         }
 
@@ -489,32 +666,10 @@
                     const key = Object.keys(data)[0];
                     renderUserProfile(data[key], key);
                 } else {
-                    fetchLatestCreatedUserPreview();
+                    renderLoggedOutGuestState();
                 }
             } catch (err) {
-                fetchLatestCreatedUserPreview();
-            }
-        }
-
-        async function fetchLatestCreatedUserPreview() {
-            const usersRef = ref(db, 'users');
-            try {
-                const snapshot = await get(usersRef);
-                if (snapshot.exists()) {
-                    const users = snapshot.val();
-                    const keys = Object.keys(users);
-                    const latestKey = keys[keys.length - 1];
-                    const latestUser = users[latestKey];
-                    renderUserProfile(latestUser, latestKey);
-                } else {
-                    document.getElementById('postsGridContainer').innerHTML = `
-                        <div class="empty-grid-msg">No user account found.</div>
-                    `;
-                }
-            } catch (err) {
-                document.getElementById('postsGridContainer').innerHTML = `
-                    <div class="empty-grid-msg">Error loading user profile.</div>
-                `;
+                renderLoggedOutGuestState();
             }
         }
 
