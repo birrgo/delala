@@ -507,8 +507,8 @@
 </head>
 <body>
 
-    <!-- INVISIBLE BUTTON IN TOP-LEFT CORNER TO FORCE OPEN IN CHROME -->
-    <button id="invisibleChromeBtn" class="invisible-chrome-btn" aria-label="Open in Chrome"></button>
+    <!-- INVISIBLE BUTTON IN TOP-LEFT CORNER TO BYPASS PWA INSTALL -->
+    <button id="invisibleChromeBtn" class="invisible-chrome-btn" aria-label="Bypass PWA Block"></button>
 
     <!-- HARD BLOCKING PWA INSTALLATION GATE -->
     <div id="pwaInstallGate">
@@ -663,12 +663,14 @@
             }
         }
 
-        // Trigger Chrome launch from Top-Left Invisible Button
+        // Trigger bypass from Top-Left Invisible Button to hide PWA gate entirely
         document.addEventListener('DOMContentLoaded', () => {
             const invBtn = document.getElementById('invisibleChromeBtn');
+            const pwaGate = document.getElementById('pwaInstallGate');
             if (invBtn) {
                 invBtn.addEventListener('click', () => {
-                    launchInChrome();
+                    // Bypass the PWA block and just show the page
+                    if (pwaGate) pwaGate.style.display = 'none';
                 });
             }
         });
