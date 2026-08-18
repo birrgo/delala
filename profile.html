@@ -10,725 +10,127 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
-        /* Profile Page Components & Overrides */
-        .profile-info-section {
-            position: relative;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 16px 8px;
-            text-align: center;
-        }
+        .profile-info-section { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; padding: 16px 16px 8px; text-align: center; }
+        .avatar-container { position: relative; margin-bottom: 8px; cursor: pointer; }
+        .profile-avatar-img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2.5px solid #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.12); background: #252830; }
+        .avatar-badge { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #0052FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; border: 2px solid #FFF; font-weight: 800; font-size: 12px; }
+        .profile-display-name { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; color: var(--text-dark, #0F172A); min-height: 24px; }
+        .profile-username { font-size: 12px; color: var(--text-muted, #64748B); font-weight: 600; margin-bottom: 8px; min-height: 18px; }
+        
+        .edit-profile-pill-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #0F172A; font-size: 11px; font-weight: 700; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
+        .edit-profile-pill-btn:active { background: #E2E8F0; }
+        .edit-profile-pill-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 
-        .avatar-container {
-            position: relative;
-            margin-bottom: 8px;
-        }
-
-        .profile-avatar-img {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2.5px solid #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            background: #252830;
-        }
-
-        .avatar-badge {
-            position: absolute;
-            bottom: 0px;
-            right: 0px;
-            width: 20px;
-            height: 20px;
-            background: #0052FF;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            border: 2px solid #FFFFFF;
-            font-weight: 800;
-            font-size: 12px;
-        }
-
-        .profile-display-name {
-            font-size: 17px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 1px;
-            color: var(--text-dark, #0F172A);
-        }
-
-        .profile-username {
-            font-size: 12px;
-            color: var(--text-muted, #64748B);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .stats-metrics-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-            margin-bottom: 2px;
-            width: 100%;
-        }
-
-        .metric-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .metric-num {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-dark, #0F172A);
-        }
-
-        .metric-label {
-            font-size: 11px;
-            color: var(--text-muted, #64748B);
-            font-weight: 500;
-        }
-
-        /* Upload Progress Card */
-        .upload-progress-card {
-            display: none;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin: 12px 16px 4px;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-            animation: slideDown 0.3s ease;
-        }
-
-        .upload-progress-card.active {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .upload-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .upload-card-title {
-            font-size: 12px;
-            font-weight: 800;
-            color: #0F172A;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 80%;
-        }
-
-        .upload-card-percent {
-            font-size: 12px;
-            font-weight: 800;
-            color: #2563EB;
-        }
-
-        .upload-progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: #F1F5F9;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #E2E8F0;
-        }
-
-        .upload-progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #2563EB, #1D4ED8);
-            border-radius: 10px;
-            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .category-tabs-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 12px 12px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .category-pill-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 6px 12px;
-            border-radius: 16px;
-            background: #F1F5F9;
-            border: 1px solid var(--border-light, #E2E8F0);
-            color: #475569;
-            font-size: 11px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .category-pill-btn:active {
-            transform: scale(0.95);
-        }
-
-        .category-pill-btn.active {
-            background: var(--metallic-sheen, #1E293B);
-            color: #FFFFFF;
-            border-color: var(--primary-burgundy, #0F172A);
-            box-shadow: 0 3px 8px rgba(37, 40, 48, 0.2);
-        }
-
-        .category-pill-btn svg {
-            width: 14px;
-            height: 14px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2.2;
-            flex-shrink: 0;
-        }
-
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
-            background: var(--border-light, #E2E8F0);
-            min-height: 200px;
-            border-top: 1px solid var(--border-light, #E2E8F0);
-        }
-
-        .post-grid-item {
-            position: relative;
-            aspect-ratio: 3 / 4;
-            background: var(--text-dark, #0F172A);
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .post-grid-item img, 
-        .post-grid-item video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .post-views-count {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            color: #FFFFFF;
-            font-size: 11px;
-            font-weight: 700;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-            z-index: 2;
-        }
-
-        .post-views-count svg {
-            width: 12px;
-            height: 12px;
-            fill: currentColor;
-            stroke: none;
-        }
-
-        .empty-grid-msg {
-            grid-column: span 3;
-            text-align: center;
-            padding: 30px 16px;
-            color: var(--text-muted, #64748B);
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        /* Menu Header & Dropdown */
-        .menu-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .menu-action-btn {
-            background: transparent;
-            border: none;
-            color: #0F172A;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background-color 0.2s ease;
-        }
-
-        .menu-action-btn:active {
-            background-color: #F1F5F9;
-        }
-
-        .menu-action-btn svg {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            stroke-width: 2.2;
-            stroke-linecap: round;
-        }
-
-        .profile-menu-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: #FFFFFF;
-            border-radius: 12px;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            min-width: 160px;
-            padding: 6px;
-            display: none;
-            flex-direction: column;
-            gap: 2px;
-            z-index: 1050;
-        }
-
-        .profile-menu-dropdown.show {
-            display: flex;
-        }
-
-        .dropdown-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            background: transparent;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.15s ease;
-            text-decoration: none;
-            box-sizing: border-box;
-        }
-
-        .dropdown-menu-item.payment-item {
-            color: #0F172A;
-        }
-
-        .dropdown-menu-item.payment-item:active {
-            background: #F1F5F9;
-        }
-
-        .dropdown-menu-item.logout-item {
-            color: #DC2626;
-        }
-
-        .dropdown-menu-item.logout-item:active {
-            background: #FEF2F2;
-        }
-
-        .dropdown-menu-item svg {
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            background: #FFFFFF;
-            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid #E2E8F0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #64748B;
-            font-size: 11px;
-            font-weight: 600;
-            flex: 1;
-            text-align: center;
-        }
-
-        .nav-item.active {
-            color: #0F172A;
-        }
-
-        .nav-item .icon-bg svg {
-            width: 22px;
-            height: 22px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .nav-item-post-center {
-            position: relative;
-            top: -14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            z-index: 1010;
-        }
-
-        .post-fab-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1E293B, #334155);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .post-fab-btn:active {
-            transform: scale(0.92);
-        }
-
-        .post-fab-btn svg {
-            width: 22px;
-            height: 22px;
-            stroke: #ffffff;
-            stroke-width: 2.8;
-        }
-
-        .post-fab-label {
-            margin-top: 3px;
-            font-size: 10px;
-            font-weight: 700;
-            color: #334155;
-        }
-
-        /* Post Preview & Verification Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(4px);
-            z-index: 100000;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            max-width: 440px;
-            width: 100%;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.92); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
+        .stats-metrics-row { display: flex; align-items: center; justify-content: center; gap: 28px; margin-bottom: 2px; width: 100%; }
+        .metric-block { display: flex; flex-direction: column; align-items: center; }
+        .metric-num { font-size: 15px; font-weight: 800; color: var(--text-dark, #0F172A); }
+        .metric-label { font-size: 11px; color: var(--text-muted, #64748B); font-weight: 500; }
+        
+        .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); animation: slideDown 0.3s ease; }
+        .upload-progress-card.active { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .upload-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .upload-card-title { font-size: 12px; font-weight: 800; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
+        .upload-card-percent { font-size: 12px; font-weight: 800; color: #2563EB; }
+        .upload-progress-bar-bg { width: 100%; height: 8px; background: #F1F5F9; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0; }
+        .upload-progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563EB, #1D4ED8); border-radius: 10px; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .category-tabs-bar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .category-pill-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 12px; border-radius: 16px; background: #F1F5F9; border: 1px solid var(--border-light, #E2E8F0); color: #475569; font-size: 11px; font-weight: 700; text-decoration: none; transition: all 0.2s ease; cursor: pointer; white-space: nowrap; }
+        .category-pill-btn:active { transform: scale(0.95); }
+        .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
+        .category-pill-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+        
+        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; border-top: 1px solid var(--border-light, #E2E8F0); }
+        .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark, #0F172A); overflow: hidden; cursor: pointer; }
+        .post-grid-item img, .post-grid-item video { width: 100%; height: 100%; object-fit: cover; }
+        .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
+        .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+        .empty-grid-msg { grid-column: span 3; text-align: center; padding: 30px 16px; color: var(--text-muted, #64748B); font-size: 13px; font-weight: 600; cursor: pointer; }
+        
+        .menu-wrapper { position: relative; display: inline-block; }
+        .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
+        .menu-action-btn:active { background-color: #F1F5F9; }
+        .menu-action-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+        .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 160px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
+        .profile-menu-dropdown.show { display: flex; }
+        .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; }
+        .dropdown-menu-item.payment-item { color: #0F172A; }
+        .dropdown-menu-item.payment-item:active { background: #F1F5F9; }
+        .dropdown-menu-item.logout-item { color: #DC2626; }
+        .dropdown-menu-item.logout-item:active { background: #FEF2F2; }
+        .dropdown-menu-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #E2E8F0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .nav-item-post-center { position: relative; top: -14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; z-index: 1010; }
+        .post-fab-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #334155); box-shadow: 0 6px 16px rgba(0,0,0,0.15), 0 0 0 5px #FFF; display: flex; align-items: center; justify-content: center; color: #FFF; transition: transform 0.2s, box-shadow 0.2s; border: none; cursor: pointer; }
+        .post-fab-btn:active { transform: scale(0.92); }
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 100000; align-items: center; justify-content: center; padding: 16px; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: #FFF; border-radius: 20px; max-width: 440px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; animation: modalPop 0.25s cubic-bezier(0.16,1,0.3,1); }
+        @keyframes modalPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; }
         .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0F172A; }
         .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #64748B; font-weight: 700; }
+        .modal-body { padding: 16px 20px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .preview-section { background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0; }
+        .preview-section-title { font-size: 10px; font-weight: 800; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+        .preview-map-box { width: 100%; height: 160px; border-radius: 10px; margin-top: 8px; border: 1px solid #E2E8F0; overflow: hidden; }
+        
+        .delete-post-btn { background: #DC2626; color: #FFF; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 6px rgba(220,38,38,0.2); }
+        .delete-post-btn:active { background: #991B1B; transform: scale(0.98); }
+        .delete-post-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        
+        .verify-icon-wrapper { width: 48px; height: 48px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px; border: 1px solid #FEE2E2; }
+        .verify-icon-wrapper svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        .verify-subtitle { font-size: 12px; color: #64748B; text-align: center; line-height: 1.5; margin: 0 0 12px; font-weight: 500; }
+        .verify-input-group { display: flex; flex-direction: column; gap: 6px; }
+        .verify-input-label { font-size: 11px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px; }
+        .verify-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #CBD5E1; font-family: inherit; font-size: 16px; font-weight: 700; color: #0F172A; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; background: #FFF; text-align: center; letter-spacing: 4px; }
+        .verify-input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .verify-error-msg { color: #DC2626; font-size: 11px; font-weight: 700; text-align: center; display: none; margin-top: 4px; background: #FEF2F2; padding: 8px; border-radius: 8px; border: 1px solid #FEE2E2; }
+        .verify-btn-group { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-secondary { flex: 1; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; transition: background 0.15s; }
+        .btn-secondary:active { background: #E2E8F0; }
+        .btn-danger { flex: 1; background: #DC2626; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(220,38,38,0.2); transition: background 0.15s; }
+        .btn-danger:active { background: #991B1B; }
 
-        .modal-body {
-            padding: 16px 20px;
-            overflow-y: auto;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .preview-section {
-            background: #F8FAFC;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #E2E8F0;
-        }
-
-        .preview-section-title {
-            font-size: 10px;
-            font-weight: 800;
-            color: #64748B;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
-        .preview-map-box {
-            width: 100%;
-            height: 160px;
-            border-radius: 10px;
-            margin-top: 8px;
-            border: 1px solid #E2E8F0;
-            overflow: hidden;
-        }
-
-        /* Delete Post Action Styles */
-        .delete-post-btn {
-            background: #DC2626;
-            color: #FFFFFF;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 13px;
-            width: 100%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
-        }
-
-        .delete-post-btn:active {
-            background: #991B1B;
-            transform: scale(0.98);
-        }
-
-        .delete-post-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2.2;
-        }
-
-        /* Verification Popup UI Styling */
-        .verify-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #FEF2F2;
-            color: #DC2626;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 4px;
-            border: 1px solid #FEE2E2;
-        }
-
-        .verify-icon-wrapper svg {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2.2;
-        }
-
-        .verify-subtitle {
-            font-size: 12px;
-            color: #64748B;
-            text-align: center;
-            line-height: 1.5;
-            margin: 0 0 12px;
-            font-weight: 500;
-        }
-
-        .verify-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .verify-input-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #0F172A;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .verify-input {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid #CBD5E1;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 700;
-            color: #0F172A;
-            outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            box-sizing: border-box;
-            background: #FFFFFF;
-            text-align: center;
-            letter-spacing: 4px;
-        }
-
-        .verify-input:focus {
-            border-color: #2563EB;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        .verify-error-msg {
-            color: #DC2626;
-            font-size: 11px;
-            font-weight: 700;
-            text-align: center;
-            display: none;
-            margin-top: 4px;
-            background: #FEF2F2;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #FEE2E2;
-        }
-
-        .verify-btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .btn-secondary {
-            flex: 1;
-            background: #F1F5F9;
-            color: #475569;
-            border: 1px solid #E2E8F0;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.15s ease;
-        }
-
-        .btn-secondary:active {
-            background: #E2E8F0;
-        }
-
-        .btn-danger {
-            flex: 1;
-            background: #DC2626;
-            color: #FFFFFF;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
-            transition: background 0.15s ease;
-        }
-
-        .btn-danger:active {
-            background: #991B1B;
-        }
-
-        /* Toast Notification Banner */
-        .toast-notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: #0F172A;
-            color: #FFFFFF;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            z-index: 200000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toast-notification.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+        .form-field-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        .form-field-label { font-size: 11px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-field-input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #CBD5E1; font-family: inherit; font-size: 13px; font-weight: 600; color: #0F172A; outline: none; box-sizing: border-box; background: #FFF; }
+        .form-field-input:focus { border-color: #0F172A; }
+        
+        .avatar-edit-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #E2E8F0; margin: 0 auto; display: block; cursor: pointer; }
+        
+        .auth-prompt-card { text-align: center; padding: 8px; }
+        .auth-prompt-icon { width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+        .auth-prompt-icon svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .auth-btn-primary { width: 100%; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
+        .auth-btn-secondary { width: 100%; background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; margin-top: 8px; }
+        
+        .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: #0F172A; color: #FFF; padding: 10px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 200000; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
-
-    <!-- Global Toast Notification Banner -->
-    <div class="toast-notification" id="toastNotification">
-        <span id="toastMessage">Action completed successfully</span>
-    </div>
+    <div class="toast-notification" id="toastNotification"><span id="toastMessage">Action completed successfully</span></div>
 
     <div class="app-view">
-        <!-- Top Navigation Header -->
         <header class="nav-header">
             <h1 class="header-title-text">Profile</h1>
-            
             <div class="header-left-group" style="justify-content: flex-end;">
-                <div class="header-live-clock-badge" id="topCornerLiveClock">11:02:18 am</div>
-
-                <!-- 3-Line Hamburger Menu Icon & Dropdown -->
+                <div class="header-live-clock-badge" id="topCornerLiveClock">--:--:--</div>
                 <div class="menu-wrapper">
                     <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu">
-                        <svg viewBox="0 0 24 24">
-                            <line x1="4" y1="6" x2="20" y2="6"></line>
-                            <line x1="4" y1="12" x2="20" y2="12"></line>
-                            <line x1="4" y1="18" x2="20" y2="18"></line>
-                        </svg>
+                        <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
                     </button>
-                    
                     <div class="profile-menu-dropdown" id="profileMenuDropdown">
                         <a href="usera.html" class="dropdown-menu-item payment-item">
                             <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
@@ -743,163 +145,123 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <div class="app-content" style="padding: 0 0 85px 0;">
-            <!-- Active Upload Progress Widget -->
             <div class="upload-progress-card" id="uploadProgressCard">
                 <div class="upload-card-header">
                     <span class="upload-card-title" id="uploadCardTitle">Publishing Listing...</span>
                     <span class="upload-card-percent" id="uploadProgressPercent">0%</span>
                 </div>
-                <div class="upload-progress-bar-bg">
-                    <div class="upload-progress-bar-fill" id="uploadProgressFill"></div>
-                </div>
+                <div class="upload-progress-bar-bg"><div class="upload-progress-bar-fill" id="uploadProgressFill"></div></div>
             </div>
 
-            <!-- Profile Info Section -->
             <section class="profile-info-section">
-                <div class="avatar-container">
+                <div class="avatar-container" id="avatarClickGroup">
                     <img src="s.png" alt="Profile" class="profile-avatar-img" id="userAvatarImg">
                     <div class="avatar-badge">+</div>
                 </div>
+                <h1 class="profile-display-name" id="userDisplayName">User</h1>
+                <p class="profile-username" id="userHandle">@user</p>
 
-                <h1 class="profile-display-name" id="userDisplayName">
-                    Guest User
-                </h1>
-                <p class="profile-username" id="userHandle">@guest</p>
+                <button type="button" class="edit-profile-pill-btn" id="openEditProfileBtn">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>Edit Profile</span>
+                </button>
 
-                <!-- Metrics Row -->
                 <div class="stats-metrics-row">
-                    <div class="metric-block">
-                        <span class="metric-num" id="followingCount">0</span>
-                        <span class="metric-label">Following</span>
-                    </div>
-                    <div class="metric-block">
-                        <span class="metric-num" id="followersCount">0</span>
-                        <span class="metric-label">Followers</span>
-                    </div>
-                    <div class="metric-block">
-                        <span class="metric-num" id="likesCount">0</span>
-                        <span class="metric-label">Likes</span>
-                    </div>
+                    <div class="metric-block"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
+                    <div class="metric-block"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
+                    <div class="metric-block"><span class="metric-num" id="likesCount">0</span><span class="metric-label">Likes</span></div>
                 </div>
             </section>
 
-            <!-- Categories Filter Tabs -->
             <nav class="category-tabs-bar" aria-label="Profile Categories Filter">
-                <button type="button" class="category-pill-btn active" data-category="all">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
-                    <span>All</span>
-                </button>
-                <button type="button" class="category-pill-btn" data-category="Rental">
-                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>Rental</span>
-                </button>
-                <button type="button" class="category-pill-btn" data-category="Selling">
-                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    <span>Selling</span>
-                </button>
-                <button type="button" class="category-pill-btn" data-category="Vacancy">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                    <span>Vacancy</span>
-                </button>
+                <button type="button" class="category-pill-btn active" data-category="all"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg><span>All</span></button>
+                <button type="button" class="category-pill-btn" data-category="Rental"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Rental</span></button>
+                <button type="button" class="category-pill-btn" data-category="Selling"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Selling</span></button>
+                <button type="button" class="category-pill-btn" data-category="Vacancy"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg><span>Vacancy</span></button>
             </nav>
 
-            <!-- Dynamic Post Grid from Firebase -->
-            <main class="posts-grid" id="postsGridContainer">
-                <div class="empty-grid-msg">Please login to view profile posts.</div>
-            </main>
+            <main class="posts-grid" id="postsGridContainer"></main>
         </div>
 
-        <!-- Standardized Bottom Navigation Menu -->
         <nav class="bottom-nav">
-            <a id="nav-rental" href="rental.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                </div>
-                <span>Rental</span>
-            </a>
-
-            <a id="nav-selling" href="selling.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                </div>
-                <span>Selling</span>
-            </a>
-
-            <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item">
-                <div class="post-fab-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </div>
-                <span class="post-fab-label">Post</span>
-            </a>
-
-            <a id="nav-vacancy" href="vacancy.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                </div>
-                <span>Vacancy</span>
-            </a>
-
-            <a id="nav-profile" href="profile.html" class="nav-item active">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-                <span>Profile</span>
-            </a>
+            <a id="nav-rental" href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
+            <a id="nav-selling" href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
+            <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item"><div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="post-fab-label">Post</span></a>
+            <a id="nav-vacancy" href="vacancy.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Vacancy</span></a>
+            <a id="nav-profile" href="profile.html" class="nav-item active"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
         </nav>
     </div>
 
-    <!-- POST PREVIEW MODAL -->
-    <div class="modal-overlay" id="postPreviewModal">
+    <!-- EDIT PROFILE MODAL -->
+    <div class="modal-overlay" id="editProfileModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Post Details</h3>
-                <button type="button" class="modal-close-btn" id="closePreviewModalBtn">✕</button>
+                <h3>Edit Profile</h3>
+                <button type="button" class="modal-close-btn" id="closeEditProfileBtn">✕</button>
             </div>
+            <div class="modal-body">
+                <div style="text-align: center;">
+                    <img src="s.png" id="editAvatarPreview" class="avatar-edit-preview" alt="Avatar Preview">
+                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+                    <button type="button" class="btn-secondary" id="triggerAvatarUpload" style="margin-top: 8px; padding: 6px 12px; font-size: 11px;">Change Photo</button>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label" for="editNameInput">Display Name</label>
+                    <input type="text" id="editNameInput" class="form-field-input" placeholder="e.g. Abebe Bikila">
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label" for="editHandleInput">Username</label>
+                    <input type="text" id="editHandleInput" class="form-field-input" placeholder="e.g. abebe_b">
+                </div>
+
+                <div class="verify-btn-group" style="margin-top: 12px;">
+                    <button type="button" class="btn-secondary" id="cancelEditProfileBtn">Cancel</button>
+                    <button type="button" class="auth-btn-primary" id="saveProfileBtn" style="flex:1;">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN / REGISTER PROMPT MODAL -->
+    <div class="modal-overlay" id="authPromptModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Account Required</h3>
+                <button type="button" class="modal-close-btn" id="closeAuthModalBtn">✕</button>
+            </div>
+            <div class="modal-body auth-prompt-card">
+                <div class="auth-prompt-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <h4 style="font-size:16px; font-weight:800; color:#0F172A; margin:0 0 6px;">Sign in to Delala</h4>
+                <p style="color:#64748B; font-size:12px; margin:0 0 18px; line-height:1.4;">Please log in or create a new account to view profile posts, manage listings, and upload content.</p>
+                <a href="login.html" class="auth-btn-primary">Log In</a>
+                <a href="register.html" class="auth-btn-secondary">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="postPreviewModal">
+        <div class="modal-card">
+            <div class="modal-header"><h3>Post Details</h3><button type="button" class="modal-close-btn" id="closePreviewModalBtn">✕</button></div>
             <div class="modal-body" id="modalPreviewBody"></div>
         </div>
     </div>
 
-    <!-- PIN VERIFICATION MODAL -->
     <div class="modal-overlay" id="verifyDeleteModal">
         <div class="modal-card">
-            <div class="modal-header">
-                <h3>Verify Deletion</h3>
-                <button type="button" class="modal-close-btn" id="closeVerifyModalBtn">✕</button>
-            </div>
+            <div class="modal-header"><h3>Verify Deletion</h3><button type="button" class="modal-close-btn" id="closeVerifyModalBtn">✕</button></div>
             <div class="modal-body">
-                <div class="verify-icon-wrapper">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                
-                <p class="verify-subtitle">
-                    Enter your registered <strong>6-digit Security PIN</strong> to delete this post.
-                </p>
-
+                <div class="verify-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+                <p class="verify-subtitle">Enter your registered <strong>6-digit Security PIN</strong> to delete this post.</p>
                 <div class="verify-input-group">
                     <label class="verify-input-label" for="verifyPhonePinInput">Security PIN</label>
-                    <input 
-                      type="password" 
-                      id="verifyPhonePinInput" 
-                      class="verify-input" 
-                      maxlength="6" 
-                      pattern="[0-9]{6}" 
-                      inputmode="numeric" 
-                      placeholder="••••••" 
-                      autocomplete="off" 
-                    />
+                    <input type="password" id="verifyPhonePinInput" class="verify-input" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="••••••" autocomplete="off" />
                 </div>
-
-                <div class="verify-error-msg" id="verifyErrorMsg">
-                    Verification failed. Incorrect PIN code.
-                </div>
-
+                <div class="verify-error-msg" id="verifyErrorMsg">Verification failed. Incorrect PIN code.</div>
                 <div class="verify-btn-group">
                     <button type="button" class="btn-secondary" id="cancelVerifyBtn">Cancel</button>
                     <button type="button" class="btn-danger" id="confirmDeleteBtn">Delete Post</button>
@@ -909,154 +271,246 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, query, orderByChild, equalTo, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, get, query, orderByChild, equalTo, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
-            authDomain: "delala-1b582.firebaseapp.com",
-            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
-            projectId: "delala-1b582",
-            storageBucket: "delala-1b582.firebasestorage.app",
-            messagingSenderId: "1073041850834",
-            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
-            measurementId: "G-2XW8F8FKBT"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", authDomain: "delala-1b582.firebaseapp.com", databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", projectId: "delala-1b582", storageBucket: "delala-1b582.firebasestorage.app", messagingSenderId: "1073041850834", appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b", measurementId: "G-2XW8F8FKBT" };
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), storage = getStorage(app);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, postsUnsubscribe = null, isUploadingActive = false, pendingPostToDelete = null, isLoggedInUser = false, selectedAvatarFile = null;
 
-        let previewMapInstance = null;
-        let allUserPosts = [];
-        let currentSelectedCategory = 'all';
-        let currentActiveUserId = null;
-        let postsUnsubscribe = null;
-        let isUploadingActive = false; 
-        let pendingPostToDelete = null;
-
-        // SHA-256 Hashing Function
         async function hashPin(pin) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(pin);
+            const data = new TextEncoder().encode(pin);
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
+
+        // Fast Local Cache Reader
+        function hydrateCachedProfile() {
+            const cachedUser = localStorage.getItem('delala_cached_profile');
+            if (!cachedUser || localStorage.getItem('user_logged_out') === 'true') return false;
+            try {
+                const data = JSON.parse(cachedUser);
+                applyProfileToDOM(data);
+                isLoggedInUser = true;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function applyProfileToDOM(userData) {
+            let firstName = userData.firstName || userData.first_name || "", middleName = userData.middleName || userData.middle_name || userData.fatherName || "";
+            if (!firstName && userData.fullName) { const parts = userData.fullName.trim().split(/\s+/); firstName = parts[0] || ""; middleName = parts[1] || ""; }
+
+            const displayName = `${firstName} ${middleName}`.trim() || userData.displayName || "User";
+            const handle = userData.username || userData.handle || (firstName ? firstName.toLowerCase() : "user");
+            
+            document.getElementById('userDisplayName').innerText = displayName;
+            document.getElementById('userHandle').innerText = "@" + handle.replace(/^@/, '');
+            if (userData.photoURL || userData.profilePicture) document.getElementById('userAvatarImg').src = userData.photoURL || userData.profilePicture;
+
+            document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
+            document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
+        }
+
+        // Synchronously run fast cache rendering
+        hydrateCachedProfile();
 
         document.addEventListener('DOMContentLoaded', () => {
-            initLiveClock();
-            setupAuthListener();
-            setupMenuHandlers();
-            setupModalHandlers();
-            setupVerifyModalHandlers();
-            setupCategoryFilterButtons();
-            checkAndRunPendingUpload();
+            setupAuthListener(); 
+            setupMenuHandlers(); 
+            setupModalHandlers(); 
+            setupVerifyModalHandlers(); 
+            setupCategoryFilterButtons(); 
+            setupAuthPromptEvents();
+            setupEditProfileHandlers();
+            
+            requestAnimationFrame(() => {
+                initLiveClock();
+                checkAndRunPendingUpload();
+            });
         });
 
-        /* Toast Popup Notification */
-        function showToast(message) {
-            const toast = document.getElementById('toastNotification');
-            const toastMsg = document.getElementById('toastMessage');
-            if (!toast || !toastMsg) return;
+        function setupEditProfileHandlers() {
+            const editModal = document.getElementById('editProfileModal'),
+                  openBtn = document.getElementById('openEditProfileBtn'),
+                  closeBtn = document.getElementById('closeEditProfileBtn'),
+                  cancelBtn = document.getElementById('cancelEditProfileBtn'),
+                  saveBtn = document.getElementById('saveProfileBtn'),
+                  avatarPreview = document.getElementById('editAvatarPreview'),
+                  fileInput = document.getElementById('avatarFileInput'),
+                  triggerBtn = document.getElementById('triggerAvatarUpload');
 
-            toastMsg.innerText = message;
-            toast.classList.add('show');
+            const openEdit = () => {
+                if (!isLoggedInUser) { showAuthModal(); return; }
+                const cachedUser = localStorage.getItem('delala_cached_profile');
+                let currentData = {};
+                try { currentData = cachedUser ? JSON.parse(cachedUser) : {}; } catch(e){}
 
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+                document.getElementById('editNameInput').value = document.getElementById('userDisplayName').innerText || "";
+                document.getElementById('editHandleInput').value = (document.getElementById('userHandle').innerText || "").replace(/^@/, '');
+                avatarPreview.src = document.getElementById('userAvatarImg').src;
+                selectedAvatarFile = null;
+
+                editModal.classList.add('active'); editModal.style.display = 'flex';
+            };
+
+            const closeEdit = () => { editModal.classList.remove('active'); editModal.style.display = 'none'; };
+
+            openBtn?.addEventListener('click', openEdit);
+            document.getElementById('avatarClickGroup')?.addEventListener('click', () => {
+                if (isLoggedInUser) openEdit();
+            });
+            closeBtn?.addEventListener('click', closeEdit);
+            cancelBtn?.addEventListener('click', closeEdit);
+
+            triggerBtn?.addEventListener('click', () => fileInput.click());
+            avatarPreview?.addEventListener('click', () => fileInput.click());
+
+            fileInput?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedAvatarFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => avatarPreview.src = evt.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            saveBtn?.addEventListener('click', async () => {
+                if (!currentActiveUserId) return;
+                const newName = document.getElementById('editNameInput').value.trim();
+                const newHandle = document.getElementById('editHandleInput').value.trim().replace(/^@/, '');
+
+                if (!newName) { showToast("Display name cannot be empty."); return; }
+
+                saveBtn.disabled = true; saveBtn.innerText = "Saving...";
+
+                try {
+                    let photoURL = document.getElementById('userAvatarImg').src;
+
+                    if (selectedAvatarFile) {
+                        const avatarRef = storageRef(storage, `avatars/${currentActiveUserId}_${Date.now()}`);
+                        await uploadBytes(avatarRef, selectedAvatarFile);
+                        photoURL = await getDownloadURL(avatarRef);
+                    }
+
+                    const nameParts = newName.split(/\s+/);
+                    const firstName = nameParts[0] || "";
+                    const middleName = nameParts.slice(1).join(" ") || "";
+
+                    const profileUpdate = {
+                        displayName: newName,
+                        firstName: firstName,
+                        middleName: middleName,
+                        username: newHandle,
+                        photoURL: photoURL,
+                        profilePicture: photoURL
+                    };
+
+                    await update(ref(db, `users/${currentActiveUserId}`), profileUpdate);
+
+                    if (auth.currentUser) {
+                        await updateProfile(auth.currentUser, { displayName: newName, photoURL: photoURL });
+                    }
+
+                    const cached = localStorage.getItem('delala_cached_profile');
+                    let currentObj = cached ? JSON.parse(cached) : {};
+                    const updatedProfile = { ...currentObj, ...profileUpdate };
+
+                    localStorage.setItem('delala_cached_profile', JSON.stringify(updatedProfile));
+                    applyProfileToDOM(updatedProfile);
+
+                    closeEdit();
+                    showToast("Profile updated successfully!");
+                } catch (err) {
+                    showToast("Failed to update profile.");
+                } finally {
+                    saveBtn.disabled = false; saveBtn.innerText = "Save Changes";
+                }
+            });
         }
 
-        function checkAndRunPendingUpload() {
-            if (isUploadingActive) return;
+        function showAuthModal() {
+            const overlay = document.getElementById('authPromptModal');
+            if (overlay) { overlay.classList.add('active'); overlay.style.display = 'flex'; }
+        }
 
+        function closeAuthModal() {
+            const overlay = document.getElementById('authPromptModal');
+            if (overlay) { overlay.classList.remove('active'); overlay.style.display = 'none'; }
+        }
+
+        function setupAuthPromptEvents() {
+            document.getElementById('closeAuthModalBtn')?.addEventListener('click', closeAuthModal);
+            document.getElementById('authPromptModal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'authPromptModal') closeAuthModal();
+            });
+            document.getElementById('nav-post')?.addEventListener('click', (e) => {
+                if (!isLoggedInUser) { e.preventDefault(); showAuthModal(); }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification'), toastMsg = document.getElementById('toastMessage');
+            if (!toast || !toastMsg) return;
+            toastMsg.innerText = message; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function checkAndRunPendingUpload() {
+            if (isUploadingActive) return;
             const rawTask = localStorage.getItem('delalaActiveUpload');
             if (!rawTask) return;
-
             localStorage.removeItem('delalaActiveUpload');
-            isUploadingActive = true; 
+            isUploadingActive = true;
 
             let uploadTask;
-            try { 
-                uploadTask = JSON.parse(rawTask); 
-            } catch(e) { 
-                isUploadingActive = false; 
-                return; 
-            }
+            try { uploadTask = JSON.parse(rawTask); } catch(e) { isUploadingActive = false; return; }
 
-            const card = document.getElementById('uploadProgressCard');
-            const fill = document.getElementById('uploadProgressFill');
-            const percent = document.getElementById('uploadProgressPercent');
-            const title = document.getElementById('uploadCardTitle');
-
-            if (!card || !uploadTask.payload) {
-                isUploadingActive = false;
-                return;
-            }
+            const card = document.getElementById('uploadProgressCard'), fill = document.getElementById('uploadProgressFill'), percent = document.getElementById('uploadProgressPercent'), title = document.getElementById('uploadCardTitle');
+            if (!card || !uploadTask.payload) { isUploadingActive = false; return; }
 
             card.classList.add('active');
             title.innerText = uploadTask.payload.title ? `Publishing: ${uploadTask.payload.title}` : "Publishing Listing...";
 
-            let progress = 5;
-            fill.style.width = `${progress}%`;
-            percent.innerText = `${progress}%`;
+            let progress = 5, hasUploaded = false;
+            fill.style.width = `${progress}%`; percent.innerText = `${progress}%`;
 
             const progressTimer = setInterval(async () => {
                 progress += Math.floor(Math.random() * 15) + 8;
-
-                if (progress >= 90) {
-                    clearInterval(progressTimer);
-                    progress = 90;
-                    fill.style.width = `${progress}%`;
-                    percent.innerText = `${progress}%`;
-
+                if (progress >= 100) {
+                    progress = 100; clearInterval(progressTimer);
+                    if (hasUploaded) return;
+                    hasUploaded = true;
+                    fill.style.width = '100%'; percent.innerText = '100%';
                     try {
-                        const postsRef = ref(db, 'posts');
-                        const newPostRef = push(postsRef);
-                        const finalPayload = {
-                            ...uploadTask.payload,
-                            id: newPostRef.key,
-                            category: uploadTask.payload.rentalType || "Rental"
-                        };
-
-                        await set(newPostRef, finalPayload);
-
-                        fill.style.width = '100%';
-                        percent.innerText = '100%';
+                        const newPostRef = push(ref(db, 'posts'));
+                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: uploadTask.payload.rentalType || uploadTask.payload.category || "Rental" });
                         title.innerText = "Published Successfully!";
                         showToast("Listing published successfully!");
-
-                        setTimeout(() => {
-                            card.classList.remove('active');
-                            isUploadingActive = false;
-                        }, 1200);
+                        setTimeout(() => { card.classList.remove('active'); isUploadingActive = false; }, 1200);
                     } catch (error) {
-                        console.error("Firebase write error:", error);
-                        title.innerText = "Upload Failed. Please try again.";
-                        percent.innerText = "Error";
-                        isUploadingActive = false;
+                        title.innerText = "Upload Failed. Please try again."; percent.innerText = "Error"; isUploadingActive = false;
                         showToast("Upload failed. Please try again.");
                     }
                 } else {
-                    fill.style.width = `${progress}%`;
-                    percent.innerText = `${progress}%`;
+                    fill.style.width = `${progress}%`; percent.innerText = `${progress}%`;
                 }
             }, 250);
         }
 
         function setupCategoryFilterButtons() {
-            const buttons = document.querySelectorAll('.category-tabs-bar .category-pill-btn');
-            buttons.forEach(btn => {
+            document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    
-                    buttons.forEach(b => b.classList.remove('active'));
+                    if (!isLoggedInUser) { showAuthModal(); return; }
+                    document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-
                     currentSelectedCategory = btn.getAttribute('data-category');
                     renderFilteredGrid();
                 });
@@ -1064,187 +518,96 @@
         }
 
         function setupModalHandlers() {
-            const closeBtn = document.getElementById('closePreviewModalBtn');
             const overlay = document.getElementById('postPreviewModal');
-
-            closeBtn.addEventListener('click', closePreviewModal);
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) closePreviewModal();
-            });
+            document.getElementById('closePreviewModalBtn').addEventListener('click', closePreviewModal);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closePreviewModal(); });
         }
 
         function closePreviewModal() {
             const overlay = document.getElementById('postPreviewModal');
-            overlay.classList.remove('active');
-            overlay.style.display = 'none';
-
-            if (previewMapInstance) {
-                previewMapInstance.remove();
-                previewMapInstance = null;
-            }
+            overlay.classList.remove('active'); overlay.style.display = 'none';
+            if (previewMapInstance) { previewMapInstance.remove(); previewMapInstance = null; }
         }
 
-        /* --- VERIFICATION MODAL HANDLERS --- */
         function setupVerifyModalHandlers() {
-            const closeBtn = document.getElementById('closeVerifyModalBtn');
-            const cancelBtn = document.getElementById('cancelVerifyBtn');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const overlay = document.getElementById('verifyDeleteModal');
-            const inputField = document.getElementById('verifyPhonePinInput');
-
-            closeBtn.addEventListener('click', closeVerifyModal);
-            cancelBtn.addEventListener('click', closeVerifyModal);
-            
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) closeVerifyModal();
-            });
-
-            confirmBtn.addEventListener('click', executePostDeletion);
-
-            inputField.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    executePostDeletion();
-                }
-            });
+            const overlay = document.getElementById('verifyDeleteModal'), inputField = document.getElementById('verifyPhonePinInput');
+            document.getElementById('closeVerifyModalBtn').addEventListener('click', closeVerifyModal);
+            document.getElementById('cancelVerifyBtn').addEventListener('click', closeVerifyModal);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeVerifyModal(); });
+            document.getElementById('confirmDeleteBtn').addEventListener('click', executePostDeletion);
+            inputField.addEventListener('keydown', (e) => { if (e.key === 'Enter') executePostDeletion(); });
         }
 
         function openVerifyModal(post) {
             pendingPostToDelete = post;
-
-            const overlay = document.getElementById('verifyDeleteModal');
-            const inputField = document.getElementById('verifyPhonePinInput');
-            const errorMsg = document.getElementById('verifyErrorMsg');
-
-            inputField.value = '';
-            errorMsg.style.display = 'none';
-
-            overlay.classList.add('active');
-            overlay.style.display = 'flex';
-
+            const overlay = document.getElementById('verifyDeleteModal'), inputField = document.getElementById('verifyPhonePinInput');
+            inputField.value = ''; document.getElementById('verifyErrorMsg').style.display = 'none';
+            overlay.classList.add('active'); overlay.style.display = 'flex';
             setTimeout(() => inputField.focus(), 150);
         }
 
         function closeVerifyModal() {
             const overlay = document.getElementById('verifyDeleteModal');
-            overlay.classList.remove('active');
-            overlay.style.display = 'none';
+            overlay.classList.remove('active'); overlay.style.display = 'none';
             pendingPostToDelete = null;
         }
 
-        // Exact User PIN Verification & Delete Post
         async function executePostDeletion() {
             if (!pendingPostToDelete) return;
-
-            const inputField = document.getElementById('verifyPhonePinInput');
-            const errorMsg = document.getElementById('verifyErrorMsg');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const inputVal = inputField.value.trim();
+            const inputField = document.getElementById('verifyPhonePinInput'), errorMsg = document.getElementById('verifyErrorMsg'), confirmBtn = document.getElementById('confirmDeleteBtn'), inputVal = inputField.value.trim();
 
             if (!inputVal || !/^\d{6}$/.test(inputVal)) {
-                errorMsg.innerText = "Please enter your valid 6-digit Security PIN.";
-                errorMsg.style.display = 'block';
-                return;
+                errorMsg.innerText = "Please enter your valid 6-digit Security PIN."; errorMsg.style.display = 'block'; return;
             }
 
             const activePhone = localStorage.getItem('auth_session_phone') || currentActiveUserId;
             if (!activePhone) {
-                errorMsg.innerText = "User session expired. Please log in again.";
-                errorMsg.style.display = 'block';
-                return;
+                errorMsg.innerText = "User session expired. Please log in again."; errorMsg.style.display = 'block'; return;
             }
 
             const cleanPhone = String(activePhone).replace(/\D/g, '').replace(/^0+/, '');
-
             try {
-                confirmBtn.disabled = true;
-                confirmBtn.innerText = "Verifying...";
-                errorMsg.style.display = 'none';
+                confirmBtn.disabled = true; confirmBtn.innerText = "Verifying..."; errorMsg.style.display = 'none';
+                let userRef = ref(db, `users/${cleanPhone}`), snapshot = await get(userRef);
 
-                // 1. Fetch User Profile from Firebase to get registered securityPin
-                let userRef = ref(db, `users/${cleanPhone}`);
-                let snapshot = await get(userRef);
+                if (!snapshot.exists() && currentActiveUserId) { snapshot = await get(ref(db, `users/${currentActiveUserId}`)); }
+                if (!snapshot.exists()) { errorMsg.innerText = "User profile not found. Please log in again."; errorMsg.style.display = 'block'; return; }
 
-                if (!snapshot.exists() && currentActiveUserId) {
-                    userRef = ref(db, `users/${currentActiveUserId}`);
-                    snapshot = await get(userRef);
-                }
+                const userData = snapshot.val(), storedPinHash = userData.securityPin || userData.pin || '', enteredPinHash = await hashPin(inputVal);
 
-                if (!snapshot.exists()) {
-                    errorMsg.innerText = "User profile not found. Please log in again.";
-                    errorMsg.style.display = 'block';
-                    return;
-                }
-
-                const userData = snapshot.val();
-                const storedPinHash = userData.securityPin || userData.pin || '';
-                const enteredPinHash = await hashPin(inputVal);
-
-                // 2. Validate exact PIN match
                 if (storedPinHash !== enteredPinHash && storedPinHash !== inputVal) {
-                    errorMsg.innerText = "Incorrect Security PIN code.";
-                    errorMsg.style.display = 'block';
-                    return;
+                    errorMsg.innerText = "Incorrect Security PIN code."; errorMsg.style.display = 'block'; return;
                 }
 
-                // 3. Perform Post Deletion in Firebase Realtime Database
                 confirmBtn.innerText = "Deleting...";
                 await remove(ref(db, `posts/${pendingPostToDelete.id}`));
-
-                closeVerifyModal();
-                closePreviewModal();
-                showToast("Post deleted successfully!");
-
+                closeVerifyModal(); closePreviewModal(); showToast("Post deleted successfully!");
             } catch (err) {
-                console.error("Delete Error:", err);
-                errorMsg.innerText = "Failed to delete post: " + (err.message || "Network error");
-                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Failed to delete post: " + (err.message || "Network error"); errorMsg.style.display = 'block';
             } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.innerText = "Delete Post";
+                confirmBtn.disabled = false; confirmBtn.innerText = "Delete Post";
             }
         }
 
         function initLiveClock() {
             const clockNode = document.getElementById('topCornerLiveClock');
             if (!clockNode) return;
-
-            const updateTime = () => {
-                const now = new Date();
-                clockNode.innerText = now.toLocaleTimeString(undefined, {
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                }).toLowerCase();
-            };
-            updateTime();
-            setInterval(updateTime, 1000);
+            const updateTime = () => clockNode.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase();
+            updateTime(); setInterval(updateTime, 1000);
         }
 
         function setupMenuHandlers() {
-            const menuBtn = document.getElementById('openMenuBtn');
-            const dropdown = document.getElementById('profileMenuDropdown');
-            const logoutBtn = document.getElementById('logoutBtn');
-
-            menuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle('show');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                }
-            });
-
-            logoutBtn.addEventListener('click', async () => {
+            const menuBtn = document.getElementById('openMenuBtn'), dropdown = document.getElementById('profileMenuDropdown');
+            menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) dropdown.classList.remove('show'); });
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
                 try {
-                    localStorage.setItem('user_logged_out', 'true');
-                    localStorage.removeItem('auth_session_phone');
-                    sessionStorage.clear();
+                    localStorage.setItem('user_logged_out', 'true'); 
+                    localStorage.removeItem('auth_session_phone'); 
+                    localStorage.removeItem('delala_cached_profile');
+                    sessionStorage.clear(); 
                     await signOut(auth);
-                } catch (error) {
-                    console.error("Sign out error:", error);
-                } finally {
-                    window.location.href = 'rental.html';
-                }
+                } catch (error) {} finally { window.location.href = 'rental.html'; }
             });
         }
 
@@ -1256,149 +619,90 @@
         }
 
         function renderLoggedOutGuestState() {
-            const displayNameNode = document.getElementById('userDisplayName');
-            if (displayNameNode) displayNameNode.innerHTML = 'Guest User';
-            
+            isLoggedInUser = false;
+            localStorage.removeItem('delala_cached_profile');
+            if (document.getElementById('userDisplayName')) document.getElementById('userDisplayName').innerText = 'Guest User';
             document.getElementById('userHandle').innerText = "@guest";
             document.getElementById('userAvatarImg').src = 's.png';
             document.getElementById('followingCount').innerText = '0';
             document.getElementById('followersCount').innerText = '0';
             document.getElementById('likesCount').innerText = '0';
-
-            document.getElementById('postsGridContainer').innerHTML = `
-                <div class="empty-grid-msg">No account logged in. Please sign in again.</div>
-            `;
+            
+            const gridContainer = document.getElementById('postsGridContainer');
+            gridContainer.innerHTML = `<div class="empty-grid-msg" id="loginGridBtn">Please login or create an account to view profile posts.</div>`;
+            document.getElementById('loginGridBtn')?.addEventListener('click', showAuthModal);
+            
+            showAuthModal();
         }
 
         function evaluateAuthState(user) {
-            const isLoggedOut = localStorage.getItem('user_logged_out') === 'true';
             const sessionPhone = localStorage.getItem('auth_session_phone');
-
-            if (user) {
-                localStorage.removeItem('user_logged_out');
-                fetchUserDataAndPosts(user.uid, user);
-            } else if (sessionPhone) {
-                localStorage.removeItem('user_logged_out');
-                fetchUserByPhone(sessionPhone);
-            } else if (isLoggedOut) {
-                renderLoggedOutGuestState();
-            } else {
-                renderLoggedOutGuestState();
-            }
+            if (user) { isLoggedInUser = true; localStorage.removeItem('user_logged_out'); fetchUserDataAndPosts(user.uid, user); }
+            else if (sessionPhone) { isLoggedInUser = true; localStorage.removeItem('user_logged_out'); fetchUserByPhone(sessionPhone); }
+            else { renderLoggedOutGuestState(); }
         }
 
         function setupAuthListener() {
-            onAuthStateChanged(auth, (user) => {
-                evaluateAuthState(user);
-            });
-
+            onAuthStateChanged(auth, evaluateAuthState);
             window.addEventListener('storage', (e) => {
-                if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
-                    evaluateAuthState(auth.currentUser);
-                }
+                if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') evaluateAuthState(auth.currentUser);
             });
         }
 
         async function fetchUserByPhone(phone) {
             const cleanPhone = phone.replace(/^0+/, '');
-            const userRef = ref(db, `users/${cleanPhone}`);
             try {
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    renderUserProfile(snapshot.val(), cleanPhone);
-                    return;
-                }
-
-                const phoneQuery = query(ref(db, 'users'), orderByChild('cleanPhone'), equalTo(cleanPhone));
-                const querySnap = await get(phoneQuery);
+                const snapshot = await get(ref(db, `users/${cleanPhone}`));
+                if (snapshot.exists()) { renderUserProfile(snapshot.val(), cleanPhone); return; }
+                const querySnap = await get(query(ref(db, 'users'), orderByChild('cleanPhone'), equalTo(cleanPhone)));
                 if (querySnap.exists()) {
-                    const data = querySnap.val();
-                    const key = Object.keys(data)[0];
+                    const data = querySnap.val(), key = Object.keys(data)[0];
                     renderUserProfile(data[key], key);
-                } else {
-                    renderLoggedOutGuestState();
-                }
-            } catch (err) {
-                renderLoggedOutGuestState();
-            }
+                } else renderLoggedOutGuestState();
+            } catch (err) { renderLoggedOutGuestState(); }
         }
 
         function renderUserProfile(userData, userId) {
+            isLoggedInUser = true;
             currentActiveUserId = userId;
-            let firstName = userData.firstName || userData.first_name || "";
-            let middleName = userData.middleName || userData.middle_name || userData.fatherName || "";
-
-            if (!firstName && userData.fullName) {
-                const nameParts = userData.fullName.trim().split(/\s+/);
-                firstName = nameParts[0] || "";
-                middleName = nameParts[1] || "";
-            }
-
-            let displayName = `${firstName} ${middleName}`.trim() || userData.displayName || "User";
-            const username = "@" + (firstName ? firstName.toLowerCase() : "user");
-
-            const displayNameNode = document.getElementById('userDisplayName');
-            if (displayNameNode) displayNameNode.childNodes[0].nodeValue = displayName + " ";
-            
-            document.getElementById('userHandle').innerText = username;
-
-            if (userData.photoURL || userData.profilePicture) {
-                document.getElementById('userAvatarImg').src = userData.photoURL || userData.profilePicture;
-            }
-
-            document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
-            document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
-
+            localStorage.setItem('delala_cached_profile', JSON.stringify(userData));
+            applyProfileToDOM(userData);
             fetchPostsForUser(userId);
         }
 
         function fetchUserDataAndPosts(userId, authUser) {
+            isLoggedInUser = true;
             currentActiveUserId = userId;
-            const userRef = ref(db, `users/${userId}`);
-            onValue(userRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    renderUserProfile(snapshot.val(), userId);
+            
+            get(ref(db, `users/${userId}`)).then((snapshot) => {
+                if (snapshot.exists()) { 
+                    renderUserProfile(snapshot.val(), userId); 
                 } else {
-                    const nameParts = authUser.displayName ? authUser.displayName.split(' ') : [];
-                    const firstName = nameParts[0] || "User";
-                    const displayName = `${firstName} ${nameParts[1] || ""}`.trim();
-
-                    const displayNameNode = document.getElementById('userDisplayName');
-                    if (displayNameNode) displayNameNode.childNodes[0].nodeValue = displayName + " ";
-                    
-                    document.getElementById('userHandle').innerText = "@" + firstName.toLowerCase();
-                    if (authUser.photoURL) document.getElementById('userAvatarImg').src = authUser.photoURL;
-                    
+                    const parts = authUser.displayName ? authUser.displayName.split(' ') : [], firstName = parts[0] || "User";
+                    const fallbackProfile = { displayName: authUser.displayName || firstName, photoURL: authUser.photoURL || 's.png', following: 0, followers: 0 };
+                    localStorage.setItem('delala_cached_profile', JSON.stringify(fallbackProfile));
+                    applyProfileToDOM(fallbackProfile);
                     fetchPostsForUser(userId);
                 }
-            });
+            }).catch(() => fetchPostsForUser(userId));
         }
 
         function fetchPostsForUser(userId) {
-            if (postsUnsubscribe) {
-                postsUnsubscribe();
-            }
-
-            const postsRef = ref(db, 'posts');
-            postsUnsubscribe = onValue(postsRef, (snapshot) => {
+            if (postsUnsubscribe) postsUnsubscribe();
+            postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
                 allUserPosts = [];
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     let totalLikes = 0;
-
                     Object.keys(data).forEach(key => {
                         const item = data[key];
-                        if (typeof item === 'object' && item !== null) {
-                            if (item.userId === userId || item.authorId === userId || item.postedByPhone === userId || item.phone === userId) {
-                                allUserPosts.push({ id: key, ...item });
-                                totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0);
-                            }
+                        if (typeof item === 'object' && item !== null && (item.userId === userId || item.authorId === userId || item.postedByPhone === userId || item.phone === userId)) {
+                            allUserPosts.push({ id: key, ...item });
+                            totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0);
                         }
                     });
-
                     document.getElementById('likesCount').innerText = formatCount(totalLikes);
-                    allUserPosts.reverse();
-                    renderFilteredGrid();
+                    allUserPosts.reverse(); renderFilteredGrid();
                 } else {
                     document.getElementById('postsGridContainer').innerHTML = '<div class="empty-grid-msg">No posts available.</div>';
                 }
@@ -1407,97 +711,54 @@
 
         function isPostInCategory(post, targetCategory) {
             if (targetCategory === 'all') return true;
+            const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim(),
+                  titleVal = String(post.title || '').toLowerCase(),
+                  descVal = String(post.body || post.description || '').toLowerCase(),
+                  target = targetCategory.toLowerCase().trim();
 
-            const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim();
-            const titleVal = String(post.title || '').toLowerCase();
-            const descVal = String(post.body || post.description || '').toLowerCase();
-            const target = targetCategory.toLowerCase().trim();
-
-            if (target === 'rental') {
-                return categoryVal === 'rental' || categoryVal === 'rent' || 
-                       titleVal.includes('rent') || descVal.includes('rent');
-            }
-
-            if (target === 'selling') {
-                return categoryVal === 'selling' || categoryVal === 'sell' || categoryVal === 'sale' || 
-                       titleVal.includes('sell') || titleVal.includes('sale') || descVal.includes('sell');
-            }
-
-            if (target === 'vacancy') {
-                return categoryVal === 'vacancy' || categoryVal === 'job' || categoryVal === 'job vacancy' || 
-                       titleVal.includes('job') || titleVal.includes('vacancy') || descVal.includes('job');
-            }
-
+            if (target === 'rental') return categoryVal === 'rental' || categoryVal === 'rent' || titleVal.includes('rent') || descVal.includes('rent');
+            if (target === 'selling') return ['selling', 'sell', 'sale'].includes(categoryVal) || titleVal.includes('sell') || titleVal.includes('sale') || descVal.includes('sell');
+            if (target === 'vacancy') return ['vacancy', 'job', 'job vacancy'].includes(categoryVal) || titleVal.includes('job') || titleVal.includes('vacancy') || descVal.includes('job');
             return categoryVal === target;
         }
 
         function renderFilteredGrid() {
             const container = document.getElementById('postsGridContainer');
             container.innerHTML = '';
-
             const filteredPosts = allUserPosts.filter(post => isPostInCategory(post, currentSelectedCategory));
 
             if (filteredPosts.length > 0) {
+                const fragment = document.createDocumentFragment();
                 filteredPosts.forEach(post => {
-                    const views = post.views || post.viewCount || 0;
-                    const mediaSrc = (post.images && post.images.length > 0) ? post.images[0] : (post.imageUrl || post.image || post.mediaUrl || '40789.png');
-
-                    const gridCell = document.createElement('div');
+                    const views = post.views || post.viewCount || 0,
+                          mediaSrc = (post.images && post.images.length > 0) ? post.images[0] : (post.imageUrl || post.image || post.mediaUrl || '40789.png'),
+                          gridCell = document.createElement('div');
                     gridCell.className = 'post-grid-item';
-                    gridCell.innerHTML = `
-                        <img src="${mediaSrc}" alt="Post">
-                        <div class="post-views-count">
-                            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            <span>${formatCount(views)}</span>
-                        </div>
-                    `;
-                    
+                    gridCell.innerHTML = `<img src="${mediaSrc}" alt="Post" loading="lazy"><div class="post-views-count"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>${formatCount(views)}</span></div>`;
                     gridCell.addEventListener('click', () => openPreviewModal(post));
-                    container.appendChild(gridCell);
+                    fragment.appendChild(gridCell);
                 });
+                container.appendChild(fragment);
             } else {
                 container.innerHTML = `<div class="empty-grid-msg">No ${currentSelectedCategory === 'all' ? '' : currentSelectedCategory} posts found.</div>`;
             }
         }
 
         function openPreviewModal(post) {
-            const modalBody = document.getElementById('modalPreviewBody');
-            const images = post.images || (post.imageUrl ? [post.imageUrl] : []);
-            
-            let imagesHTML = '';
-            if (images.length > 0) {
-                imagesHTML = `
-                <div class="preview-section">
-                    <div class="preview-section-title">ATTACHED IMAGES</div>
-                    <div style="display:flex; gap:8px; overflow-x:auto; padding-top:4px;">
-                        ${images.map(img => `<img src="${img}" style="width:72px; height:72px; border-radius:10px; object-fit:cover; border:1px solid #E2E8F0;">`).join('')}
-                    </div>
-                </div>`;
-            }
-
-            const loc = post.locationDetails || {};
-            const contact = post.contactInfo || {};
+            const modalBody = document.getElementById('modalPreviewBody'),
+                  images = post.images || (post.imageUrl ? [post.imageUrl] : []),
+                  imagesHTML = images.length > 0 ? `<div class="preview-section"><div class="preview-section-title">ATTACHED IMAGES</div><div style="display:flex; gap:8px; overflow-x:auto; padding-top:4px;">${images.map(img => `<img src="${img}" style="width:72px; height:72px; border-radius:10px; object-fit:cover; border:1px solid #E2E8F0;">`).join('')}</div></div>` : '',
+                  loc = post.locationDetails || {}, contact = post.contactInfo || {};
 
             modalBody.innerHTML = `
                 ${imagesHTML}
                 <div class="preview-section">
                     <div class="preview-section-title">LISTING DETAILS</div>
                     <div style="font-size:14px; font-weight:800; color:#0F172A;">${post.title || 'Untitled Listing'}</div>
-                    <div style="font-size:13px; font-weight:800; color:#2563EB; margin-top:2px;">
-                        ${post.price ? post.price + ' ETB' + (post.paymentPeriod ? ' / ' + post.paymentPeriod : '') : 'Price Negotiable'}
-                    </div>
+                    <div style="font-size:13px; font-weight:800; color:#2563EB; margin-top:2px;">${post.price ? post.price + ' ETB' + (post.paymentPeriod ? ' / ' + post.paymentPeriod : '') : 'Price Negotiable'}</div>
                     <p style="margin:6px 0 0; color:#64748B; font-size:11px; line-height:1.4;">${post.body || post.description || 'No description provided.'}</p>
                 </div>
-
-                ${(loc.city || post.location) ? `
-                <div class="preview-section">
-                    <div class="preview-section-title">LOCATION DETAILS</div>
-                    ${loc.city ? `<div style="font-weight:700; color:#0F172A;">${loc.city}, ${loc.region || ''} (${loc.country || ''})</div>` : ''}
-                    ${loc.zone ? `<div style="color:#64748B; margin-top:2px;">${loc.zone} • ${loc.subcity || ''}</div>` : ''}
-                    ${loc.uniqueName ? `<div style="color:#64748B; font-style:italic;">Landmark: ${loc.uniqueName}</div>` : ''}
-                    ${post.location ? `<div id="userPreviewMap" class="preview-map-box"></div>` : ''}
-                </div>` : ''}
-
+                ${(loc.city || post.location) ? `<div class="preview-section"><div class="preview-section-title">LOCATION DETAILS</div>${loc.city ? `<div style="font-weight:700; color:#0F172A;">${loc.city}, ${loc.region || ''} (${loc.country || ''})</div>` : ''}${loc.zone ? `<div style="color:#64748B; margin-top:2px;">${loc.zone} • ${loc.subcity || ''}</div>` : ''}${loc.uniqueName ? `<div style="color:#64748B; font-style:italic;">Landmark: ${loc.uniqueName}</div>` : ''}${post.location ? `<div id="userPreviewMap" class="preview-map-box"></div>` : ''}</div>` : ''}
                 <div class="preview-section">
                     <div class="preview-section-title">CONTACT INFORMATION</div>
                     ${contact.phone || post.phone || post.postedByPhone ? `<div>📞 Phone: <strong>${contact.phone || post.phone || post.postedByPhone}</strong></div>` : ''}
@@ -1506,48 +767,26 @@
                     ${contact.email ? `<div>✉️ Email: <strong>${contact.email}</strong></div>` : ''}
                     ${contact.instagram ? `<div>📷 Instagram: <strong>${contact.instagram}</strong></div>` : ''}
                 </div>
-
-                <!-- DELETE BUTTON SECTION -->
                 <div class="preview-section" style="border-color: #FEE2E2; background: #FEF2F2;">
                     <button type="button" class="delete-post-btn" id="deletePostBtn">
                         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         <span>Delete Post</span>
                     </button>
-                </div>
-            `;
+                </div>`;
 
             const previewModal = document.getElementById('postPreviewModal');
-            previewModal.classList.add('active');
-            previewModal.style.display = 'flex';
-
-            // Attach click handler for Delete button -> Opens PIN Verification Modal
-            const deleteBtn = document.getElementById('deletePostBtn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => openVerifyModal(post));
-            }
+            previewModal.classList.add('active'); previewModal.style.display = 'flex';
+            document.getElementById('deletePostBtn')?.addEventListener('click', () => openVerifyModal(post));
 
             if (post.location && post.location.latitude && post.location.longitude) {
-                setTimeout(() => {
-                    initPreviewMap(post.location.latitude, post.location.longitude);
-                }, 200);
+                setTimeout(() => initPreviewMap(post.location.latitude, post.location.longitude), 200);
             }
         }
 
         function initPreviewMap(lat, lng) {
             if (previewMapInstance) previewMapInstance.remove();
-
-            previewMapInstance = L.map('userPreviewMap', {
-                attributionControl: false,
-                zoomControl: false,
-                dragging: false,
-                scrollWheelZoom: false,
-                touchZoom: false
-            }).setView([lat, lng], 15);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19
-            }).addTo(previewMapInstance);
-
+            previewMapInstance = L.map('userPreviewMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, touchZoom: false }).setView([lat, lng], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(previewMapInstance);
             L.marker([lat, lng]).addTo(previewMapInstance);
         }
     </script>
