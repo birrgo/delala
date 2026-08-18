@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Hulum - Rental Article Details</title>
+    
+    <!-- PWA Manifest & iOS Metalink Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hulum">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
+    
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -379,9 +388,108 @@
             padding: 0;
             cursor: pointer;
         }
+
+        /* HARD BLOCK PWA FORCE OVERLAY */
+        #pwaInstallGate {
+            position: fixed;
+            inset: 0;
+            background: #081B38;
+            color: #FFFFFF;
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        #pwaInstallGate .pwa-card {
+            background: #0F2C59;
+            border: 1px solid #1E40AF;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pwa-icon {
+            width: 72px;
+            height: 72px;
+            background: #2563EB;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .pwa-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: #FFFFFF;
+            stroke-width: 2.2;
+            fill: none;
+        }
+
+        .pwa-install-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 18px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .ios-instructions {
+            display: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: #93C5FD;
+            text-align: left;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
+
+    <!-- HARD BLOCKING PWA INSTALLATION GATE -->
+    <div id="pwaInstallGate">
+        <div class="pwa-card">
+            <div class="pwa-icon">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+            </div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">App Access Only</h2>
+            <p style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5;">
+                This application cannot be accessed directly inside a web browser. Please install and launch the <strong>Hulum App</strong> on your home screen to proceed.
+            </p>
+            
+            <button id="pwaInstallBtn" class="pwa-install-btn">📲 Install App Now</button>
+            
+            <div id="iosInstructionBox" class="ios-instructions">
+                <strong>iPhone / iPad Users:</strong><br>
+                1. Tap the <strong>Share</strong> button <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> at the bottom of Safari.<br>
+                2. Scroll down & select <strong>"Add to Home Screen"</strong>.<br>
+                3. Open the installed app from your home screen.
+            </div>
+        </div>
+    </div>
 
     <div class="app-view">
         <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -470,6 +578,62 @@
             </div>
         </div>
     </div>
+
+    <!-- PWA ENFORCER LOGIC -->
+    <script>
+        (function enforcePWAMode() {
+            let deferredPrompt = null;
+
+            // Detect if running inside standalone mode
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                 window.navigator.standalone === true ||
+                                 document.referrer.includes('android-app://');
+
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (!isStandalone) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const gate = document.getElementById('pwaInstallGate');
+                    const installBtn = document.getElementById('pwaInstallBtn');
+                    const iosBox = document.getElementById('iosInstructionBox');
+
+                    // Block web access
+                    if (gate) gate.style.display = 'flex';
+
+                    if (isIOS && iosBox) {
+                        iosBox.style.display = 'block';
+                        if (installBtn) installBtn.style.display = 'none';
+                    }
+
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        deferredPrompt = e;
+                    });
+
+                    if (installBtn) {
+                        installBtn.addEventListener('click', async () => {
+                            if (deferredPrompt) {
+                                deferredPrompt.prompt();
+                                const { outcome } = await deferredPrompt.userChoice;
+                                if (outcome === 'accepted') {
+                                    deferredPrompt = null;
+                                }
+                            } else {
+                                alert('To install, use your browser options menu and tap "Add to Home Screen" or "Install App".');
+                            }
+                        });
+                    }
+                });
+            }
+        })();
+
+        // Register dummy/minimal service worker to fulfill PWA criteria
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
