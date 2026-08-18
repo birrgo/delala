@@ -179,7 +179,7 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .btn-next {
+        .btn-next {
             flex: 1;
             height: 46px;
             padding: 0 13px;
@@ -192,10 +192,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark); 
+            color: #FFFFFF; 
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -588,10 +588,6 @@
                     </div>
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBack2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -748,11 +744,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             refreshFormState();
-
-            document.getElementById('btnBack2').addEventListener('click', () => {
-                saveDraftToSession();
-                window.location.href = 'rentalpost.html';
-            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;

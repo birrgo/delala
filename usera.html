@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala | Activity Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            --primary-delala: #0F172A;
+            --primary-dark: #0F172A;
+            --accent-silver: #8a99ad;
+            --accent-delala-gold: #3b82f6;
+            --text-main: #0F172A;
+            --text-dark: #0F172A; 
+            --text-muted: #64748B; 
+            --bg-body: #F8FAFC;
+            --bg-light: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --online-color: #10b981;
+            --offline-color: #ef4444;
+            --unpaid-card-bg: #ffffff;
+            --unpaid-card-border: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Standard Top Nav Header */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        
+        .btn-circle-back {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            border: 1px solid var(--border-color);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* App View & Container */
+        .app-view {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 16px 16px 90px 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 55px);
+            position: relative;
+        }
+
+        .main-body-content {
+            flex-grow: 1;
+        }
+
+        .screen-title {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+        }
+
+        .screen-title span {
+            color: #2563eb;
+        }
+
+        .screen-subtitle {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Tabs UI */
+        .activity-tabs {
+            display: flex;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .activity-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .activity-tab-btn {
+            flex: 1;
+            min-width: 65px;
+            border: none;
+            background: none;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .activity-tab-btn.active {
+            background: var(--primary-delala);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+        }
+
+        .tab-count-badge {
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 8.5px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 8px;
+            margin-left: 3px;
+            display: inline-block;
+        }
+
+        .activity-tab-btn.active .tab-count-badge {
+            background: #ffffff;
+            color: var(--primary-delala);
+        }
+
+        /* Banner Popup Notification */
+        .status-popup-banner {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-popup-banner.unpaid {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid #475569;
+        }
+
+        .status-popup-banner.pending {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-left: 4px solid #2563eb;
+        }
+
+        .status-popup-banner.approved {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-left: 4px solid #10b981;
+        }
+
+        .status-popup-banner.rejected {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-left: 4px solid #ef4444;
+        }
+
+        .status-popup-banner.cancelled {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #6b7280;
+        }
+
+        .popup-banner-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex-grow: 1;
+        }
+
+        .popup-banner-title {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-popup-banner.unpaid .popup-banner-title { color: #334155; }
+        .status-popup-banner.pending .popup-banner-title { color: #1e40af; }
+        .status-popup-banner.approved .popup-banner-title { color: #065f46; }
+        .status-popup-banner.rejected .popup-banner-title { color: #991b1b; }
+        .status-popup-banner.cancelled .popup-banner-title { color: #374151; }
+
+        .popup-banner-text {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.3;
+        }
+
+        .btn-read-ack {
+            background: var(--primary-delala);
+            color: #ffffff;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .btn-read-ack:active { opacity: 0.8; }
+        .status-popup-banner.unpaid .btn-read-ack { background: #334155; }
+        .status-popup-banner.pending .btn-read-ack { background: #2563eb; }
+        .status-popup-banner.approved .btn-read-ack { background: #10b981; }
+        .status-popup-banner.rejected .btn-read-ack { background: #ef4444; }
+        .status-popup-banner.cancelled .btn-read-ack { background: #6b7280; }
+
+        @keyframes slideDown {
+            0% { transform: translateY(-10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Activity Items */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .activity-item {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .activity-item.unpaid-card {
+            border: 1px solid var(--unpaid-card-border);
+            background: var(--unpaid-card-bg);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            border-left: 4px solid #475569;
+        }
+
+        .activity-item.pending-card {
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+        }
+
+        .activity-item.cancelled-card {
+            border: 1px solid rgba(156, 163, 175, 0.3);
+            background: #f9fafb;
+        }
+
+        .activity-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item-title {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--text-dark);
+        }
+
+        .activity-item-amount {
+            font-weight: 800;
+            font-size: 14.5px;
+            color: var(--primary-delala);
+        }
+
+        .activity-badge {
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .activity-badge.unpaid { 
+            background: #f1f5f9; 
+            color: #334155; 
+            border: 1px solid #cbd5e1; 
+        }
+
+        .activity-badge.pending { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
+        .activity-badge.approved { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        .activity-badge.rejected { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .activity-badge.cancelled { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+        .card-action-box {
+            margin-top: 4px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(100, 116, 139, 0.2);
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-continue-payment {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, var(--primary-delala) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-continue-payment:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .activity-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-activity-state {
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Live Chat Redirect Button in Top Right Corner */
+        .chat-floating-btn {
+            background: var(--primary-delala);
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            animation: pulseGlow 2s infinite ease-in-out;
+            text-decoration: none;
+        }
+
+        .chat-badge-count {
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 2px;
+            border: 1px solid #ffffff;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(15, 23, 42, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(15, 23, 42, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(15, 23, 42, 0); }
+        }
+
+        /* Standard Bottom Navigation Menu */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+    </style>
+</head>
+<body>
+
+    <!-- Standard Nav Header Structure -->
+    <header class="nav-header">
+        <div class="header-left-group">
+            <button class="btn-circle-back" onclick="window.location.href='profile.html'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <h1 class="header-title-text">Delala - Activity</h1>
+        </div>
+        <a href="chat.html" class="chat-floating-btn" id="chatFloatingBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Support
+            <span id="support-unread-badge" class="chat-badge-count" style="display: none;">0</span>
+        </a>
+    </header>
+
+    <div class="app-view">
+        <div class="main-body-content">
+            <div class="step-view active" id="screen-activity">
+                <div class="screen-title">Track <span>Transactions</span></div>
+                <div class="screen-subtitle">Track your open, pending, approved, or cancelled deposit orders</div>
+
+                <div class="activity-tabs">
+                    <button class="activity-tab-btn active" id="tab-unpaid" onclick="filterActivity('unpaid')">
+                        Unpaid <span id="count-unpaid" class="tab-count-badge" style="display:none;">0</span>
+                    </button>
+                    <button class="activity-tab-btn" id="tab-pending" onclick="filterActivity('pending')">
+                        Pending <span id="count-pending" class="tab-count-badge" style="display:none;">0</span>
+                    </button>
+                    <button class="activity-tab-btn" id="tab-approved" onclick="filterActivity('approved')">Approved</button>
+                    <button class="activity-tab-btn" id="tab-rejected" onclick="filterActivity('rejected')">Rejected</button>
+                    <button class="activity-tab-btn" id="tab-cancelled" onclick="filterActivity('cancelled')">Cancelled</button>
+                </div>
+
+                <!-- SINGLE GLOBAL NOTIFICATION POPUP -->
+                <div id="status-popup-area"></div>
+
+                <div class="activity-list" id="activity-list-container">
+                    <div class="empty-activity-state">Connecting to servers...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Standard Bottom Nav Menu -->
+    <nav class="bottom-nav">
+        <a href="rental.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <span>Rental</span>
+        </a>
+        <a href="selling.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+            <span>Selling</span>
+        </a>
+        <a href="rentalpost.html" class="nav-item-post-center">
+            <div class="post-fab-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+            <span class="post-fab-label">Post</span>
+        </a>
+        <a href="vacancy.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+            <span>Vacancy</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        function normalizePhoneNumber(phoneStr) {
+            if (!phoneStr) return "DEV_USER";
+            return phoneStr.replace(/\D/g, ''); 
+        }
+
+        let rawPhone = localStorage.getItem("auth_session_phone") || localStorage.getItem("current_user_id") || "251900000000";
+        let userId = normalizePhoneNumber(rawPhone);
+        
+        let userTransactionsList = [];
+        let currentActivityFilter = 'unpaid';
+
+        function listenForUnreadMessagesRealtime() {
+            const userChatRef = ref(db, `chats/${userId}/messages`);
+            onValue(userChatRef, (snapshot) => {
+                let unreadCount = 0;
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const msg = childSnapshot.val();
+                        const isFromSupport = msg && (msg.sender === 'merchant' || msg.sender === 'support' || msg.sender !== 'user');
+                        if (isFromSupport && !msg.isRead) unreadCount++;
+                    });
+                }
+
+                const badgeEl = document.getElementById('support-unread-badge');
+                if (badgeEl) {
+                    if (unreadCount > 0) {
+                        badgeEl.innerText = unreadCount;
+                        badgeEl.style.display = 'inline-block';
+                    } else {
+                        badgeEl.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        window.acknowledgeOrderStatus = function(orderId) {
+            const updates = {};
+            updates[`users/${userId}/transactions/${orderId}/userRead`] = true;
+            update(ref(db), updates).then(() => {
+                renderActivityItems();
+            });
+        };
+
+        function fetchUserTransactionsRealtime() {
+            const userHistoryRef = ref(db, `users/${userId}/transactions`);
+            onValue(userHistoryRef, (snapshot) => {
+                userTransactionsList = [];
+                let unpaidCount = 0;
+                let pendingCount = 0;
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        const itemObj = { id: childSnapshot.key, ...data };
+                        userTransactionsList.push(itemObj);
+
+                        const status = (data.status || '').toLowerCase();
+                        if (status === 'unpaid' || status === 'open') unpaidCount++;
+                        if (status === 'pending' || status === 'waiting approval' || status === 'pending approval') pendingCount++;
+                    });
+                    userTransactionsList.reverse();
+                }
+
+                const unpaidBadge = document.getElementById('count-unpaid');
+                const pendingBadge = document.getElementById('count-pending');
+
+                unpaidBadge.innerText = unpaidCount;
+                unpaidBadge.style.display = unpaidCount > 0 ? 'inline-block' : 'none';
+
+                pendingBadge.innerText = pendingCount;
+                pendingBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+
+                const chatBtn = document.getElementById('chatFloatingBtn');
+
+                if (unpaidCount > 0 || pendingCount > 0) {
+                    if (chatBtn) chatBtn.style.display = 'flex';
+                } else {
+                    if (chatBtn) chatBtn.style.display = 'none';
+                }
+
+                renderActivityItems();
+            });
+        }
+
+        function runDatabaseIntegration() {
+            fetchUserTransactionsRealtime();
+            listenForUnreadMessagesRealtime();
+        }
+
+        window.filterActivity = function(filter) {
+            currentActivityFilter = filter;
+            document.querySelectorAll('.activity-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${filter}`).classList.add('active');
+            renderActivityItems();
+        };
+
+        function getMethodIdFromTitle(title) {
+            const lowerTitle = (title || '').toLowerCase();
+            if (lowerTitle.includes('cbe birr')) return 'cbebirr';
+            if (lowerTitle.includes('commercial bank')) return 'cbe';
+            if (lowerTitle.includes('abyssinia')) return 'boa';
+            if (lowerTitle.includes('telebirr')) return 'telebirr';
+            if (lowerTitle.includes('mpesa') || lowerTitle.includes('m-pesa')) return 'mpesa';
+            return 'cbe'; 
+        }
+
+        window.redirectToOrderPage = function(orderRef, amount, rawTitle, dbKey, ticketNum) {
+            const methodId = getMethodIdFromTitle(rawTitle);
+            localStorage.setItem('pending_delala_orderRef', orderRef);
+            localStorage.setItem('pending_delala_selectedMethod', methodId);
+            localStorage.setItem('pending_delala_txKey', dbKey);
+            if (ticketNum) localStorage.setItem('pending_delala_ticketNum', ticketNum);
+
+            const redirectUrl = `payment.html?ref=${encodeURIComponent(orderRef)}&depositRef=${encodeURIComponent(dbKey)}`;
+            window.location.href = redirectUrl;
+        };
+
+        function renderActivityItems() {
+            const container = document.getElementById('activity-list-container');
+            const popupArea = document.getElementById('status-popup-area');
+            container.innerHTML = '';
+            popupArea.innerHTML = '';
+
+            let activePopupItem = userTransactionsList.find(item => item.userRead !== true);
+
+            if (activePopupItem) {
+                const status = (activePopupItem.status || 'unpaid').toLowerCase();
+                let stateClass = 'unpaid';
+                let bannerTitle = 'Payment Pending';
+                let message = `Order Ref #${activePopupItem.orderRef || 'N/A'} - Action Required`;
+                let actionBtnText = 'Clear Notification';
+
+                if (status === 'pending' || status === 'waiting approval' || status === 'pending approval') {
+                    stateClass = 'pending';
+                    bannerTitle = 'Under Review';
+                    message = `Order Ref #${activePopupItem.orderRef || 'N/A'} is currently being processed.`;
+                } else if (status === 'approved' || status === 'success' || status === 'completed') {
+                    stateClass = 'approved';
+                    bannerTitle = 'Order Approved';
+                    message = `Order Ref #${activePopupItem.orderRef || 'N/A'} verified! Ticket #${activePopupItem.ticketNum || '---'} activated.`;
+                } else if (status === 'rejected' || status === 'failed') {
+                    stateClass = 'rejected';
+                    bannerTitle = 'Order Rejected';
+                    message = `Order Ref #${activePopupItem.orderRef || 'N/A'} could not be processed.`;
+                } else if (status === 'cancelled') {
+                    stateClass = 'cancelled';
+                    bannerTitle = 'Order Cancelled';
+                    message = `Order Ref #${activePopupItem.orderRef || 'N/A'} was cancelled.`;
+                }
+
+                popupArea.innerHTML = `
+                    <div class="status-popup-banner ${stateClass}">
+                        <div class="popup-banner-content">
+                            <div class="popup-banner-title">${bannerTitle}</div>
+                            <div class="popup-banner-text">${message}</div>
+                        </div>
+                        <button class="btn-read-ack" onclick="acknowledgeOrderStatus('${activePopupItem.id}')">${actionBtnText}</button>
+                    </div>
+                `;
+            }
+
+            const filteredList = userTransactionsList.filter(item => {
+                const status = (item.status || 'unpaid').toLowerCase();
+                const type = (item.type || '').toLowerCase();
+                const title = (item.title || '').toLowerCase();
+                const isDeposit = type.includes('deposit') || title.includes('deposit') || (!item.type && !item.title);
+
+                if (currentActivityFilter === 'unpaid') return isDeposit && (status === 'unpaid' || status === 'open');
+                if (currentActivityFilter === 'pending') return isDeposit && (status === 'pending' || status === 'waiting approval' || status === 'pending approval');
+                if (currentActivityFilter === 'approved') return status === 'approved' || status === 'success' || status === 'completed';
+                if (currentActivityFilter === 'rejected') return status === 'rejected' || status === 'failed';
+                if (currentActivityFilter === 'cancelled') return status === 'cancelled';
+                return false;
+            });
+
+            if (filteredList.length === 0) {
+                container.innerHTML = `<div class="empty-activity-state">No ${currentActivityFilter} orders found.</div>`;
+                return;
+            }
+
+            filteredList.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('activity-item');
+                const cleanAmount = parseFloat(item.amount || 3000).toLocaleString();
+
+                if (currentActivityFilter === 'unpaid') {
+                    card.classList.add('unpaid-card');
+                    card.innerHTML = `
+                        <div class="activity-item-header">
+                            <span class="activity-item-title">${item.title || 'Delala Reservation'}</span>
+                            <span class="activity-badge unpaid">UNPAID</span>
+                        </div>
+                        <div class="activity-meta">
+                            <span>Ref: ${item.orderRef || 'N/A'}</span>
+                            <span class="activity-item-amount" style="color: #334155">${cleanAmount} ETB</span>
+                        </div>
+                        <div class="activity-meta" style="margin-top:2px; font-size:10px;">
+                            <span>Ticket: #${item.ticketNum || '---'} | Created: ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : 'Just now'}</span>
+                        </div>
+                        <div class="card-action-box">
+                            <button class="btn-continue-payment" onclick="redirectToOrderPage('${item.orderRef || ""}', '${item.amount || 3000}', '${item.title || ""}', '${item.id || ""}', '${item.ticketNum || ""}')">
+                                Complete Payment &rarr;
+                            </button>
+                        </div>
+                    `;
+                } else if (currentActivityFilter === 'pending') {
+                    card.classList.add('pending-card');
+                    card.innerHTML = `
+                        <div class="activity-item-header">
+                            <span class="activity-item-title">${item.title || 'Delala Reservation'}</span>
+                            <span class="activity-badge pending">Pending Approval</span>
+                        </div>
+                        <div class="activity-meta">
+                            <span>Ref: ${item.orderRef || 'N/A'}</span>
+                            <span class="activity-item-amount" style="color: #2563eb">${cleanAmount} ETB</span>
+                        </div>
+                        <div class="activity-meta" style="margin-top:2px; font-size:10px;">
+                            <span>Ticket: #${item.ticketNum || '---'} | Submitted: ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : ''}</span>
+                        </div>
+                    `;
+                } else if (currentActivityFilter === 'approved') {
+                    card.innerHTML = `
+                        <div class="activity-item-header">
+                            <span class="activity-item-title">${item.title || 'Delala Ticket Verified'}</span>
+                            <span class="activity-badge approved">APPROVED</span>
+                        </div>
+                        <div class="activity-meta">
+                            <span>Ref: ${item.orderRef || 'N/A'}</span>
+                            <span class="activity-item-amount" style="color: #10b981">+${cleanAmount} ETB</span>
+                        </div>
+                        <div class="activity-meta" style="margin-top:2px; font-size:10px;">
+                            <span>Ticket: #${item.ticketNum || '---'} | Verified: ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : ''}</span>
+                        </div>
+                    `;
+                } else if (currentActivityFilter === 'cancelled') {
+                    card.classList.add('cancelled-card');
+                    card.innerHTML = `
+                        <div class="activity-item-header">
+                            <span class="activity-item-title">${item.title || 'Cancelled Reservation'}</span>
+                            <span class="activity-badge cancelled">CANCELLED</span>
+                        </div>
+                        <div class="activity-meta">
+                            <span>Ref: ${item.orderRef || 'N/A'}</span>
+                            <span class="activity-item-amount" style="color: #9ca3af">${cleanAmount} ETB</span>
+                        </div>
+                        <div class="activity-meta" style="margin-top:2px; font-size:10px;">
+                            <span>Ticket: #${item.ticketNum || '---'}</span>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="activity-item-header">
+                            <span class="activity-item-title">${item.title || 'Reservation'}</span>
+                            <span class="activity-badge ${(item.status || '').toLowerCase()}">${item.status || ''}</span>
+                        </div>
+                        <div class="activity-meta">
+                            <span>Ref: ${item.orderRef || 'N/A'}</span>
+                            <span class="activity-item-amount">${cleanAmount} ETB</span>
+                        </div>
+                        <div class="activity-meta" style="margin-top:2px; font-size:10px;">
+                            <span>Date: ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : ''}</span>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            runDatabaseIntegration();
+        });
+    </script>
+</body>
+</html>

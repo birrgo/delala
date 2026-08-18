@@ -54,20 +54,6 @@
 
         .header-left-group { display: flex; align-items: center; gap: 10px; }
 
-        .header-back-btn {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-dark);
-            border-radius: 8px;
-        }
-
-        .header-back-btn:active { background: #F1F5F9; }
-
         .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
         .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
 
@@ -195,7 +181,7 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .submit-post-btn {
+        .submit-post-btn {
             flex: 1;
             padding: 13px;
             border-radius: 12px;
@@ -207,10 +193,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .submit-post-btn { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
         .submit-post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .bottom-nav {
@@ -376,9 +362,6 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <button type="button" class="header-back-btn" id="globalHeaderBackBtn" title="Back">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
                 <h1 class="header-title-text">Delala - Post Rental</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
@@ -438,10 +421,6 @@
                     <input type="hidden" id="rentalLng">
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBackToCategory">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
                         <button type="button" class="submit-post-btn" id="btnNext3">
                             Next: Contact 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -558,9 +537,6 @@
                 savePart2FormData();
             });
 
-            document.getElementById('btnBackToCategory').addEventListener('click', navigateBackToCategoryPage);
-            document.getElementById('globalHeaderBackBtn').addEventListener('click', navigateBackToCategoryPage);
-
             document.getElementById('btnNext3').addEventListener('click', () => {
                 const country = document.getElementById('locCountry').value.trim();
                 const region = document.getElementById('locRegion').value.trim();
@@ -650,40 +626,6 @@
                         isLocationTracked = true;
                     }
                 } catch(e) { console.error(e); }
-            }
-        }
-
-        function navigateBackToCategoryPage() {
-            savePart2FormData();
-
-            let category = "";
-            const rawDraft = sessionStorage.getItem('delalaDraftPart1');
-            if (rawDraft) {
-                try {
-                    const draft = JSON.parse(rawDraft);
-                    category = draft.rentalType || "";
-                } catch (e) {
-                    console.error("Error reading category draft", e);
-                }
-            }
-
-            // Route dynamically back to specific category form page
-            if (category === "Residential Property") {
-                window.location.href = 'renthome.html';
-            } else if (category === "Workplace") {
-                window.location.href = 'rentwork.html';
-            } else if (category === "Vehicle") {
-                window.location.href = 'rentcar.html';
-            } else if (category === "Machinery") {
-                window.location.href = 'rentmachine.html';
-            } else if (category === "Event Equipment") {
-                window.location.href = 'rentevent.html';
-            } else if (category === "Clothing") {
-                window.location.href = 'rentcloth.html';
-            } else if (category === "Miscellaneous Items") {
-                window.location.href = 'rentother.html';
-            } else {
-                window.location.href = 'rentalpost.html';
             }
         }
 

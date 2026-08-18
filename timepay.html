@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Post Rental (Listing Duration)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        /* Exact same CSS as original */
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+            --danger-bg: #FEF2F2;
+            --danger-border: #FCA5A5;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .form-step-page { display: block; }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .category-badge {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            color: #1D4ED8;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .period-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .period-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .period-card:hover { border-color: #94A3B8; }
+
+        .period-card.selected {
+            border-color: var(--primary-dark);
+            background: #F8FAFC;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+        }
+
+        .period-info { display: flex; flex-direction: column; gap: 2px; }
+        .period-name { font-size: 13px; font-weight: 800; color: var(--primary-dark); }
+        .period-subtext { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+        .period-price { text-align: right; }
+        .amount { font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+        .currency { font-size: 10px; font-weight: 700; color: var(--text-muted); margin-left: 2px; }
+
+        .loader {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+
+        .submit-post-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+        .submit-post-btn:disabled { background: #94A3B8; box-shadow: none; cursor: not-allowed; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text" id="headerTitle">Select Duration</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card">
+                <!-- STEP 5: LISTING DURATION VIEW -->
+                <div id="sectionDuration" class="form-step-page">
+                    <div class="step-title">Choose Listing Duration</div>
+                    
+                    <div class="category-badge" id="categoryBadge">
+                        <span id="catNameText">Identifying category...</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+
+                    <div id="loader" class="loader">Loading exact database prices...</div>
+
+                    <div class="period-list" id="periodList" style="display: none;"></div>
+
+                    <div class="step-actions">
+                        <button type="button" class="submit-post-btn" id="proceedBtn" disabled>Select Period</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <!-- Navigation items same as original -->
+            <a href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
+            <a href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="vacancy.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Vacancy</span></a>
+            <a href="profile.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let selectedPlan = null;
+
+        const categoryNames = {
+            "1": "Residential & Homes", "2": "Workplace & Commercial", "3": "Vehicles & Automotive",
+            "4": "Event Equipment", "5": "Clothing & Fashion", "6": "Heavy Machinery", "7": "Miscellaneous & Others"
+        };
+
+        const categoryNameToIdMap = {
+            "1": "1", "residential & homes": "1", "residential": "1", "homes": "1", "house": "1", "home": "1",
+            "2": "2", "workplace & commercial": "2", "workplace": "2", "commercial": "2", "office": "2", "shop": "2", "store": "2",
+            "3": "3", "vehicles & automotive": "3", "vehicles": "3", "vehicle": "3", "vecile": "3", "automotive": "3", "car": "3", "cars": "3",
+            "4": "4", "event equipment": "4", "event": "4", "equipment": "4", "events": "4",
+            "5": "5", "clothing & fashion": "5", "clothing": "5", "fashion": "5", "clothes": "5",
+            "6": "6", "heavy machinery": "6", "heavy": "6", "machinery": "6", "machine": "6",
+            "7": "7", "miscellaneous & others": "7", "miscellaneous": "7", "others": "7", "other": "7", "misc": "7", "any": "7"
+        };
+
+        const defaultCategoryPrices = {
+            "1": { "1m": 200, "3m": 500, "6m": 900, "1y": 1600, "2y": 2800 },
+            "2": { "1m": 300, "3m": 750, "6m": 1350, "1y": 2400, "2y": 4200 },
+            "3": { "1m": 250, "3m": 600, "6m": 1100, "1y": 2000, "2y": 3500 },
+            "4": { "1m": 150, "3m": 380, "6m": 700, "1y": 1200, "2y": 2100 },
+            "5": { "1m": 100, "3m": 250, "6m": 450, "1y": 800, "2y": 1400 },
+            "6": { "1m": 400, "3m": 1000, "6m": 1800, "1y": 3200, "2y": 5500 },
+            "7": { "1m": 100, "3m": 250, "6m": 450, "1y": 800, "2y": 1400 }
+        };
+
+        const durationLabels = [
+            { key: "1m", label: "1 Month", desc: "30 days active listing" },
+            { key: "3m", label: "3 Months", desc: "90 days active listing" },
+            { key: "6m", label: "6 Months", desc: "180 days active listing" },
+            { key: "1y", label: "1 Year", desc: "365 days active listing" },
+            { key: "2y", label: "2 Years", desc: "730 days active listing" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            initDurationSection();
+            document.getElementById('proceedBtn').addEventListener('click', handleFinalProceed);
+            
+            // Make selectPeriod globally available so inline onclick events work
+            window.selectPeriod = selectPeriod;
+        });
+
+        // This runs automatically to pull the prices based on previous session data
+        function initDurationSection() {
+            const rawPart1 = sessionStorage.getItem('delalaDraftPart1');
+            const rawPending = sessionStorage.getItem('delalaPendingListing');
+
+            let part1Data = {};
+            let pendingData = {};
+
+            if (rawPart1) {
+                try { part1Data = JSON.parse(rawPart1); } catch(e) {}
+            }
+            if (rawPending) {
+                try { pendingData = JSON.parse(rawPending); } catch(e) {}
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            let rawCategoryId = urlParams.get('cat') || 
+                                pendingData.rentType ||
+                                pendingData.rentalType ||
+                                pendingData.category || 
+                                pendingData.categoryId || 
+                                part1Data.rentType ||
+                                part1Data.rentalType ||
+                                part1Data.category || 
+                                part1Data.categoryId || 
+                                '7';
+            
+            let stringId = String(rawCategoryId).replace(/^(cat_|category_)/i, '').trim();
+            const lowerStringId = stringId.toLowerCase();
+            let cleanCategoryId = categoryNameToIdMap[lowerStringId] ? categoryNameToIdMap[lowerStringId] : stringId;
+            
+            if (!["1", "2", "3", "4", "5", "6", "7"].includes(String(cleanCategoryId))) {
+                cleanCategoryId = "7";
+            }
+            
+            const displayCatName = categoryNames[cleanCategoryId] || `Category ${cleanCategoryId}`;
+            document.getElementById('catNameText').innerText = `Category: ${displayCatName}`;
+            
+            fetchPrices(cleanCategoryId);
+        }
+
+        async function fetchPrices(cleanCategoryId) {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('periodList').style.display = 'none';
+
+            try {
+                let allPricesRef = ref(db, 'settings/category_prices');
+                let snapshot = await get(allPricesRef);
+
+                let targetCategoryPrices = null;
+
+                if (snapshot.exists()) {
+                    let allCategoriesPrices = snapshot.val();
+                    
+                    if (allCategoriesPrices[cleanCategoryId]) {
+                        targetCategoryPrices = allCategoriesPrices[cleanCategoryId];
+                    } 
+                    else if (allCategoriesPrices[`cat_${cleanCategoryId}`]) {
+                        targetCategoryPrices = allCategoriesPrices[`cat_${cleanCategoryId}`];
+                    }
+                }
+
+                if (targetCategoryPrices) {
+                    renderDurationOptions(targetCategoryPrices, cleanCategoryId);
+                } else {
+                    console.warn(`Exact database price for category ${cleanCategoryId} is missing. Applying defaults.`);
+                    renderDurationOptions(defaultCategoryPrices[cleanCategoryId] || defaultCategoryPrices["7"], cleanCategoryId);
+                }
+            } catch (err) {
+                console.error("Database fetch failed, fallback to defaults:", err);
+                renderDurationOptions(defaultCategoryPrices[cleanCategoryId] || defaultCategoryPrices["7"], cleanCategoryId);
+            }
+        }
+
+        function renderDurationOptions(prices, cleanCategoryId) {
+            const container = document.getElementById('periodList');
+            container.innerHTML = '';
+
+            const fallback = defaultCategoryPrices[cleanCategoryId] || defaultCategoryPrices["7"];
+
+            durationLabels.forEach(d => {
+                const priceVal = (prices && prices[d.key] !== undefined) ? Number(prices[d.key]) : fallback[d.key];
+
+                const card = document.createElement('div');
+                card.className = 'period-card';
+                card.onclick = () => selectPeriod(card, d.key, priceVal, d.label, cleanCategoryId);
+
+                card.innerHTML = `
+                    <div class="period-info">
+                        <span class="period-name">${d.label}</span>
+                        <span class="period-subtext">${d.desc}</span>
+                    </div>
+                    <div class="period-price">
+                        <span class="amount">${priceVal}</span>
+                        <span class="currency">ETB</span>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            container.style.display = 'flex';
+        }
+
+        function selectPeriod(element, periodKey, price, periodLabel, cleanCategoryId) {
+            document.querySelectorAll('.period-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            const storedListing = JSON.parse(sessionStorage.getItem('delalaPendingListing') || '{}');
+
+            selectedPlan = {
+                categoryId: cleanCategoryId,
+                periodKey: periodKey,
+                periodLabel: periodLabel,
+                amount: price,
+                listingData: storedListing
+            };
+
+            const proceedBtn = document.getElementById('proceedBtn');
+            proceedBtn.disabled = false;
+            proceedBtn.innerText = `Pay ${price} ETB`;
+        }
+
+        function handleFinalProceed() {
+            if (!selectedPlan) return;
+            sessionStorage.setItem('delalaPaymentPlan', JSON.stringify(selectedPlan));
+            window.location.href = `pay.html?cat=${selectedPlan.categoryId}&period=${selectedPlan.periodKey}&amount=${selectedPlan.amount}`;
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

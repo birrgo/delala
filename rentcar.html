@@ -113,7 +113,7 @@
         }
 
         .form-group { 
-            margin-bottom: 16px; 
+            margin-bottom: 0; 
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -174,13 +174,12 @@
 
         .form-row .form-group { 
             flex: 1; 
-            margin-bottom: 16px;
         }
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .btn-next {
-            flex: 1;
+        .btn-next {
+            width: 100%;
             height: 46px;
             padding: 0 13px;
             border-radius: 12px;
@@ -192,10 +191,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -336,30 +335,18 @@
             cursor: pointer;
         }
 
-        #dynamicCategoryFieldsContainer {
-            margin-top: 14px;
-            margin-bottom: 14px;
-            animation: fadeIn3D 0.35s ease-out forwards;
-        }
-
-        @keyframes fadeIn3D {
-            from { opacity: 0; transform: translateY(8px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
         .nested-box {
             background: linear-gradient(145deg, #2b303a, #1a1d24);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 16px;
-            padding: 18px;
-            margin-top: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             box-shadow: 
                 0 10px 25px rgba(0, 0, 0, 0.4),
                 inset 0 1px 1px rgba(255, 255, 255, 0.15);
             position: relative;
         }
 
-        #dynamicCategoryFieldsContainer .form-label,
         .nested-box .form-label {
             color: #CBD5E1 !important;
             font-weight: 700;
@@ -369,8 +356,6 @@
             margin-bottom: 8px;
         }
 
-        #dynamicCategoryFieldsContainer .form-input,
-        #dynamicCategoryFieldsContainer .form-select,
         .nested-box .form-input,
         .nested-box .form-select {
             background-color: #1a1d24 !important;
@@ -387,11 +372,8 @@
             height: 44px;
         }
 
-        #dynamicCategoryFieldsContainer .form-input::placeholder,
         .nested-box .form-input::placeholder { color: #64748B !important; }
 
-        #dynamicCategoryFieldsContainer .form-input:focus,
-        #dynamicCategoryFieldsContainer .form-select:focus,
         .nested-box .form-input:focus,
         .nested-box .form-select:focus {
             border-color: #38BDF8 !important;
@@ -399,7 +381,6 @@
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
         }
 
-        #dynamicCategoryFieldsContainer option,
         .nested-box option,
         select option {
             background-color: #1e2228 !important;
@@ -558,74 +539,78 @@
                 <div class="form-step-page" id="stepPage2">
                     <div class="step-title">Step 2: Vehicle Details</div>
 
-                    <!-- Category Selection -->
-                    <div class="form-group">
-                        <label class="form-label" for="vehicleCategory">Vehicle Category / የከተማ ዓይነት *</label>
-                        <select class="form-select custom-styled-select" id="vehicleCategory" required>
-                            <option value="Private Car">1. Private Car | የቤት መኪና</option>
-                            <option value="Commercial Vehicle">2. Commercial Vehicle | የሥራ መኪና</option>
-                            <option value="Auto Rickshaw (Bajaj)">3. Auto Rickshaw (Bajaj) | ባጃጅ</option>
-                            <option value="Motorcycle">4. Motorcycle | ሞተር ብስክሌት</option>
-                            <option value="Bicycle">5. Bicycle | ብስክሌት</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Toyota Corolla Executive for Rent" required>
-                    </div>
-
-                    <div class="form-row">
+                    <!-- BOX 1: Category Selection -->
+                    <div class="nested-box">
                         <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 3500" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Time Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="Hour">Per Hour (በሰዓት)</option>
-                                <option value="Day" selected>Per Day (በቀን)</option>
-                                <option value="1 Week">1 Week (በሳምንት)</option>
-                                <option value="1 Month">1 Month (በወር)</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year (በዓመት)</option>
+                            <label class="form-label" for="vehicleCategory">Vehicle Category / የከተማ ዓይነት *</label>
+                            <select class="form-select custom-styled-select" id="vehicleCategory" required>
+                                <option value="Private Car">1. Private Car | የቤት መኪና</option>
+                                <option value="Commercial Vehicle">2. Commercial Vehicle | የሥራ መኪና</option>
+                                <option value="Auto Rickshaw (Bajaj)">3. Auto Rickshaw (Bajaj) | ባጃጅ</option>
+                                <option value="Motorcycle">4. Motorcycle | ሞተር ብስክሌት</option>
+                                <option value="Bicycle">5. Bicycle | ብስክሌት</option>
                             </select>
                         </div>
                     </div>
 
-                    <div id="dynamicCategoryFieldsContainer">
-                        <div class="nested-box">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="vehicleBrand">Brand / አምራች *</label>
-                                    <select class="form-select custom-styled-select" id="vehicleBrand" required>
-                                        <!-- Populated via Javascript -->
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="vehicleModelSelect">Model / ሞዴል *</label>
-                                    <select class="form-select custom-styled-select" id="vehicleModelSelect" required>
-                                        <!-- Populated via Javascript -->
-                                    </select>
-                                </div>
+                    <!-- BOX 2: Price & Period -->
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                                <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 3500" required>
                             </div>
-
-                            <!-- Custom Brand & Model Input Fallback (hidden by default unless "Other" is selected) -->
-                            <div class="form-group" id="customModelGroup" style="display: none; margin-top: 10px;">
-                                <label class="form-label" for="vehicleModel">Specify Brand & Model *</label>
-                                <input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Custom Brand & Model">
-                            </div>
-
-                            <div class="form-group" style="margin-top: 12px;">
-                                <label class="form-label" for="transmissionType">Transmission *</label>
-                                <select class="form-select custom-styled-select" id="transmissionType" required>
-                                    <option value="Automatic">Automatic</option>
-                                    <option value="Manual">Manual</option>
-                                    <option value="N/A">Not Applicable (Pedal/Manual)</option>
+                            <div class="form-group">
+                                <label class="form-label" for="paymentPeriod">Time Period *</label>
+                                <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                    <option value="Hour">Per Hour (በሰዓት)</option>
+                                    <option value="Day" selected>Per Day (በቀን)</option>
+                                    <option value="1 Week">1 Week (በሳምንት)</option>
+                                    <option value="1 Month">1 Month (በወር)</option>
+                                    <option value="3 Months">3 Months</option>
+                                    <option value="6 Months">6 Months</option>
+                                    <option value="1 Year">1 Year (በዓመት)</option>
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- BOX 3: Brand, Model & Transmission -->
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleBrand">Brand / አምራች *</label>
+                                <select class="form-select custom-styled-select" id="vehicleBrand" required>
+                                    <!-- Populated via Javascript -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleModelSelect">Model / ሞዴል *</label>
+                                <select class="form-select custom-styled-select" id="vehicleModelSelect" required>
+                                    <!-- Populated via Javascript -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Custom Brand & Model Input Fallback (hidden by default unless "Other" is selected) -->
+                        <div class="form-group" id="customModelGroup" style="display: none; margin-top: 10px;">
+                            <label class="form-label" for="vehicleModel">Specify Brand & Model *</label>
+                            <input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Custom Brand & Model">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 12px;">
+                            <label class="form-label" for="transmissionType">Transmission *</label>
+                            <select class="form-select custom-styled-select" id="transmissionType" required>
+                                <option value="Automatic">Automatic</option>
+                                <option value="Manual">Manual</option>
+                                <option value="N/A">Not Applicable (Pedal/Manual)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label" for="postTitle">Title / Headline *</label>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Toyota Corolla Executive for Rent" required>
                     </div>
 
                     <div class="form-group" style="margin-top: 16px;">
@@ -634,10 +619,6 @@
                     </div>
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBack2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -906,11 +887,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             refreshFormState();
-
-            document.getElementById('btnBack2').addEventListener('click', () => {
-                saveDraftToSession();
-                window.location.href = 'rentalpost.html';
-            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;

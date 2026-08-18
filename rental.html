@@ -452,7 +452,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const BATCH_LIMIT = 15;
+        // Updated batch size to fetch only 2 items at a time for fast loading
+        const BATCH_LIMIT = 2;
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
@@ -654,7 +655,6 @@
         }
 
         function extractItemCoordinates(item) {
-            // 1. Primary check: Strict match to database rules schema (location.latitude, location.longitude)
             if (item.location && typeof item.location === 'object') {
                 const lat = parseFloat(item.location.latitude);
                 const lng = parseFloat(item.location.longitude);
@@ -663,7 +663,6 @@
                 }
             }
 
-            // 2. Fallback check: Direct root-level or legacy location fields
             const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
             const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
 
@@ -776,7 +775,8 @@
 
             if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
 
-            const nodePaths = ['posts', 'delalaListings'];
+            // Configured to load from active valid schema nodes: 'posts' and 'delala_new'
+            const nodePaths = ['posts', 'delala_new'];
 
             try {
                 const fetchPromises = nodePaths.map(async (nodePath) => {

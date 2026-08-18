@@ -184,7 +184,7 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .btn-next {
+        .btn-next {
             flex: 1;
             height: 46px;
             padding: 0 13px;
@@ -197,10 +197,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -568,48 +568,47 @@
                         <input type="text" class="form-input" id="postTitle" placeholder="e.g., 2 Bedroom Apartment in Bole" required>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 15000" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="1 Month">1 Month</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
-                                <option value="Day">Per Day</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div id="dynamicCategoryFieldsContainer">
                         <div class="nested-box">
-                            <div class="form-group" style="margin-bottom:0;">
+                            <div class="form-group">
                                 <label class="form-label" for="resCategory">House Rental Category / የቤት ኪራይ ምድብ *</label>
                                 <select class="form-select custom-styled-select" id="resCategory" onchange="handleResidentialCategoryChange()" required>
+                                    <option value="" disabled selected>Select Category...</option>
                                     <option value="Full Compound">1. Full Compound / ሙሉ ግቢ</option>
                                     <option value="Apartment">2. Apartment / አፓርታማ</option>
                                     <option value="Condominium">3. Condominium / ኮንዶሚኒየም</option>
                                     <option value="Living with Owner">4. Living with Owner / ከባለቤት ጋር የሚኖር</option>
                                 </select>
                             </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                                    <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 15000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="paymentPeriod">Payment Period *</label>
+                                    <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                        <option value="" disabled selected>Select Period...</option>
+                                        <option value="1 Month">1 Month</option>
+                                        <option value="3 Months">3 Months</option>
+                                        <option value="6 Months">6 Months</option>
+                                        <option value="1 Year">1 Year</option>
+                                        <option value="Day">Per Day</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div id="resSubCategoryFields"></div>
                         </div>
                     </div>
 
                     <div class="form-group" style="margin-top: 16px;">
                         <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, amenities, water/electric access, or rules (optional)..."></textarea>
+                        <textarea class="form-textarea" id="postContent" placeholder="Select a category above to load a description template..."></textarea>
                     </div>
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBack2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -777,22 +776,26 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
-            handleResidentialCategoryChange();
             refreshFormState();
-
-            document.getElementById('btnBack2').addEventListener('click', () => {
-                saveDraftToSession();
-                window.location.href = 'rentalpost.html';
-            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
 
                 const title = document.getElementById('postTitle').value.trim();
                 const price = document.getElementById('rentalPrice').value;
+                const period = document.getElementById('paymentPeriod').value;
+                const category = document.getElementById('resCategory').value;
 
-                if (!title || !price) {
-                    showErrorModal("Please fill in both the listing title and rental price.");
+                if (!title) {
+                    showErrorModal("Please enter a listing title.");
+                    return;
+                }
+                if (!category) {
+                    showErrorModal("Please select a house rental category.");
+                    return;
+                }
+                if (!price || !period) {
+                    showErrorModal("Please enter both rental price and payment period.");
                     return;
                 }
 
@@ -844,7 +847,7 @@
                     const c = draft.categorySpecificDetails;
                     if (c.resCategory && document.getElementById('resCategory')) {
                         document.getElementById('resCategory').value = c.resCategory;
-                        handleResidentialCategoryChange();
+                        handleResidentialCategoryChange(false);
                     }
                     if (c.compoundType && document.getElementById('compoundType')) document.getElementById('compoundType').value = c.compoundType;
                     
@@ -879,27 +882,27 @@
                     }
                 }
 
-                autoFillPlaceholders();
-
             } catch (err) {
                 console.error("Failed to restore draft", err);
             }
         }
 
-        function autoFillPlaceholders() {
-            const postTitle = document.getElementById('postTitle');
-            const postContent = document.getElementById('postContent');
+        const CATEGORY_TITLES = {
+            'Full Compound': 'Full Compound House for Rent / የሚከራይ ሙሉ ግቢ ቤት',
+            'Apartment': 'Apartment for Rent / የሚከራይ አፓርታማ',
+            'Condominium': 'Condominium for Rent / የሚከራይ ኮንዶሚኒየም',
+            'Living with Owner': 'Shared House Room for Rent / ከባለቤት ጋር የሚኖር የሚከራይ ክፍል'
+        };
 
-            if (!postTitle.value) {
-                postTitle.value = 'Residential Property for Rent';
-            }
-
-            if (!postContent.value) {
-                postContent.value = `[Property Overview]: Residential rental.\n\n[Features & Facilities]: Water & electricity available, good accessibility, fully secure locality.`;
-            }
-        }
+        const CATEGORY_DESCRIPTIONS = {
+            'Full Compound': `[Property Overview]: Full compound rental featuring private space, quiet living environment, and high security.\n\n[Amenities & Facilities]: Dedicated parking area, private garden space, reliable 24/7 water supply & electricity, secure perimeter fence, and easy road access.`,
+            'Apartment': `[Property Overview]: Modern apartment with quality floor planning, great interior natural lighting, and well-maintained building environment.\n\n[Amenities & Facilities]: Water backup tank, separate electric meter, secure entrance gate, clean shared corridors, and convenient access to local markets.`,
+            'Condominium': `[Property Overview]: Clean and cozy condominium unit situated in an accessible residential block.\n\n[Amenities & Facilities]: Dedicated parking space, reliable utility access (water & electricity), proximity to main roads, shopping spots, and public transport options.`,
+            'Living with Owner': `[Property Overview]: Private residential room/space offered within an owner-occupied compound.\n\n[Amenities & Facilities]: Peaceful shared living setup, kitchen access, clean shared bathroom, secure gated entry, and utility options included upon agreement.`
+        };
 
         const ROOM_OPTIONS_HTML = `
+            <option value="" disabled selected>Select Rooms...</option>
             <option value="1 Room">1 Room</option>
             <option value="2 Rooms">2 Rooms</option>
             <option value="3 Rooms">3 Rooms</option>
@@ -908,6 +911,7 @@
             <option value="custom">Custom / Self-Enter...</option>`;
 
         const SIZE_METER_OPTIONS_HTML = `
+            <option value="" disabled selected>Select Meters...</option>
             <option value="2m">2 meters</option>
             <option value="3m">3 meters</option>
             <option value="4m">4 meters</option>
@@ -919,6 +923,7 @@
             <option value="custom">Custom / Self-Enter...</option>`;
 
         const FLOOR_G_OPTIONS_HTML = `
+            <option value="" disabled selected>Select Floor...</option>
             <option value="Ground Floor (G+0)">Ground Floor (G+0)</option>
             <option value="G+1">G+1</option>
             <option value="G+2">G+2</option>
@@ -928,6 +933,7 @@
             <option value="custom">Custom / Self-Enter...</option>`;
 
         const LAND_AREA_OPTIONS_HTML = `
+            <option value="" disabled selected>Select Land Area...</option>
             <option value="50 m²">50 m²</option>
             <option value="100 m²">100 m²</option>
             <option value="150 m²">150 m²</option>
@@ -937,20 +943,30 @@
             <option value="500 m²">500 m²</option>
             <option value="custom">Custom / Self-Enter...</option>`;
 
-        function handleResidentialCategoryChange() {
+        function handleResidentialCategoryChange(updateContent = true) {
             const resCatElem = document.getElementById('resCategory');
             if (!resCatElem) return;
             const resCat = resCatElem.value;
             const subContainer = document.getElementById('resSubCategoryFields');
             if (!subContainer) return;
 
+            if (updateContent) {
+                if (CATEGORY_TITLES[resCat]) {
+                    document.getElementById('postTitle').value = CATEGORY_TITLES[resCat];
+                }
+                if (CATEGORY_DESCRIPTIONS[resCat]) {
+                    document.getElementById('postContent').value = CATEGORY_DESCRIPTIONS[resCat];
+                }
+            }
+
             let html = '';
 
             if (resCat === 'Full Compound') {
                 html = `
-                    <div class="form-group" style="margin-top:12px;">
+                    <div class="form-group">
                         <label class="form-label" for="compoundType">Compound Type / የግብይቱ ዓይነት *</label>
                         <select class="form-select custom-styled-select" id="compoundType" onchange="handleCompoundTypeChange()" required>
+                            <option value="" disabled selected>Select Compound Type...</option>
                             <option value="Villa">Villa / ቪላ</option>
                             <option value="G+ Building">G+ Multi-Story Building</option>
                         </select>
@@ -958,7 +974,7 @@
                     <div id="compoundSubFields"></div>`;
             } else if (resCat === 'Apartment') {
                 html = `
-                    <div class="form-row" style="margin-top:12px;">
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="roomCountSelect">Total Rooms *</label>
                             <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
@@ -983,19 +999,20 @@
                             <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <label class="form-label" for="sizeHeightSelect">Main Room Height (H) *</label>
                             <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
                                 ${SIZE_METER_OPTIONS_HTML}
                             </select>
-                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter height">
                         </div>
                     </div>`;
             } else if (resCat === 'Condominium') {
                 html = `
-                    <div class="form-row" style="margin-top:12px;">
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="roomCountSelect">Total Bedrooms *</label>
                             <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                                <option value="" disabled selected>Select Bedrooms...</option>
                                 <option value="Studio">Studio</option>
                                 <option value="1 Bedroom">1 Bedroom</option>
                                 <option value="2 Bedrooms">2 Bedrooms</option>
@@ -1023,16 +1040,16 @@
                             <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <label class="form-label" for="sizeHeightSelect">Main Room Height (H) *</label>
                             <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
                                 ${SIZE_METER_OPTIONS_HTML}
                             </select>
-                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter height">
                         </div>
                     </div>`;
             } else if (resCat === 'Living with Owner') {
                 html = `
-                    <div class="form-group" style="margin-top:12px;">
+                    <div class="form-group">
                         <label class="form-label" for="roomCountSelect">Rooms Included *</label>
                         <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
                             ${ROOM_OPTIONS_HTML}
@@ -1048,11 +1065,11 @@
                             <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <label class="form-label" for="sizeHeightSelect">Main Room Height (H) *</label>
                             <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
                                 ${SIZE_METER_OPTIONS_HTML}
                             </select>
-                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter height">
                         </div>
                     </div>`;
             }
@@ -1089,11 +1106,11 @@
                             <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <label class="form-label" for="sizeHeightSelect">Main Room Height (H) *</label>
                             <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
                                 ${SIZE_METER_OPTIONS_HTML}
                             </select>
-                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter height">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1103,7 +1120,7 @@
                         </select>
                         <input type="text" class="form-input custom-input-box" id="landAreaCustom" placeholder="Enter custom land area in m²">
                     </div>`;
-            } else {
+            } else if (compType === 'G+ Building') {
                 container.innerHTML = `
                     <div class="form-row">
                         <div class="form-group">
@@ -1130,11 +1147,11 @@
                             <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <label class="form-label" for="sizeHeightSelect">Main Room Height (H) *</label>
                             <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
                                 ${SIZE_METER_OPTIONS_HTML}
                             </select>
-                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter height">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1144,6 +1161,8 @@
                         </select>
                         <input type="text" class="form-input custom-input-box" id="landAreaCustom" placeholder="Enter custom land area in m²">
                     </div>`;
+            } else {
+                container.innerHTML = '';
             }
             bindCustomSelectHandlers();
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Post Machinery Rental</title>
+    <title>Delala - Post Rental Item (Part 2)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -182,10 +182,10 @@
             margin-bottom: 16px;
         }
 
-        .step-actions { display: flex; margin-top: 22px; }
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-next {
-            width: 100%;
+        .btn-prev, .btn-next {
+            flex: 1;
             height: 46px;
             padding: 0 13px;
             border-radius: 12px;
@@ -197,10 +197,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            background: var(--primary-dark);
-            color: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
+
+        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
+        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -546,7 +546,7 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Delala - Post Machinery</h1>
+                <h1 class="header-title-text">Delala - Post Rental</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
         </header>
@@ -561,26 +561,26 @@
                 </div>
 
                 <div class="form-step-page" id="stepPage2">
-                    <div class="step-title">Step 2: Machinery & Equipment Details</div>
+                    <div class="step-title">Step 2: Listing Details (Properties & Vehicles)</div>
 
                     <div class="form-group">
                         <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Heavy Machinery & Tools" required>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., 2 Bedroom Apartment in Bole" required>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 5000" required>
+                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 15000" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="paymentPeriod">Payment Period *</label>
                             <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="Day">Per Day</option>
                                 <option value="1 Month">1 Month</option>
                                 <option value="3 Months">3 Months</option>
                                 <option value="6 Months">6 Months</option>
                                 <option value="1 Year">1 Year</option>
+                                <option value="Day">Per Day</option>
                             </select>
                         </div>
                     </div>
@@ -589,10 +589,14 @@
 
                     <div class="form-group" style="margin-top: 16px;">
                         <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or rules (optional)..."></textarea>
+                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, amenities, water/electric access, or rules (optional)..."></textarea>
                     </div>
 
                     <div class="step-actions">
+                        <button type="button" class="btn-prev" id="btnBack2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Back
+                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -660,8 +664,6 @@
     </div>
 
     <script>
-        const PAGE_CATEGORY = "Machinery";
-
         window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
             document.getElementById('errorModalMessage').innerText = message;
@@ -723,6 +725,21 @@
             openCustomSelectModal(this);
         }
 
+        function toggleCustomInput(selectId, customInputId) {
+            const selectElem = document.getElementById(selectId);
+            const inputElem = document.getElementById(customInputId);
+            if (!selectElem || !inputElem) return;
+
+            if (selectElem.value === 'custom') {
+                inputElem.style.display = 'block';
+                inputElem.required = true;
+            } else {
+                inputElem.style.display = 'none';
+                inputElem.required = false;
+                inputElem.value = '';
+            }
+        }
+
         function getAuthenticatedUser() {
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
@@ -741,7 +758,6 @@
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            renderCategorySpecificFields();
             restoreSavedDraft();
             bindCustomSelectHandlers();
         }
@@ -749,6 +765,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             refreshFormState();
+
+            document.getElementById('btnBack2').addEventListener('click', () => {
+                saveDraftToSession();
+                window.location.href = 'rentalpost.html';
+            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
@@ -780,31 +801,42 @@
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
-            draftData.rentalType = PAGE_CATEGORY;
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
             draftData.title = document.getElementById('postTitle').value.trim();
             draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
             draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
             draftData.body = document.getElementById('postContent').value.trim();
-            draftData.categorySpecificDetails = {
-                machineryType: document.getElementById('machineryType')?.value || "",
-                powerSource: document.getElementById('powerSource')?.value || ""
-            };
-            draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
+            draftData.categorySpecificDetails = getCategoryDetails(draftData.rentalType);
+            draftData.activeCategoryOnStep2 = draftData.rentalType;
 
             sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
         }
 
         function restoreSavedDraft() {
             const rawDraft = sessionStorage.getItem('delalaDraftPart1');
-            if (!rawDraft) {
-                autoFillPlaceholders();
-                return;
-            }
+            if (!rawDraft) return;
 
             try {
                 let draft = JSON.parse(rawDraft);
+                const selectedCategory = draft.rentalType || "Residential Property";
+                const previousCategory = draft.activeCategoryOnStep2 || null;
+
+                if (selectedCategory && selectedCategory !== previousCategory) {
+                    delete draft.categorySpecificDetails;
+                    draft.title = "";
+                    draft.body = "";
+                    draft.activeCategoryOnStep2 = selectedCategory;
+
+                    sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draft));
+                }
+
+                const container = document.getElementById('dynamicCategoryFieldsContainer');
+                if (container) container.innerHTML = '';
+                if (selectedCategory) {
+                    renderCategorySpecificFields(selectedCategory);
+                }
+
                 document.getElementById('postTitle').value = draft.title || '';
                 document.getElementById('rentalPrice').value = draft.price || '';
                 if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
@@ -812,50 +844,434 @@
 
                 if (draft.categorySpecificDetails) {
                     const c = draft.categorySpecificDetails;
-                    if (c.machineryType && document.getElementById('machineryType')) document.getElementById('machineryType').value = c.machineryType;
-                    if (c.powerSource && document.getElementById('powerSource')) document.getElementById('powerSource').value = c.powerSource;
+                    if (c.resCategory && document.getElementById('resCategory')) {
+                        document.getElementById('resCategory').value = c.resCategory;
+                        handleResidentialCategoryChange();
+                    }
+                    if (c.compoundType && document.getElementById('compoundType')) document.getElementById('compoundType').value = c.compoundType;
+                    
+                    if (c.roomCountSelect && document.getElementById('roomCountSelect')) {
+                        document.getElementById('roomCountSelect').value = c.roomCountSelect;
+                        toggleCustomInput('roomCountSelect', 'roomCountCustom');
+                        if (c.roomCountCustom) document.getElementById('roomCountCustom').value = c.roomCountCustom;
+                    }
+
+                    if (c.sizeWidthSelect && document.getElementById('sizeWidthSelect')) {
+                        document.getElementById('sizeWidthSelect').value = c.sizeWidthSelect;
+                        toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom');
+                        if (c.sizeWidthCustom) document.getElementById('sizeWidthCustom').value = c.sizeWidthCustom;
+                    }
+
+                    if (c.sizeHeightSelect && document.getElementById('sizeHeightSelect')) {
+                        document.getElementById('sizeHeightSelect').value = c.sizeHeightSelect;
+                        toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom');
+                        if (c.sizeHeightCustom) document.getElementById('sizeHeightCustom').value = c.sizeHeightCustom;
+                    }
+
+                    if (c.landAreaSelect && document.getElementById('landAreaSelect')) {
+                        document.getElementById('landAreaSelect').value = c.landAreaSelect;
+                        toggleCustomInput('landAreaSelect', 'landAreaCustom');
+                        if (c.landAreaCustom) document.getElementById('landAreaCustom').value = c.landAreaCustom;
+                    }
+
+                    if (c.floorLevelSelect && document.getElementById('floorLevelSelect')) {
+                        document.getElementById('floorLevelSelect').value = c.floorLevelSelect;
+                        toggleCustomInput('floorLevelSelect', 'floorLevelCustom');
+                        if (c.floorLevelCustom) document.getElementById('floorLevelCustom').value = c.floorLevelCustom;
+                    }
+
+                    if (c.shopSize && document.getElementById('shopSize')) document.getElementById('shopSize').value = c.shopSize;
+                    if (c.shopFloor && document.getElementById('shopFloor')) document.getElementById('shopFloor').value = c.shopFloor;
+                    if (c.vehicleModel && document.getElementById('vehicleModel')) document.getElementById('vehicleModel').value = c.vehicleModel;
+                    if (c.transmissionType && document.getElementById('transmissionType')) document.getElementById('transmissionType').value = c.transmissionType;
                 }
 
-                autoFillPlaceholders();
+                autoFillPlaceholders(selectedCategory);
+
             } catch (err) {
                 console.error("Failed to restore draft", err);
             }
         }
 
-        function autoFillPlaceholders() {
+        function autoFillPlaceholders(selected) {
             const postTitle = document.getElementById('postTitle');
             const postContent = document.getElementById('postContent');
 
             if (!postTitle.value) {
-                postTitle.value = 'Heavy Machinery & Tools';
+                if (selected === 'Residential Property') postTitle.value = 'Residential Property for Rent';
+                else if (selected === 'Workplace') postTitle.value = 'Workplace / Office / Shop Space';
+                else if (selected === 'Vehicle') postTitle.value = 'Vehicle Rental';
             }
 
             if (!postContent.value) {
-                postContent.value = `[Machinery Overview]: Well-serviced equipment ready for project site.\n\n[Terms]: Operator options and rental terms available upon request.`;
+                if (selected === 'Residential Property') postContent.value = `[Property Overview]: Residential rental.\n\n[Features & Facilities]: Water & electricity available, good accessibility, fully secure locality.`;
+                else if (selected === 'Workplace') postContent.value = `[Workplace Overview]: Commercial space suitable for business activities.\n\n[Features & Facilities]: High customer foot traffic, power supply available.`;
+                else if (selected === 'Vehicle') postContent.value = `[Vehicle Overview]: Well-maintained vehicle available for rent.\n\n[Terms]: Clean condition, ready for immediate service.`;
             }
         }
 
-        function renderCategorySpecificFields() {
+        const ROOM_OPTIONS_HTML = `
+            <option value="1 Room">1 Room</option>
+            <option value="2 Rooms">2 Rooms</option>
+            <option value="3 Rooms">3 Rooms</option>
+            <option value="4 Rooms">4 Rooms</option>
+            <option value="5 Rooms">5 Rooms</option>
+            <option value="custom">Custom / Self-Enter...</option>`;
+
+        const SIZE_METER_OPTIONS_HTML = `
+            <option value="2m">2 meters</option>
+            <option value="3m">3 meters</option>
+            <option value="4m">4 meters</option>
+            <option value="5m">5 meters</option>
+            <option value="6m">6 meters</option>
+            <option value="7m">7 meters</option>
+            <option value="8m">8 meters</option>
+            <option value="10m">10 meters</option>
+            <option value="custom">Custom / Self-Enter...</option>`;
+
+        const FLOOR_G_OPTIONS_HTML = `
+            <option value="Ground Floor (G+0)">Ground Floor (G+0)</option>
+            <option value="G+1">G+1</option>
+            <option value="G+2">G+2</option>
+            <option value="G+3">G+3</option>
+            <option value="G+4">G+4</option>
+            <option value="G+5">G+5</option>
+            <option value="custom">Custom / Self-Enter...</option>`;
+
+        const LAND_AREA_OPTIONS_HTML = `
+            <option value="50 m²">50 m²</option>
+            <option value="100 m²">100 m²</option>
+            <option value="150 m²">150 m²</option>
+            <option value="200 m²">200 m²</option>
+            <option value="250 m²">250 m²</option>
+            <option value="300 m²">300 m²</option>
+            <option value="500 m²">500 m²</option>
+            <option value="custom">Custom / Self-Enter...</option>`;
+
+        function handleResidentialCategoryChange() {
+            const resCatElem = document.getElementById('resCategory');
+            if (!resCatElem) return;
+            const resCat = resCatElem.value;
+            const subContainer = document.getElementById('resSubCategoryFields');
+            if (!subContainer) return;
+
+            let html = '';
+
+            if (resCat === 'Full Compound') {
+                html = `
+                    <div class="form-group" style="margin-top:12px;">
+                        <label class="form-label" for="compoundType">Compound Type / የግብይቱ ዓይነት *</label>
+                        <select class="form-select custom-styled-select" id="compoundType" onchange="handleCompoundTypeChange()" required>
+                            <option value="Villa">Villa / ቪላ</option>
+                            <option value="G+ Building">G+ Multi-Story Building</option>
+                        </select>
+                    </div>
+                    <div id="compoundSubFields"></div>`;
+            } else if (resCat === 'Apartment') {
+                html = `
+                    <div class="form-row" style="margin-top:12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="roomCountSelect">Total Rooms *</label>
+                            <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                                ${ROOM_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="roomCountCustom" placeholder="Enter custom total rooms">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="floorLevelSelect">Floor Level (G+) *</label>
+                            <select class="form-select custom-styled-select" id="floorLevelSelect" onchange="toggleCustomInput('floorLevelSelect', 'floorLevelCustom')" required>
+                                ${FLOOR_G_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="floorLevelCustom" placeholder="Enter custom floor level">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sizeWidthSelect">Main Room Width (W) *</label>
+                            <select class="form-select custom-styled-select" id="sizeWidthSelect" onchange="toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                        </div>
+                    </div>`;
+            } else if (resCat === 'Condominium') {
+                html = `
+                    <div class="form-row" style="margin-top:12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="roomCountSelect">Total Bedrooms *</label>
+                            <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                                <option value="Studio">Studio</option>
+                                <option value="1 Bedroom">1 Bedroom</option>
+                                <option value="2 Bedrooms">2 Bedrooms</option>
+                                <option value="3 Bedrooms">3 Bedrooms</option>
+                                <option value="4 Bedrooms">4 Bedrooms</option>
+                                <option value="5 Bedrooms">5 Bedrooms</option>
+                                <option value="custom">Custom / Self-Enter...</option>
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="roomCountCustom" placeholder="Enter custom bedroom count">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="floorLevelSelect">Floor Level *</label>
+                            <select class="form-select custom-styled-select" id="floorLevelSelect" onchange="toggleCustomInput('floorLevelSelect', 'floorLevelCustom')" required>
+                                ${FLOOR_G_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="floorLevelCustom" placeholder="Enter custom floor">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sizeWidthSelect">Main Room Width (W) *</label>
+                            <select class="form-select custom-styled-select" id="sizeWidthSelect" onchange="toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                        </div>
+                    </div>`;
+            } else if (resCat === 'Living with Owner') {
+                html = `
+                    <div class="form-group" style="margin-top:12px;">
+                        <label class="form-label" for="roomCountSelect">Rooms Included *</label>
+                        <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                            ${ROOM_OPTIONS_HTML}
+                        </select>
+                        <input type="text" class="form-input custom-input-box" id="roomCountCustom" placeholder="Enter custom room count">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sizeWidthSelect">Main Room Width (W) *</label>
+                            <select class="form-select custom-styled-select" id="sizeWidthSelect" onchange="toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                        </div>
+                    </div>`;
+            }
+
+            subContainer.innerHTML = html;
+            if (resCat === 'Full Compound') {
+                handleCompoundTypeChange();
+            }
+            bindCustomSelectHandlers();
+        }
+
+        function handleCompoundTypeChange() {
+            const compTypeElem = document.getElementById('compoundType');
+            if (!compTypeElem) return;
+            const compType = compTypeElem.value;
+            const container = document.getElementById('compoundSubFields');
+            if (!container) return;
+
+            if (compType === 'Villa') {
+                container.innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label" for="roomCountSelect">Total Rooms *</label>
+                        <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                            ${ROOM_OPTIONS_HTML}
+                        </select>
+                        <input type="text" class="form-input custom-input-box" id="roomCountCustom" placeholder="Enter custom total rooms">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sizeWidthSelect">Main Room Width (W) *</label>
+                            <select class="form-select custom-styled-select" id="sizeWidthSelect" onchange="toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="landAreaSelect">Total Land Area (m²) *</label>
+                        <select class="form-select custom-styled-select" id="landAreaSelect" onchange="toggleCustomInput('landAreaSelect', 'landAreaCustom')" required>
+                            ${LAND_AREA_OPTIONS_HTML}
+                        </select>
+                        <input type="text" class="form-input custom-input-box" id="landAreaCustom" placeholder="Enter custom land area in m²">
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="roomCountSelect">Total Rooms *</label>
+                            <select class="form-select custom-styled-select" id="roomCountSelect" onchange="toggleCustomInput('roomCountSelect', 'roomCountCustom')" required>
+                                ${ROOM_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="roomCountCustom" placeholder="Enter custom total rooms">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="floorLevelSelect">Floor Level (G+) *</label>
+                            <select class="form-select custom-styled-select" id="floorLevelSelect" onchange="toggleCustomInput('floorLevelSelect', 'floorLevelCustom')" required>
+                                ${FLOOR_G_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="floorLevelCustom" placeholder="Enter custom floor level">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sizeWidthSelect">Main Room Width (W) *</label>
+                            <select class="form-select custom-styled-select" id="sizeWidthSelect" onchange="toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeWidthCustom" placeholder="Enter width">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sizeHeightSelect">Main Room Length / Height (H) *</label>
+                            <select class="form-select custom-styled-select" id="sizeHeightSelect" onchange="toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom')" required>
+                                ${SIZE_METER_OPTIONS_HTML}
+                            </select>
+                            <input type="text" class="form-input custom-input-box" id="sizeHeightCustom" placeholder="Enter length/height">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="landAreaSelect">Total Land Area (m²) *</label>
+                        <select class="form-select custom-styled-select" id="landAreaSelect" onchange="toggleCustomInput('landAreaSelect', 'landAreaCustom')" required>
+                            ${LAND_AREA_OPTIONS_HTML}
+                        </select>
+                        <input type="text" class="form-input custom-input-box" id="landAreaCustom" placeholder="Enter custom land area in m²">
+                    </div>`;
+            }
+            bindCustomSelectHandlers();
+        }
+
+        function getCategoryDetails(cat) {
+            if (cat === 'Residential Property') {
+                const roomSel = document.getElementById('roomCountSelect')?.value;
+                const roomVal = roomSel === 'custom' ? document.getElementById('roomCountCustom')?.value : roomSel;
+
+                const widthSel = document.getElementById('sizeWidthSelect')?.value;
+                const widthVal = widthSel === 'custom' ? document.getElementById('sizeWidthCustom')?.value : widthSel;
+
+                const heightSel = document.getElementById('sizeHeightSelect')?.value;
+                const heightVal = heightSel === 'custom' ? document.getElementById('sizeHeightCustom')?.value : heightSel;
+
+                const landSel = document.getElementById('landAreaSelect')?.value;
+                const landVal = landSel === 'custom' ? document.getElementById('landAreaCustom')?.value : landSel;
+
+                const floorSel = document.getElementById('floorLevelSelect')?.value;
+                const floorVal = floorSel === 'custom' ? document.getElementById('floorLevelCustom')?.value : floorSel;
+
+                return {
+                    resCategory: document.getElementById('resCategory')?.value || "",
+                    compoundType: document.getElementById('compoundType')?.value || "",
+                    roomCountSelect: roomSel || "",
+                    roomCountCustom: document.getElementById('roomCountCustom')?.value || "",
+                    roomCount: roomVal || "",
+                    sizeWidthSelect: widthSel || "",
+                    sizeWidthCustom: document.getElementById('sizeWidthCustom')?.value || "",
+                    sizeHeightSelect: heightSel || "",
+                    sizeHeightCustom: document.getElementById('sizeHeightCustom')?.value || "",
+                    mainRoomSize: (widthVal && heightVal) ? `${widthVal} × ${heightVal}` : "",
+                    landAreaSelect: landSel || "",
+                    landAreaCustom: document.getElementById('landAreaCustom')?.value || "",
+                    totalLandArea: landVal || "",
+                    floorLevelSelect: floorSel || "",
+                    floorLevelCustom: document.getElementById('floorLevelCustom')?.value || "",
+                    floorLevel: floorVal || ""
+                };
+            } else if (cat === 'Workplace') {
+                return {
+                    shopSize: document.getElementById('shopSize')?.value || "",
+                    shopFloor: document.getElementById('shopFloor')?.value || ""
+                };
+            } else if (cat === 'Vehicle') {
+                return {
+                    vehicleModel: document.getElementById('vehicleModel')?.value || "",
+                    transmissionType: document.getElementById('transmissionType')?.value || ""
+                };
+            }
+            return {};
+        }
+
+        function renderCategorySpecificFields(category) {
             const container = document.getElementById('dynamicCategoryFieldsContainer');
             if (!container) return;
 
-            container.innerHTML = `
-                <div class="nested-box">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="machineryType">Machinery / Tool Type *</label>
-                            <input type="text" class="form-input" id="machineryType" placeholder="e.g. Excavator, Generator, Concrete Mixer" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="powerSource">Power Source *</label>
-                            <select class="form-select custom-styled-select" id="powerSource" required>
-                                <option value="Diesel / Petrol">Diesel / Petrol</option>
-                                <option value="Electric">Electric</option>
-                                <option value="Manual / Hydraulic">Manual / Hydraulic</option>
+            container.innerHTML = '';
+
+            let html = '';
+            if (category === 'Residential Property') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" for="resCategory">House Rental Category / የቤት ኪራይ ምድብ *</label>
+                            <select class="form-select custom-styled-select" id="resCategory" onchange="handleResidentialCategoryChange()" required>
+                                <option value="Full Compound">1. Full Compound / ሙሉ ግቢ</option>
+                                <option value="Apartment">2. Apartment / አፓርታማ</option>
+                                <option value="Condominium">3. Condominium / ኮንዶሚኒየም</option>
+                                <option value="Living with Owner">4. Living with Owner / ከባለቤት ጋር የሚኖር</option>
                             </select>
                         </div>
-                    </div>
-                </div>`;
+                        <div id="resSubCategoryFields"></div>
+                    </div>`;
+            } else if (category === 'Workplace') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="shopSize">Approx. Size (sqm) *</label>
+                                <input type="text" class="form-input" id="shopSize" placeholder="e.g. 45 sqm" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="shopFloor">Floor Level *</label>
+                                <select class="form-select custom-styled-select" id="shopFloor" required>
+                                    <option value="Ground Floor">Ground Floor</option>
+                                    <option value="1st Floor">1st Floor</option>
+                                    <option value="2nd Floor & Above">2nd Floor & Above</option>
+                                    <option value="Basement">Basement</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (category === 'Vehicle') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleModel">Vehicle Brand & Model *</label>
+                                <input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Toyota Corolla / Vitz" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="transmissionType">Transmission *</label>
+                                <select class="form-select custom-styled-select" id="transmissionType" required>
+                                    <option value="Automatic">Automatic</option>
+                                    <option value="Manual">Manual</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            container.innerHTML = html;
+
+            if (category === 'Residential Property') {
+                handleResidentialCategoryChange();
+            }
             bindCustomSelectHandlers();
         }
 

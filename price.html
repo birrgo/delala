@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delala Admin | Category Pricing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 16px; }
+
+        .container { max-width: 650px; margin: 0 auto; }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-back:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+            transform: translateX(-2px);
+        }
+
+        .header h1 { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .category-card {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .category-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .cat-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .cat-title { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
+        .cat-id { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .durations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .duration-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: #F8FAFC;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .duration-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .price-input-wrapper { display: flex; align-items: center; gap: 4px; }
+        
+        .price-input {
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            outline: none;
+            text-align: right;
+        }
+
+        .price-input:focus { border-color: var(--primary-dark); }
+        .currency { font-size: 10px; font-weight: 700; color: var(--text-muted); }
+
+        .btn-save {
+            width: 100%;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            transition: background 0.2s;
+        }
+
+        .btn-save:hover { background: #1E293B; }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10B981;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-title-container">
+                <a href="new.html" class="btn-back" title="Go to new.html">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <h1>Admin Price Control</h1>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; background: #E2E8F0; padding: 4px 8px; border-radius: 6px;">Admin Only</span>
+        </div>
+
+        <div class="card" id="category-container">
+            <!-- Categories rendered dynamically via JavaScript -->
+        </div>
+
+        <button class="btn-save" id="savePricesBtn">Update Database Prices</button>
+    </div>
+
+    <div class="toast" id="toastMsg">Category Prices Saved!</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const pricesRef = ref(db, 'settings/category_prices');
+
+        const categories = [
+            { id: 1, title: "1. Residential & Homes" },
+            { id: 2, title: "2. Workplace & Commercial" },
+            { id: 3, title: "3. Vehicles & Automotive" },
+            { id: 4, title: "4. Event Equipment" },
+            { id: 5, title: "5. Clothing & Fashion" },
+            { id: 6, title: "6. Heavy Machinery" },
+            { id: 7, title: "7. Miscellaneous & Others" }
+        ];
+
+        const durationKeys = [
+            { key: "1m", label: "1 Month" },
+            { key: "3m", label: "3 Months" },
+            { key: "6m", label: "6 Months" },
+            { key: "1y", label: "1 Year" },
+            { key: "2y", label: "2 Years" }
+        ];
+
+        // Standard default prices per period (Multiplier base defaults)
+        const baseDefaults = {
+            "1m": 100,
+            "3m": 270,
+            "6m": 500,
+            "1y": 900,
+            "2y": 1600
+        };
+
+        // Render UI Elements Dynamically
+        const container = document.getElementById('category-container');
+        categories.forEach(cat => {
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            
+            let durationFields = durationKeys.map(d => `
+                <div class="duration-box">
+                    <span class="duration-label">${d.label}</span>
+                    <div class="price-input-wrapper">
+                        <input type="number" id="cat_${cat.id}_${d.key}" class="price-input" placeholder="0">
+                        <span class="currency">ETB</span>
+                    </div>
+                </div>
+            `).join('');
+
+            card.innerHTML = `
+                <div class="cat-info">
+                    <span class="cat-title">${cat.title}</span>
+                    <span class="cat-id">Category #${cat.id}</span>
+                </div>
+                <div class="durations-grid">
+                    ${durationFields}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Load existing prices from Realtime Database
+        onValue(pricesRef, (snapshot) => {
+            const data = snapshot.exists() ? snapshot.val() : {};
+            
+            categories.forEach(cat => {
+                const catKey = `cat_${cat.id}`;
+                durationKeys.forEach(d => {
+                    const fieldId = `cat_${cat.id}_${d.key}`;
+                    const input = document.getElementById(fieldId);
+                    
+                    if (data[catKey] && data[catKey][d.key] !== undefined) {
+                        input.value = data[catKey][d.key];
+                    } else {
+                        // Fallback logic for legacy single-value entries or missing data
+                        const baseVal = (typeof data[catKey] === 'number') ? data[catKey] : baseDefaults[d.key];
+                        input.value = baseVal;
+                    }
+                });
+            });
+        });
+
+        // Save updated prices back to Realtime Database
+        document.getElementById('savePricesBtn').addEventListener('click', () => {
+            const updatedPrices = {};
+
+            categories.forEach(cat => {
+                const catKey = `cat_${cat.id}`;
+                updatedPrices[catKey] = {};
+
+                durationKeys.forEach(d => {
+                    const fieldId = `cat_${cat.id}_${d.key}`;
+                    const val = parseFloat(document.getElementById(fieldId).value);
+                    updatedPrices[catKey][d.key] = isNaN(val) ? baseDefaults[d.key] : val;
+                });
+            });
+
+            set(pricesRef, updatedPrices).then(() => {
+                const toast = document.getElementById('toastMsg');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2500);
+            }).catch(err => {
+                alert("Failed to update database: " + err.message);
+            });
+        });
+    </script>
+</body>
+</html>

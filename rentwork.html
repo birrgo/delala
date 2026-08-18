@@ -179,7 +179,7 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-prev, .btn-next {
+        .btn-next {
             flex: 1;
             height: 46px;
             padding: 0 13px;
@@ -192,10 +192,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-
-        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
-        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -559,40 +559,12 @@
                     <div class="step-title">Step 2: Workplace / Commercial Details</div>
 
                     <div class="form-group">
-                        <label class="form-label" for="workplaceSubCategory">Workplace Sub-Category *</label>
-                        <select class="form-select custom-styled-select" id="workplaceSubCategory" required>
-                            <option value="Shop">1. Commercial Shop - ንግድ ሱቅ</option>
-                            <option value="Office">2. Office - ቢሮ</option>
-                            <option value="Warehouse">3. Warehouse / Storage - የዕቃ መጋዘን</option>
-                            <option value="Workshop">4. Workshop - የሥራ ቦታ / ዎርክሾፕ</option>
-                            <option value="Hotel">5. Hotel - From Small to Large - ሆቴል</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label class="form-label" for="postTitle">Title / Headline *</label>
                         <input type="text" class="form-input" id="postTitle" placeholder="e.g., Prime Shop Space for Rent in Bole" required>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 25000" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="1 Month">1 Month</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
-                                <option value="Day">Per Day</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div id="dynamicCategoryFieldsContainer">
-                        <!-- Dynamic category specific fields rendered dynamically -->
+                        <!-- Sub-Category, Price, Period, and Category specific fields rendered inside the 3D frame -->
                     </div>
 
                     <div class="form-group" style="margin-top: 16px;">
@@ -601,10 +573,6 @@
                     </div>
 
                     <div class="step-actions">
-                        <button type="button" class="btn-prev" id="btnBack2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            Back
-                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -747,31 +715,147 @@
             return { phone: userPhone, id: userId || userPhone };
         }
 
+        function getCommonPriceMarkup() {
+            return `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                        <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 25000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="paymentPeriod">Payment Period *</label>
+                        <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                            <option value="1 Month">1 Month</option>
+                            <option value="3 Months">3 Months</option>
+                            <option value="6 Months">6 Months</option>
+                            <option value="1 Year">1 Year</option>
+                            <option value="Day">Per Day</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSubCategorySelectMarkup(selectedVal = 'Shop') {
+            return `
+                <div class="form-group">
+                    <label class="form-label" for="workplaceSubCategory">Workplace Sub-Category *</label>
+                    <select class="form-select custom-styled-select" id="workplaceSubCategory" required>
+                        <option value="Shop" ${selectedVal === 'Shop' ? 'selected' : ''}>1. Commercial Shop - ንግድ ሱቅ</option>
+                        <option value="Office" ${selectedVal === 'Office' ? 'selected' : ''}>2. Office - ቢሮ</option>
+                        <option value="Warehouse" ${selectedVal === 'Warehouse' ? 'selected' : ''}>3. Warehouse / Storage - የዕቃ መጋዘን</option>
+                        <option value="Workshop" ${selectedVal === 'Workshop' ? 'selected' : ''}>4. Workshop - የሥራ ቦታ / ዎርክሾፕ</option>
+                        <option value="Hotel" ${selectedVal === 'Hotel' ? 'selected' : ''}>5. Hotel - From Small to Large - ሆቴል</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function attachSubCategoryListener() {
+            const subCatSelect = document.getElementById('workplaceSubCategory');
+            if (subCatSelect) {
+                subCatSelect.addEventListener('change', () => {
+                    const currentPrice = document.getElementById('rentalPrice')?.value;
+                    const currentPeriod = document.getElementById('paymentPeriod')?.value;
+                    
+                    renderCategoryFields();
+                    
+                    if (currentPrice && document.getElementById('rentalPrice')) {
+                        document.getElementById('rentalPrice').value = currentPrice;
+                    }
+                    if (currentPeriod && document.getElementById('paymentPeriod')) {
+                        document.getElementById('paymentPeriod').value = currentPeriod;
+                    }
+                    
+                    autoFillPlaceholders();
+                });
+            }
+        }
+
         function renderCategoryFields() {
-            const subCat = document.getElementById('workplaceSubCategory').value;
+            const existingSelect = document.getElementById('workplaceSubCategory');
+            const subCat = existingSelect ? existingSelect.value : 'Shop';
             const container = document.getElementById('dynamicCategoryFieldsContainer');
             
+            const subCatMarkup = getSubCategorySelectMarkup(subCat);
+            const priceMarkup = getCommonPriceMarkup();
+            
+            let extraFields = '';
+
             if (subCat === 'Shop' || subCat === 'Office') {
-                container.innerHTML = `
-                    <div class="nested-box">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="workplaceFloor">Floor Level *</label>
-                                <select class="form-select custom-styled-select" id="workplaceFloor" required>
-                                    <option value="Ground Floor">Ground Floor</option>
-                                    <option value="1st Floor (G+1)">1st Floor (G+1)</option>
-                                    <option value="2nd Floor (G+2)">2nd Floor (G+2)</option>
-                                    <option value="3rd Floor (G+3)">3rd Floor (G+3)</option>
-                                    <option value="4th Floor & Above">4th Floor & Above</option>
-                                    <option value="Basement">Basement</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="workplaceSquareMeter">Area (sqm) *</label>
-                                <input type="number" class="form-input" id="workplaceSquareMeter" placeholder="e.g. 45" required>
-                            </div>
+                extraFields = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="workplaceFloor">Floor Level *</label>
+                            <select class="form-select custom-styled-select" id="workplaceFloor" required>
+                                <option value="Ground Floor">Ground Floor</option>
+                                <option value="1st Floor (G+1)">1st Floor (G+1)</option>
+                                <option value="2nd Floor (G+2)">2nd Floor (G+2)</option>
+                                <option value="3rd Floor (G+3)">3rd Floor (G+3)</option>
+                                <option value="4th Floor & Above">4th Floor & Above</option>
+                                <option value="Basement">Basement</option>
+                            </select>
                         </div>
-                        <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
+                        <div class="form-group">
+                            <label class="form-label" for="workplaceSquareMeter">Area (sqm) *</label>
+                            <input type="number" class="form-input" id="workplaceSquareMeter" placeholder="e.g. 45" required>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 0px; margin-bottom: 0;">
+                        <label class="form-label" for="numberOfRooms">Total Number of Rooms *</label>
+                        <select class="form-select custom-styled-select" id="numberOfRooms" required>
+                            <option value="1 Room">1 Room</option>
+                            <option value="2 Rooms">2 Rooms</option>
+                            <option value="3 or Above">3 or Above</option>
+                        </select>
+                    </div>
+                `;
+            } else if (subCat === 'Warehouse' || subCat === 'Workshop') {
+                extraFields = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="warehouseScope">Rental Scope *</label>
+                            <select class="form-select custom-styled-select" id="warehouseScope" required>
+                                <option value="Whole Facility / For All">Whole Facility (All)</option>
+                                <option value="Shared / Specific Section">Shared / Specific Section</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="warehouseVolume">Total Area (sqm or m³)*</label>
+                            <input type="text" class="form-input" id="warehouseVolume" placeholder="e.g. 150 sqm / 450 m³" required>
+                        </div>
+                    </div>
+                `;
+            } else if (subCat === 'Hotel') {
+                extraFields = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="hotelType">Facility Type *</label>
+                            <select class="form-select custom-styled-select" id="hotelType" required>
+                                <option value="Cafe">Cafe</option>
+                                <option value="Restaurant">Restaurant</option>
+                                <option value="Fast Food">Fast Food</option>
+                                <option value="Hotel & Guest House">Hotel / Guest Rooms</option>
+                                <option value="Other Commercial">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="hotelFloor">Floor Structure *</label>
+                            <select class="form-select custom-styled-select" id="hotelFloor" required>
+                                <option value="Ground Floor">Ground Floor</option>
+                                <option value="G+1 Building">G+1 Building</option>
+                                <option value="G+2 Building">G+2 Building</option>
+                                <option value="G+3 Building">G+3 Building</option>
+                                <option value="G+4 & Above">G+4 & Above</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top: 0px;">
+                        <div class="form-group">
+                            <label class="form-label" for="hotelSquareMeter">Total Area (sqm) *</label>
+                            <input type="number" class="form-input" id="hotelSquareMeter" placeholder="e.g. 300" required>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label" for="numberOfRooms">Total Number of Rooms *</label>
                             <select class="form-select custom-styled-select" id="numberOfRooms" required>
                                 <option value="1 Room">1 Room</option>
@@ -781,67 +865,17 @@
                         </div>
                     </div>
                 `;
-            } else if (subCat === 'Warehouse' || subCat === 'Workshop') {
-                container.innerHTML = `
-                    <div class="nested-box">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="warehouseScope">Rental Scope *</label>
-                                <select class="form-select custom-styled-select" id="warehouseScope" required>
-                                    <option value="Whole Facility / For All">Whole Facility (All)</option>
-                                    <option value="Shared / Specific Section">Shared / Specific Section</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="warehouseVolume">Total Area (sqm or m³)*</label>
-                                <input type="text" class="form-input" id="warehouseVolume" placeholder="e.g. 150 sqm / 450 m³" required>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (subCat === 'Hotel') {
-                container.innerHTML = `
-                    <div class="nested-box">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="hotelType">Facility Type *</label>
-                                <select class="form-select custom-styled-select" id="hotelType" required>
-                                    <option value="Cafe">Cafe</option>
-                                    <option value="Restaurant">Restaurant</option>
-                                    <option value="Fast Food">Fast Food</option>
-                                    <option value="Hotel & Guest House">Hotel / Guest Rooms</option>
-                                    <option value="Other Commercial">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="hotelFloor">Floor Structure *</label>
-                                <select class="form-select custom-styled-select" id="hotelFloor" required>
-                                    <option value="Ground Floor">Ground Floor</option>
-                                    <option value="G+1 Building">G+1 Building</option>
-                                    <option value="G+2 Building">G+2 Building</option>
-                                    <option value="G+3 Building">G+3 Building</option>
-                                    <option value="G+4 & Above">G+4 & Above</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row" style="margin-top: 12px;">
-                            <div class="form-group">
-                                <label class="form-label" for="hotelSquareMeter">Total Area (sqm) *</label>
-                                <input type="number" class="form-input" id="hotelSquareMeter" placeholder="e.g. 300" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="numberOfRooms">Total Number of Rooms *</label>
-                                <select class="form-select custom-styled-select" id="numberOfRooms" required>
-                                    <option value="1 Room">1 Room</option>
-                                    <option value="2 Rooms">2 Rooms</option>
-                                    <option value="3 or Above">3 or Above</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                `;
             }
 
+            container.innerHTML = `
+                <div class="nested-box">
+                    ${subCatMarkup}
+                    ${priceMarkup}
+                    ${extraFields}
+                </div>
+            `;
+
+            attachSubCategoryListener();
             bindCustomSelectHandlers();
         }
 
@@ -856,24 +890,14 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
-            
-            document.getElementById('workplaceSubCategory').addEventListener('change', () => {
-                renderCategoryFields();
-                autoFillPlaceholders();
-            });
-
             refreshFormState();
-
-            document.getElementById('btnBack2').addEventListener('click', () => {
-                saveDraftToSession();
-                window.location.href = 'rentalpost.html';
-            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
 
                 const title = document.getElementById('postTitle').value.trim();
-                const price = document.getElementById('rentalPrice').value;
+                const priceInput = document.getElementById('rentalPrice');
+                const price = priceInput ? priceInput.value : '';
 
                 if (!title || !price) {
                     showErrorModal("Please fill in both the listing title and rental price.");
@@ -900,12 +924,12 @@
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
             draftData.rentalType = 'Workplace';
-            draftData.workplaceSubCategory = document.getElementById('workplaceSubCategory').value;
+            draftData.workplaceSubCategory = document.getElementById('workplaceSubCategory')?.value || 'Shop';
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
             draftData.title = document.getElementById('postTitle').value.trim();
-            draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
-            draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
+            draftData.price = Number(document.getElementById('rentalPrice')?.value) || 0;
+            draftData.paymentPeriod = document.getElementById('paymentPeriod')?.value || '1 Month';
             draftData.body = document.getElementById('postContent').value.trim();
             draftData.categorySpecificDetails = getCategoryDetails();
             draftData.activeCategoryOnStep2 = 'Workplace';
@@ -920,14 +944,20 @@
             try {
                 let draft = JSON.parse(rawDraft);
 
-                if (draft.workplaceSubCategory) {
+                if (draft.workplaceSubCategory && document.getElementById('workplaceSubCategory')) {
                     document.getElementById('workplaceSubCategory').value = draft.workplaceSubCategory;
                     renderCategoryFields();
                 }
 
                 document.getElementById('postTitle').value = draft.title || '';
-                document.getElementById('rentalPrice').value = draft.price || '';
-                if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
+                
+                if (document.getElementById('rentalPrice')) {
+                    document.getElementById('rentalPrice').value = draft.price || '';
+                }
+                if (draft.paymentPeriod && document.getElementById('paymentPeriod')) {
+                    document.getElementById('paymentPeriod').value = draft.paymentPeriod;
+                }
+                
                 document.getElementById('postContent').value = draft.body || '';
 
                 if (draft.categorySpecificDetails) {
@@ -952,7 +982,8 @@
         function autoFillPlaceholders() {
             const postTitle = document.getElementById('postTitle');
             const postContent = document.getElementById('postContent');
-            const subCat = document.getElementById('workplaceSubCategory').value;
+            const subCatSelect = document.getElementById('workplaceSubCategory');
+            const subCat = subCatSelect ? subCatSelect.value : 'Shop';
 
             if (!postTitle.value) {
                 postTitle.value = `${subCat} Space for Rent`;
@@ -964,7 +995,9 @@
         }
 
         function getCategoryDetails() {
-            const subCat = document.getElementById('workplaceSubCategory').value;
+            const subCatSelect = document.getElementById('workplaceSubCategory');
+            const subCat = subCatSelect ? subCatSelect.value : 'Shop';
+
             if (subCat === 'Shop' || subCat === 'Office') {
                 return {
                     workplaceFloor: document.getElementById('workplaceFloor')?.value || "",

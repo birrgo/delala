@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delala Admin Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <style>
+        :root {
+            --primary-metallic: linear-gradient(135deg, #64748b 0%, #334155 50%, #1e293b 100%);
+            --silver-accent: #94a3b8;
+            --silver-highlight: #cbd5e1;
+            --bg-dark-metallic: #0f1115;
+            --card-bg: #181b20;
+            --card-border: #2d333b;
+            --text-dark: #f1f5f9; 
+            --text-muted: #94a3b8; 
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #2a2e35;
+            --input-bg: #22262c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark-metallic);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- NAVIGATION --- */
+        .top-nav {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            background: linear-gradient(180deg, #2a2e33 0%, #1c1f23 100%);
+            border-bottom: 1px solid #3d434a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            flex-shrink: 0;
+            padding-top: 4px;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 12px 16px;
+        }
+
+        .brand-logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #e2e8f0;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .brand-logo span {
+            color: var(--silver-accent);
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .btn-back-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #2e343b, #1f2327);
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 900;
+            transition: all 0.2s ease;
+            z-index: 2;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .btn-back-icon:hover {
+            background: #334155;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .btn-back-icon:active {
+            transform: scale(0.95);
+        }
+
+        .btn-header-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #2e343b, #1f2327);
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .btn-header-icon:hover {
+            background: #334155;
+            transform: scale(1.05);
+        }
+        .btn-header-icon:active {
+            transform: scale(0.95);
+        }
+
+        .nav-tabs {
+            display: flex;
+            width: 100%;
+            border-top: 1px solid #23272d;
+            background: #121417;
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .tab-btn:hover {
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            border-bottom-color: #94a3b8;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 100%);
+        }
+
+        .nav-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 20px;
+            margin-left: 6px;
+            display: inline-block;
+            pointer-events: none;
+        }
+        .nav-badge.zero {
+            background-color: #475569;
+            display: none;
+        }
+        .nav-badge.unpaid-badge {
+            background-color: #f59e0b;
+        }
+
+        /* --- VIEWPORT PANELS --- */
+        .content-body {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-panel {
+            display: none;
+            height: 100%;
+            width: 100%;
+            flex-direction: column;
+            background: var(--bg-dark-metallic);
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        .scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* --- UI CARDS & FORMS --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .form-control {
+            width: 100%;
+            height: 42px;
+            background-color: var(--input-bg);
+            border: 1px solid #3d434a;
+            border-radius: 10px;
+            padding: 0 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #f8fafc;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #64748b;
+            background-color: #1a1d22;
+        }
+
+        .btn-primary {
+            background: var(--primary-metallic);
+            color: white;
+            border: 1px solid #475569;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* --- TRANSACTIONS CARDS --- */
+        .mobile-tx-card {
+            background: linear-gradient(145deg, #1d2126, #14171a);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #282d35;
+        }
+
+        .tx-ref {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 13px;
+            color: #e2e8f0;
+        }
+
+        .tx-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .tx-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            border-top: 1px solid #282d35;
+            padding-top: 10px;
+        }
+
+        .btn-action-mobile {
+            flex: 1;
+            padding: 9px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .reject-input-box {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #475569;
+        }
+
+        .reject-input-box.active {
+            display: flex;
+        }
+
+        /* --- CHAT OVERLAY & MODALS --- */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+            color: #f8fafc;
+            border-radius: 50%;
+            border: 1px solid #64748b;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 9000;
+            transition: transform 0.2s ease;
+        }
+        .floating-chat-btn:active {
+            transform: scale(0.9);
+        }
+        .floating-chat-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #0f172a;
+        }
+
+        .chat-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .chat-modal-overlay.active {
+            display: flex;
+        }
+
+        .chat-modal-container {
+            width: 100%;
+            max-width: 450px;
+            height: 80vh;
+            max-height: 650px;
+            background: #181b1e;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: linear-gradient(180deg, #24282e 0%, #181b1e 100%);
+            border-bottom: 1px solid #334155;
+        }
+
+        .chat-mobile-wrapper {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            background: #121417;
+        }
+
+        .chat-user-selector {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #181b20;
+            overflow-y: auto;
+        }
+
+        .chat-user-selector.hidden {
+            display: none;
+        }
+
+        .chat-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid #2a2e35;
+            cursor: pointer;
+        }
+
+        .chat-list-item:active {
+            background: #23272e;
+        }
+
+        .user-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #475569, #1e293b);
+            color: #f8fafc;
+            border: 1px solid #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+        .chat-active-window {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: #0f1115;
+        }
+
+        .chat-active-window.active {
+            display: flex;
+        }
+
+        .chat-top-header {
+            background: #181b20;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            font-weight: 700;
+            color: var(--silver-highlight);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .chat-scroller {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .bubble.received {
+            background: #272b30;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bubble.sent {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            color: white;
+            border: 1px solid #64748b;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-footer {
+            background: #181b20;
+            padding: 8px 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* --- PROOF SLIP PREVIEW MODAL --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 9999;
+        }
+
+        .modal-body {
+            background: #181b20;
+            border: 1px solid #3d434a;
+            padding: 16px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .modal-body img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #2d333b;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <div class="brand-header">
+            <button class="btn-back-icon" onclick="window.location.href='new.html'" title="Go to New">
+                &#8592;
+            </button>
+            
+            <div class="brand-logo">Delala <span>Hub</span></div>
+
+            <div class="header-actions">
+                <button class="btn-header-icon" id="btn-toggle-chat-nav" title="Live Chat Services">
+                    💬
+                    <span id="header-chat-badge" class="nav-badge zero" style="position: absolute; top: -4px; right: -4px; margin: 0;">0</span>
+                </button>
+                <button class="btn-header-icon" onclick="window.location.href='alerts.html'" title="System Alerts">
+                    🔔
+                </button>
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="pane-unpaid">
+                Unpaid Orders <span id="tab-badge-unpaid" class="nav-badge zero unpaid-badge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="pane-deposits">
+                Pending Reviews <span id="tab-badge-pending" class="nav-badge zero">0</span>
+            </button>
+            <button class="tab-btn" data-tab="pane-history">History</button>
+        </div>
+    </header>
+
+    <div class="content-body">
+        <div id="pane-unpaid" class="tab-panel active">
+            <div class="scrollable-content" id="unpaid-cards-container"></div>
+        </div>
+
+        <div id="pane-deposits" class="tab-panel">
+            <div class="scrollable-content" id="tx-cards-container"></div>
+        </div>
+
+        <div id="pane-history" class="tab-panel">
+            <div class="scrollable-content" id="history-cards-container"></div>
+        </div>
+    </div>
+
+    <button class="floating-chat-btn" id="btn-toggle-chat-float" title="Open Chat Center">
+        💬
+        <span id="floating-chat-badge" class="floating-chat-badge" style="display: none;">0</span>
+    </button>
+
+    <div class="chat-modal-overlay" id="chat-overlay">
+        <div class="chat-modal-container">
+            <div class="chat-modal-header">
+                <h3 style="font-size: 16px; font-weight: 800; margin: 0; color: #f1f5f9;">Support Chat Services</h3>
+                <button class="btn-back-icon" id="btn-close-chat-x" style="width: 32px; height: 32px; font-size: 14px;">✕</button>
+            </div>
+            <div class="chat-mobile-wrapper" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                <div class="chat-user-selector" id="chat-list-view"></div>
+                <div class="chat-active-window" id="chat-room-view">
+                    <div class="chat-top-header">
+                        <button class="btn-back" id="btn-exit-chat-room">← Back</button>
+                        <div>
+                            <h4 id="active-user-title" style="font-size: 14px; font-weight:800; color:#f8fafc;">Selected Client</h4>
+                            <p style="font-size: 10px; color: var(--text-muted);">Secure Client Tunnel</p>
+                        </div>
+                    </div>
+                    <div class="chat-scroller" id="chat-messages-box"></div>
+                    <div class="chat-footer">
+                        <input type="text" id="chat-msg-input" class="form-control" placeholder="Type administrative response..." style="flex-grow: 1;">
+                        <button class="btn-primary" id="send-chat-btn" style="width: auto; padding: 0 16px; height: 42px;">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="slipModal">
+        <div class="modal-body">
+            <h4 style="margin-bottom: 12px; font-weight: 800; color:#f8fafc;">Delala Verification Slip</h4>
+            <img id="slipImg" src="" alt="Proof Receipt">
+            <button class="btn-primary" id="btn-close-slip" style="background:#334155; color:#f8fafc; border: 1px solid #475569;">Close Frame</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, ref, set, get, onValue, push } from './db.js';
+
+        let activeUserId = '';
+        let activeDelalaList = {};
+
+        function switchTab(targetPaneId) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const panels = document.querySelectorAll('.tab-panel');
+
+            tabs.forEach(btn => {
+                if (btn.getAttribute('data-tab') === targetPaneId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            panels.forEach(panel => {
+                if (panel.id === targetPaneId) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleChatOverlay() {
+            const overlay = document.getElementById('chat-overlay');
+            if (overlay) overlay.classList.toggle('active');
+        }
+
+        function exitChatRoom() {
+            activeUserId = '';
+            document.getElementById('chat-room-view').classList.remove('active');
+            document.getElementById('chat-list-view').classList.remove('hidden');
+        }
+
+        function closeSlip() {
+            document.getElementById('slipModal').style.display = 'none';
+        }
+
+        function viewSlip(receiptUrl, fallbackRef) {
+            const imgEl = document.getElementById('slipImg');
+            imgEl.src = receiptUrl || `https://placehold.co/400x600/1e293b/cbd5e1?text=${fallbackRef}+Receipt`;
+            document.getElementById('slipModal').style.display = 'flex';
+        }
+
+        function sendEmailNotification(subjectText, txDetails = {}) {
+            get(ref(db, 'settings/email_config')).then((snapshot) => {
+                const config = snapshot.val();
+                if (!config) return;
+
+                const targetEmail = config.alert_email_target;
+                const publicKey = config.emailjs_public_key;
+                const serviceId = config.emailjs_service_id;
+                const templateId = config.emailjs_template_id;
+
+                const emailjsInstance = window.emailjs;
+
+                if (emailjsInstance && publicKey && serviceId && templateId && targetEmail) {
+                    emailjsInstance.init({ publicKey: publicKey });
+                    const templateParams = {
+                        name: txDetails.name || txDetails.userId || 'Guest Client',
+                        email: txDetails.email || txDetails.userId || 'N/A',
+                        amount: txDetails.amount || '0',
+                        subject: `⚠️ [Delala Alert] ${subjectText}`, 
+                        method: txDetails.method || 'Delala Gateway',
+                        ref: txDetails.ref || 'N/A',
+                        status: txDetails.status || 'Pending',
+                        reason: txDetails.reason || 'None given'
+                    };
+                    emailjsInstance.send(serviceId, templateId, templateParams);
+                }
+            });
+        }
+
+        function setupEventDelegation(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.addEventListener('click', (event) => {
+                const target = event.target;
+                
+                if (target.classList.contains('btn-view-receipt')) {
+                    const dbKey = target.getAttribute('data-dbkey');
+                    const refCode = target.getAttribute('data-ref');
+                    const url = target.getAttribute('data-url');
+                    if (dbKey) viewSlip(url, refCode);
+                }
+
+                if (target.classList.contains('btn-approve-tx')) {
+                    const dbKey = target.getAttribute('data-dbkey');
+                    if (dbKey) updateTransactionStatus(dbKey, 'Approved', '');
+                }
+
+                if (target.classList.contains('btn-reject-tx')) {
+                    const dbKey = target.getAttribute('data-dbkey');
+                    const box = document.getElementById(`reject-box-${dbKey}`);
+                    if (box) box.classList.toggle('active');
+                }
+
+                if (target.classList.contains('btn-confirm-reject')) {
+                    const dbKey = target.getAttribute('data-dbkey');
+                    const input = document.getElementById(`reject-input-${dbKey}`);
+                    const reason = input ? input.value.trim() : '';
+                    updateTransactionStatus(dbKey, 'Rejected', reason || 'Invalid details provided');
+                }
+            });
+        }
+
+        function listenToDelala() {
+            const container = document.getElementById('tx-cards-container'); 
+            const unpaidContainer = document.getElementById('unpaid-cards-container'); 
+            const historyContainer = document.getElementById('history-cards-container'); 
+            
+            const topMenuPendingBadge = document.getElementById('tab-badge-pending');
+            const topMenuUnpaidBadge = document.getElementById('tab-badge-unpaid');
+
+            let initialLoadComplete = false;
+            const knownTxKeys = new Set();
+
+            onValue(ref(db, 'delala_new'), (snapshot) => {
+                const data = snapshot.val() || {};
+                activeDelalaList = data; 
+                
+                let pendingCount = 0;
+                let unpaidCount = 0;
+                
+                container.innerHTML = '';
+                unpaidContainer.innerHTML = '';
+                historyContainer.innerHTML = '';
+
+                const keys = Object.keys(data).reverse();
+
+                let totalUnpaidRendered = 0;
+                let totalPendingRendered = 0;
+                let totalHistoryRendered = 0;
+
+                keys.forEach((dbKey) => {
+                    const dep = data[dbKey];
+                    const rawStatus = (dep.status || 'unpaid').toLowerCase();
+
+                    if (rawStatus === 'pending') pendingCount++;
+                    if (rawStatus === 'unpaid') unpaidCount++;
+
+                    if (initialLoadComplete && !knownTxKeys.has(dbKey) && rawStatus === 'pending') {
+                        get(ref(db, `users/${dep.userId}/fullName`)).then((nameSnap) => {
+                            const clientFullName = nameSnap.val() || dep.userId;
+                            sendEmailNotification("New Pending Delala Order Placed", {
+                                name: clientFullName,
+                                email: dep.userId,
+                                amount: dep.amount,
+                                method: dep.method,
+                                ref: dep.ref,
+                                status: 'Pending'
+                            });
+                        }).catch(() => {});
+                    }
+                    knownTxKeys.add(dbKey);
+
+                    const card = document.createElement('div');
+                    card.className = 'mobile-tx-card';
+                    card.id = `card-${dbKey}`;
+                    
+                    const isUnpaidCard = rawStatus === 'unpaid';
+                    const isPendingCard = rawStatus === 'pending';
+                    
+                    let badgeStyle = '';
+                    if (isPendingCard) {
+                        badgeStyle = 'background:rgba(245, 158, 11, 0.2); color:#fbbf24; border: 1px solid #d97706;';
+                    } else if (isUnpaidCard) {
+                        badgeStyle = 'background:rgba(217, 119, 6, 0.15); color:#f59e0b; border: 1px solid #b45309;';
+                    } else if (rawStatus === 'approved') {
+                        badgeStyle = 'background:rgba(16, 185, 129, 0.2); color:#34d399; border: 1px solid #059669;';
+                    } else if (rawStatus === 'rejected') {
+                        badgeStyle = 'background:rgba(239, 68, 68, 0.2); color:#f87171; border: 1px solid #dc2626;';
+                    } else if (rawStatus === 'cancelled') {
+                        badgeStyle = 'background:rgba(100, 116, 139, 0.2); color:#94a3b8; border: 1px solid #475569;';
+                    }
+
+                    let reasonDisplay = dep.reject_reason ? `<div class="tx-row" style="color:#f87171;"><span style="font-weight:600;">Reason:</span> <span>${dep.reject_reason}</span></div>` : '';
+
+                    const slipActionHtml = (isUnpaidCard || rawStatus === 'cancelled')
+                        ? `<button class="btn-action-mobile" style="background:#272b30; color:#64748b; border:1px solid #334155; cursor: not-allowed;" disabled>No Receipt</button>`
+                        : `<button class="btn-action-mobile btn-view-receipt" style="background:#334155; color:#f8fafc; border:1px solid #475569;" data-dbkey="${dbKey}" data-url="${dep.receiptUrl || ''}" data-ref="${dep.ref || 'N/A'}">View Receipt</button>`;
+
+                    let actionPanelHtml = '';
+                    if (isPendingCard) {
+                        actionPanelHtml = `
+                            <div class="tx-actions">
+                                ${slipActionHtml}
+                                <button class="btn-action-mobile btn-approve-tx" style="background:var(--success-color); color:white;" data-dbkey="${dbKey}">Approve</button>
+                                <button class="btn-action-mobile btn-reject-tx" style="background:var(--danger-color); color:white;" data-dbkey="${dbKey}">Reject</button>
+                            </div>
+                            <div class="reject-input-box" id="reject-box-${dbKey}">
+                                <input type="text" id="reject-input-${dbKey}" class="form-control" placeholder="Enter reason for rejection...">
+                                <button class="btn-action-mobile btn-confirm-reject" style="background:var(--danger-color); color:white;" data-dbkey="${dbKey}">Confirm Rejection</button>
+                            </div>
+                        `;
+                    } else {
+                        actionPanelHtml = `
+                            <div class="tx-actions">
+                                ${slipActionHtml}
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="tx-header">
+                            <span class="tx-ref">${dep.ref || 'N/A'}</span>
+                            <span style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; text-transform:uppercase; ${badgeStyle}">${dep.status || 'Unpaid'}</span>
+                        </div>
+                        <div class="tx-row">
+                            <span style="color:var(--text-muted);">Gateway:</span>
+                            <span style="font-weight:600; color:#cbd5e1;">${dep.method || 'Delala Gateway'}</span>
+                        </div>
+                        <div class="tx-row">
+                            <span style="color:var(--text-muted);">Client Ref:</span>
+                            <span style="font-weight:600; color:#cbd5e1;" id="client-info-${dbKey}">${dep.userId || 'N/A'}</span>
+                        </div>
+                        <div class="tx-row">
+                            <span style="color:var(--text-muted);">Transfer Amount:</span>
+                            <span style="font-weight:800; color:#38bdf8;">${parseFloat(dep.amount || 0).toLocaleString()} ETB</span>
+                        </div>
+                        ${reasonDisplay}
+                        ${actionPanelHtml}
+                    `;
+
+                    if (isUnpaidCard) {
+                        unpaidContainer.appendChild(card);
+                        totalUnpaidRendered++;
+                    } else if (isPendingCard) {
+                        container.appendChild(card);
+                        totalPendingRendered++;
+                    } else {
+                        historyContainer.appendChild(card);
+                        totalHistoryRendered++;
+                    }
+
+                    if (dep.userId) {
+                        get(ref(db, `users/${dep.userId}/fullName`)).then((nameSnap) => {
+                            const fullName = nameSnap.val();
+                            const infoEl = document.getElementById(`client-info-${dbKey}`);
+                            if (infoEl && fullName) {
+                                infoEl.innerHTML = `${fullName} <span style="font-weight:400; color:var(--text-muted); font-size:11px;">(${dep.userId})</span>`;
+                            }
+                        }).catch(() => {});
+                    }
+                });
+
+                if (totalUnpaidRendered === 0) {
+                    unpaidContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); margin-top: 40px;">No unpaid Delala requests active.</p>`;
+                }
+                if (totalPendingRendered === 0) {
+                    container.innerHTML = `<p style="text-align: center; color: var(--text-muted); margin-top: 40px;">No pending Delala reviews active.</p>`;
+                }
+                if (totalHistoryRendered === 0) {
+                    historyContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); margin-top: 40px;">No Delala transaction history found.</p>`;
+                }
+
+                topMenuPendingBadge.innerText = pendingCount;
+                if (pendingCount > 0) topMenuPendingBadge.classList.remove('zero');
+                else topMenuPendingBadge.classList.add('zero');
+
+                topMenuUnpaidBadge.innerText = unpaidCount;
+                if (unpaidCount > 0) topMenuUnpaidBadge.classList.remove('zero');
+                else topMenuUnpaidBadge.classList.add('zero');
+
+                initialLoadComplete = true;
+            });
+        }
+
+        function updateTransactionStatus(dbKey, newStatus, reason = '') {
+            const delalaRef = ref(db, `delala_new/${dbKey}`);
+            get(delalaRef).then((snapshot) => {
+                const delalaData = snapshot.val();
+                if (!delalaData) return;
+                
+                let updates = { status: newStatus };
+                if (newStatus === 'Rejected' && reason) updates.reject_reason = reason;
+
+                set(ref(db, `delala_new/${dbKey}`), { ...delalaData, ...updates }).then(() => {
+                    const historyRecordRef = ref(db, `users/${delalaData.userId}/transactions/${dbKey}`);
+                    const formatLabel = newStatus === 'Approved' 
+                        ? `⚡ Delala Approved [${delalaData.method || 'Delala'}]` 
+                        : `🎟️ Delala Declined [${delalaData.method || 'Delala'}]`;
+
+                    const dateObj = new Date();
+                    const readableTimestamp = dateObj.toLocaleDateString([], {month:'short', day:'numeric'}) + ' ' + dateObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+                    set(historyRecordRef, {
+                        title: formatLabel,
+                        amount: parseFloat(delalaData.amount || 0),
+                        type: newStatus === 'Approved' ? 'income' : 'expense',
+                        status: newStatus,
+                        timestamp: readableTimestamp,
+                        sortingTime: Date.now(),
+                        orderRef: delalaData.ref,
+                        ...(reason && { reason: reason })
+                    });
+
+                    get(ref(db, `users/${delalaData.userId}/fullName`)).then((nameSnap) => {
+                        const clientName = nameSnap.val() || delalaData.userId;
+                        sendEmailNotification(`Delala Transaction ${newStatus}`, {
+                            name: clientName,
+                            email: delalaData.userId,
+                            amount: delalaData.amount,
+                            method: delalaData.method,
+                            ref: delalaData.ref,
+                            status: newStatus,
+                            reason: reason || 'N/A'
+                        });
+                    }).catch(() => {});
+                });
+            });
+        }
+
+        function listenToChatUsers() {
+            const listContainer = document.getElementById('chat-list-view');
+            const headerChatBadge = document.getElementById('header-chat-badge');
+            const floatingChatBadge = document.getElementById('floating-chat-badge');
+            
+            onValue(ref(db, 'chats'), (snapshot) => {
+                listContainer.innerHTML = '';
+                const chats = snapshot.val() || {};
+                const userIds = Object.keys(chats);
+                let totalUnreadCount = 0;
+
+                if (userIds.length === 0) {
+                    listContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); margin-top: 40px;">No customer chats active.</p>`;
+                }
+
+                userIds.forEach(userId => {
+                    const chatData = chats[userId];
+                    const messages = chatData.messages || {};
+                    let userUnreadCount = 0;
+                    Object.keys(messages).forEach(msgKey => {
+                        const msg = messages[msgKey];
+                        if (msg.sender === 'user' && msg.read !== true) {
+                            userUnreadCount++;
+                        }
+                    });
+                    totalUnreadCount += userUnreadCount;
+
+                    const item = document.createElement('div');
+                    item.className = 'chat-list-item';
+                    item.addEventListener('click', () => openChatRoom(userId));
+                    
+                    const unreadBadgeHtml = userUnreadCount > 0 
+                        ? `<span class="nav-badge" style="margin-left: auto; margin-right: 12px; display: inline-block;">${userUnreadCount}</span>` 
+                        : '';
+
+                    item.innerHTML = `
+                        <div class="user-badge">${userId.slice(-3).toUpperCase()}</div>
+                        <div style="flex-grow: 1;">
+                            <h4 style="font-size:14px; font-weight:800; color:#f8fafc;">${userId}</h4>
+                            <p style="font-size:11px; color:var(--text-muted);">${userUnreadCount > 0 ? '💬 New message received' : 'Click to chat live'}</p>
+                        </div>
+                        ${unreadBadgeHtml}
+                    `;
+                    listContainer.appendChild(item);
+
+                    if (activeUserId === userId && userUnreadCount > 0) {
+                        clearUnreadMessages(userId, messages);
+                    }
+                });
+
+                headerChatBadge.innerText = totalUnreadCount;
+                if (totalUnreadCount > 0) headerChatBadge.classList.remove('zero');
+                else headerChatBadge.classList.add('zero');
+
+                if (totalUnreadCount > 0) {
+                    floatingChatBadge.innerText = totalUnreadCount;
+                    floatingChatBadge.style.display = 'block';
+                } else {
+                    floatingChatBadge.style.display = 'none';
+                }
+            });
+        }
+
+        function clearUnreadMessages(userId, messages) {
+            Object.keys(messages).forEach(msgKey => {
+                const msg = messages[msgKey];
+                if (msg.sender === 'user' && msg.read !== true) {
+                    set(ref(db, `chats/${userId}/messages/${msgKey}/read`), true);
+                }
+            });
+        }
+
+        function openChatRoom(userId) {
+            activeUserId = userId;
+            document.getElementById('chat-list-view').classList.add('hidden');
+            document.getElementById('chat-room-view').classList.add('active');
+            document.getElementById('active-user-title').innerText = userId;
+
+            const chatBox = document.getElementById('chat-messages-box');
+            onValue(ref(db, `chats/${userId}/messages`), (snapshot) => {
+                chatBox.innerHTML = '';
+                const msgs = snapshot.val() || {};
+                
+                Object.keys(msgs).forEach(msgKey => {
+                    const msg = msgs[msgKey];
+                    const bubble = document.createElement('div');
+                    bubble.className = `bubble ${msg.sender === 'user' ? 'received' : 'sent'}`;
+                    bubble.innerText = msg.text;
+                    chatBox.appendChild(bubble);
+
+                    if (msg.sender === 'user' && msg.read !== true) {
+                        set(ref(db, `chats/${userId}/messages/${msgKey}/read`), true);
+                    }
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        function submitAdminMessage() {
+            const input = document.getElementById('chat-msg-input');
+            const val = input.value.trim();
+            if (!val || !activeUserId) return;
+
+            const newMsgRef = push(ref(db, `chats/${activeUserId}/messages`));
+            set(newMsgRef, {
+                sender: 'admin',
+                text: val,
+                timestamp: Date.now()
+            }).then(() => {
+                input.value = '';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab switching via click listener on .nav-tabs
+            const navTabs = document.querySelector('.nav-tabs');
+            if (navTabs) {
+                navTabs.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.tab-btn');
+                    if (!btn) return;
+
+                    const targetPaneId = btn.getAttribute('data-tab');
+                    if (targetPaneId) {
+                        switchTab(targetPaneId);
+                    }
+                });
+            }
+
+            // Bind overlay and modal toggles
+            document.getElementById('btn-toggle-chat-nav').addEventListener('click', toggleChatOverlay);
+            document.getElementById('btn-toggle-chat-float').addEventListener('click', toggleChatOverlay);
+            document.getElementById('btn-close-chat-x').addEventListener('click', toggleChatOverlay);
+            document.getElementById('btn-exit-chat-room').addEventListener('click', exitChatRoom);
+            document.getElementById('btn-close-slip').addEventListener('click', closeSlip);
+
+            const overlay = document.getElementById('chat-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target.id === 'chat-overlay') toggleChatOverlay();
+                });
+            }
+
+            const modal = document.getElementById('slipModal');
+            if (modal) {
+                modal.addEventListener('click', closeSlip);
+            }
+
+            document.getElementById('send-chat-btn').addEventListener('click', submitAdminMessage);
+            document.getElementById('chat-msg-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') submitAdminMessage();
+            });
+
+            // Initialize event listeners for cards
+            setupEventDelegation('tx-cards-container');
+            setupEventDelegation('unpaid-cards-container');
+            setupEventDelegation('history-cards-container');
+
+            // Listen to real-time Firebase nodes
+            listenToDelala();
+            listenToChatUsers();
+        });
+    </script>
+</body>
+</html>

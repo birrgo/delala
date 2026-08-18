@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala Premium — Scan Receipt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --bg-body: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --brand-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            --brand-gradient-hover: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        .nav-header { display: flex; align-items: center; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+
+        .app-view { max-width: 480px; margin: 0 auto; padding: 16px; width: 100%; flex: 1; }
+        .centered-popup-card { background: var(--card-bg); border-radius: 18px; padding: 20px 18px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); text-align: center; }
+
+        .drawer-step-light-title { font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+        
+        .upload-receipt-card { border: 2px dashed var(--border-color); background: #F8FAFC; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 14px; }
+        .preview-scan-wrapper { width: 100%; max-height: 240px; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; }
+        .receipt-thumbnail { width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; }
+        
+        .btn-drawer-submit { width: 100%; background: var(--brand-gradient); color: #ffffff; border: none; border-radius: 12px; padding: 14px; font-size: 14.5px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+        .btn-drawer-submit:hover { background: var(--brand-gradient-hover); }
+        .btn-drawer-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Modals */
+        .modal-overlay { display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; padding: 16px; }
+        .modal-overlay.active { display: flex !important; }
+        .modal-card { background: #FFFFFF; width: 100%; max-width: 380px; padding: 20px; border-radius: 18px; box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1); text-align: center; }
+
+        .center-scan-modal-card { background: #0F172A; width: 90%; max-width: 340px; border-radius: 20px; padding: 20px; color: #FFFFFF; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.5); }
+        .center-scan-frame { position: relative; width: 100%; height: 180px; border-radius: 12px; overflow: hidden; background: #000; margin-bottom: 14px; border: 1px solid #1E293B; }
+        .center-scan-frame img { width: 100%; height: 100%; object-fit: contain; }
+        .center-scan-line { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #38BDF8; box-shadow: 0 0 12px #38BDF8, 0 0 20px #38BDF8; animation: centerScanAnim 1.6s ease-in-out infinite alternate; }
+        @keyframes centerScanAnim { 0% { top: 0%; } 100% { top: 96%; } }
+        .center-scan-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+
+        .loading-card { background: #FFFFFF; border-radius: 18px; padding: 24px; text-align: center; max-width: 260px; }
+        .spinner-ring { width: 38px; height: 38px; border: 3.5px solid #E2E8F0; border-top: 3.5px solid var(--primary-dark); border-radius: 50%; margin: 0 auto 12px auto; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header class="nav-header">
+        <h1 class="header-title-text">Verify Receipt</h1>
+    </header>
+
+    <div class="app-view">
+        <div class="centered-popup-card">
+            <div class="drawer-step-light-title">RECEIPT SCANNING</div>
+            
+            <div class="upload-receipt-card">
+                <div class="preview-scan-wrapper"><img id="imagePreview" class="receipt-thumbnail" src="" alt="Receipt Preview"></div>
+                <span style="font-size: 14px; font-weight: 700; color: var(--text-main); display:block; margin-top: 8px;">Ready for Verification</span>
+                <p style="font-size: 12px; color: var(--text-muted);">Ensure image is clear before submitting</p>
+            </div>
+
+            <button type="button" class="btn-drawer-submit" id="submitDepositReceiptBtn">Scan & Publish Listing</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="scanningModal">
+        <div class="center-scan-modal-card">
+            <div class="center-scan-frame">
+                <img id="modalScanImg" src="">
+                <div class="center-scan-line"></div>
+            </div>
+            <div class="center-scan-title">Scanning Receipt Image...</div>
+            <div style="font-size: 12px; color: #94A3B8;">Detecting payment details and reference code</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="spinner-ring"></div>
+            <div id="loadingTitleText" style="font-weight:700; margin-bottom:4px;">Verifying Receipt</div>
+            <div id="loadingSubText" style="font-size:12px; color:var(--text-muted);">Analyzing receipt details in background...</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="statusAlertModal">
+        <div class="modal-card">
+            <div id="statusAlertIcon" style="width:46px; height:46px; margin:0 auto 12px auto; border-radius:50%; display:flex; align-items:center; justify-content:center;"></div>
+            <div id="statusAlertTitle" style="font-size:16px; font-weight:700; margin-bottom:6px;">Notification</div>
+            <div id="statusAlertMessage" style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">Details...</div>
+            <button type="button" id="statusAlertCloseBtn" style="width:100%; padding:11px; background:var(--brand-gradient); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
+    <canvas id="ocrCanvas" style="display:none;"></canvas>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Validate Input passed from prior page
+        const imgData = localStorage.getItem('pending_receipt_image_data');
+        if (!imgData) window.location.href = 'order.html';
+        document.getElementById('imagePreview').src = imgData;
+        document.getElementById('modalScanImg').src = imgData;
+
+        // Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app", messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Core variables recovered from local storage
+        const activeUserPhone = localStorage.getItem('auth_session_phone') || "251900000000";
+        const completeRawCardSequence = activeUserPhone.replace(/\D/g, '');
+        const selectedMethodKey = localStorage.getItem('pending_delala_selectedMethod') || 'cbe';
+        const currentOrderRef = localStorage.getItem('pending_delala_orderRef') || 'DL-' + Math.floor(100000 + Math.random() * 900000);
+        const listingKey = localStorage.getItem('pending_delala_listingKey');
+        const txKey = localStorage.getItem('pending_delala_txKey');
+        const userCity = localStorage.getItem('pending_delala_location') || 'Adama';
+        const rentCategoryName = localStorage.getItem('pending_delala_category') || 'Rental Posting';
+        const rentType = localStorage.getItem('pending_delala_rentType') || 'Residential Rent';
+        const rentTimePeriod = localStorage.getItem('pending_delala_timePeriod') || '1 Month';
+        const foundCollectionPath = localStorage.getItem('pending_delala_collection') || 'rentals'; 
+
+        let categoryPrice = 0;
+        let dynamicAdminAccounts = {};
+        
+        let extractedOcrText = ""; 
+        let backgroundExtractedTxnRef = "";
+        let isReceiptValidImage = false;
+
+        // Fetch Required Constraints
+        onValue(ref(db, 'settings/accounts'), (snapshot) => {
+            if (snapshot.exists()) dynamicAdminAccounts = snapshot.val();
+        }, { onlyOnce: true });
+
+        get(ref(db, `settings/category_prices/${rentCategoryName}`)).then((snap) => {
+            if (snap.exists()) {
+                const data = snap.val();
+                let prices = typeof data === 'object' ? Object.values(data).map(Number) : [parseFloat(data)];
+                categoryPrice = Math.min(...prices.filter(v => !isNaN(v) && v > 0));
+            }
+        });
+
+        // Event Handlers
+        document.getElementById('statusAlertCloseBtn').addEventListener('click', () => {
+            document.getElementById('statusAlertModal').classList.remove('active');
+            const title = document.getElementById('statusAlertTitle').innerText;
+            if (title.includes("Verified") || title.includes("Approved")) {
+                localStorage.removeItem('pending_receipt_image_data');
+                localStorage.removeItem('delala_payment_draft_info');
+                window.location.href = "publish.html";
+            } else {
+                localStorage.removeItem('pending_receipt_image_data');
+                window.location.href = "order.html";
+            }
+        });
+
+        document.getElementById('submitDepositReceiptBtn').addEventListener('click', async () => {
+            const submitBtn = document.getElementById('submitDepositReceiptBtn');
+            submitBtn.disabled = true;
+
+            const res = await runOcrProcess(imgData);
+            if (!res || !isReceiptValidImage) {
+                submitBtn.disabled = false;
+                showPopupState("invalid", "Scan Failed", "Image could not be validated. Screenshot rejected.");
+                return;
+            }
+
+            showLoading(true, "Verifying Payment", "Checking recipient details and duplicate records...");
+            try {
+                if (!backgroundExtractedTxnRef) {
+                    showLoading(false); submitBtn.disabled = false;
+                    showPopupState("invalid", "Unreadable ID", "Could not detect transaction reference. Upload a clearer image.");
+                    return;
+                }
+
+                const merchantObj = dynamicAdminAccounts[selectedMethodKey] || {};
+                const merchantHolder = (merchantObj.holder_name || merchantObj.name || "").toLowerCase();
+                const merchantAcc = (merchantObj.number || merchantObj.account || "").replace(/[^A-Z0-9]/ig, '');
+                
+                const nameParts = merchantHolder.split(/\s+/).filter(p => p.length > 2);
+                const isNameMatch = nameParts.length === 0 || nameParts.some(p => extractedOcrText.includes(p));
+                const isAccMatch = merchantAcc.length > 4 && extractedOcrText.replace(/[^A-Z0-9]/ig, '').includes(merchantAcc);
+                const scannedAmount = extractAmountFromOcr(extractedOcrText);
+                const isAmountValid = scannedAmount >= categoryPrice || extractedOcrText.includes(categoryPrice.toString());
+
+                if (!isNameMatch && !isAccMatch) {
+                    showLoading(false); submitBtn.disabled = false;
+                    showPopupState("invalid", "Incorrect Recipient", "Recipient name or account does not match our merchant details.");
+                    return;
+                }
+                if (!isAmountValid && categoryPrice > 0) {
+                    showLoading(false); submitBtn.disabled = false;
+                    showPopupState("invalid", "Incorrect Amount", `Payment amount must be ${categoryPrice.toLocaleString()} Birr or above.`);
+                    return;
+                }
+
+                const depositsSnap = await get(ref(db, 'deposits'));
+                if (depositsSnap.exists()) {
+                    const cleanDetected = backgroundExtractedTxnRef.replace(/[^A-Z0-9]/ig, '');
+                    const isDup = Object.values(depositsSnap.val()).some(d => {
+                        const existingTxn = (d.txnRef || d.ref || "").replace(/[^A-Z0-9]/ig, '');
+                        return existingTxn.length >= 6 && cleanDetected.length >= 6 && existingTxn === cleanDetected;
+                    });
+                    if (isDup) {
+                        showLoading(false); submitBtn.disabled = false;
+                        showPopupState("invalid", "Duplicate", `Transaction ID (${backgroundExtractedTxnRef}) has already been submitted.`);
+                        return;
+                    }
+                }
+
+                const depositRefNode = push(ref(db, 'deposits'));
+                const publishPostRefNode = push(ref(db, 'published_posts'));
+                const adminNotifRefNode = push(ref(db, 'notifications'));
+
+                const atomicUpdates = {};
+                atomicUpdates[`/deposits/${depositRefNode.key}`] = {
+                    ref: currentOrderRef, txnRef: backgroundExtractedTxnRef, method: merchantObj.name || selectedMethodKey.toUpperCase(),
+                    userId: completeRawCardSequence, amount: Number(categoryPrice), status: 'verified', receiptUrl: imgData,
+                    category: rentCategoryName, rentType: rentType, location: userCity, timePeriod: rentTimePeriod, timestamp: Date.now()
+                };
+                
+                atomicUpdates[`/published_posts/${publishPostRefNode.key}`] = {
+                    orderRef: currentOrderRef, userId: completeRawCardSequence, category: rentCategoryName, rentType: rentType,
+                    location: userCity, timePeriod: rentTimePeriod, status: 'published', txnRef: backgroundExtractedTxnRef, timestamp: Date.now()
+                };
+
+                atomicUpdates[`/notifications/${adminNotifRefNode.key}`] = {
+                    type: 'NEW_CATEGORY_DEPOSIT', depositId: depositRefNode.key, userPhone: completeRawCardSequence, amount: Number(categoryPrice),
+                    category: rentCategoryName, txnRef: backgroundExtractedTxnRef, status: 'unread', timestamp: Date.now()
+                };
+
+                if (listingKey) {
+                    atomicUpdates[`/${foundCollectionPath}/${listingKey}/status`] = 'published';
+                    atomicUpdates[`/${foundCollectionPath}/${listingKey}/depositRef`] = depositRefNode.key;
+                    atomicUpdates[`/${foundCollectionPath}/${listingKey}/txnRef`] = backgroundExtractedTxnRef;
+                    if (foundCollectionPath !== 'rentals') atomicUpdates[`/rentals/${listingKey}/status`] = 'published';
+                }
+
+                if (txKey && completeRawCardSequence) {
+                    atomicUpdates[`/users/${completeRawCardSequence}/transactions/${txKey}/status`] = 'published';
+                    atomicUpdates[`/users/${completeRawCardSequence}/transactions/${txKey}/txnRef`] = backgroundExtractedTxnRef;
+                }
+
+                await update(ref(db), atomicUpdates);
+                showLoading(false); submitBtn.disabled = false;
+                showPopupState("success", "Receipt Approved & Verified!", `Payment verified! Listing for ${rentCategoryName} in ${userCity} published.`);
+            } catch (err) {
+                console.error(err); showLoading(false); submitBtn.disabled = false;
+                showPopupState("invalid", "Network Error", "Unable to submit category verification. Please try again.");
+            }
+        });
+
+        // OCR Pipeline Processing
+        function preprocessImageForOcr(src) {
+            return new Promise((resolve) => {
+                const img = new Image(); img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    const canvas = document.getElementById('ocrCanvas'); const ctx = canvas.getContext('2d');
+                    const scale = Math.min(1000 / img.width, 1000 / img.height, 1);
+                    canvas.width = Math.floor(img.width * scale); canvas.height = Math.floor(img.height * scale);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const imgDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const d = imgDataObj.data;
+                    for (let i = 0; i < d.length; i += 4) { const v = ((d[i] + d[i+1] + d[i+2])/3) > 125 ? 255 : 0; d[i]=d[i+1]=d[i+2]=v; }
+                    ctx.putImageData(imgDataObj, 0, 0); resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(src);
+                img.src = src;
+            });
+        }
+
+        async function runOcrProcess(src) {
+            const scanningModal = document.getElementById('scanningModal');
+            scanningModal.classList.add('active');
+            try {
+                const optimizedImage = await preprocessImageForOcr(src);
+                const result = await Tesseract.recognize(optimizedImage, 'eng');
+                extractedOcrText = (result.data.text || "").toLowerCase();
+                
+                const kws = ["transaction", "transfer", "cbe", "telebirr", "bank", "amount", "birr", "successful", "paid", "ref", "account"];
+                if (!kws.some(kw => extractedOcrText.includes(kw)) || extractedOcrText.length < 8) {
+                    scanningModal.classList.remove('active'); return false;
+                }
+
+                isReceiptValidImage = true; backgroundExtractedTxnRef = "";
+                const lines = result.data.text.split("\n");
+                for (let line of lines) {
+                    const cleaned = line.replace(/[^A-Z0-9]/ig, '').toUpperCase();
+                    if (cleaned.length >= 8 && /\d/.test(cleaned) && /[A-Z]/.test(cleaned)) { backgroundExtractedTxnRef = cleaned; break; }
+                }
+
+                scanningModal.classList.remove('active'); return true;
+            } catch (err) { scanningModal.classList.remove('active'); return false; }
+        }
+
+        function extractAmountFromOcr(text) {
+            if (!text || categoryPrice <= 0) return 0;
+            const norm = text.replace(/,/g, '');
+            for (let regex of [/(?:amount|birr|etb|br|paid|total|val)\D*(\d{2,6}(?:\.\d{2})?)/gi, /\b([1-9]\d{2,6}(?:\.\d{2})?)\b/g]) {
+                let match; while ((match = regex.exec(norm)) !== null) {
+                    const v = parseFloat(match[1]); if (!isNaN(v) && v >= categoryPrice) return v;
+                }
+            } return 0;
+        }
+
+        // Generic Helpers
+        function showPopupState(type, title, message) {
+            const modal = document.getElementById('statusAlertModal');
+            const icon = document.getElementById('statusAlertIcon');
+            document.getElementById('statusAlertTitle').innerText = title;
+            document.getElementById('statusAlertMessage').innerText = message;
+            icon.style.background = type === 'success' ? "#D1FAE5" : "#FEE2E2";
+            icon.style.color = type === 'success' ? "#10B981" : "#EF4444";
+            icon.innerHTML = type === 'success' 
+                ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>` 
+                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+            modal.classList.add('active');
+        }
+
+        function showLoading(show, title = "Loading", subtitle = "Please wait...") {
+            document.getElementById('loadingTitleText').innerText = title;
+            document.getElementById('loadingSubText').innerText = subtitle;
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Post Machinery Rental</title>
+    <title>Delala - Post Rental Item (Part 4)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -182,10 +182,10 @@
             margin-bottom: 16px;
         }
 
-        .step-actions { display: flex; margin-top: 22px; }
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
-        .btn-next {
-            width: 100%;
+        .btn-prev, .btn-next {
+            flex: 1;
             height: 46px;
             padding: 0 13px;
             border-radius: 12px;
@@ -197,10 +197,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            background: var(--primary-dark);
-            color: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
+
+        .btn-prev { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); }
+        .btn-next { background: var(--primary-dark); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         .bottom-nav {
             position: fixed;
@@ -546,7 +546,7 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Delala - Post Machinery</h1>
+                <h1 class="header-title-text">Delala - Post Rental</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
         </header>
@@ -561,11 +561,11 @@
                 </div>
 
                 <div class="form-step-page" id="stepPage2">
-                    <div class="step-title">Step 2: Machinery & Equipment Details</div>
+                    <div class="step-title">Step 2: Listing Details (Equipment & Other Items)</div>
 
                     <div class="form-group">
                         <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Heavy Machinery & Tools" required>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Event Sound System or Generator" required>
                     </div>
 
                     <div class="form-row">
@@ -593,6 +593,10 @@
                     </div>
 
                     <div class="step-actions">
+                        <button type="button" class="btn-prev" id="btnBack2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Back
+                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -660,8 +664,6 @@
     </div>
 
     <script>
-        const PAGE_CATEGORY = "Machinery";
-
         window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
             document.getElementById('errorModalMessage').innerText = message;
@@ -723,6 +725,21 @@
             openCustomSelectModal(this);
         }
 
+        function toggleCustomInput(selectId, customInputId) {
+            const selectElem = document.getElementById(selectId);
+            const inputElem = document.getElementById(customInputId);
+            if (!selectElem || !inputElem) return;
+
+            if (selectElem.value === 'custom') {
+                inputElem.style.display = 'block';
+                inputElem.required = true;
+            } else {
+                inputElem.style.display = 'none';
+                inputElem.required = false;
+                inputElem.value = '';
+            }
+        }
+
         function getAuthenticatedUser() {
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
@@ -741,7 +758,6 @@
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            renderCategorySpecificFields();
             restoreSavedDraft();
             bindCustomSelectHandlers();
         }
@@ -749,6 +765,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             refreshFormState();
+
+            document.getElementById('btnBack2').addEventListener('click', () => {
+                saveDraftToSession();
+                window.location.href = 'rentalpost.html';
+            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
@@ -780,31 +801,42 @@
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
-            draftData.rentalType = PAGE_CATEGORY;
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
             draftData.title = document.getElementById('postTitle').value.trim();
             draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
             draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
             draftData.body = document.getElementById('postContent').value.trim();
-            draftData.categorySpecificDetails = {
-                machineryType: document.getElementById('machineryType')?.value || "",
-                powerSource: document.getElementById('powerSource')?.value || ""
-            };
-            draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
+            draftData.categorySpecificDetails = getCategoryDetails(draftData.rentalType);
+            draftData.activeCategoryOnStep2 = draftData.rentalType;
 
             sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
         }
 
         function restoreSavedDraft() {
             const rawDraft = sessionStorage.getItem('delalaDraftPart1');
-            if (!rawDraft) {
-                autoFillPlaceholders();
-                return;
-            }
+            if (!rawDraft) return;
 
             try {
                 let draft = JSON.parse(rawDraft);
+                const selectedCategory = draft.rentalType || "Event Equipment";
+                const previousCategory = draft.activeCategoryOnStep2 || null;
+
+                if (selectedCategory && selectedCategory !== previousCategory) {
+                    delete draft.categorySpecificDetails;
+                    draft.title = "";
+                    draft.body = "";
+                    draft.activeCategoryOnStep2 = selectedCategory;
+
+                    sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draft));
+                }
+
+                const container = document.getElementById('dynamicCategoryFieldsContainer');
+                if (container) container.innerHTML = '';
+                if (selectedCategory) {
+                    renderCategorySpecificFields(selectedCategory);
+                }
+
                 document.getElementById('postTitle').value = draft.title || '';
                 document.getElementById('rentalPrice').value = draft.price || '';
                 if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
@@ -812,50 +844,131 @@
 
                 if (draft.categorySpecificDetails) {
                     const c = draft.categorySpecificDetails;
+                    if (c.equipmentType && document.getElementById('equipmentType')) document.getElementById('equipmentType').value = c.equipmentType;
+                    if (c.itemQuantity && document.getElementById('itemQuantity')) document.getElementById('itemQuantity').value = c.itemQuantity;
+                    if (c.clothingType && document.getElementById('clothingType')) document.getElementById('clothingType').value = c.clothingType;
+                    if (c.clothingSize && document.getElementById('clothingSize')) document.getElementById('clothingSize').value = c.clothingSize;
                     if (c.machineryType && document.getElementById('machineryType')) document.getElementById('machineryType').value = c.machineryType;
                     if (c.powerSource && document.getElementById('powerSource')) document.getElementById('powerSource').value = c.powerSource;
+                    if (c.specItemType && document.getElementById('specItemType')) document.getElementById('specItemType').value = c.specItemType;
                 }
 
-                autoFillPlaceholders();
+                autoFillPlaceholders(selectedCategory);
+
             } catch (err) {
                 console.error("Failed to restore draft", err);
             }
         }
 
-        function autoFillPlaceholders() {
+        function autoFillPlaceholders(selected) {
             const postTitle = document.getElementById('postTitle');
             const postContent = document.getElementById('postContent');
 
             if (!postTitle.value) {
-                postTitle.value = 'Heavy Machinery & Tools';
+                if (selected === 'Event Equipment') postTitle.value = 'Event Equipment for Rent';
+                else if (selected === 'Clothing') postTitle.value = 'Traditional / Cultural Clothing';
+                else if (selected === 'Machinery') postTitle.value = 'Heavy Machinery & Tools';
+                else if (selected === 'Miscellaneous Items') postTitle.value = 'Rental Item Listing';
             }
 
             if (!postContent.value) {
-                postContent.value = `[Machinery Overview]: Well-serviced equipment ready for project site.\n\n[Terms]: Operator options and rental terms available upon request.`;
+                if (selected === 'Event Equipment') postContent.value = `[Equipment Overview]: Quality rental items for events and ceremonies.\n\n[Terms]: Available for daily or event-based rental agreements.`;
+                else if (selected === 'Clothing') postContent.value = `[Clothing Overview]: Clean and high quality outfit for rent.\n\n[Terms]: Clean condition, return after event.`;
+                else if (selected === 'Machinery') postContent.value = `[Machinery Overview]: Well-serviced equipment ready for project site.\n\n[Terms]: Operator options and rental terms available upon request.`;
+                else if (selected === 'Miscellaneous Items') postContent.value = `[Rental Overview]: Item available for rent.\n\n[Terms]: Contact for further details and terms.`;
             }
         }
 
-        function renderCategorySpecificFields() {
+        function getCategoryDetails(cat) {
+            if (cat === 'Event Equipment') {
+                return {
+                    equipmentType: document.getElementById('equipmentType')?.value || "",
+                    itemQuantity: document.getElementById('itemQuantity')?.value || ""
+                };
+            } else if (cat === 'Clothing') {
+                return {
+                    clothingType: document.getElementById('clothingType')?.value || "",
+                    clothingSize: document.getElementById('clothingSize')?.value || ""
+                };
+            } else if (cat === 'Machinery') {
+                return {
+                    machineryType: document.getElementById('machineryType')?.value || "",
+                    powerSource: document.getElementById('powerSource')?.value || ""
+                };
+            }
+            return { specItemType: document.getElementById('specItemType')?.value || "" };
+        }
+
+        function renderCategorySpecificFields(category) {
             const container = document.getElementById('dynamicCategoryFieldsContainer');
             if (!container) return;
 
-            container.innerHTML = `
-                <div class="nested-box">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="machineryType">Machinery / Tool Type *</label>
-                            <input type="text" class="form-input" id="machineryType" placeholder="e.g. Excavator, Generator, Concrete Mixer" required>
+            container.innerHTML = '';
+
+            let html = '';
+            if (category === 'Event Equipment') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="equipmentType">Equipment Category *</label>
+                                <input type="text" class="form-input" id="equipmentType" placeholder="e.g. Chairs, Tents, Sound System" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="itemQuantity">Quantity Available *</label>
+                                <input type="number" class="form-input" id="itemQuantity" placeholder="e.g. 50 Sets" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="powerSource">Power Source *</label>
-                            <select class="form-select custom-styled-select" id="powerSource" required>
-                                <option value="Diesel / Petrol">Diesel / Petrol</option>
-                                <option value="Electric">Electric</option>
-                                <option value="Manual / Hydraulic">Manual / Hydraulic</option>
-                            </select>
+                    </div>`;
+            } else if (category === 'Clothing') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="clothingType">Attire Type *</label>
+                                <input type="text" class="form-input" id="clothingType" placeholder="e.g. Cultural Dress, Suit, Wedding Dress" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="clothingSize">Size *</label>
+                                <select class="form-select custom-styled-select" id="clothingSize" required>
+                                    <option value="Small (S)">Small (S)</option>
+                                    <option value="Medium (M)">Medium (M)</option>
+                                    <option value="Large (L)">Large (L)</option>
+                                    <option value="Extra Large (XL)">Extra Large (XL)</option>
+                                    <option value="Free Size">Free Size</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                </div>`;
+                    </div>`;
+            } else if (category === 'Machinery') {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="machineryType">Machinery / Tool Type *</label>
+                                <input type="text" class="form-input" id="machineryType" placeholder="e.g. Excavator, Generator, Concrete Mixer" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="powerSource">Power Source *</label>
+                                <select class="form-select custom-styled-select" id="powerSource" required>
+                                    <option value="Diesel / Petrol">Diesel / Petrol</option>
+                                    <option value="Electric">Electric</option>
+                                    <option value="Manual / Hydraulic">Manual / Hydraulic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                html = `
+                    <div class="nested-box">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" for="specItemType">Item Specifics *</label>
+                            <input type="text" class="form-input" id="specItemType" placeholder="Specify item type or category details" required>
+                        </div>
+                    </div>`;
+            }
+
+            container.innerHTML = html;
             bindCustomSelectHandlers();
         }
 
