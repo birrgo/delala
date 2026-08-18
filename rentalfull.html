@@ -612,7 +612,7 @@
     <script>
         (function enforce3PhasePWA() {
             let deferredPrompt = null;
-            let currentPhase = 1; // 1: Install App, 2: Installing (0-100% Counter), 3: Open App
+            let currentPhase = 1; // 1: Install, 2: 30s Countdown, 3: Open App
 
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                                  window.navigator.standalone === true ||
@@ -624,6 +624,11 @@
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+            });
+
+            // Listen for completed installation event
+            window.addEventListener('appinstalled', () => {
+                localStorage.setItem('pwa_installed', 'true');
             });
 
             if (!isStandalone) {
@@ -644,14 +649,35 @@
 
                     if (installBtn) {
                         installBtn.addEventListener('click', async () => {
-                            // --- PHASE 1: INSTALL APP ---
+
+                            // ==========================================
+                            // PHASE 1: WAIT FOR BROWSER POPUP INSTALL
+                            // ==========================================
                             if (currentPhase === 1) {
                                 if (deferredPrompt) {
+                                    // Trigger native browser prompt popup
                                     deferredPrompt.prompt();
+
+                                    // WAIT until user clicks "Install" in the native browser popup
+                                    const choiceResult = await deferredPrompt.userChoice;
                                     deferredPrompt = null;
+
+                                    // If user clicked "Cancel" or closed native prompt
+                                    if (choiceResult.outcome !== 'accepted') {
+                                        if (gateStatus) {
+                                            gateStatus.innerText = "⚠️ Installation was not completed. Please click Install App again.";
+                                        }
+                                        return; // Stop execution here
+                                    }
+                                } else if (!isIOS) {
+                                    if (gateStatus) {
+                                        gateStatus.innerText = "Tap Install to trigger browser prompt or open in Chrome/Edge.";
+                                    }
                                 }
 
-                                // Transition to PHASE 2
+                                // ==========================================
+                                // PHASE 2: RUN 30-SECOND COUNTDOWN (0 - 100%)
+                                // ==========================================
                                 currentPhase = 2;
                                 installBtn.disabled = true;
                                 if (progressBar) progressBar.style.display = 'block';
@@ -668,7 +694,7 @@
                                     installBtn.innerText = `⏳ Installing... ${percentage}%`;
                                     if (progressFill) progressFill.style.width = `${percentage}%`;
 
-                                    // --- PHASE 2 COMPLETE -> TRANSITION TO PHASE 3 ---
+                                    // Transition to Phase 3 when timer reaches 100%
                                     if (percentage >= 100) {
                                         clearInterval(progressInterval);
                                         currentPhase = 3;
@@ -677,24 +703,38 @@
                                         installBtn.innerText = "🚀 Open App";
                                         installBtn.style.background = "#10B981"; // Green Success Color
                                         installBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.4)";
-                                        if (gateStatus) gateStatus.innerText = "Installation Complete! Tap below to open the application.";
+                                        if (gateStatus) {
+                                            gateStatus.innerText = "Installation Complete! Tap below to open the app directly.";
+                                        }
                                         
                                         localStorage.setItem('pwa_installed', 'true');
                                     }
                                 }, stepMs);
 
-                            // --- PHASE 3: OPEN APP ---
+                            // ==========================================
+                            // PHASE 3: FORCE JUMP / LAUNCH APP
+                            // ==========================================
                             } else if (currentPhase === 3) {
-                                // If inside standalone after install, remove gate. Otherwise launch app target.
-                                if (window.matchMedia('(display-mode: standalone)').matches) {
-                                    if (gate) gate.style.display = 'none';
-                                } else {
-                                    window.location.href = window.location.href; // Reloads to launch installed PWA scope
-                                }
+                                jumpToInstalledApp();
                             }
                         });
                     }
                 });
+            }
+
+            // Helper function to force launch the PWA app window
+            function jumpToInstalledApp() {
+                const currentUrl = window.location.href;
+                const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
+
+                // For Android: Use Android Intent scheme to launch installed standalone web app
+                if (/Android/i.test(navigator.userAgent)) {
+                    const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+                    window.location.href = intentUrl;
+                } else {
+                    // For iOS/Desktop: Open current scope to trigger launch transition
+                    window.location.href = currentUrl;
+                }
             }
         })();
 
