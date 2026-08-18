@@ -13,6 +13,16 @@
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://delala.online/">
 
+    <!-- PWA Web App Manifest & Mobile Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F8FAFC">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Delala">
+    <link rel="apple-touch-icon" href="s.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="s.png">
+
     <!-- Open Graph / Facebook / Discord / WhatsApp / Telegram Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://delala.online/">
@@ -143,6 +153,17 @@
             </svg>
         </a>
     </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered successfully.', reg))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 
 </body>
 </html>
