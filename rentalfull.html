@@ -449,6 +449,31 @@
             cursor: pointer;
             margin-top: 18px;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+
+        .pwa-install-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .pwa-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .pwa-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563EB, #10B981);
+            transition: width 0.3s ease;
+            border-radius: 10px;
         }
 
         .ios-instructions {
@@ -476,12 +501,16 @@
                 </svg>
             </div>
             <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">App Access Only</h2>
-            <p style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5;">
+            <p id="pwaGateStatus" style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5;">
                 This application cannot be accessed directly inside a web browser. Please install and launch the <strong>Hulum App</strong> on your home screen to proceed.
             </p>
             
             <button id="pwaInstallBtn" class="pwa-install-btn">📲 Install App Now</button>
             
+            <div id="pwaProgressBar" class="pwa-progress-bar">
+                <div id="pwaProgressFill" class="pwa-progress-fill"></div>
+            </div>
+
             <div id="iosInstructionBox" class="ios-instructions">
                 <strong>iPhone / iPad Users:</strong><br>
                 1. Tap the <strong>Share</strong> button <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> at the bottom of Safari.<br>
@@ -579,47 +608,89 @@
         </div>
     </div>
 
-    <!-- PWA ENFORCER LOGIC -->
+    <!-- 3-PHASE PWA ENFORCER LOGIC -->
     <script>
-        (function enforcePWAMode() {
+        (function enforce3PhasePWA() {
             let deferredPrompt = null;
+            let currentPhase = 1; // 1: Install App, 2: Installing (0-100% Counter), 3: Open App
 
-            // Detect if running inside standalone mode
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                                  window.navigator.standalone === true ||
                                  document.referrer.includes('android-app://');
 
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+            // Catch browser native install prompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
             if (!isStandalone) {
                 document.addEventListener('DOMContentLoaded', () => {
                     const gate = document.getElementById('pwaInstallGate');
                     const installBtn = document.getElementById('pwaInstallBtn');
+                    const progressBar = document.getElementById('pwaProgressBar');
+                    const progressFill = document.getElementById('pwaProgressFill');
+                    const gateStatus = document.getElementById('pwaGateStatus');
                     const iosBox = document.getElementById('iosInstructionBox');
 
-                    // Block web access
+                    // Show full screen gate on web browser
                     if (gate) gate.style.display = 'flex';
 
                     if (isIOS && iosBox) {
                         iosBox.style.display = 'block';
-                        if (installBtn) installBtn.style.display = 'none';
                     }
-
-                    window.addEventListener('beforeinstallprompt', (e) => {
-                        e.preventDefault();
-                        deferredPrompt = e;
-                    });
 
                     if (installBtn) {
                         installBtn.addEventListener('click', async () => {
-                            if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } = await deferredPrompt.userChoice;
-                                if (outcome === 'accepted') {
+                            // --- PHASE 1: INSTALL APP ---
+                            if (currentPhase === 1) {
+                                if (deferredPrompt) {
+                                    deferredPrompt.prompt();
                                     deferredPrompt = null;
                                 }
-                            } else {
-                                alert('To install, use your browser options menu and tap "Add to Home Screen" or "Install App".');
+
+                                // Transition to PHASE 2
+                                currentPhase = 2;
+                                installBtn.disabled = true;
+                                if (progressBar) progressBar.style.display = 'block';
+                                if (gateStatus) gateStatus.innerText = "Installing Hulum Application, please wait...";
+
+                                let durationMs = 30000; // 30 seconds
+                                let elapsedMs = 0;
+                                let stepMs = 300; // Update every 300ms
+
+                                const progressInterval = setInterval(() => {
+                                    elapsedMs += stepMs;
+                                    let percentage = Math.min(Math.floor((elapsedMs / durationMs) * 100), 100);
+
+                                    installBtn.innerText = `⏳ Installing... ${percentage}%`;
+                                    if (progressFill) progressFill.style.width = `${percentage}%`;
+
+                                    // --- PHASE 2 COMPLETE -> TRANSITION TO PHASE 3 ---
+                                    if (percentage >= 100) {
+                                        clearInterval(progressInterval);
+                                        currentPhase = 3;
+
+                                        installBtn.disabled = false;
+                                        installBtn.innerText = "🚀 Open App";
+                                        installBtn.style.background = "#10B981"; // Green Success Color
+                                        installBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.4)";
+                                        if (gateStatus) gateStatus.innerText = "Installation Complete! Tap below to open the application.";
+                                        
+                                        localStorage.setItem('pwa_installed', 'true');
+                                    }
+                                }, stepMs);
+
+                            // --- PHASE 3: OPEN APP ---
+                            } else if (currentPhase === 3) {
+                                // If inside standalone after install, remove gate. Otherwise launch app target.
+                                if (window.matchMedia('(display-mode: standalone)').matches) {
+                                    if (gate) gate.style.display = 'none';
+                                } else {
+                                    window.location.href = window.location.href; // Reloads to launch installed PWA scope
+                                }
                             }
                         });
                     }
@@ -627,7 +698,7 @@
             }
         })();
 
-        // Register dummy/minimal service worker to fulfill PWA criteria
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(() => {});
