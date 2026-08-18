@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Post Rental Item (Part 2)</title>
+    <title>Delala - Post Rental (Step 4)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="news.css">
-
     <script>
         if (window.self !== window.top) {
             window.top.location.href = window.self.location.href;
@@ -53,7 +50,6 @@
         }
 
         .header-left-group { display: flex; align-items: center; gap: 10px; }
-
         .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
         .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
 
@@ -99,8 +95,6 @@
             justify-content: center;
             font-size: 11px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
         }
 
         .step-node.active {
@@ -110,8 +104,7 @@
             box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
         }
 
-        .form-step-page { display: none; }
-        .form-step-page.active { display: block; }
+        .form-step-page { display: block; }
 
         .step-title {
             font-size: 15px;
@@ -151,40 +144,10 @@
             box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
         }
 
-        .form-input[readonly] {
-            background-color: #F1F5F9;
-            color: #475569;
-            cursor: not-allowed;
-            border-color: #CBD5E1;
-        }
-
-        .form-row { display: flex; gap: 12px; }
-        .form-row .form-group { flex: 1; }
-
-        .detect-loc-btn {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: #EFF6FF;
-            color: var(--primary-accent);
-            border: 1px solid #BFDBFE;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            margin-bottom: 14px;
-            text-decoration: none;
-        }
-
-        .leaflet-control-container .leaflet-control-attribution { display: none !important; }
-
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
         .submit-post-btn {
-            flex: 1;
+            width: 100%;
             padding: 13px;
             border-radius: 12px;
             font-size: 13px;
@@ -199,7 +162,7 @@
             color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
-        .submit-post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .submit-post-btn:disabled { background: #94A3B8; box-shadow: none; cursor: not-allowed; }
 
         .bottom-nav {
             position: fixed;
@@ -279,11 +242,10 @@
         .modal-card {
             background: #FFFFFF;
             border-radius: 20px;
-            max-width: 480px;
+            max-width: 380px;
             width: 100%;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
+            border: 1px solid var(--danger-border);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             overflow: hidden;
             animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -292,30 +254,6 @@
         @keyframes modalPop {
             from { transform: scale(0.92); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-body {
-            padding: 16px 20px;
-            overflow-y: auto;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal-footer {
-            padding: 14px 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #F8FAFC;
-        }
-
-        .error-modal-card {
-            max-width: 380px;
-            text-align: center;
-            border: 1px solid var(--danger-border);
         }
 
         .error-badge-icon {
@@ -331,21 +269,8 @@
         }
 
         .error-badge-icon svg { width: 28px; height: 28px; stroke: currentColor; }
-
-        .error-modal-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-top: 8px;
-        }
-
-        .error-modal-msg {
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.5;
-            margin: 0;
-        }
-
+        .error-modal-title { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-top: 8px; }
+        .error-modal-msg { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
         .btn-error-dismiss {
             width: 100%;
             padding: 12px;
@@ -364,73 +289,57 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Delala - Post Rental</h1>
+                <h1 class="header-title-text" id="headerTitle">Delala - Post Rental</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
         </header>
 
         <main class="app-content">
-            <form class="post-form-card" id="step2Form">
-                <div class="step-indicator">
-                    <div class="step-node" id="node-1">1</div>
-                    <div class="step-node" id="node-2">2</div>
-                    <div class="step-node active" id="node-3">3</div>
-                    <div class="step-node" id="node-4">4</div>
+            <div class="post-form-card">
+                <!-- STEP 4: CONTACT INFO VIEW -->
+                <div id="sectionContact" class="form-step-page">
+                    <div class="step-indicator">
+                        <div class="step-node" id="node-1">1</div>
+                        <div class="step-node" id="node-2">2</div>
+                        <div class="step-node" id="node-3">3</div>
+                        <div class="step-node active" id="node-4">4</div>
+                    </div>
+
+                    <form id="step4Form">
+                        <div class="step-title">Step 4: Contact Information</div>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Fill at least 1 contact method. All others are optional.</p>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contactPhone">Phone Number</label>
+                            <input type="tel" class="form-input" id="contactPhone" placeholder="e.g. +251911223344">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contactTelegram">Telegram Username</label>
+                            <input type="text" class="form-input" id="contactTelegram" placeholder="e.g. @username or t.me/username">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contactWhatsApp">WhatsApp Number</label>
+                            <input type="tel" class="form-input" id="contactWhatsApp" placeholder="e.g. +251911223344">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contactEmail">Email Address</label>
+                            <input type="email" class="form-input" id="contactEmail" placeholder="e.g. example@domain.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contactInstagram">Instagram Profile</label>
+                            <input type="text" class="form-input" id="contactInstagram" placeholder="e.g. @username or instagram.com/user">
+                        </div>
+
+                        <div class="step-actions">
+                            <button type="submit" class="submit-post-btn" id="submitBtn">Publish Post</button>
+                        </div>
+                    </form>
                 </div>
-
-                <!-- PAGE 3 -->
-                <div class="form-step-page active" id="stepPage3">
-                    <div class="step-title">Step 3: Location Details</div>
-
-                    <a href="map.html?returnUrl=rentalpost1.html" class="detect-loc-btn" id="gpsDetectBtn">
-                        📡 Detect Real-Time GPS Location
-                    </a>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="locCountry">Country (Auto GPS)</label>
-                            <input type="text" class="form-input" id="locCountry" readonly placeholder="Detect via GPS..." required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="locRegion">Region (Auto GPS)</label>
-                            <input type="text" class="form-input" id="locRegion" readonly placeholder="Detect via GPS..." required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="locZone">Zone / Area (Auto GPS)</label>
-                            <input type="text" class="form-input" id="locZone" readonly placeholder="Detect via GPS..." required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="locCity">City / Town (Auto GPS)</label>
-                            <input type="text" class="form-input" id="locCity" readonly placeholder="Detect via GPS..." required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="locSubcity">Subcity / Woreda *</label>
-                            <input type="text" class="form-input" id="locSubcity" placeholder="Auto-detected or enter manually" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="locUniqueName">Unique Place / Landmark *</label>
-                            <input type="text" class="form-input" id="locUniqueName" placeholder="Enter landmark manually" required>
-                        </div>
-                    </div>
-
-                    <input type="hidden" id="rentalLat">
-                    <input type="hidden" id="rentalLng">
-
-                    <!-- HIDE THE FILL INFORMATION BUTTON -->
-                    <div class="step-actions" style="display: none;">
-                        <button type="button" class="submit-post-btn" id="btnNext3">
-                            Next: Contact 
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </button>
-                    </div>
-                </div>
-            </form>
+            </div>
 
             <footer class="verified-footer-shield">
                 <span class="footer-shield-text">Delala Marketplace Verified</span>
@@ -438,35 +347,21 @@
         </main>
 
         <nav class="bottom-nav">
-            <a href="rental.html" class="nav-item">
-                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
-                <span>Rental</span>
-            </a>
-            <a href="selling.html" class="nav-item">
-                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
-                <span>Selling</span>
-            </a>
+            <a href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
+            <a href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
             <a href="rentalpost.html" class="nav-item-post-center active">
-                <div class="post-fab-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </div>
+                <div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                 <span class="post-fab-label">Post</span>
             </a>
-            <a href="vacancy.html" class="nav-item">
-                <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
-                <span>Vacancy</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-                <span>Profile</span>
-            </a>
+            <a href="vacancy.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Vacancy</span></a>
+            <a href="profile.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
         </nav>
     </div>
 
     <!-- ERROR MODAL -->
     <div class="modal-overlay" id="errorModalOverlay">
-        <div class="modal-card error-modal-card">
-            <div class="modal-body" style="padding: 24px 20px 16px;">
+        <div class="modal-card">
+            <div style="padding: 24px 20px 16px;">
                 <div class="error-badge-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -477,18 +372,16 @@
                 <div class="error-modal-title" id="errorModalTitle">Missing Information</div>
                 <p class="error-modal-msg" id="errorModalMessage">Please review required details and try again.</p>
             </div>
-            <div class="modal-footer" style="padding: 12px 20px 20px; background: transparent; border: none;">
+            <div style="padding: 12px 20px 20px; background: transparent;">
                 <button type="button" class="btn-error-dismiss" id="dismissErrorBtn">Got It</button>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -502,14 +395,13 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
         let currentUser = null;
-        let isLocationTracked = false;
 
         function sanitizePath(value) {
-            return (value || "").toString().replace(/[.#$\[\]]/g, "_");
+            return (value || "").toString().replace(/[.#$[\]]/g, "_");
         }
 
         function getAccountDetails() {
@@ -536,108 +428,71 @@
                 loadSavedFormData();
             });
 
-            document.getElementById('gpsDetectBtn').addEventListener('click', () => {
-                savePart2FormData();
-            });
-
-            // CLICKING NUMBER ONE NODE REDIRECTS TO PUB.HTML AFTER VALIDATING
-            document.getElementById('node-1').addEventListener('click', () => {
-                validateAndRedirect();
-            });
-
-            document.getElementById('btnNext3').addEventListener('click', () => {
-                validateAndRedirect();
-            });
-
+            document.getElementById('step4Form').addEventListener('submit', handleFormSubmit);
             document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
 
             const formInputs = document.querySelectorAll('.form-input');
             formInputs.forEach(input => {
-                input.addEventListener('input', savePart2FormData);
+                input.addEventListener('input', savePart4FormData);
             });
         });
 
-        function validateAndRedirect() {
-            const country = document.getElementById('locCountry').value.trim();
-            const region = document.getElementById('locRegion').value.trim();
-            const zone = document.getElementById('locZone').value.trim();
-            const city = document.getElementById('locCity').value.trim();
-            const subcity = document.getElementById('locSubcity').value.trim();
-            const uniqueName = document.getElementById('locUniqueName').value.trim();
-
-            if (!country || !region || !zone || !city || !isLocationTracked) {
-                showErrorModal("Real-Time GPS Required", "Please tap 'Detect Real-Time GPS Location' to acquire your real-time position automatically.");
-                return;
-            }
-
-            if (!subcity || !uniqueName) {
-                showErrorModal("Missing Fields", "Please make sure Subcity and Unique Place / Landmark are filled out.");
-                return;
-            }
-
-            savePart2FormData();
-            window.location.href = 'pub.html';
-        }
-
-        function savePart2FormData() {
+        function savePart4FormData() {
             const acc = getAccountDetails();
+            const rawPart1 = sessionStorage.getItem('delalaDraftPart1');
             const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
-            let existingData = {};
+
+            let part1Data = {};
+            let part2Data = {};
+
+            if (rawPart1) {
+                try { part1Data = JSON.parse(rawPart1); } catch(e) {}
+            }
             if (rawPart2) {
-                try { existingData = JSON.parse(rawPart2); } catch(e) {}
+                try { part2Data = JSON.parse(rawPart2); } catch(e) {}
             }
 
-            const formData = {
-                ...existingData,
+            const contactData = {
+                phone: document.getElementById('contactPhone').value.trim(),
+                telegram: document.getElementById('contactTelegram').value.trim(),
+                whatsapp: document.getElementById('contactWhatsApp').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                instagram: document.getElementById('contactInstagram').value.trim()
+            };
+
+            const fullPayload = {
+                ...part1Data,
+                ...part2Data,
+                contactInfo: contactData,
                 postedByPhone: acc.phone,
                 userId: acc.id,
-                country: document.getElementById('locCountry').value,
-                region: document.getElementById('locRegion').value,
-                zone: document.getElementById('locZone').value,
-                city: document.getElementById('locCity').value,
-                subcity: document.getElementById('locSubcity').value,
-                uniqueName: document.getElementById('locUniqueName').value,
-                lat: document.getElementById('rentalLat').value,
-                lng: document.getElementById('rentalLng').value
+                status: 'pending_publish',
+                createdAt: new Date().toISOString()
             };
-            sessionStorage.setItem('delalaDraftPart2', JSON.stringify(formData));
+            
+            sessionStorage.setItem('delalaDraftPart4', JSON.stringify(contactData));
+            sessionStorage.setItem('delalaPendingListing', JSON.stringify(fullPayload));
+
+            return fullPayload;
         }
 
         function loadSavedFormData() {
-            const rawGps = sessionStorage.getItem('selectedGpsLocation');
-            if (rawGps) {
+            const rawPart4 = sessionStorage.getItem('delalaDraftPart4') || sessionStorage.getItem('delalaPendingListing');
+            if (rawPart4) {
                 try {
-                    const parsed = JSON.parse(rawGps);
-                    if (parsed.lat && parsed.lng) {
-                        document.getElementById('rentalLat').value = Number(parsed.lat).toFixed(6);
-                        document.getElementById('rentalLng').value = Number(parsed.lng).toFixed(6);
-                        isLocationTracked = true;
-                    }
-                    if (parsed.address) {
-                        const addr = parsed.address;
-                        document.getElementById('locCountry').value = addr.country || '';
-                        document.getElementById('locRegion').value = addr.region || '';
-                        document.getElementById('locZone').value = addr.zone || '';
-                        document.getElementById('locCity').value = addr.city || '';
-                        if (addr.subcity) {
-                            document.getElementById('locSubcity').value = addr.subcity;
-                        }
-                    }
+                    const data = JSON.parse(rawPart4);
+                    const contacts = data.contactInfo || data;
+                    if (contacts.phone) document.getElementById('contactPhone').value = contacts.phone;
+                    if (contacts.telegram) document.getElementById('contactTelegram').value = contacts.telegram;
+                    if (contacts.whatsapp) document.getElementById('contactWhatsApp').value = contacts.whatsapp;
+                    if (contacts.email) document.getElementById('contactEmail').value = contacts.email;
+                    if (contacts.instagram) document.getElementById('contactInstagram').value = contacts.instagram;
                 } catch(e) { console.error(e); }
-            }
-
-            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
-            if (rawPart2) {
-                try {
-                    const p2 = JSON.parse(rawPart2);
-                    if (p2.subcity && !document.getElementById('locSubcity').value) document.getElementById('locSubcity').value = p2.subcity;
-                    if (p2.uniqueName) document.getElementById('locUniqueName').value = p2.uniqueName;
-                    if (p2.lat && p2.lng) {
-                        document.getElementById('rentalLat').value = p2.lat;
-                        document.getElementById('rentalLng').value = p2.lng;
-                        isLocationTracked = true;
-                    }
-                } catch(e) { console.error(e); }
+            } else {
+                const acc = getAccountDetails();
+                if (acc.phone && !document.getElementById('contactPhone').value) {
+                    document.getElementById('contactPhone').value = acc.phone;
+                }
             }
         }
 
@@ -649,6 +504,25 @@
 
         function closeErrorModal() {
             document.getElementById('errorModalOverlay').style.display = 'none';
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('contactPhone').value.trim();
+            const telegram = document.getElementById('contactTelegram').value.trim();
+            const whatsapp = document.getElementById('contactWhatsApp').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const instagram = document.getElementById('contactInstagram').value.trim();
+
+            if (!phone && !telegram && !whatsapp && !email && !instagram) {
+                showErrorModal("Contact Required", "Please fill in at least 1 contact method before continuing.");
+                return;
+            }
+
+            savePart4FormData();
+            // Redirect directly to publish.html
+            window.location.href = 'publish.html';
         }
 
         function initClock() {
