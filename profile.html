@@ -60,12 +60,12 @@
             align-items: center;
             gap: 4px;
             margin-bottom: 1px;
-            color: var(--text-dark);
+            color: var(--text-dark, #0F172A);
         }
 
         .profile-username {
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text-muted, #64748B);
             font-weight: 600;
             margin-bottom: 10px;
         }
@@ -88,12 +88,12 @@
         .metric-num {
             font-size: 15px;
             font-weight: 800;
-            color: var(--text-dark);
+            color: var(--text-dark, #0F172A);
         }
 
         .metric-label {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-muted, #64748B);
             font-weight: 500;
         }
 
@@ -437,7 +437,7 @@
             color: #334155;
         }
 
-        /* Post Preview Modal Styling */
+        /* Post Preview & Verification Modals */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -453,10 +453,14 @@
             padding: 16px;
         }
 
+        .modal-overlay.active {
+            display: flex;
+        }
+
         .modal-card {
             background: #FFFFFF;
             border-radius: 20px;
-            max-width: 480px;
+            max-width: 440px;
             width: 100%;
             max-height: 85vh;
             display: flex;
@@ -515,9 +519,197 @@
             border: 1px solid #E2E8F0;
             overflow: hidden;
         }
+
+        /* Delete Post Action Styles */
+        .delete-post-btn {
+            background: #DC2626;
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 13px;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+        }
+
+        .delete-post-btn:active {
+            background: #991B1B;
+            transform: scale(0.98);
+        }
+
+        .delete-post-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.2;
+        }
+
+        /* Verification Popup UI Styling */
+        .verify-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #FEF2F2;
+            color: #DC2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 4px;
+            border: 1px solid #FEE2E2;
+        }
+
+        .verify-icon-wrapper svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.2;
+        }
+
+        .verify-subtitle {
+            font-size: 12px;
+            color: #64748B;
+            text-align: center;
+            line-height: 1.5;
+            margin: 0 0 12px;
+            font-weight: 500;
+        }
+
+        .verify-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .verify-input-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0F172A;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .verify-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #CBD5E1;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
+            background: #FFFFFF;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .verify-input:focus {
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .verify-error-msg {
+            color: #DC2626;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            display: none;
+            margin-top: 4px;
+            background: #FEF2F2;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #FEE2E2;
+        }
+
+        .verify-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: #F1F5F9;
+            color: #475569;
+            border: 1px solid #E2E8F0;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.15s ease;
+        }
+
+        .btn-secondary:active {
+            background: #E2E8F0;
+        }
+
+        .btn-danger {
+            flex: 1;
+            background: #DC2626;
+            color: #FFFFFF;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+            transition: background 0.15s ease;
+        }
+
+        .btn-danger:active {
+            background: #991B1B;
+        }
+
+        /* Toast Notification Banner */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            z-index: 200000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Global Toast Notification Banner -->
+    <div class="toast-notification" id="toastNotification">
+        <span id="toastMessage">Action completed successfully</span>
+    </div>
 
     <div class="app-view">
         <!-- Top Navigation Header -->
@@ -672,12 +864,56 @@
         </div>
     </div>
 
+    <!-- PIN VERIFICATION MODAL -->
+    <div class="modal-overlay" id="verifyDeleteModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Verify Deletion</h3>
+                <button type="button" class="modal-close-btn" id="closeVerifyModalBtn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="verify-icon-wrapper">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                
+                <p class="verify-subtitle">
+                    Enter your registered <strong>6-digit Security PIN</strong> to delete this post.
+                </p>
+
+                <div class="verify-input-group">
+                    <label class="verify-input-label" for="verifyPhonePinInput">Security PIN</label>
+                    <input 
+                      type="password" 
+                      id="verifyPhonePinInput" 
+                      class="verify-input" 
+                      maxlength="6" 
+                      pattern="[0-9]{6}" 
+                      inputmode="numeric" 
+                      placeholder="••••••" 
+                      autocomplete="off" 
+                    />
+                </div>
+
+                <div class="verify-error-msg" id="verifyErrorMsg">
+                    Verification failed. Incorrect PIN code.
+                </div>
+
+                <div class="verify-btn-group">
+                    <button type="button" class="btn-secondary" id="cancelVerifyBtn">Cancel</button>
+                    <button type="button" class="btn-danger" id="confirmDeleteBtn">Delete Post</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, query, orderByChild, equalTo, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, get, query, orderByChild, equalTo, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -698,29 +934,69 @@
         let allUserPosts = [];
         let currentSelectedCategory = 'all';
         let currentActiveUserId = null;
+        let postsUnsubscribe = null;
+        let isUploadingActive = false; 
+        let pendingPostToDelete = null;
+
+        // SHA-256 Hashing Function
+        async function hashPin(pin) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initLiveClock();
             setupAuthListener();
             setupMenuHandlers();
             setupModalHandlers();
+            setupVerifyModalHandlers();
             setupCategoryFilterButtons();
             checkAndRunPendingUpload();
         });
 
+        /* Toast Popup Notification */
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         function checkAndRunPendingUpload() {
+            if (isUploadingActive) return;
+
             const rawTask = localStorage.getItem('delalaActiveUpload');
             if (!rawTask) return;
 
+            localStorage.removeItem('delalaActiveUpload');
+            isUploadingActive = true; 
+
             let uploadTask;
-            try { uploadTask = JSON.parse(rawTask); } catch(e) { return; }
+            try { 
+                uploadTask = JSON.parse(rawTask); 
+            } catch(e) { 
+                isUploadingActive = false; 
+                return; 
+            }
 
             const card = document.getElementById('uploadProgressCard');
             const fill = document.getElementById('uploadProgressFill');
             const percent = document.getElementById('uploadProgressPercent');
             const title = document.getElementById('uploadCardTitle');
 
-            if (!card || !uploadTask.payload) return;
+            if (!card || !uploadTask.payload) {
+                isUploadingActive = false;
+                return;
+            }
 
             card.classList.add('active');
             title.innerText = uploadTask.payload.title ? `Publishing: ${uploadTask.payload.title}` : "Publishing Listing...";
@@ -752,18 +1028,18 @@
                         fill.style.width = '100%';
                         percent.innerText = '100%';
                         title.innerText = "Published Successfully!";
+                        showToast("Listing published successfully!");
 
                         setTimeout(() => {
-                            localStorage.removeItem('delalaActiveUpload');
                             card.classList.remove('active');
-                            if (currentActiveUserId) {
-                                fetchPostsForUser(currentActiveUserId);
-                            }
+                            isUploadingActive = false;
                         }, 1200);
                     } catch (error) {
                         console.error("Firebase write error:", error);
                         title.innerText = "Upload Failed. Please try again.";
                         percent.innerText = "Error";
+                        isUploadingActive = false;
+                        showToast("Upload failed. Please try again.");
                     }
                 } else {
                     fill.style.width = `${progress}%`;
@@ -798,10 +1074,133 @@
         }
 
         function closePreviewModal() {
-            document.getElementById('postPreviewModal').style.display = 'none';
+            const overlay = document.getElementById('postPreviewModal');
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+
             if (previewMapInstance) {
                 previewMapInstance.remove();
                 previewMapInstance = null;
+            }
+        }
+
+        /* --- VERIFICATION MODAL HANDLERS --- */
+        function setupVerifyModalHandlers() {
+            const closeBtn = document.getElementById('closeVerifyModalBtn');
+            const cancelBtn = document.getElementById('cancelVerifyBtn');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const overlay = document.getElementById('verifyDeleteModal');
+            const inputField = document.getElementById('verifyPhonePinInput');
+
+            closeBtn.addEventListener('click', closeVerifyModal);
+            cancelBtn.addEventListener('click', closeVerifyModal);
+            
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeVerifyModal();
+            });
+
+            confirmBtn.addEventListener('click', executePostDeletion);
+
+            inputField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    executePostDeletion();
+                }
+            });
+        }
+
+        function openVerifyModal(post) {
+            pendingPostToDelete = post;
+
+            const overlay = document.getElementById('verifyDeleteModal');
+            const inputField = document.getElementById('verifyPhonePinInput');
+            const errorMsg = document.getElementById('verifyErrorMsg');
+
+            inputField.value = '';
+            errorMsg.style.display = 'none';
+
+            overlay.classList.add('active');
+            overlay.style.display = 'flex';
+
+            setTimeout(() => inputField.focus(), 150);
+        }
+
+        function closeVerifyModal() {
+            const overlay = document.getElementById('verifyDeleteModal');
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+            pendingPostToDelete = null;
+        }
+
+        // Exact User PIN Verification & Delete Post
+        async function executePostDeletion() {
+            if (!pendingPostToDelete) return;
+
+            const inputField = document.getElementById('verifyPhonePinInput');
+            const errorMsg = document.getElementById('verifyErrorMsg');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const inputVal = inputField.value.trim();
+
+            if (!inputVal || !/^\d{6}$/.test(inputVal)) {
+                errorMsg.innerText = "Please enter your valid 6-digit Security PIN.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const activePhone = localStorage.getItem('auth_session_phone') || currentActiveUserId;
+            if (!activePhone) {
+                errorMsg.innerText = "User session expired. Please log in again.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const cleanPhone = String(activePhone).replace(/\D/g, '').replace(/^0+/, '');
+
+            try {
+                confirmBtn.disabled = true;
+                confirmBtn.innerText = "Verifying...";
+                errorMsg.style.display = 'none';
+
+                // 1. Fetch User Profile from Firebase to get registered securityPin
+                let userRef = ref(db, `users/${cleanPhone}`);
+                let snapshot = await get(userRef);
+
+                if (!snapshot.exists() && currentActiveUserId) {
+                    userRef = ref(db, `users/${currentActiveUserId}`);
+                    snapshot = await get(userRef);
+                }
+
+                if (!snapshot.exists()) {
+                    errorMsg.innerText = "User profile not found. Please log in again.";
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
+                const userData = snapshot.val();
+                const storedPinHash = userData.securityPin || userData.pin || '';
+                const enteredPinHash = await hashPin(inputVal);
+
+                // 2. Validate exact PIN match
+                if (storedPinHash !== enteredPinHash && storedPinHash !== inputVal) {
+                    errorMsg.innerText = "Incorrect Security PIN code.";
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
+                // 3. Perform Post Deletion in Firebase Realtime Database
+                confirmBtn.innerText = "Deleting...";
+                await remove(ref(db, `posts/${pendingPostToDelete.id}`));
+
+                closeVerifyModal();
+                closePreviewModal();
+                showToast("Post deleted successfully!");
+
+            } catch (err) {
+                console.error("Delete Error:", err);
+                errorMsg.innerText = "Failed to delete post: " + (err.message || "Network error");
+                errorMsg.style.display = 'block';
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerText = "Delete Post";
             }
         }
 
@@ -976,8 +1375,12 @@
         }
 
         function fetchPostsForUser(userId) {
+            if (postsUnsubscribe) {
+                postsUnsubscribe();
+            }
+
             const postsRef = ref(db, 'posts');
-            onValue(postsRef, (snapshot) => {
+            postsUnsubscribe = onValue(postsRef, (snapshot) => {
                 allUserPosts = [];
                 if (snapshot.exists()) {
                     const data = snapshot.val();
@@ -1103,9 +1506,25 @@
                     ${contact.email ? `<div>✉️ Email: <strong>${contact.email}</strong></div>` : ''}
                     ${contact.instagram ? `<div>📷 Instagram: <strong>${contact.instagram}</strong></div>` : ''}
                 </div>
+
+                <!-- DELETE BUTTON SECTION -->
+                <div class="preview-section" style="border-color: #FEE2E2; background: #FEF2F2;">
+                    <button type="button" class="delete-post-btn" id="deletePostBtn">
+                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Delete Post</span>
+                    </button>
+                </div>
             `;
 
-            document.getElementById('postPreviewModal').style.display = 'flex';
+            const previewModal = document.getElementById('postPreviewModal');
+            previewModal.classList.add('active');
+            previewModal.style.display = 'flex';
+
+            // Attach click handler for Delete button -> Opens PIN Verification Modal
+            const deleteBtn = document.getElementById('deletePostBtn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => openVerifyModal(post));
+            }
 
             if (post.location && post.location.latitude && post.location.longitude) {
                 setTimeout(() => {
