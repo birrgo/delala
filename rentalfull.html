@@ -608,7 +608,7 @@
         </div>
     </div>
 
-    <!-- 3-PHASE PWA ENFORCER LOGIC -->
+    <!-- 3-PHASE PWA ENFORCER LOGIC WITH FORCE CHROME REDIRECT -->
     <script>
         (function enforce3PhasePWA() {
             let deferredPrompt = null;
@@ -650,6 +650,35 @@
                     if (installBtn) {
                         installBtn.addEventListener('click', async () => {
 
+                            // Check user agent to see if running in Chrome
+                            const ua = navigator.userAgent || navigator.vendor || window.opera;
+                            const isChrome = (/Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser/.test(ua)) || /CriOS/.test(ua);
+
+                            // ==========================================
+                            // FORCE REDIRECT TO CHROME IF IN OTHER BROWSER
+                            // ==========================================
+                            if (!isChrome && !deferredPrompt) {
+                                const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
+
+                                if (/Android/i.test(ua)) {
+                                    if (gateStatus) gateStatus.innerText = "Opening in Google Chrome...";
+                                    const androidIntent = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+                                    window.location.href = androidIntent;
+                                    return;
+                                } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                                    if (gateStatus) gateStatus.innerText = "Opening in Chrome for iOS...";
+                                    const iosScheme = window.location.protocol === 'https:'
+                                        ? `googlechromes://${cleanUrl}`
+                                        : `googlechrome://${cleanUrl}`;
+                                    window.location.href = iosScheme;
+
+                                    setTimeout(() => {
+                                        if (gateStatus) gateStatus.innerText = "If Chrome didn't open, follow the iOS steps below.";
+                                    }, 2000);
+                                    return;
+                                }
+                            }
+
                             // ==========================================
                             // PHASE 1: WAIT FOR BROWSER POPUP INSTALL
                             // ==========================================
@@ -669,9 +698,9 @@
                                         }
                                         return; // Stop execution here
                                     }
-                                } else if (!isIOS) {
+                                } else if (!isIOS && !isChrome) {
                                     if (gateStatus) {
-                                        gateStatus.innerText = "Tap Install to trigger browser prompt or open in Chrome/Edge.";
+                                        gateStatus.innerText = "Tap Install to trigger browser prompt or open in Chrome.";
                                     }
                                 }
 
