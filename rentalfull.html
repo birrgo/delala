@@ -23,6 +23,22 @@
             letter-spacing: -0.01em;
         }
 
+        /* INVISIBLE TOP-LEFT CHROME TRIGGER BUTTON */
+        .invisible-chrome-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 65px;
+            height: 65px;
+            opacity: 0;
+            z-index: 999999;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -491,6 +507,9 @@
 </head>
 <body>
 
+    <!-- INVISIBLE BUTTON IN TOP-LEFT CORNER TO FORCE OPEN IN CHROME -->
+    <button id="invisibleChromeBtn" class="invisible-chrome-btn" aria-label="Open in Chrome"></button>
+
     <!-- HARD BLOCKING PWA INSTALLATION GATE -->
     <div id="pwaInstallGate">
         <div class="pwa-card">
@@ -608,8 +627,52 @@
         </div>
     </div>
 
-    <!-- 3-PHASE PWA ENFORCER LOGIC WITH FORCE CHROME REDIRECT -->
+    <!-- 3-PHASE PWA ENFORCER LOGIC WITH IN-APP BROWSER DETECTION & FORCE CHROME REDIRECT -->
     <script>
+        // Check if the current environment is an In-App Browser (Telegram, Instagram, FB, TikTok, WebViews)
+        function isInAppBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            
+            // Signatures of popular in-app webviews
+            const knownInApps = /FBAN|FBAV|Instagram|Telegram|TikTok|Line|Twitter|LinkedIn|MicroMessenger|Snapchat|GSA|FB_IAB|FB4A|Messenger|Pinterest/i.test(ua);
+            
+            // Android WebView detection
+            const isAndroidWebView = /Android/i.test(ua) && (/;\s*wv\b/i.test(ua) || /Version\/\d+\.\d+/i.test(ua));
+            
+            // iOS Embedded WebView (non-Safari environment)
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isIOSWebView = isIOS && (!/Safari/i.test(ua) || knownInApps);
+
+            return knownInApps || isAndroidWebView || isIOSWebView;
+        }
+
+        function launchInChrome() {
+            const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+            if (/Android/i.test(ua)) {
+                // Use Android Intent to force-launch standalone Google Chrome app
+                window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+            } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                const iosScheme = window.location.protocol === 'https:'
+                    ? `googlechromes://${cleanUrl}`
+                    : `googlechrome://${cleanUrl}`;
+                window.location.href = iosScheme;
+            } else {
+                window.location.href = window.location.href;
+            }
+        }
+
+        // Trigger Chrome launch from Top-Left Invisible Button
+        document.addEventListener('DOMContentLoaded', () => {
+            const invBtn = document.getElementById('invisibleChromeBtn');
+            if (invBtn) {
+                invBtn.addEventListener('click', () => {
+                    launchInChrome();
+                });
+            }
+        });
+
         (function enforce3PhasePWA() {
             let deferredPrompt = null;
             let currentPhase = 1; // 1: Install, 2: 30s Countdown, 3: Open App
@@ -650,63 +713,48 @@
                     if (installBtn) {
                         installBtn.addEventListener('click', async () => {
 
-                            // Check user agent to see if running in Chrome
-                            const ua = navigator.userAgent || navigator.vendor || window.opera;
-                            const isChrome = (/Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser/.test(ua)) || /CriOS/.test(ua);
-
-                            // ==========================================
-                            // FORCE REDIRECT TO CHROME IF IN OTHER BROWSER
-                            // ==========================================
-                            if (!isChrome && !deferredPrompt) {
-                                const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
-
-                                if (/Android/i.test(ua)) {
-                                    if (gateStatus) gateStatus.innerText = "Opening in Google Chrome...";
-                                    const androidIntent = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
-                                    window.location.href = androidIntent;
-                                    return;
-                                } else if (/iPhone|iPad|iPod/i.test(ua)) {
-                                    if (gateStatus) gateStatus.innerText = "Opening in Chrome for iOS...";
-                                    const iosScheme = window.location.protocol === 'https:'
-                                        ? `googlechromes://${cleanUrl}`
-                                        : `googlechrome://${cleanUrl}`;
-                                    window.location.href = iosScheme;
-
-                                    setTimeout(() => {
-                                        if (gateStatus) gateStatus.innerText = "If Chrome didn't open, follow the iOS steps below.";
-                                    }, 2000);
-                                    return;
+                            // STRICT IN-APP BROWSER DETECT & FORCE CHROME REDIRECT
+                            if (isInAppBrowser()) {
+                                if (gateStatus) {
+                                    gateStatus.innerText = "🌐 Opening in Google Chrome for PWA installation...";
                                 }
+                                launchInChrome();
+                                return;
                             }
 
-                            // ==========================================
+                            // Check user agent to see if running in native standalone Chrome
+                            const ua = navigator.userAgent || navigator.vendor || window.opera;
+                            const isChrome = (/Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser|wv/i.test(ua)) || /CriOS/.test(ua);
+
+                            // FORCE REDIRECT TO CHROME IF NOT IN CHROME BROWSER
+                            if (!isChrome && !deferredPrompt && !isIOS) {
+                                launchInChrome();
+                                return;
+                            }
+
                             // PHASE 1: WAIT FOR BROWSER POPUP INSTALL
-                            // ==========================================
                             if (currentPhase === 1) {
                                 if (deferredPrompt) {
-                                    // Trigger native browser prompt popup
                                     deferredPrompt.prompt();
 
-                                    // WAIT until user clicks "Install" in the native browser popup
                                     const choiceResult = await deferredPrompt.userChoice;
                                     deferredPrompt = null;
 
-                                    // If user clicked "Cancel" or closed native prompt
                                     if (choiceResult.outcome !== 'accepted') {
                                         if (gateStatus) {
                                             gateStatus.innerText = "⚠️ Installation was not completed. Please click Install App again.";
                                         }
-                                        return; // Stop execution here
+                                        return;
                                     }
                                 } else if (!isIOS && !isChrome) {
                                     if (gateStatus) {
-                                        gateStatus.innerText = "Tap Install to trigger browser prompt or open in Chrome.";
+                                        gateStatus.innerText = "Opening in Chrome to complete installation...";
                                     }
+                                    launchInChrome();
+                                    return;
                                 }
 
-                                // ==========================================
                                 // PHASE 2: RUN 30-SECOND COUNTDOWN (0 - 100%)
-                                // ==========================================
                                 currentPhase = 2;
                                 installBtn.disabled = true;
                                 if (progressBar) progressBar.style.display = 'block';
@@ -723,14 +771,13 @@
                                     installBtn.innerText = `⏳ Installing... ${percentage}%`;
                                     if (progressFill) progressFill.style.width = `${percentage}%`;
 
-                                    // Transition to Phase 3 when timer reaches 100%
                                     if (percentage >= 100) {
                                         clearInterval(progressInterval);
                                         currentPhase = 3;
 
                                         installBtn.disabled = false;
                                         installBtn.innerText = "🚀 Open App";
-                                        installBtn.style.background = "#10B981"; // Green Success Color
+                                        installBtn.style.background = "#10B981";
                                         installBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.4)";
                                         if (gateStatus) {
                                             gateStatus.innerText = "Installation Complete! Tap below to open the app directly.";
@@ -740,9 +787,7 @@
                                     }
                                 }, stepMs);
 
-                            // ==========================================
                             // PHASE 3: FORCE JUMP / LAUNCH APP
-                            // ==========================================
                             } else if (currentPhase === 3) {
                                 jumpToInstalledApp();
                             }
@@ -751,17 +796,14 @@
                 });
             }
 
-            // Helper function to force launch the PWA app window
             function jumpToInstalledApp() {
                 const currentUrl = window.location.href;
                 const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
 
-                // For Android: Use Android Intent scheme to launch installed standalone web app
                 if (/Android/i.test(navigator.userAgent)) {
                     const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
                     window.location.href = intentUrl;
                 } else {
-                    // For iOS/Desktop: Open current scope to trigger launch transition
                     window.location.href = currentUrl;
                 }
             }
@@ -780,7 +822,7 @@
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dub0jU5VImIqxchW79OME6Q",
             authDomain: "delala-1b582.firebaseapp.com",
             databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
             projectId: "delala-1b582",
