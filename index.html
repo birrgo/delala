@@ -80,6 +80,17 @@
             overflow: hidden;
         }
 
+        /* Container for Vertically Stacked Action Buttons */
+        .action-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
         /* Top Light Wave Gradient Background Accent */
         .bg-wave-top {
             position: absolute;
@@ -90,10 +101,8 @@
             pointer-events: none;
         }
 
-        /* Centered Get Started Button Styling */
-        .btn-get-started {
-            position: relative;
-            z-index: 10;
+        /* Base Button Styles */
+        .btn-get-started, .btn-install {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -101,23 +110,37 @@
             width: 85%;
             max-width: 280px;
             padding: 18px 32px;
-            background: linear-gradient(135deg, #0F172A, #1E293B);
-            color: #FFFFFF;
             font-size: 18px;
             font-weight: 700;
             text-decoration: none;
             border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             text-align: center;
+            box-sizing: border-box;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
         }
 
-        .btn-get-started:active {
+        /* Get Started Button */
+        .btn-get-started {
+            background: linear-gradient(135deg, #0F172A, #1E293B);
+            color: #FFFFFF;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+        }
+
+        /* Always Visible Install App Button */
+        .btn-install {
+            background: #008000;
+            color: #FFFFFF;
+            box-shadow: 0 10px 25px rgba(0, 128, 0, 0.25);
+        }
+
+        .btn-get-started:active, .btn-install:active {
             transform: scale(0.96);
-            box-shadow: 0 5px 12px rgba(15, 23, 42, 0.2);
         }
 
-        .btn-get-started svg {
+        .btn-get-started svg, .btn-install svg {
             width: 22px;
             height: 22px;
             stroke: #FFFFFF;
@@ -145,17 +168,29 @@
             </defs>
         </svg>
 
-        <!-- Screen Centered Action -->
-        <a href="rental.html" class="btn-get-started">
-            <span>Get Started</span>
-            <svg viewBox="0 0 24 24">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-        </a>
+        <!-- Stacked Buttons Container -->
+        <div class="action-container">
+            <a href="rental.html" class="btn-get-started">
+                <span>Get Started</span>
+                <svg viewBox="0 0 24 24">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+
+            <!-- Always visible Install App button -->
+            <button id="pwaInstallBtn" class="btn-install">
+                <span>Install App</span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration & Installation Logic -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -164,6 +199,38 @@
                     .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwaInstallBtn');
+
+        // Capture standard install prompt when available
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // Always handle click event
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to install prompt: ${outcome}`);
+                deferredPrompt = null;
+            } else {
+                // Fallback guidance if prompt isn't natively available (iOS or already installed)
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    alert('To install Delala on iOS: tap the Share button in Safari and select "Add to Home Screen".');
+                } else {
+                    alert('App installation prompt is not ready or the app is already installed. Use your browser menu to "Add to Home Screen".');
+                }
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            console.log('Delala app installed successfully.');
+        });
     </script>
 
 </body>
