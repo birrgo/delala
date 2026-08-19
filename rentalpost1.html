@@ -99,8 +99,6 @@
             justify-content: center;
             font-size: 11px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
         }
 
         .step-node.active {
@@ -372,7 +370,9 @@
         <main class="app-content">
             <form class="post-form-card" id="step2Form">
                 <div class="step-indicator">
-                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node" id="node-1">
+                        <a href="javascript:void(0)" id="node-1-link" style="text-decoration:none; color:inherit;">1</a>
+                    </div>
                     <div class="step-node" id="node-2">2</div>
                     <div class="step-node active" id="node-3">3</div>
                     <div class="step-node" id="node-4">4</div>
@@ -422,8 +422,7 @@
                     <input type="hidden" id="rentalLat">
                     <input type="hidden" id="rentalLng">
 
-                    <!-- HIDE THE FILL INFORMATION BUTTON -->
-                    <div class="step-actions" style="display: none;">
+                    <div class="step-actions">
                         <button type="button" class="submit-post-btn" id="btnNext3">
                             Next: Contact 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -527,37 +526,7 @@
             return { phone, id };
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initClock();
-            loadSavedFormData();
-
-            onAuthStateChanged(auth, (user) => { 
-                currentUser = user; 
-                loadSavedFormData();
-            });
-
-            document.getElementById('gpsDetectBtn').addEventListener('click', () => {
-                savePart2FormData();
-            });
-
-            // CLICKING NUMBER ONE NODE REDIRECTS TO PUB.HTML AFTER VALIDATING
-            document.getElementById('node-1').addEventListener('click', () => {
-                validateAndRedirect();
-            });
-
-            document.getElementById('btnNext3').addEventListener('click', () => {
-                validateAndRedirect();
-            });
-
-            document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
-
-            const formInputs = document.querySelectorAll('.form-input');
-            formInputs.forEach(input => {
-                input.addEventListener('input', savePart2FormData);
-            });
-        });
-
-        function validateAndRedirect() {
+        function checkCompletionAndToggleState() {
             const country = document.getElementById('locCountry').value.trim();
             const region = document.getElementById('locRegion').value.trim();
             const zone = document.getElementById('locZone').value.trim();
@@ -565,19 +534,81 @@
             const subcity = document.getElementById('locSubcity').value.trim();
             const uniqueName = document.getElementById('locUniqueName').value.trim();
 
-            if (!country || !region || !zone || !city || !isLocationTracked) {
-                showErrorModal("Real-Time GPS Required", "Please tap 'Detect Real-Time GPS Location' to acquire your real-time position automatically.");
-                return;
-            }
+            const isAllFilled = country && region && zone && city && subcity && uniqueName && isLocationTracked;
+            const detectBtn = document.getElementById('gpsDetectBtn');
+            const node1Link = document.getElementById('node-1-link');
 
-            if (!subcity || !uniqueName) {
-                showErrorModal("Missing Fields", "Please make sure Subcity and Unique Place / Landmark are filled out.");
-                return;
+            if (isAllFilled) {
+                if (detectBtn) detectBtn.style.display = 'none';
+                if (node1Link) node1Link.href = 'pub.html';
+            } else {
+                if (detectBtn) detectBtn.style.display = 'flex';
+                if (node1Link) node1Link.href = 'javascript:void(0)';
             }
-
-            savePart2FormData();
-            window.location.href = 'pub.html';
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            loadSavedFormData();
+            checkCompletionAndToggleState();
+
+            onAuthStateChanged(auth, (user) => { 
+                currentUser = user; 
+                loadSavedFormData();
+                checkCompletionAndToggleState();
+            });
+
+            document.getElementById('gpsDetectBtn').addEventListener('click', () => {
+                savePart2FormData();
+            });
+
+            document.getElementById('node-1-link').addEventListener('click', (e) => {
+                const country = document.getElementById('locCountry').value.trim();
+                const region = document.getElementById('locRegion').value.trim();
+                const zone = document.getElementById('locZone').value.trim();
+                const city = document.getElementById('locCity').value.trim();
+                const subcity = document.getElementById('locSubcity').value.trim();
+                const uniqueName = document.getElementById('locUniqueName').value.trim();
+
+                const isAllFilled = country && region && zone && city && subcity && uniqueName && isLocationTracked;
+                if (!isAllFilled) {
+                    e.preventDefault();
+                    showErrorModal("Incomplete Form", "Please fill out all required location details and detect your GPS location first before proceeding to pub.html.");
+                }
+            });
+
+            document.getElementById('btnNext3').addEventListener('click', () => {
+                const country = document.getElementById('locCountry').value.trim();
+                const region = document.getElementById('locRegion').value.trim();
+                const zone = document.getElementById('locZone').value.trim();
+                const city = document.getElementById('locCity').value.trim();
+                const subcity = document.getElementById('locSubcity').value.trim();
+                const uniqueName = document.getElementById('locUniqueName').value.trim();
+
+                if (!country || !region || !zone || !city || !isLocationTracked) {
+                    showErrorModal("Real-Time GPS Required", "Please tap 'Detect Real-Time GPS Location' to acquire your real-time position automatically.");
+                    return;
+                }
+
+                if (!subcity || !uniqueName) {
+                    showErrorModal("Missing Fields", "Please make sure Subcity and Unique Place / Landmark are filled out.");
+                    return;
+                }
+
+                savePart2FormData();
+                window.location.href = 'rentalpost3.html';
+            });
+
+            document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
+
+            const formInputs = document.querySelectorAll('.form-input');
+            formInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    savePart2FormData();
+                    checkCompletionAndToggleState();
+                });
+            });
+        });
 
         function savePart2FormData() {
             const acc = getAccountDetails();
@@ -639,6 +670,8 @@
                     }
                 } catch(e) { console.error(e); }
             }
+
+            checkCompletionAndToggleState();
         }
 
         function showErrorModal(title, message) {
