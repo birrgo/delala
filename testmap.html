@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Select Location</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="news.css">
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: #000000;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .map-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            background: #000;
+        }
+
+        #rentalMap { 
+            width: 100vw;
+            height: 100vh; 
+        }
+
+        .top-left-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 210px;
+            z-index: 1000;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-input::placeholder { color: #94A3B8; }
+
+        .top-right-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .map-back-btn {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .map-back-btn:active { transform: scale(0.96); }
+
+        .map-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .save-location-btn {
+            background: var(--primary-accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.3s ease, background 0.3s ease, transform 0.1s ease;
+            white-space: nowrap;
+        }
+
+        .save-location-btn:active { transform: scale(0.96); }
+
+        .map-gps-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #1E293B;
+            color: #38BDF8;
+            border: 2px solid #38BDF8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .map-gps-btn:active { transform: scale(0.92); }
+        .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .user-location-dot {
+            width: 18px;
+            height: 18px;
+            background-color: #38BDF8;
+            border: 3px solid #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+            cursor: grab;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+        .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); font-weight: 700; }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background: #F8FAFC;
+        }
+
+        .modal-btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--primary-accent);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .preview-section {
+            background: #F8FAFC;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="map-wrapper" id="mapContainer">
+        <div class="top-left-controls">
+            <div class="search-box-wrapper">
+                <input type="text" id="manualSearchInput" class="search-input" placeholder="Search location (Press Enter)..." autocomplete="off">
+            </div>
+        </div>
+
+        <div class="top-right-controls">
+            <a href="test4.html" class="map-back-btn" id="backBtn" title="Back to post">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back
+            </a>
+            <button type="button" class="save-location-btn" id="saveLocationBtn">
+                Done
+            </button>
+        </div>
+
+        <div id="rentalMap"></div>
+        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Current Location">
+            <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+    </div>
+
+    <!-- CONFIRMATION POPUP MODAL -->
+    <div class="modal-overlay" id="confirmLocationModalOverlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Confirm Selected Location</h3>
+                <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
+            </div>
+            <div class="modal-body" id="locationConfirmBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn-cancel" id="retrackLocationBtn">Cancel</button>
+                <button type="button" class="modal-btn-confirm" id="acceptLocationBtn">Confirm & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MapLibre GL JS Library -->
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+    <!-- Firebase SDK v10 -->
+
+
+
+
+
+
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+        authDomain: "tsestlive.firebaseapp.com",
+        databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+        projectId: "tsestlive",
+        storageBucket: "tsestlive.firebasestorage.app",
+        messagingSenderId: "271877452740",
+        appId: "1:271877452740:web:2982ecec515f245ea32a91",
+        measurementId: "G-KCFDH1TV5S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let map, mapMarker;
+    let selectedLat = 9.0034;
+    let selectedLng = 38.7881;
+    let selectedAddress = "Fetching address...";
+    let addressPromise = null;
+    let parsedAddressDetails = {
+        country: '',
+        region: '',
+        zone: '',
+        city: '',
+        subcity: '',
+        uniqueName: ''
+    };
+
+    const BOLE_LAT = 9.0034;
+    const BOLE_LNG = 38.7881;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initMapLibreMap();
+
+        document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
+        document.getElementById('mapGpsBtn').addEventListener('click', centerOnUserLocation);
+
+        document.getElementById('closeLocationModalCross').addEventListener('click', closeModal);
+        document.getElementById('retrackLocationBtn').addEventListener('click', closeModal);
+        document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationToSessionAndDb);
+
+        document.getElementById('manualSearchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                geocodeSearch(e.target.value);
+            }
+        });
+    });
+
+    function initMapLibreMap() {
+        map = new maplibregl.Map({
+            container: 'rentalMap',
+            style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+            center: [BOLE_LNG, BOLE_LAT],
+            zoom: 14,
+            attributionControl: false
+        });
+
+        const userDot = document.createElement('div');
+        userDot.className = 'user-location-dot';
+
+        mapMarker = new maplibregl.Marker({ element: userDot, draggable: true })
+            .setLngLat([BOLE_LNG, BOLE_LAT])
+            .addTo(map);
+
+        addressPromise = fetchAddress(BOLE_LAT, BOLE_LNG);
+
+        map.on('click', (e) => {
+            const { lng, lat } = e.lngLat;
+            updateLocation(lat, lng);
+        });
+
+        mapMarker.on('dragend', () => {
+            const lngLat = mapMarker.getLngLat();
+            updateLocation(lngLat.lat, lngLat.lng);
+        });
+    }
+
+    function updateLocation(lat, lng) {
+        selectedLat = Number(lat);
+        selectedLng = Number(lng);
+        if (mapMarker) mapMarker.setLngLat([lng, lat]);
+        addressPromise = fetchAddress(lat, lng);
+    }
+
+    async function fetchAddress(lat, lng) {
+        selectedAddress = "Loading address...";
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`, {
+                headers: { 'Accept-Language': 'en' }
+            });
+            const data = await res.json();
+            selectedAddress = data.display_name || "Unknown Location";
+            
+            if (data.address) {
+                const a = data.address;
+                parsedAddressDetails = {
+                    country: a.country || 'Ethiopia',
+                    region: a.state || a.region || a.state_district || 'Oromia',
+                    zone: a.county || a.zone || a.district || 'East Shewa',
+                    city: a.city || a.town || a.village || a.municipality || 'Adama',
+                    subcity: a.suburb || a.city_district || a.quarter || a.neighbourhood || '',
+                    uniqueName: a.road || a.amenity || a.building || a.pedestrian || ''
+                };
+            }
+        } catch (err) {
+            selectedAddress = "Address unavailable";
+            parsedAddressDetails = {
+                country: 'Ethiopia',
+                region: '',
+                zone: '',
+                city: '',
+                subcity: '',
+                uniqueName: ''
+            };
+        }
+    }
+
+    async function geocodeSearch(query) {
+        if (!query.trim()) return;
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1`, {
+                headers: { 'Accept-Language': 'en' }
+            });
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+                map.flyTo({ center: [lng, lat], zoom: 15 });
+                updateLocation(lat, lng);
+            } else {
+                alert("Location not found. Please try another search.");
+            }
+        } catch (err) {
+            alert("Error searching location.");
+        }
+    }
+
+    function centerOnUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.flyTo({ center: [lng, lat], zoom: 16 });
+                updateLocation(lat, lng);
+            }, () => {
+                alert("Unable to fetch your GPS location.");
+            });
+        }
+    }
+
+    async function promptLocationConfirmation() {
+        if (addressPromise) {
+            await addressPromise;
+        }
+
+        const modalBody = document.getElementById('locationConfirmBody');
+        modalBody.innerHTML = `
+            <div class="preview-section">
+                <div class="preview-section-title">ADDRESS</div>
+                <div style="font-size:13px; font-weight:600; color:var(--primary-dark); margin-bottom: 10px;">${selectedAddress}</div>
+                <div class="preview-section-title">SELECTED COORDINATES</div>
+                <div style="font-size:12px; font-weight:700; color:var(--text-muted);">Latitude: ${selectedLat.toFixed(6)}</div>
+                <div style="font-size:12px; font-weight:700; color:var(--text-muted);">Longitude: ${selectedLng.toFixed(6)}</div>
+            </div>
+        `;
+        document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('confirmLocationModalOverlay').style.display = 'none';
+    }
+
+    async function saveLocationToSessionAndDb() {
+        const acceptBtn = document.getElementById('acceptLocationBtn');
+        acceptBtn.innerText = "Saving...";
+        acceptBtn.disabled = true;
+
+        try {
+            const payload = {
+                lat: Number(selectedLat.toFixed(6)),
+                lng: Number(selectedLng.toFixed(6)),
+                address: parsedAddressDetails,
+                fullAddress: selectedAddress
+            };
+            
+            sessionStorage.setItem('selectedGpsLocation', JSON.stringify(payload));
+
+            const locationsRef = ref(database, 'locations');
+            const newLocationRef = push(locationsRef);
+            await set(newLocationRef, {
+                location: {
+                    latitude: payload.lat,
+                    longitude: payload.lng
+                },
+                locationDetails: parsedAddressDetails,
+                fullAddress: selectedAddress,
+                createdAt: new Date().toISOString()
+            });
+
+            closeModal();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl') || 'test4.html';
+            window.location.href = returnUrl;
+        } catch (error) {
+            console.error("Firebase Error: ", error);
+            alert("Failed to save location. Please try again.");
+        } finally {
+            acceptBtn.innerText = "Confirm & Save";
+            acceptBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

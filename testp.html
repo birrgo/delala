@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Post Request (Photos)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+
+    <!-- Firebase JS SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 2;
+            background: #FFFFFF;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .step-node.active {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
+        }
+
+        .step-header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .btn-clear-draft {
+            background: #FEE2E2;
+            color: var(--danger-color);
+            border: 1px solid #FCA5A5;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-clear-draft:active { transform: scale(0.96); }
+
+        .section-block {
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .section-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .tier-pricing-badge {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .tier-pricing-badge:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+        }
+
+        .tier-pricing-badge .badge-highlight {
+            color: #38BDF8;
+            font-weight: 800;
+        }
+
+        .photo-upload-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .photo-slot {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px dashed #CBD5E1;
+            border-radius: 12px;
+            background: #F8FAFC;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .photo-slot:hover {
+            border-color: #334155;
+            background: #F1F5F9;
+        }
+
+        .photo-slot.has-image {
+            border: 1px solid var(--border-color);
+        }
+
+        .photo-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-slot .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(239, 68, 68, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .photo-slot-plus-icon {
+            font-size: 26px;
+            font-weight: 700;
+            color: #64748B;
+            line-height: 1;
+        }
+
+        .photo-slot-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748B;
+            margin-top: 4px;
+        }
+
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+
+        .btn-prev {
+            flex: 1;
+            padding: 13px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            background: #FFFFFF;
+            color: var(--text-main);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-next {
+            flex: 1;
+            padding: 13px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-prev:active, .btn-next:active { transform: scale(0.98); }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; font-weight: 700; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .category-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .category-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .category-modal-card {
+            width: 90%;
+            max-width: 380px;
+            background: linear-gradient(145deg, #38414e, #1e2530, #131821);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 20px 45px rgba(0, 0, 0, 0.85);
+            transform: translateY(12px) scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .category-modal-overlay.active .category-modal-card { transform: translateY(0) scale(1); }
+
+        .category-modal-header {
+            padding: 16px 18px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #94A3B8;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-modal-list {
+            display: flex;
+            flex-direction: column;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            min-height: 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .category-item:active { transform: scale(0.98); }
+        .category-item:last-child { border-bottom: none; }
+        .category-item:hover, .category-item.selected { background: rgba(255, 255, 255, 0.08); }
+
+        .category-text-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #E2E8F0;
+        }
+
+        .custom-radio {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .category-item.selected .custom-radio {
+            border-color: #38BDF8;
+            background: #38BDF8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+
+        .category-item.selected .custom-radio::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #FFFFFF;
+        }
+
+        .metal-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .metal-modal-card {
+            width: 85%;
+            max-width: 320px;
+            background: linear-gradient(135deg, #4A5568, #2D3748, #1A202C);
+            border-radius: 20px;
+            padding: 20px 16px 16px;
+            box-sizing: border-box;
+            text-align: center;
+            border: 1px solid #718096;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(12px) scale(0.95);
+            transition: transform 0.25s ease;
+        }
+
+        .metal-modal-overlay.active .metal-modal-card { transform: translateY(0) scale(1); }
+
+        .metal-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #718096, #2D3748);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #A0AEC0;
+        }
+
+        .metal-icon-wrapper svg { width: 22px; height: 22px; stroke: #E2E8F0; }
+        .metal-modal-title { font-size: 13px; font-weight: 800; color: #E2E8F0; margin: 0 0 6px; text-transform: uppercase; }
+        .metal-modal-message { font-size: 11px; font-weight: 600; color: #CBD5E0; margin-bottom: 16px; }
+        
+        .metal-modal-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #718096;
+            background: linear-gradient(180deg, #4A5568 0%, #2D3748 100%);
+            color: #EDF2F7;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Delala - Photo Upload</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card">
+                <div class="step-indicator">
+                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
+                    <div class="step-node" id="node-3">3</div>
+                    <div class="step-node active" id="node-4">4</div>
+                </div>
+
+                <form id="listingForm" onsubmit="event.preventDefault();">
+                    <div class="form-step-page" id="stepPhotos">
+
+                        <div class="section-block">
+                            <button type="button" class="tier-pricing-badge" id="openPhotoPricingModalBtn">
+                                <span>Photos: <strong id="photoCountDisplay" class="badge-highlight">0</strong> / <span id="photoLimitDisplay">1</span></span>
+                                <span>Fee: <strong id="photoFeeDisplay" class="badge-highlight">FREE</strong></span>
+                            </button>
+
+                            <div class="photo-upload-grid" id="photoUploadGrid"></div>
+                            <input type="file" id="photoFileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+                        </div>
+
+                        <div class="step-actions">
+                            <button type="button" class="btn-prev" onclick="goToStep4()">Previous</button>
+                            <button type="button" class="btn-next" onclick="nextStepPhotos()">Next</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="rental.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                <span>Rental</span>
+            </a>
+            <a href="selling.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+                <span>Selling</span>
+            </a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="service.html" class="nav-item active">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                </div>
+                <span>Service</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- PHOTO TIER PRICING MODAL -->
+    <div class="category-modal-overlay" id="photoPricingOverlay">
+        <div class="category-modal-card">
+            <div class="category-modal-header">
+                <span>Select Photo Package / ፎቶ ጥቅል ይምረጡ</span>
+                <div class="custom-radio"></div>
+            </div>
+            <div class="category-modal-list" id="photoPricingList">
+                <!-- Dynamically populated from Database -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ERROR MODAL -->
+    <div class="metal-modal-overlay" id="errorModalOverlay">
+        <div class="metal-modal-card">
+            <div class="metal-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h3 class="metal-modal-title" id="errorModalTitle">Attention Required</h3>
+            <p class="metal-modal-message" id="errorModalMessage">An error has occurred.</p>
+            <button type="button" class="metal-modal-btn" onclick="closeErrorModal()">Dismiss</button>
+        </div>
+    </div>
+
+    <script>
+        const SESSION_KEY = 'delela_post_draft';
+        const STEP1_KEY = 'test1';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        let uploadedPhotos = [];
+        let selectedPhotoLimit = 1;
+        let currentPhotoFee = 0;
+
+        window.showErrorModal = function(message, title = "Validation Error") {
+            document.getElementById('errorModalTitle').innerText = title;
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModalOverlay').classList.add('active');
+        };
+
+        window.closeErrorModal = function() {
+            document.getElementById('errorModalOverlay').classList.remove('active');
+        };
+
+        function getFormSession() {
+            const rawDraft = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+            const rawStep1 = sessionStorage.getItem(STEP1_KEY) || localStorage.getItem(STEP1_KEY);
+            let draft = {};
+            let step1 = {};
+            try { draft = rawDraft ? JSON.parse(rawDraft) : {}; } catch (e) { draft = {}; }
+            try { step1 = rawStep1 ? JSON.parse(rawStep1) : {}; } catch (e) { step1 = {}; }
+
+            const mainCategory = draft.serviceType || draft.category || step1.serviceType || step1.category || "";
+
+            return {
+                ...step1,
+                ...draft,
+                serviceType: mainCategory,
+                category: mainCategory
+            };
+        }
+
+        function saveDraft() {
+            try {
+                const current = getFormSession();
+
+                const photoDetails = {
+                    photos: uploadedPhotos,
+                    selectedPhotoLimit: selectedPhotoLimit,
+                    photoFee: currentPhotoFee
+                };
+
+                const draft = {
+                    ...current,
+                    photoDetails: photoDetails,
+                    photos: uploadedPhotos,
+                    updatedAt: Date.now()
+                };
+
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify(draft));
+                localStorage.setItem(SESSION_KEY, JSON.stringify(draft));
+            } catch (e) {
+                console.warn("Storage update skipped to prevent overflow", e);
+            }
+        }
+
+        function clearDraft() {
+            if (confirm("Are you sure you want to delete all saved draft information?")) {
+                sessionStorage.removeItem(SESSION_KEY);
+                localStorage.removeItem(SESSION_KEY);
+                sessionStorage.removeItem(STEP1_KEY);
+                localStorage.removeItem(STEP1_KEY);
+                sessionStorage.removeItem('selectedGpsLocation');
+
+                uploadedPhotos = [];
+                selectedPhotoLimit = 1;
+                currentPhotoFee = 0;
+                renderPhotoGrid();
+                updatePhotoTierUI();
+
+                alert("Draft information deleted successfully.");
+            }
+        }
+
+        function loadDraft() {
+            const draft = getFormSession();
+
+            if (draft.photoDetails) {
+                if (Array.isArray(draft.photoDetails.photos)) uploadedPhotos = draft.photoDetails.photos;
+                if (draft.photoDetails.selectedPhotoLimit) selectedPhotoLimit = draft.photoDetails.selectedPhotoLimit;
+                if (typeof draft.photoDetails.photoFee !== 'undefined') currentPhotoFee = draft.photoDetails.photoFee;
+            } else if (Array.isArray(draft.photos)) {
+                uploadedPhotos = draft.photos;
+            }
+
+            renderPhotoGrid();
+            updatePhotoTierUI();
+            saveDraft();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            setupPhotoPricingModal();
+            fetchDatabasePhotoPrices();
+            loadDraft();
+        });
+
+        function goToStep4() {
+            saveDraft();
+            window.location.href = 'test4.html';
+        }
+
+        function nextStepPhotos() {
+            saveDraft();
+            window.location.href = 'test5.html';
+        }
+
+        function fetchDatabasePhotoPrices() {
+            const container = document.getElementById('photoPricingList');
+            let htmlOptions = `
+                <div class="category-item ${selectedPhotoLimit === 1 ? 'selected' : ''}" data-limit="1" data-fee="0">
+                    <div class="category-text-group"><span>1 Photo</span><span>—</span><span>FREE</span></div>
+                    <div class="custom-radio"></div>
+                </div>
+            `;
+
+            db.ref('settings/pricing_records').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const records = snapshot.val();
+                    const optionsList = [];
+                    Object.keys(records).forEach(key => {
+                        const rec = records[key];
+                        if (rec && rec.photo_limit > 1) {
+                            optionsList.push({ limit: parseInt(rec.photo_limit), fee: parseInt(rec.photo_price || 0) });
+                        }
+                    });
+                    optionsList.sort((a, b) => a.limit - b.limit);
+                    optionsList.forEach(opt => {
+                        const isSelected = selectedPhotoLimit === opt.limit;
+                        const feeFormatted = opt.fee === 0 ? "FREE" : `${opt.fee.toLocaleString()} ETB`;
+                        const labelText = opt.limit >= 100 ? "Unlimited (Max 100)" : `${opt.limit} Photos`;
+                        htmlOptions += `
+                            <div class="category-item ${isSelected ? 'selected' : ''}" data-limit="${opt.limit}" data-fee="${opt.fee}">
+                                <div class="category-text-group"><span>${labelText}</span><span>—</span><span>${feeFormatted}</span></div>
+                                <div class="custom-radio"></div>
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML = htmlOptions;
+                bindPricingItemClicks();
+            }).catch(() => {
+                container.innerHTML = htmlOptions;
+                bindPricingItemClicks();
+            });
+        }
+
+        function bindPricingItemClicks() {
+            const overlay = document.getElementById('photoPricingOverlay');
+            const items = overlay.querySelectorAll('.category-item');
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    const limit = parseInt(item.getAttribute('data-limit'));
+                    const fee = parseInt(item.getAttribute('data-fee'));
+
+                    if (uploadedPhotos.length > limit) {
+                        return showErrorModal(`You have already uploaded ${uploadedPhotos.length} photos. Please remove photos before selecting a lower limit.`);
+                    }
+
+                    selectedPhotoLimit = limit;
+                    currentPhotoFee = fee;
+                    items.forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+
+                    renderPhotoGrid();
+                    updatePhotoTierUI();
+                    saveDraft();
+                    overlay.classList.remove('active');
+                });
+            });
+        }
+
+        function setupPhotoPricingModal() {
+            const trigger = document.getElementById('openPhotoPricingModalBtn');
+            const overlay = document.getElementById('photoPricingOverlay');
+            if (trigger) trigger.addEventListener('click', () => overlay.classList.add('active'));
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) overlay.classList.remove('active');
+                });
+            }
+        }
+
+        function triggerFileInput() {
+            if (uploadedPhotos.length >= selectedPhotoLimit) {
+                return showErrorModal(`You have reached your tier limit of ${selectedPhotoLimit} photo(s). Tap 'Photos / Fee' to choose a higher package.`);
+            }
+            document.getElementById('photoFileInput').click();
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                if (uploadedPhotos.length >= selectedPhotoLimit) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadedPhotos.push(event.target.result);
+                    renderPhotoGrid();
+                    updatePhotoTierUI();
+                    saveDraft();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+
+        function removePhoto(index) {
+            uploadedPhotos.splice(index, 1);
+            renderPhotoGrid();
+            updatePhotoTierUI();
+            saveDraft();
+        }
+
+        function renderPhotoGrid() {
+            const grid = document.getElementById('photoUploadGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const totalSlotsToDisplay = selectedPhotoLimit;
+            for (let i = 0; i < totalSlotsToDisplay; i++) {
+                const slot = document.createElement('div');
+                if (i < uploadedPhotos.length) {
+                    slot.className = 'photo-slot has-image';
+                    slot.innerHTML = `
+                        <img src="${uploadedPhotos[i]}" alt="Photo ${i + 1}">
+                        <button type="button" class="remove-btn" onclick="removePhoto(${i})">×</button>
+                    `;
+                } else {
+                    slot.className = 'photo-slot';
+                    slot.onclick = triggerFileInput;
+                    slot.innerHTML = `
+                        <span class="photo-slot-plus-icon">+</span>
+                        <span class="photo-slot-label">Photo ${i + 1}</span>
+                    `;
+                }
+                grid.appendChild(slot);
+            }
+        }
+
+        function updatePhotoTierUI() {
+            const count = uploadedPhotos.length;
+            const countNode = document.getElementById('photoCountDisplay');
+            const limitNode = document.getElementById('photoLimitDisplay');
+            const feeNode = document.getElementById('photoFeeDisplay');
+
+            if (countNode) countNode.innerText = count;
+            if (limitNode) limitNode.innerText = selectedPhotoLimit === 100 ? '100' : selectedPhotoLimit;
+            if (feeNode) feeNode.innerText = currentPhotoFee === 0 ? "FREE" : `${currentPhotoFee.toLocaleString()} ETB`;
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

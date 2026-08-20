@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Rental Article Details</title>
+    
+    <!-- PWA Manifest & iOS Metalink Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hulum">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+    
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        /* INVISIBLE TOP-LEFT CHROME TRIGGER BUTTON */
+        .invisible-chrome-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 65px;
+            height: 65px;
+            opacity: 0;
+            z-index: 999999;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #E2E8F0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+
+        .nav-item .icon-bg svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: #0F172A;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+            stroke-width: 2.8;
+        }
+
+        .post-fab-label {
+            margin-top: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .full-article-view {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 16px 12px 100px 12px;
+            color: #000000;
+        }
+
+        #fullNewsReaderBody {
+            width: 100%;
+            box-sizing: border-box;
+            color: #000000;
+        }
+
+        .info-terms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 14px 0;
+            background: #F8FAFC;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .info-term-item {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .info-term-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-term-label {
+            font-size: 0.72rem;
+            color: #64748B;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .info-term-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0F172A;
+            word-break: break-word;
+            margin-top: 2px;
+        }
+
+        .multi-image-gallery {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 8px;
+            margin: 14px 0 6px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .multi-image-gallery::-webkit-scrollbar { height: 4px; }
+
+        .multi-image-gallery::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        .gallery-img-container {
+            flex: 0 0 100%;
+            width: 100%;
+            box-sizing: border-box;
+            scroll-snap-align: start;
+            border-radius: 14px;
+            overflow: hidden;
+            height: 260px;
+            background: #0f172a;
+            position: relative;
+        }
+
+        .gallery-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-action-bar {
+            display: flex;
+            justify-style: space-around;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0 16px 0;
+            width: 100%;
+            box-sizing: border-box;
+            background: #F8FAFC;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .img-action-btn {
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            color: #0F172A;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .img-action-btn:hover {
+            background: #E2E8F0;
+            transform: scale(1.05);
+        }
+
+        .img-action-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #0F172A;
+            stroke-width: 2.2;
+            fill: none;
+        }
+
+        .category-specs-container {
+            width: 100%;
+            box-sizing: border-box;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 14px 0;
+        }
+
+        .category-specs-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .reader-full-body {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #1E293B;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-line;
+            background: #F8FAFC;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .contact-trigger-btn {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px;
+            border-radius: 12px;
+            background: #0F172A;
+            border: none;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .contact-btn {
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .contact-btn-phone { background: #10B981; color: #ffffff; }
+        .contact-btn-telegram { background: #0088cc; color: #ffffff; }
+        .contact-btn-whatsapp { background: #25D366; color: #ffffff; }
+        .contact-btn-email { background: #EF4444; color: #ffffff; }
+        .contact-btn-instagram { background: #E1306C; color: #ffffff; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .modal-title {
+            color: #DC2626;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .modal-body {
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .modal-confirm-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0F172A;
+            border: none;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-back-btn {
+            width: 100%;
+            padding: 11px;
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            border-radius: 10px;
+            color: #0F172A;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .back-nav-btn {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* HARD BLOCK PWA FORCE OVERLAY */
+        #pwaInstallGate {
+            position: fixed;
+            inset: 0;
+            background: #081B38;
+            color: #FFFFFF;
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        #pwaInstallGate .pwa-card {
+            background: #0F2C59;
+            border: 1px solid #1E40AF;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pwa-icon {
+            width: 72px;
+            height: 72px;
+            background: #2563EB;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .pwa-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: #FFFFFF;
+            stroke-width: 2.2;
+            fill: none;
+        }
+
+        .pwa-install-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 18px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+
+        .pwa-install-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .pwa-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .pwa-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563EB, #10B981);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .ios-instructions {
+            display: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: #93C5FD;
+            text-align: left;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INVISIBLE BUTTON IN TOP-LEFT CORNER TO BYPASS PWA INSTALL -->
+    <button id="invisibleChromeBtn" class="invisible-chrome-btn" aria-label="Bypass PWA Block"></button>
+
+    <!-- HARD BLOCKING PWA INSTALLATION GATE -->
+    <div id="pwaInstallGate">
+        <div class="pwa-card">
+            <div class="pwa-icon">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+            </div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">App Access Only</h2>
+            <p id="pwaGateStatus" style="font-size: 0.9rem; color: #CBD5E1; line-height: 1.5;">
+                This application cannot be accessed directly inside a web browser. Please install and launch the <strong>Hulum App</strong> on your home screen to proceed.
+            </p>
+            
+            <button id="pwaInstallBtn" class="pwa-install-btn">📲 Install App Now</button>
+            
+            <div id="pwaProgressBar" class="pwa-progress-bar">
+                <div id="pwaProgressFill" class="pwa-progress-fill"></div>
+            </div>
+
+            <div id="iosInstructionBox" class="ios-instructions">
+                <strong>iPhone / iPad Users:</strong><br>
+                1. Tap the <strong>Share</strong> button <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> at the bottom of Safari.<br>
+                2. Scroll down & select <strong>"Add to Home Screen"</strong>.<br>
+                3. Open the installed app from your home screen.
+            </div>
+        </div>
+    </div>
+
+    <div class="app-view">
+        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
+            <defs>
+                <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#081B38"/>
+                    <stop offset="1" stop-color="#0F2C59"/>
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <header class="nav-header">
+            <div class="header-left-group" style="display:flex; align-items:center; gap:10px;">
+                <button class="back-nav-btn" id="goBackBtn" aria-label="Go Back">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h1 class="header-title-text" style="font-size: 15px; font-weight: 700;">Rental Details</h1>
+            </div>
+            
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content full-article-view">
+            <div id="fullNewsReaderBody">
+                <div style="text-align:center; padding:40px 20px; color:#64748B; font-weight:600;">⏳ Loading Item Details...</div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <span>Rental</span>
+            </a>
+
+            <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <span>Selling</span>
+            </a>
+
+            <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+
+            <a id="nav-vacancy" href="vacancy.html" class="nav-item" data-filter="Job Vacancy">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </div>
+                <span>Vacancy</span>
+            </a>
+
+            <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modalWarningSection">
+                <div class="modal-title">⚠️ ጥብቅ ማስጠንቀቂያ!</div>
+                <div class="modal-body">
+                    ሕጋዊ ስምምነት ሳይፈረም ምንም ዓይነት ክፍያ እንዳይፈጸም እናስነብባለን። ከማጭበርበር ድርጊቶች ራስዎን ይጠብቁ።
+                </div>
+                <button class="modal-confirm-btn" onclick="showPopupContacts()">Continue to Contacts</button>
+                <button class="modal-back-btn" onclick="closeWarningModal()">Cancel</button>
+            </div>
+            
+            <div id="modalContactSection" style="display: none;">
+                <div class="modal-title" style="color: #0F172A;">📞 Contact Options</div>
+                <div id="popupContactButtonsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;"></div>
+                <button class="modal-back-btn" onclick="showPopupWarning()">← Back to Warning</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3-PHASE PWA ENFORCER LOGIC WITH IN-APP BROWSER DETECTION & FORCE CHROME REDIRECT -->
+    <script>
+        // Check if the current environment is an In-App Browser (Telegram, Instagram, FB, TikTok, WebViews)
+        function isInAppBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            
+            // Signatures of popular in-app webviews
+            const knownInApps = /FBAN|FBAV|Instagram|Telegram|TikTok|Line|Twitter|LinkedIn|MicroMessenger|Snapchat|GSA|FB_IAB|FB4A|Messenger|Pinterest/i.test(ua);
+            
+            // Android WebView detection
+            const isAndroidWebView = /Android/i.test(ua) && (/;\s*wv\b/i.test(ua) || /Version\/\d+\.\d+/i.test(ua));
+            
+            // iOS Embedded WebView (non-Safari environment)
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isIOSWebView = isIOS && (!/Safari/i.test(ua) || knownInApps);
+
+            return knownInApps || isAndroidWebView || isIOSWebView;
+        }
+
+        function launchInChrome() {
+            const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+            if (/Android/i.test(ua)) {
+                // Use Android Intent to force-launch standalone Google Chrome app
+                window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+            } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                const iosScheme = window.location.protocol === 'https:'
+                    ? `googlechromes://${cleanUrl}`
+                    : `googlechrome://${cleanUrl}`;
+                window.location.href = iosScheme;
+            } else {
+                window.location.href = window.location.href;
+            }
+        }
+
+        // Trigger bypass from Top-Left Invisible Button to hide PWA gate entirely
+        document.addEventListener('DOMContentLoaded', () => {
+            const invBtn = document.getElementById('invisibleChromeBtn');
+            const pwaGate = document.getElementById('pwaInstallGate');
+            if (invBtn) {
+                invBtn.addEventListener('click', () => {
+                    // Bypass the PWA block and just show the page
+                    if (pwaGate) pwaGate.style.display = 'none';
+                });
+            }
+        });
+
+        (function enforce3PhasePWA() {
+            let deferredPrompt = null;
+            let currentPhase = 1; // 1: Install, 2: 30s Countdown, 3: Open App
+
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                 window.navigator.standalone === true ||
+                                 document.referrer.includes('android-app://');
+
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            // Catch browser native install prompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            // Listen for completed installation event
+            window.addEventListener('appinstalled', () => {
+                localStorage.setItem('pwa_installed', 'true');
+            });
+
+            if (!isStandalone) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const gate = document.getElementById('pwaInstallGate');
+                    const installBtn = document.getElementById('pwaInstallBtn');
+                    const progressBar = document.getElementById('pwaProgressBar');
+                    const progressFill = document.getElementById('pwaProgressFill');
+                    const gateStatus = document.getElementById('pwaGateStatus');
+                    const iosBox = document.getElementById('iosInstructionBox');
+
+                    // Show full screen gate on web browser
+                    if (gate) gate.style.display = 'flex';
+
+                    if (isIOS && iosBox) {
+                        iosBox.style.display = 'block';
+                    }
+
+                    if (installBtn) {
+                        installBtn.addEventListener('click', async () => {
+
+                            // STRICT IN-APP BROWSER DETECT & FORCE CHROME REDIRECT
+                            if (isInAppBrowser()) {
+                                if (gateStatus) {
+                                    gateStatus.innerText = "🌐 Opening in Google Chrome for PWA installation...";
+                                }
+                                launchInChrome();
+                                return;
+                            }
+
+                            // Check user agent to see if running in native standalone Chrome
+                            const ua = navigator.userAgent || navigator.vendor || window.opera;
+                            const isChrome = (/Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser|wv/i.test(ua)) || /CriOS/.test(ua);
+
+                            // FORCE REDIRECT TO CHROME IF NOT IN CHROME BROWSER
+                            if (!isChrome && !deferredPrompt && !isIOS) {
+                                launchInChrome();
+                                return;
+                            }
+
+                            // PHASE 1: WAIT FOR BROWSER POPUP INSTALL
+                            if (currentPhase === 1) {
+                                if (deferredPrompt) {
+                                    deferredPrompt.prompt();
+
+                                    const choiceResult = await deferredPrompt.userChoice;
+                                    deferredPrompt = null;
+
+                                    if (choiceResult.outcome !== 'accepted') {
+                                        if (gateStatus) {
+                                            gateStatus.innerText = "⚠️ Installation was not completed. Please click Install App again.";
+                                        }
+                                        return;
+                                    }
+                                } else if (!isIOS && !isChrome) {
+                                    if (gateStatus) {
+                                        gateStatus.innerText = "Opening in Chrome to complete installation...";
+                                    }
+                                    launchInChrome();
+                                    return;
+                                }
+
+                                // PHASE 2: RUN 30-SECOND COUNTDOWN (0 - 100%)
+                                currentPhase = 2;
+                                installBtn.disabled = true;
+                                if (progressBar) progressBar.style.display = 'block';
+                                if (gateStatus) gateStatus.innerText = "Installing Hulum Application, please wait...";
+
+                                let durationMs = 30000; // 30 seconds
+                                let elapsedMs = 0;
+                                let stepMs = 300; // Update every 300ms
+
+                                const progressInterval = setInterval(() => {
+                                    elapsedMs += stepMs;
+                                    let percentage = Math.min(Math.floor((elapsedMs / durationMs) * 100), 100);
+
+                                    installBtn.innerText = `⏳ Installing... ${percentage}%`;
+                                    if (progressFill) progressFill.style.width = `${percentage}%`;
+
+                                    if (percentage >= 100) {
+                                        clearInterval(progressInterval);
+                                        currentPhase = 3;
+
+                                        installBtn.disabled = false;
+                                        installBtn.innerText = "🚀 Open App";
+                                        installBtn.style.background = "#10B981";
+                                        installBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.4)";
+                                        if (gateStatus) {
+                                            gateStatus.innerText = "Installation Complete! Tap below to open the app directly.";
+                                        }
+                                        
+                                        localStorage.setItem('pwa_installed', 'true');
+                                    }
+                                }, stepMs);
+
+                            // PHASE 3: FORCE JUMP / LAUNCH APP
+                            } else if (currentPhase === 3) {
+                                jumpToInstalledApp();
+                            }
+                        });
+                    }
+                });
+            }
+
+            function jumpToInstalledApp() {
+                const currentUrl = window.location.href;
+                const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
+
+                if (/Android/i.test(navigator.userAgent)) {
+                    const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+                    window.location.href = intentUrl;
+                } else {
+                    window.location.href = currentUrl;
+                }
+            }
+        })();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+    </script>
+
+    <!-- FIREBASE AND DATA PROCESSING MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // FIREBASE CONFIG FROM SECOND CODE
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let cardClockIntervalId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initiateLiveInterfaceClocks();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const itemId = urlParams.get('id');
+
+            const backBtn = document.getElementById('goBackBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    if (document.referrer && document.referrer.includes('rental.html')) {
+                        window.history.back();
+                    } else if (itemId) {
+                        window.location.href = `rental.html?returnId=${encodeURIComponent(itemId)}`;
+                    } else {
+                        window.location.href = 'rental.html';
+                    }
+                });
+            }
+
+            if (itemId) {
+                await loadItemDetails(itemId);
+            } else {
+                renderErrorState("Invalid item ID parameter.");
+            }
+        });
+
+        window.triggerContactPopup = function() {
+            showPopupWarning();
+            const modalNode = document.getElementById('warningModal');
+            if (modalNode) modalNode.style.display = 'flex';
+        };
+
+        window.closeWarningModal = function() {
+            const modalNode = document.getElementById('warningModal');
+            if (modalNode) modalNode.style.display = 'none';
+        };
+
+        window.showPopupContacts = function() {
+            document.getElementById('modalWarningSection').style.display = 'none';
+            document.getElementById('modalContactSection').style.display = 'block';
+        };
+
+        window.showPopupWarning = function() {
+            document.getElementById('modalWarningSection').style.display = 'block';
+            document.getElementById('modalContactSection').style.display = 'none';
+        };
+
+        function initiateLiveInterfaceClocks() {
+            const cornerClockNode = document.getElementById('topCornerLiveClock');
+            
+            if (cardClockIntervalId) clearInterval(cardClockIntervalId);
+            cardClockIntervalId = setInterval(() => {
+                const now = new Date();
+                if (cornerClockNode) {
+                    cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                }
+            }, 1000);
+        }
+
+        function formatExactTimestampWithSeconds(baseEpoch) {
+            const dateObj = new Date(baseEpoch);
+            if (isNaN(dateObj.getTime())) return "Recent";
+            return dateObj.toLocaleDateString(undefined, { 
+                month: 'short', day: 'numeric', year: 'numeric' 
+            }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        }
+
+        // EXTRACT IMAGES mapped specifically for second code schema (photo property)
+        function extractAllImages(item) {
+            let list = [];
+            if (item.photo && typeof item.photo === 'string' && item.photo.trim() !== '') {
+                list.push(item.photo.trim());
+            }
+            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
+                if (!list.includes(item.imageUrl.trim())) list.push(item.imageUrl.trim());
+            }
+            if (item.images) {
+                if (Array.isArray(item.images)) {
+                    item.images.forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                } else if (typeof item.images === 'object') {
+                    Object.values(item.images).forEach(img => {
+                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
+                            list.push(img.trim());
+                        }
+                    });
+                }
+            }
+            return list;
+        }
+
+        async function loadItemDetails(itemId) {
+            try {
+                const snapshot = await get(ref(db, `posts/${itemId}`));
+
+                if (!snapshot.exists()) {
+                    renderErrorState("Rental item not found.");
+                    return;
+                }
+
+                const item = { id: itemId, ...snapshot.val() };
+                renderFullItemHTML(item);
+
+            } catch (err) {
+                console.error("Error loading item full view:", err);
+                renderErrorState("Error fetching listing details: " + err.message);
+            }
+        }
+
+        function renderErrorState(msg) {
+            const readerBody = document.getElementById('fullNewsReaderBody');
+            if (readerBody) {
+                readerBody.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:#EF4444; font-weight:700;">
+                        ⚠️ ${msg}
+                    </div>
+                `;
+            }
+        }
+
+        function renderFullItemHTML(item) {
+            const readerBody = document.getElementById('fullNewsReaderBody');
+            if (!readerBody) return;
+
+            // Mapping properties from 2nd code schema
+            const headline = item.titleName || item.title || "Untitled Listing";
+            const fullContent = item.description || "No detailed description provided.";
+            const category = item.category || "General";
+            const subCategory = item.subCategory || "Other";
+            
+            const allImages = extractAllImages(item);
+            
+            let locationParts = [];
+            if (item.zone) locationParts.push(`Zone: ${item.zone}`);
+            if (item.city) locationParts.push(`City: ${item.city}`);
+            const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : 'Not Specified';
+
+            let lat = item.location?.latitude || null;
+            let lng = item.location?.longitude || null;
+
+            const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
+            
+            let mapPreviewHTML = `
+                <div style="margin-top: 16px; width: 100%; box-sizing: border-box;">
+                    <div class="category-specs-title">Location Preview</div>
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 0.95rem; color: #0F172A; font-weight: 600;">📍 ${fullLocationStr}</span>
+                        ${ (lat && lng) ? `<span style="font-size: 0.8rem; color: #64748B;">Coordinates: ${lat}, ${lng}</span>` : '' }
+                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 12px; background: #0F172A; color: #FFFFFF; font-size: 0.92rem; font-weight: 700; text-decoration: none; border-radius: 10px; text-align: center; margin-top: 4px;">
+                            Open Location Map
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            let phone = item.phone || "";
+            let email = item.email || "";
+
+            let numericalTime = item.createdAt || item.timestamp || Date.now();
+            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
+
+            let imageGalleryHTML = "";
+            if (allImages.length > 0) {
+                imageGalleryHTML = `<div class="multi-image-gallery">`;
+                allImages.forEach((imgUrl, idx) => {
+                    imageGalleryHTML += `
+                        <div class="gallery-img-container">
+                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
+                            <span style="position:absolute; bottom:10px; right:10px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.72rem; padding:4px 8px; border-radius:6px; font-weight:700;">${idx + 1} / ${allImages.length}</span>
+                        </div>
+                    `;
+                });
+                imageGalleryHTML += `</div>`;
+            } else {
+                imageGalleryHTML = `
+                    <div class="multi-image-gallery">
+                        <div class="gallery-img-container">
+                            <img src="https://via.placeholder.com/800x450?text=No+Image+Available" alt="No Image">
+                        </div>
+                    </div>
+                `;
+            }
+
+            const firstImg = allImages.length > 0 ? allImages[0] : '#';
+            
+            let imageActionBarHTML = `
+                <div class="image-action-bar">
+                    <button class="img-action-btn" title="View Fullscreen" onclick="if('${firstImg}' !== '#') window.open('${firstImg}', '_blank')">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <button class="img-action-btn" title="Like" onclick="alert('Liked!')">
+                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </button>
+                    <button class="img-action-btn" title="Comment" onclick="alert('Comments opened')">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </button>
+                    <button class="img-action-btn" title="Share" onclick="if(navigator.share){navigator.share({title:'${headline.replace(/'/g, "\\'")}',url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('Link copied!')}">
+                        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    </button>
+                </div>
+            `;
+
+            let contactButtonsHTML = `
+                <button id="contactTriggerBtn" class="contact-trigger-btn" onclick="triggerContactPopup()">
+                    📞 Contact Us
+                </button>
+            `;
+
+            let popupButtonsContent = "";
+            if (phone) popupButtonsContent += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
+            if (email) popupButtonsContent += `<a href="mailto:${email}" class="contact-btn contact-btn-email">✉️ Email Owner (${email})</a>`;
+            
+            if (!popupButtonsContent) {
+                popupButtonsContent = `<div style="font-size:0.85rem; color:#64748B; padding:10px 0;">No direct contact information provided for this listing.</div>`;
+            }
+
+            const popupContainerList = document.getElementById('popupContactButtonsList');
+            if (popupContainerList) {
+                popupContainerList.innerHTML = popupButtonsContent;
+            }
+
+            readerBody.innerHTML = `
+                <div class="reader-meta-bar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; width:100%;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="spotlight-pill" style="font-size:0.75rem; padding:4px 8px; background:#0F172A; color:#FFF; border-radius:6px; font-weight:700;">${category}</span>
+                        <span class="spotlight-pill" style="font-size:0.75rem; padding:4px 8px; background:#64748B; color:#FFF; border-radius:6px; font-weight:700;">${subCategory}</span>
+                        <span style="font-size:0.75rem; color:#64748B;">ID: ${item.id}</span>
+                    </div>
+                    <span class="timestamp-log-text" style="font-size:0.75rem; color:#64748B;">${initialFormattedClock}</span>
+                </div>
+
+                <h1 class="reader-title" style="margin-top:6px; font-size:1.3rem; color:#0F172A; font-weight:800; line-height:1.35; width:100%; box-sizing:border-box;">${headline}</h1>
+
+                ${imageGalleryHTML}
+                ${imageActionBarHTML}
+
+                <div class="info-terms-list">
+                    <div class="info-term-item">
+                        <span class="info-term-label">Zone</span>
+                        <span class="info-term-value">${item.zone || 'N/A'}</span>
+                    </div>
+
+                    <div class="info-term-item">
+                        <span class="info-term-label">City</span>
+                        <span class="info-term-value">${item.city || 'N/A'}</span>
+                    </div>
+                </div>
+
+                ${mapPreviewHTML}
+
+                <div style="margin-top:16px; width:100%; box-sizing:border-box;">
+                    <div class="category-specs-title">Full Description</div>
+                    <div class="reader-full-body">${fullContent}</div>
+                </div>
+
+                ${contactButtonsHTML}
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Location Details (Step 4)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 2;
+            background: #F1F5F9;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .step-node.active {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
+        }
+
+        .step-header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .section-block {
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #F8FAFC;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-accent);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input[readonly] {
+            background-color: #F1F5F9;
+            color: #475569;
+            cursor: not-allowed;
+            border-color: #CBD5E1;
+        }
+
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+
+        .detect-loc-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            color: #FFFFFF;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .detect-loc-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+        }
+
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+
+        .btn-next {
+            flex: 1;
+            padding: 13px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-next:active { transform: scale(0.98); }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; font-weight: 700; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .metal-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .metal-modal-card {
+            width: 85%;
+            max-width: 320px;
+            background: linear-gradient(135deg, #4A5568, #2D3748, #1A202C);
+            border-radius: 20px;
+            padding: 20px 16px 16px;
+            box-sizing: border-box;
+            text-align: center;
+            border: 1px solid #718096;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(12px) scale(0.95);
+            transition: transform 0.25s ease;
+        }
+
+        .metal-modal-overlay.active .metal-modal-card { transform: translateY(0) scale(1); }
+
+        .metal-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #718096, #2D3748);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #A0AEC0;
+        }
+
+        .metal-icon-wrapper svg { width: 22px; height: 22px; stroke: #E2E8F0; }
+        .metal-modal-title { font-size: 13px; font-weight: 800; color: #E2E8F0; margin: 0 0 6px; text-transform: uppercase; }
+        .metal-modal-message { font-size: 11px; font-weight: 600; color: #CBD5E0; margin-bottom: 16px; }
+        
+        .metal-modal-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #718096;
+            background: linear-gradient(180deg, #4A5568 0%, #2D3748 100%);
+            color: #EDF2F7;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Delala - Post Details</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card">
+                <div class="step-indicator">
+                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
+                    <div class="step-node" id="node-3">3</div>
+                    <div class="step-node active" id="node-4">4</div>
+                </div>
+
+                <form id="listingForm" onsubmit="event.preventDefault();">
+                    <div class="form-step-page" id="step4">
+                        <div class="step-header-flex">
+                            <h2 class="step-title">Step 4: Location & Map</h2>
+                        </div>
+
+                        <div class="section-block">
+                            <button type="button" class="detect-loc-btn" id="gpsDetectBtn" onclick="redirectToMap()">
+                                📡 Select Location on Map
+                            </button>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="locCountry">Country (Auto GPS)</label>
+                                    <input type="text" class="form-input" id="locCountry" readonly placeholder="Select on Map..." oninput="saveDraft()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="locRegion">Region (Auto GPS)</label>
+                                    <input type="text" class="form-input" id="locRegion" readonly placeholder="Select on Map..." oninput="saveDraft()">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="locZone">Zone / Area (Auto GPS)</label>
+                                    <input type="text" class="form-input" id="locZone" readonly placeholder="Select on Map..." oninput="saveDraft()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="locCity">City / Town (Auto GPS)</label>
+                                    <input type="text" class="form-input" id="locCity" readonly placeholder="Select on Map..." oninput="saveDraft()">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="locSubcity">Subcity / Woreda</label>
+                                    <input type="text" class="form-input" id="locSubcity" placeholder="Enter Subcity / Woreda..." oninput="saveDraft()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="locUniqueName">Unique Place / Landmark</label>
+                                    <input type="text" class="form-input" id="locUniqueName" placeholder="Enter Landmark..." oninput="saveDraft()">
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="latitude">
+                            <input type="hidden" id="longitude">
+                        </div>
+
+                        <div class="step-actions">
+                            <button type="button" class="btn-next" onclick="nextStep4()">Next</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="rental.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                <span>Rental</span>
+            </a>
+            <a href="selling.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+                <span>Selling</span>
+            </a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="service.html" class="nav-item active">
+                <div class="icon-bg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                </div>
+                <span>Service</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- ERROR MODAL -->
+    <div class="metal-modal-overlay" id="errorModalOverlay">
+        <div class="metal-modal-card">
+            <div class="metal-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h3 class="metal-modal-title" id="errorModalTitle">Attention Required</h3>
+            <p class="metal-modal-message" id="errorModalMessage">An error has occurred.</p>
+            <button type="button" class="metal-modal-btn" onclick="closeErrorModal()">Dismiss</button>
+        </div>
+    </div>
+
+    <script>
+        const SESSION_KEY = 'delela_post_draft';
+        const STEP1_KEY = 'test1';
+
+        window.showErrorModal = function(message, title = "Validation Error") {
+            document.getElementById('errorModalTitle').innerText = title;
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModalOverlay').classList.add('active');
+        };
+
+        window.closeErrorModal = function() {
+            document.getElementById('errorModalOverlay').classList.remove('active');
+        };
+
+        function getFormSession() {
+            const rawDraft = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+            const rawStep1 = sessionStorage.getItem(STEP1_KEY) || localStorage.getItem(STEP1_KEY);
+            let draft = {};
+            let step1 = {};
+            try { draft = rawDraft ? JSON.parse(rawDraft) : {}; } catch (e) { draft = {}; }
+            try { step1 = rawStep1 ? JSON.parse(rawStep1) : {}; } catch (e) { step1 = {}; }
+
+            const mainCategory = draft.serviceType || draft.category || step1.serviceType || step1.category || "";
+
+            return {
+                ...step1,
+                ...draft,
+                serviceType: mainCategory,
+                category: mainCategory
+            };
+        }
+
+        function saveDraft() {
+            try {
+                const current = getFormSession();
+                const latVal = document.getElementById("latitude") ? document.getElementById("latitude").value : "";
+                const lngVal = document.getElementById("longitude") ? document.getElementById("longitude").value : "";
+
+                const locationDetails = {
+                    country: document.getElementById('locCountry') ? document.getElementById('locCountry').value : '',
+                    region: document.getElementById('locRegion') ? document.getElementById('locRegion').value : '',
+                    zone: document.getElementById('locZone') ? document.getElementById('locZone').value : '',
+                    city: document.getElementById('locCity') ? document.getElementById('locCity').value : '',
+                    subcity: document.getElementById('locSubcity') ? document.getElementById('locSubcity').value : '',
+                    uniqueName: document.getElementById('locUniqueName') ? document.getElementById('locUniqueName').value : ''
+                };
+
+                const draft = {
+                    ...current,
+                    latitude: latVal,
+                    longitude: lngVal,
+                    locationDetails: locationDetails,
+                    updatedAt: Date.now()
+                };
+
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify(draft));
+                localStorage.setItem(SESSION_KEY, JSON.stringify(draft));
+            } catch (e) {
+                console.warn("Storage update skipped to prevent overflow", e);
+            }
+        }
+
+        function loadDraft() {
+            const rawGps = sessionStorage.getItem('selectedGpsLocation');
+            if (rawGps) {
+                try {
+                    const parsed = JSON.parse(rawGps);
+                    if (parsed.lat !== undefined && parsed.lng !== undefined) {
+                        document.getElementById('latitude').value = Number(parsed.lat).toFixed(6);
+                        document.getElementById('longitude').value = Number(parsed.lng).toFixed(6);
+                    }
+                    if (parsed.address) {
+                        const addr = parsed.address;
+                        document.getElementById('locCountry').value = addr.country || '';
+                        document.getElementById('locRegion').value = addr.region || addr.state || '';
+                        document.getElementById('locZone').value = addr.county || addr.zone || addr.state_district || addr.district || '';
+                        document.getElementById('locCity').value = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || '';
+                        document.getElementById('locSubcity').value = addr.subcity || addr.suburb || addr.borough || addr.quarter || addr.neighbourhood || '';
+                        document.getElementById('locUniqueName').value = addr.uniqueName || addr.road || addr.amenity || addr.building || '';
+                    } else if (parsed.formattedAddress) {
+                        const parts = parsed.formattedAddress.split(',').map(s => s.trim());
+                        if (parts.length >= 4) {
+                            document.getElementById('locCity').value = parts[0];
+                            document.getElementById('locZone').value = parts[1];
+                            document.getElementById('locRegion').value = parts[2];
+                            document.getElementById('locCountry').value = parts[3];
+                        }
+                    }
+                } catch(e) {
+                    console.error("Error decoding selectedGpsLocation:", e);
+                }
+            } else {
+                const draft = getFormSession();
+                if (draft.locationDetails) {
+                    const ld = draft.locationDetails;
+                    if (document.getElementById('locCountry')) document.getElementById('locCountry').value = ld.country || '';
+                    if (document.getElementById('locRegion')) document.getElementById('locRegion').value = ld.region || '';
+                    if (document.getElementById('locZone')) document.getElementById('locZone').value = ld.zone || '';
+                    if (document.getElementById('locCity')) document.getElementById('locCity').value = ld.city || '';
+                    if (document.getElementById('locSubcity')) document.getElementById('locSubcity').value = ld.subcity || '';
+                    if (document.getElementById('locUniqueName')) document.getElementById('locUniqueName').value = ld.uniqueName || '';
+                }
+            }
+            saveDraft();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            loadDraft();
+        });
+
+        function nextStep4() {
+            const country = document.getElementById('locCountry').value.trim();
+            const region = document.getElementById('locRegion').value.trim();
+            if (!country || !region) {
+                showErrorModal("Please select a valid location on the map before proceeding.", "Location Missing");
+                return;
+            }
+            saveDraft();
+            window.location.href = 'testp.html';
+        }
+
+        function redirectToMap() {
+            saveDraft();
+            window.location.href = 'testmap.html';
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

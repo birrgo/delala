@@ -8,7 +8,7 @@
     <!-- Ultra-Fast Preconnections & Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://delala-1b582-default-rtdb.firebaseio.com">
+    <link rel="dns-prefetch" href="https://tsestlive-default-rtdb.firebaseio.com">
     
     <!-- Non-blocking Google Font Load -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -438,22 +438,22 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Updated Database Configuration based on target schema configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
-            authDomain: "delala-1b582.firebaseapp.com",
-            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
-            projectId: "delala-1b582",
-            storageBucket: "delala-1b582.firebasestorage.app",
-            messagingSenderId: "1073041850834",
-            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
-            measurementId: "G-2XW8F8FKBT"
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Updated batch size to fetch only 2 items at a time for fast loading
-        const BATCH_LIMIT = 2;
+        // Updated batch size to fetch items
+        const BATCH_LIMIT = 4;
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
@@ -557,7 +557,7 @@
 
         function itemMatchesCategory(item) {
             if (activeCategoryFilter === 'all') return true;
-            const itemCat = String(item.rentalSubCategory || item.subCategory || item.category || item.rentalType || '').trim().toLowerCase();
+            const itemCat = String(item.subCategory || item.category || item.rentalSubCategory || item.rentalType || '').trim().toLowerCase();
             return itemCat.includes(activeCategoryFilter);
         }
 
@@ -739,17 +739,14 @@
             });
         }
 
-        function isRentalCategory(item) {
-            if (!item) return false;
-            const rType = String(item.rentalType || '').trim().toLowerCase();
-            const cat = String(item.category || '').trim().toLowerCase();
-            return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
-        }
-
         function extractAllImages(item) {
             let list = [];
+            // Target schema uses photo field
+            if (item.photo && typeof item.photo === 'string' && item.photo.trim() !== '') {
+                list.push(item.photo.trim());
+            }
             if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
-                list.push(item.imageUrl.trim());
+                if (!list.includes(item.imageUrl.trim())) list.push(item.imageUrl.trim());
             }
             if (item.images) {
                 if (Array.isArray(item.images)) {
@@ -775,45 +772,39 @@
 
             if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
 
-            // Configured to load from active valid schema nodes: 'posts' and 'delala_new'
-            const nodePaths = ['posts', 'delala_new'];
+            // Configured to target single primary post schema
+            const nodePath = 'posts';
 
             try {
-                const fetchPromises = nodePaths.map(async (nodePath) => {
-                    const baseRef = ref(db, nodePath);
-                    let dbQuery;
+                const baseRef = ref(db, nodePath);
+                let dbQuery;
 
-                    if (lastLoadedTimestamp !== null) {
-                        dbQuery = query(
-                            baseRef,
-                            orderByChild('createdAt'),
-                            endBefore(lastLoadedTimestamp, lastLoadedKey),
-                            limitToLast(BATCH_LIMIT)
-                        );
-                    } else {
-                        dbQuery = query(
-                            baseRef,
-                            orderByChild('createdAt'),
-                            limitToLast(BATCH_LIMIT)
-                        );
-                    }
+                if (lastLoadedTimestamp !== null) {
+                    dbQuery = query(
+                        baseRef,
+                        orderByChild('createdAt'),
+                        endBefore(lastLoadedTimestamp, lastLoadedKey),
+                        limitToLast(BATCH_LIMIT)
+                    );
+                } else {
+                    dbQuery = query(
+                        baseRef,
+                        limitToLast(BATCH_LIMIT)
+                    );
+                }
 
-                    const snapshot = await get(dbQuery);
-                    const results = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnap) => {
-                            results.push({
-                                id: childSnap.key,
-                                _dbPath: nodePath,
-                                ...childSnap.val()
-                            });
+                const snapshot = await get(dbQuery);
+                const fetchedListings = [];
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnap) => {
+                        fetchedListings.push({
+                            id: childSnap.key,
+                            _dbPath: nodePath,
+                            ...childSnap.val()
                         });
-                    }
-                    return results;
-                });
-
-                const rawResults = await Promise.all(fetchPromises);
-                const fetchedListings = rawResults.flat();
+                    });
+                }
 
                 if (fetchedListings.length === 0) {
                     hasMoreItems = false;
@@ -836,7 +827,7 @@
                         lastLoadedKey = rawItem.id;
                     }
 
-                    if (isRentalCategory(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
+                    if (!localCachedBroadcasts.some(b => b.id === rawItem.id)) {
                         validItems.push(rawItem);
                     }
                 }
@@ -886,19 +877,21 @@
 
         function extractFullLocationString(item) {
             let locationParts = [];
+            
+            // Map zone and city directly from target post structure
+            if (item.zone) locationParts.push(item.zone);
+            if (item.city) locationParts.push(item.city);
+
             if (item.locationDetails) {
                 if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
                 if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
-                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
-                if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
                 if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
-                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
             }
             
             if (locationParts.length > 0) {
                 return locationParts.join(', ');
             }
-            return item.location || item.city || 'Location not specified';
+            return item.location || 'Location not specified';
         }
 
         function buildCategorySpecsHTML(item) {
@@ -936,8 +929,9 @@
         }
 
         function buildSingleNewsCardHTML(item) {
-            const headline = item.title || "Rental Item";
-            const category = item.rentalType || item.category || "Rental";
+            // Target database uses titleName for headlines
+            const headline = item.titleName || item.title || "Rental Item";
+            const category = item.category || item.subCategory || "Rental";
             const allImages = extractAllImages(item);
 
             let numericalTime = item.createdAt || item.timestamp || Date.now();
@@ -989,7 +983,7 @@
 
         window.openFullNewsReader = function(itemId, path) {
             sessionStorage.setItem('rental_scroll_pos', window.scrollY.toString());
-            window.location.href = `rentalfull.html?id=${encodeURIComponent(itemId)}&path=${encodeURIComponent(path || 'posts')}`;
+            window.location.href = `feedo.html?id=${encodeURIComponent(itemId)}`;
         };
 
         function setupSearchEngineControls() {
@@ -1033,12 +1027,12 @@
 
             const matchedNews = localCachedBroadcasts.filter(item => {
                 const code = String(item.id || '').toLowerCase();
-                const title = String(item.title || '').toLowerCase();
+                const title = String(item.titleName || item.title || '').toLowerCase();
                 const content = String(item.body || item.content || '').toLowerCase();
                 const locationFull = extractFullLocationString(item).toLowerCase();
-                const rentalType = String(item.rentalType || '').toLowerCase();
+                const subCategory = String(item.subCategory || '').toLowerCase();
 
-                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || locationFull.includes(cleanQuery) || rentalType.includes(cleanQuery);
+                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || locationFull.includes(cleanQuery) || subCategory.includes(cleanQuery);
             });
 
             if (matchedNews.length === 0) {
