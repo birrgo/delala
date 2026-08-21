@@ -18,23 +18,26 @@
     <noscript><link rel="stylesheet" href="news.css"></noscript>
 
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             letter-spacing: -0.011em;
             color: #0F172A;
+            background-color: #F8FAFC;
         }
 
         .header-title-text {
             font-size: 20px;
             font-weight: 800;
             letter-spacing: -0.02em;
-        }
-
-        .header-live-clock-badge {
-            font-weight: 600;
-            letter-spacing: 0.02em;
+            color: #FFFFFF;
         }
 
         .bottom-nav {
@@ -73,6 +76,14 @@
             stroke: currentColor;
             fill: none;
             stroke-width: 2;
+        }
+
+        .nav-item .nav-profile-img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid #0F172A;
         }
 
         .nav-item-post-center {
@@ -118,6 +129,16 @@
             letter-spacing: -0.01em;
         }
 
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* Header height reduced here */
+            padding: 8px 20px; 
+            position: relative;
+            z-index: 100;
+        }
+
         .header-actions-group {
             display: flex;
             align-items: center;
@@ -125,7 +146,8 @@
             position: relative;
         }
 
-        .location-action-btn {
+        .location-action-btn,
+        .search-action-btn {
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
@@ -139,7 +161,8 @@
             transition: transform 0.2s ease, background 0.2s ease;
         }
 
-        .location-action-btn:active {
+        .location-action-btn:active,
+        .search-action-btn:active {
             transform: scale(0.92);
         }
 
@@ -150,9 +173,18 @@
             border-color: #059669;
         }
 
-        .location-action-btn svg {
+        .location-action-btn svg,
+        .search-action-btn svg {
             width: 18px;
             height: 18px;
+        }
+
+        .search-action-btn svg.search-long-handle {
+            width: 19px;
+            height: 19px;
+            stroke: #38BDF8;
+            stroke-width: 2.4;
+            stroke-linecap: round;
         }
 
         .category-dropdown-menu {
@@ -196,34 +228,60 @@
         }
 
         .category-specs-container {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 12px 0;
+            background: linear-gradient(145deg, #FFFFFF, #F1F5F9);
+            border: 1px solid #CBD5E1;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 14px 0;
+            box-shadow: 
+                0 4px 12px rgba(15, 23, 42, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.03);
+            position: relative;
+            transform: translateZ(0);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .category-specs-container:hover {
+            box-shadow: 
+                0 6px 16px rgba(15, 23, 42, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
 
         .category-specs-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            color: #475569;
+            color: #1E293B;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .category-specs-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 12px;
+            background: #0284C7;
+            border-radius: 2px;
         }
 
         .info-terms-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .info-term-item {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            border-bottom: 1px dashed #E2E8F0;
-            padding-bottom: 4px;
+            align-items: center;
+            font-size: 12.5px;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 6px;
         }
 
         .info-term-item:last-child {
@@ -239,7 +297,12 @@
 
         .info-term-value {
             color: #0F172A;
-            font-weight: 700;
+            font-weight: 800;
+            background: #F8FAFC;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
 
         .infinite-scroll-trigger {
@@ -265,28 +328,33 @@
         .broadcast-title {
             color: #0F172A !important;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 800;
             line-height: 1.35;
             letter-spacing: -0.02em;
         }
 
         .location-text-val {
             color: #334155 !important;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .spotlight-pill {
             font-weight: 700;
             letter-spacing: -0.01em;
-        }
-
-        .timestamp-log-text {
+            background: #E0F2FE;
+            color: #0369A1;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-size: 11px;
-            font-weight: 500;
-            color: #64748B !important;
         }
 
         .featured-broadcast-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 12px 16px 16px 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
             cursor: pointer;
             scroll-margin-top: 70px;
             contain: content;
@@ -297,19 +365,354 @@
             aspect-ratio: 16 / 9;
             background-color: #E2E8F0;
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 12px;
+            margin: 10px 0;
         }
         .broadcast-image-frame img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
+        .post-author-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .author-info-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .author-info-left:active {
+            opacity: 0.8;
+        }
+
+        .author-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #0F172A;
+            font-size: 14px;
+            object-fit: cover;
+            border: 1px solid #CBD5E1;
+            flex-shrink: 0;
+        }
+
+        .author-name-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-first-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1.2;
+        }
+
+        .author-sub-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748B;
+        }
+
+        .author-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-follow-author {
+            background: #0F172A;
+            border: 1px solid #0F172A;
+            padding: 5px 11px;
+            border-radius: 20px;
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-follow-author.following {
+            background: #E2E8F0;
+            border-color: #CBD5E1;
+            color: #334155;
+        }
+        .btn-follow-author:active {
+            transform: scale(0.94);
+        }
+
+        .btn-view-author-profile {
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: #0F172A;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .btn-view-author-profile:active {
+            transform: scale(0.95);
+            background: #E2E8F0;
+        }
+
+        .post-social-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 10px;
+            margin-top: 12px;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .social-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            color: #64748B;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+        }
+        .social-action-btn:hover {
+            background: #F1F5F9;
+            color: #0F172A;
+        }
+        .social-action-btn:active {
+            transform: scale(0.93);
+        }
+
+        .social-action-btn.liked {
+            color: #EF4444;
+        }
+        .social-action-btn.liked svg {
+            fill: #EF4444;
+            stroke: #EF4444;
+        }
+
+        .social-action-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* --- New Modern 3D Dark Silver Details Button --- */
+        .btn-details-3d {
+            background: linear-gradient(145deg, #64748b, #334155);
+            color: #f8fafc;
+            border: 1px solid #1e293b;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            /* Creates the 3D shiny appearance with highlights and deep shadows */
+            box-shadow: 
+                inset 0 1px 1px rgba(255, 255, 255, 0.25), 
+                inset 0 -2px 5px rgba(0, 0, 0, 0.4),
+                0 4px 6px rgba(15, 23, 42, 0.3),
+                0 1px 3px rgba(15, 23, 42, 0.2);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-details-3d:active {
+            /* Pushes down the button and deepens shadow */
+            transform: translateY(2px);
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                inset 0 1px 2px rgba(0, 0, 0, 0.2),
+                0 1px 2px rgba(15, 23, 42, 0.2);
+        }
+
+        .quick-comments-preview {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #E2E8F0;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .quick-comments-preview.show {
+            display: flex;
+        }
+
+        .comment-item-preview {
+            background: #F8FAFC;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            color: #334155;
+        }
+        .comment-item-preview strong {
+            color: #0F172A;
+        }
+
+        .comment-input-inline-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .comment-input-field {
+            flex: 1;
+            padding: 7px 12px;
+            font-size: 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: 20px;
+            outline: none;
+            font-family: inherit;
+            background: #FFFFFF;
+        }
+        .comment-input-field:focus {
+            border-color: #38BDF8;
+        }
+
+        .comment-submit-btn {
+            background: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .custom-popup-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        .custom-popup-overlay.show-popup { display: flex; }
+
+        .custom-popup-modal {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+
+        .popup-status-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+        .popup-main-title { font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
+        .popup-body-desc { font-size: 13px; color: #64748B; margin-bottom: 18px; line-height: 1.4; }
+        .popup-dismiss-action {
+            width: 100%;
+            padding: 10px;
+            background: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .search-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #FFFFFF;
+            z-index: 1500;
+            display: none;
+            flex-direction: column;
+        }
+        .search-modal-overlay.active-search { display: flex; }
+
+        .search-box-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #E2E8F0;
+            background: #FFFFFF;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F1F5F9;
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+        .search-input-wrapper svg { width: 18px; height: 18px; stroke: #64748B; }
+
+        .search-news-field {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 13px;
+            font-family: inherit;
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .close-search-btn {
+            border: none;
+            background: transparent;
+            color: #64748B;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .search-results-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .verified-footer-shield {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 600;
+            margin-bottom: 60px;
+        }
     </style>
 </head>
 <body>
 
     <div class="app-view">
-        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- SVG header background wave height reduced to 110px -->
+        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top:0; left:0; width:100%; height:110px; z-index:-1;">
             <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
             <defs>
                 <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
@@ -319,6 +722,7 @@
             </defs>
         </svg>
 
+        <!-- Status Modal Overlay -->
         <div class="custom-popup-overlay" id="customPopupModule">
             <div class="custom-popup-modal">
                 <span class="popup-status-icon" id="popupIconNode">ℹ️</span>
@@ -328,10 +732,14 @@
             </div>
         </div>
 
+        <!-- Search Overlay Modal -->
         <div class="search-modal-overlay" id="searchModalOverlay">
             <div class="search-box-header">
                 <div class="search-input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <circle cx="9.5" cy="9.5" r="5.5"></circle>
+                        <line x1="14" y1="14" x2="21" y2="21"></line>
+                    </svg>
                     <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Search Title, City, or Category..." autocomplete="off">
                 </div>
                 <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
@@ -343,12 +751,11 @@
             </div>
         </div>
 
+        <!-- Header Bar -->
         <header class="nav-header">
             <div class="header-left-group">
                 <h1 class="header-title-text">Rental Items</h1>
             </div>
-            
-            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
 
             <div class="header-actions-group">
                 <button class="location-action-btn" id="categoryMenuToggleBtn" aria-label="Filter Categories" title="Filter by category">
@@ -376,7 +783,10 @@
                 </button>
 
                 <button class="search-action-btn" id="openSearchBtn" aria-label="Search Items">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <svg class="search-long-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="9.5" cy="9.5" r="5.5"></circle>
+                        <line x1="14" y1="14" x2="21" y2="21"></line>
+                    </svg>
                 </button>
             </div>
         </header>
@@ -389,10 +799,11 @@
             </div>
 
             <footer class="verified-footer-shield">
-                <span class="footer-shield-text">Delala Secure Matrix Verified</span>
+                <span class="footer-shield-text" id="footerShieldText">Loading user...</span>
             </footer>
         </main>
 
+        <!-- Bottom Navigation Bar -->
         <nav class="bottom-nav">
             <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
                 <div class="icon-bg">
@@ -425,18 +836,20 @@
                 <span>Service</span>
             </a>
 
-            <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
+            <a id="nav-profile" href="user.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <img id="navProfilePic" class="nav-profile-img" src="" alt="Profile" style="display:none;">
+                    <svg id="navProfileIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
-                <span>Profile</span>
+                <span id="navProfileName">Profile</span>
             </a>
         </nav>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -451,9 +864,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
-        // Updated batch size to fetch only 2 items at a time for fast loading
-        const BATCH_LIMIT = 2;
+        const BATCH_LIMIT = 3;
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
@@ -463,13 +876,139 @@
         let currentUserCoordinates = null;
         let isGpsActive = false;
         let activeCategoryFilter = 'all';
+        let currentUser = null;
 
         const DOM = {};
+
+        window.navigateToAuthorProfile = function(event, userId, userName) {
+            if (event) event.stopPropagation();
+            if (!userId || userId === 'unknown') return;
+            window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
+        };
+
+        window.toggleFollowUser = async function(event, authorId) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to follow this user.", "🔐");
+                return;
+            }
+            if (currentUser.uid === authorId) {
+                triggerSystemAlert("Action Restricted", "You cannot follow your own account.", "ℹ️");
+                return;
+            }
+
+            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
+            try {
+                const snap = await get(followRef);
+                const isFollowing = snap.exists() && snap.val() === true;
+                await set(followRef, !isFollowing);
+
+                document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
+                    if (!isFollowing) {
+                        btn.innerText = "Following";
+                        btn.classList.add('following');
+                    } else {
+                        btn.innerText = "+ Follow";
+                        btn.classList.remove('following');
+                    }
+                });
+            } catch (err) {
+                console.error("Follow error:", err);
+            }
+        };
+
+        window.toggleLikePost = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
+                return;
+            }
+
+            const likeRef = ref(db, `${path}/${itemId}/likes/${currentUser.uid}`);
+            const countRef = ref(db, `${path}/${itemId}/likeCount`);
+
+            try {
+                const snap = await get(likeRef);
+                const isLiked = snap.exists() && snap.val() === true;
+
+                if (isLiked) {
+                    await set(likeRef, null);
+                    await runTransaction(countRef, (c) => (c || 1) - 1);
+                } else {
+                    await set(likeRef, true);
+                    await runTransaction(countRef, (c) => (c || 0) + 1);
+                }
+
+                const likeBtn = document.getElementById(`like-btn-${itemId}`);
+                const likeCountNode = document.getElementById(`like-count-${itemId}`);
+                if (likeBtn && likeCountNode) {
+                    let currentCount = parseInt(likeCountNode.innerText || '0', 10);
+                    if (isLiked) {
+                        likeBtn.classList.remove('liked');
+                        likeCountNode.innerText = Math.max(0, currentCount - 1);
+                    } else {
+                        likeBtn.classList.add('liked');
+                        likeCountNode.innerText = currentCount + 1;
+                    }
+                }
+            } catch (err) {
+                console.error("Like toggle failed:", err);
+            }
+        };
+
+        window.toggleCommentBox = function(event, itemId) {
+            if (event) event.stopPropagation();
+            const commentBox = document.getElementById(`comments-box-${itemId}`);
+            if (commentBox) {
+                commentBox.classList.toggle('show');
+            }
+        };
+
+        window.submitInlineComment = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to post comments.", "💬");
+                return;
+            }
+
+            const inputEl = document.getElementById(`comment-input-${itemId}`);
+            if (!inputEl || !inputEl.value.trim()) return;
+
+            const commentText = inputEl.value.trim();
+            inputEl.value = '';
+
+            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
+            const newCommentRef = ref(db, `${path}/${itemId}/comments/${Date.now()}`);
+
+            try {
+                await set(newCommentRef, {
+                    userId: currentUser.uid,
+                    userName: userFirstName,
+                    text: commentText,
+                    timestamp: Date.now()
+                });
+
+                const listContainer = document.getElementById(`comments-list-${itemId}`);
+                if (listContainer) {
+                    const cItem = document.createElement('div');
+                    cItem.className = 'comment-item-preview';
+                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`;
+                    listContainer.appendChild(cItem);
+                }
+
+                const cCountNode = document.getElementById(`comment-count-${itemId}`);
+                if (cCountNode) {
+                    let currentVal = parseInt(cCountNode.innerText || '0', 10);
+                    cCountNode.innerText = currentVal + 1;
+                }
+            } catch (err) {
+                console.error("Comment submit error:", err);
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             DOM.container = document.getElementById('broadcastsContainer');
             DOM.triggerEl = document.getElementById('infiniteScrollTrigger');
-            DOM.cornerClockNode = document.getElementById('topCornerLiveClock');
             DOM.popupModal = document.getElementById('customPopupModule');
             DOM.popupTitleNode = document.getElementById('popupTitleNode');
             DOM.popupDescNode = document.getElementById('popupDescNode');
@@ -488,6 +1027,7 @@
             setupInfiniteScrollObserver();
             setupGpsDetectionControl();
             setupCategoryDropdownMenu();
+            initUserProfile();
 
             if (DOM.closePopupBtn) {
                 DOM.closePopupBtn.addEventListener('click', () => {
@@ -495,9 +1035,56 @@
                 });
             }
             
-            initiateLiveInterfaceClocks();
             fetchItemsBatch();
         });
+
+        function initUserProfile() {
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                const imgEl = document.getElementById('navProfilePic');
+                const iconEl = document.getElementById('navProfileIcon');
+                const nameEl = document.getElementById('navProfileName');
+                const footerShieldEl = document.getElementById('footerShieldText');
+
+                if (user) {
+                    let photoURL = user.photoURL;
+                    let displayName = user.displayName;
+
+                    try {
+                        const userSnap = await get(ref(db, `users/${user.uid}`));
+                        if (userSnap.exists()) {
+                            const uData = userSnap.val();
+                            if (uData.photoURL) photoURL = uData.photoURL;
+                            if (uData.firstName || uData.displayName || uData.name) {
+                                displayName = uData.firstName || uData.displayName || uData.name;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Could not load user profile details:", e);
+                    }
+
+                    const firstName = displayName ? displayName.trim().split(' ')[0] : 'User';
+
+                    if (photoURL && imgEl) {
+                        imgEl.src = photoURL;
+                        imgEl.style.display = 'block';
+                        if (iconEl) iconEl.style.display = 'none';
+                    }
+
+                    if (nameEl) {
+                        nameEl.innerText = firstName;
+                    }
+
+                    if (footerShieldEl) {
+                        footerShieldEl.innerText = `${firstName} Verified`;
+                    }
+                } else {
+                    if (footerShieldEl) {
+                        footerShieldEl.innerText = "Guest Verified";
+                    }
+                }
+            });
+        }
 
         function restoreScrollPosition() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -572,8 +1159,8 @@
                 DOM.container.innerHTML = `
                     <article class="featured-broadcast-card">
                         <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                        <h2 class="broadcast-title">No Items Found</h2>
-                        <p class="broadcast-body-text" style="color: #64748B;">No rental items found for the selected category.</p>
+                        <h2 class="broadcast-title" style="margin-top:8px;">No Items Found</h2>
+                        <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No rental items found for the selected category.</p>
                     </article>
                 `;
                 return;
@@ -601,37 +1188,6 @@
             DOM.container.appendChild(fragment);
 
             restoreScrollPosition();
-        }
-
-        function initiateLiveInterfaceClocks() {
-            setInterval(() => {
-                const now = new Date();
-                if (DOM.cornerClockNode) {
-                    DOM.cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
-                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                    });
-                }
-            }, 1000);
-
-            setInterval(() => {
-                const clockNodes = document.querySelectorAll('.timestamp-log-text[data-timestamp]');
-                clockNodes.forEach(node => {
-                    const rawTime = parseInt(node.getAttribute('data-timestamp'));
-                    if (rawTime && !isNaN(rawTime)) {
-                        node.innerText = formatExactTimestampWithSeconds(rawTime);
-                    }
-                });
-            }, 10000);
-        }
-
-        function formatExactTimestampWithSeconds(baseEpoch) {
-            const dateObj = new Date(baseEpoch);
-            if (isNaN(dateObj.getTime())) return "Recent";
-            return dateObj.toLocaleDateString(undefined, { 
-                month: 'short', day: 'numeric', year: 'numeric' 
-            }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-            });
         }
 
         function triggerSystemAlert(title, message, icon = "ℹ️") {
@@ -699,13 +1255,13 @@
                         if (status.state === 'denied') {
                             triggerSystemAlert(
                                 "Location Permission Required", 
-                                "Location access is currently blocked. Please open your device/browser settings to allow location access for this website.", 
+                                "Location access is currently blocked. Please allow location access to sort listings.", 
                                 "📍"
                             );
                             return;
                         }
                     } catch (e) {
-                        console.warn("Permissions API check failed, falling back to navigator.geolocation:", e);
+                        console.warn("Permissions API check failed:", e);
                     }
                 }
 
@@ -726,11 +1282,7 @@
                         DOM.gpsBtn.style.opacity = "1";
                         let errMsg = "Unable to retrieve position.";
                         if (error.code === error.PERMISSION_DENIED) {
-                            errMsg = "Location permission request was denied. Please allow location access to sort listings by distance.";
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            errMsg = "Location information is unavailable.";
-                        } else if (error.code === error.TIMEOUT) {
-                            errMsg = "Location request timed out. Please try again.";
+                            errMsg = "Location permission request was denied.";
                         }
                         triggerSystemAlert("GPS Error", errMsg, "📍");
                     },
@@ -775,7 +1327,6 @@
 
             if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
 
-            // Configured to load from active valid schema nodes: 'posts' and 'delala_new'
             const nodePaths = ['posts', 'delala_new'];
 
             try {
@@ -878,8 +1429,8 @@
             DOM.container.innerHTML = `
                 <article class="featured-broadcast-card">
                     <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                    <h2 class="broadcast-title">No Rental Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B;">There are currently no active rental listings available in the database.</p>
+                    <h2 class="broadcast-title" style="margin-top:8px;">No Rental Items Found</h2>
+                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">There are currently no active rental listings available.</p>
                 </article>
             `;
         }
@@ -930,7 +1481,7 @@
             return `
                 <div class="category-specs-container">
                     <div class="category-specs-title">Property Specifications</div>
-                    <div style="font-size:12px; color:#64748B; font-weight: 500;">Standard property specifications apply.</div>
+                    <div style="font-size:12px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div>
                 </div>
             `;
         }
@@ -940,11 +1491,19 @@
             const category = item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
 
-            let numericalTime = item.createdAt || item.timestamp || Date.now();
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
+            const authorId = item.userId || item.uid || item.postedBy || item.authorId || item.postedById || 'unknown';
+            const fullAuthorName = item.userName || item.displayName || item.authorName || item.postedByName || item.username || 'User';
+            const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
+            const authorPhoto = item.userPhoto || item.authorPhoto || item.userAvatar || item.photoURL || '';
 
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
+
+            const likeCount = item.likeCount || (item.likes ? Object.keys(item.likes).length : 0);
+            const isLikedByMe = currentUser && item.likes && item.likes[currentUser.uid];
+
+            const commentsList = item.comments ? Object.values(item.comments) : [];
+            const commentCount = commentsList.length;
 
             let imageHTML = "";
             if (allImages.length > 0) {
@@ -967,22 +1526,82 @@
                 }
             }
 
+            let commentsPreviewHTML = "";
+            if (commentsList.length > 0) {
+                const recentComments = commentsList.slice(-2);
+                recentComments.forEach(c => {
+                    commentsPreviewHTML += `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`;
+                });
+            }
+
             return `
-                <div class="badge-meta-row">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="spotlight-pill">${category}</span>
-                        ${distanceBadge}
-                        ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
+                <div class="post-author-header">
+                    <div class="author-info-left" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
+                        ${authorPhoto 
+                            ? `<img class="author-avatar" src="${authorPhoto}" alt="${firstName}">` 
+                            : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`
+                        }
+                        <div class="author-name-box">
+                            <span class="author-first-name">${firstName}</span>
+                            <span class="author-sub-label">Posted item</span>
+                        </div>
                     </div>
-                    <span class="timestamp-log-text" data-timestamp="${numericalTime}">${initialFormattedClock}</span>
+                    
+                    <div class="author-actions-right">
+                        ${authorId !== 'unknown' ? `
+                            <button class="btn-follow-author follow-btn-${authorId}" onclick="toggleFollowUser(event, '${authorId}')">+ Follow</button>
+                        ` : ''}
+                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span>Profile</span>
+                        </button>
+                    </div>
                 </div>
+
+                <div class="badge-meta-row" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                    <span class="spotlight-pill">${category}</span>
+                    ${distanceBadge}
+                    ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
+                </div>
+                
                 ${imageHTML}
+                
                 <div class="clickable-news-content">
                     <h2 class="broadcast-title">${headline}</h2>
-                    <div style="margin-top: 8px; font-size: 13px; color: #475569; font-weight: 600;">
+                    <div style="margin-top: 6px; font-size: 12.5px; color: #475569; font-weight: 600;">
                         📍 Location: <span class="location-text-val">${fullLocationStr}</span>
                     </div>
+                    
                     ${categorySpecsHTML}
+                </div>
+
+                <div class="post-social-bar">
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <button class="social-action-btn ${isLikedByMe ? 'liked' : ''}" id="like-btn-${item.id}" onclick="toggleLikePost(event, '${item.id}', '${item._dbPath || 'posts'}')">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            <span id="like-count-${item.id}">${likeCount}</span>
+                        </button>
+
+                        <button class="social-action-btn" onclick="toggleCommentBox(event, '${item.id}')">
+                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <span id="comment-count-${item.id}">${commentCount}</span>
+                        </button>
+                    </div>
+
+                    <!-- Updated Modern 3D Details Button -->
+                    <button class="btn-details-3d" onclick="openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')">
+                        Details &rarr;
+                    </button>
+                </div>
+
+                <div class="quick-comments-preview" id="comments-box-${item.id}">
+                    <div id="comments-list-${item.id}">
+                        ${commentsPreviewHTML}
+                    </div>
+                    <div class="comment-input-inline-box" onclick="event.stopPropagation()">
+                        <input type="text" class="comment-input-field" id="comment-input-${item.id}" placeholder="Add a comment..." />
+                        <button class="comment-submit-btn" onclick="submitInlineComment(event, '${item.id}', '${item._dbPath || 'posts'}')">Post</button>
+                    </div>
                 </div>
             `;
         }
