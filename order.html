@@ -812,8 +812,11 @@
                 if (title.includes("Verified") || title.includes("Approved")) {
                     localStorage.removeItem('pending_receipt_image_data');
                     localStorage.removeItem('delala_payment_draft_info');
-                    sessionStorage.removeItem('delalaPendingListing');
-                    sessionStorage.removeItem('delalaPaymentPlan');
+                    
+                    // DO NOT remove sessionStorage here. We need it for publish.html to save the post!
+                    // sessionStorage.removeItem('delalaPendingListing');
+                    // sessionStorage.removeItem('delalaPaymentPlan');
+                    
                     window.location.href = "publish.html";
                 } else {
                     localStorage.removeItem('pending_receipt_image_data');
@@ -881,11 +884,10 @@
                         }
                     }
 
-                    // --- ATOMIC PUBLISHING: SAVE LISTING DATA & VERIFIED STATUS ON LAST STEP ---
+                    // --- ATOMIC PAYMENT SAVE: ONLY SAVE DEPOSIT & NOTIFICATION ---
                     let completeRawCardSequence = userId.replace(/\D/g, '') || "unknown_user";
 
                     const depositRefNode = push(ref(db, 'deposits'));
-                    const publishPostRefNode = push(ref(db, 'published_posts'));
                     const adminNotifRefNode = push(ref(db, 'notifications'));
 
                     const atomicUpdates = {};
@@ -908,21 +910,8 @@
                         timePeriod: periodLabel || '1 Month', 
                         timestamp: Date.now()
                     };
-                    
-                    // 2. Publish Metadata Entry
-                    atomicUpdates[`/published_posts/${publishPostRefNode.key}`] = {
-                        orderRef: currentOrderRefLocal || "DL-000000", 
-                        userId: completeRawCardSequence, 
-                        category: rentCategoryNameLocal || 'Uncategorized', 
-                        rentType: rtType || 'Standard',
-                        location: userCityLocal || 'Unknown', 
-                        timePeriod: periodLabel || '1 Month', 
-                        status: 'published', 
-                        txnRef: backgroundExtractedTxnRef, 
-                        timestamp: Date.now()
-                    };
 
-                    // 3. Admin Notification
+                    // 2. Admin Notification
                     atomicUpdates[`/notifications/${adminNotifRefNode.key}`] = {
                         type: 'NEW_CATEGORY_DEPOSIT', 
                         depositId: depositRefNode.key, 
@@ -934,34 +923,19 @@
                         timestamp: Date.now()
                     };
 
-                    // 4. Save full listing into /posts ON THIS LAST PAGE ONLY
-                    let finalPostKey = (passedPostId && !passedPostId.startsWith('TEMP_')) ? passedPostId : push(ref(db, 'posts')).key;
-                    
-                    if (pendingPayload && Object.keys(pendingPayload).length > 0) {
-                        atomicUpdates[`/posts/${finalPostKey}`] = {
-                            ...pendingPayload,
-                            id: finalPostKey,
-                            status: 'published',
-                            depositRef: depositRefNode.key,
-                            txnRef: backgroundExtractedTxnRef,
-                            periodKey: periodKey,
-                            periodLabel: periodLabel,
-                            createdAt: Date.now()
-                        };
-                    } else {
-                        atomicUpdates[`/posts/${finalPostKey}/status`] = 'published';
-                        atomicUpdates[`/posts/${finalPostKey}/depositRef`] = depositRefNode.key;
-                        atomicUpdates[`/posts/${finalPostKey}/txnRef`] = backgroundExtractedTxnRef;
-                    }
-
+                    // 3. Update existing User Transaction to paid
                     if (dbKey && completeRawCardSequence !== "unknown_user") {
                         atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/status`] = 'paid';
                         atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/txnRef`] = backgroundExtractedTxnRef;
                     }
 
+                    // Push payment info to sessionStorage so publish.html can link it to the post!
+                    sessionStorage.setItem('delala_approved_deposit_ref', depositRefNode.key);
+                    sessionStorage.setItem('delala_approved_txn_ref', backgroundExtractedTxnRef);
+
                     await update(ref(db), atomicUpdates);
                     showLoading(false); submitBtn.disabled = false;
-                    showPopupState("success", "Receipt Approved & Verified!", `Payment verified! Listing for ${rentCategoryNameLocal} in ${userCityLocal} published.`);
+                    showPopupState("success", "Receipt Approved & Verified!", `Payment verified! Proceeding to publish listing.`);
                     
                 } catch (err) {
                     console.error(err); 
