@@ -21,6 +21,13 @@
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             letter-spacing: -0.01em;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #FFFFFF;
         }
 
         /* INVISIBLE TOP-LEFT CHROME TRIGGER BUTTON */
@@ -117,14 +124,12 @@
 
         .full-article-view {
             width: 100%;
-            box-sizing: border-box;
             padding: 16px 12px 100px 12px;
             color: #000000;
         }
 
         #fullNewsReaderBody {
             width: 100%;
-            box-sizing: border-box;
             color: #000000;
         }
 
@@ -133,7 +138,6 @@
             flex-direction: column;
             gap: 10px;
             width: 100%;
-            box-sizing: border-box;
             margin: 14px 0;
             background: #F8FAFC;
             padding: 14px;
@@ -174,7 +178,6 @@
             display: flex;
             gap: 10px;
             width: 100%;
-            box-sizing: border-box;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             padding-bottom: 8px;
@@ -183,7 +186,6 @@
         }
 
         .multi-image-gallery::-webkit-scrollbar { height: 4px; }
-
         .multi-image-gallery::-webkit-scrollbar-thumb {
             background: #CBD5E1;
             border-radius: 4px;
@@ -192,7 +194,6 @@
         .gallery-img-container {
             flex: 0 0 100%;
             width: 100%;
-            box-sizing: border-box;
             scroll-snap-align: start;
             border-radius: 14px;
             overflow: hidden;
@@ -212,12 +213,11 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             margin: 12px 0 16px 0;
             width: 100%;
-            box-sizing: border-box;
             background: #F8FAFC;
-            padding: 10px 16px;
+            padding: 10px 8px;
             border-radius: 14px;
             border: 1px solid #E2E8F0;
         }
@@ -226,11 +226,12 @@
             background: transparent;
             border: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
+            min-width: 52px;
+            padding: 6px 4px;
+            border-radius: 10px;
             color: #0F172A;
             cursor: pointer;
             transition: background 0.15s ease, transform 0.1s ease;
@@ -249,9 +250,29 @@
             fill: none;
         }
 
+        .img-action-count {
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-top: 3px;
+            color: #475569;
+        }
+
+        /* 5-STAR RATING SYSTEM */
+        .star-rating {
+            color: #CBD5E1;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+        .star-rating span:hover,
+        .star-rating .active-star {
+            color: #F59E0B;
+        }
+
         .category-specs-container {
             width: 100%;
-            box-sizing: border-box;
             background: #F8FAFC;
             border: 1px solid #E2E8F0;
             border-radius: 12px;
@@ -270,7 +291,6 @@
 
         .reader-full-body {
             width: 100%;
-            box-sizing: border-box;
             font-size: 0.95rem;
             line-height: 1.7;
             color: #1E293B;
@@ -285,7 +305,6 @@
 
         .contact-trigger-btn {
             width: 100%;
-            box-sizing: border-box;
             padding: 14px;
             border-radius: 12px;
             background: #0F172A;
@@ -304,7 +323,6 @@
 
         .contact-btn {
             width: 100%;
-            box-sizing: border-box;
             justify-content: center;
             padding: 12px;
             border-radius: 10px;
@@ -314,14 +332,17 @@
             text-decoration: none;
             font-weight: 700;
             font-size: 0.92rem;
+            border: none;
+            cursor: pointer;
         }
 
         .contact-btn-phone { background: #10B981; color: #ffffff; }
         .contact-btn-telegram { background: #0088cc; color: #ffffff; }
+        .contact-btn-instagram { background: #E1306C; color: #ffffff; }
         .contact-btn-whatsapp { background: #25D366; color: #ffffff; }
         .contact-btn-email { background: #EF4444; color: #ffffff; }
-        .contact-btn-instagram { background: #E1306C; color: #ffffff; }
 
+        /* UNIFIED MODAL OVERLAY DESIGN */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -333,8 +354,12 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 20000;
             padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
         }
 
         .modal-box {
@@ -344,16 +369,15 @@
             padding: 24px;
             width: 100%;
             max-width: 360px;
-            box-sizing: border-box;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .modal-title {
-            color: #DC2626;
+            color: #0F172A;
             font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -393,16 +417,319 @@
             margin-top: 10px;
         }
 
-        .back-nav-btn {
-            color: #ffffff;
-            text-decoration: none;
+        /* COMMENT MODAL STYLES WITH 3D DARK SILVER HEADER */
+        .comment-modal-box {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.25);
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            color: #0F172A;
+            overflow: hidden;
+        }
+
+        /* 3D DARK SILVER MODERN HEADER */
+        .modal-header-3d-silver {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(145deg, #4b5563, #374151, #1f2937);
+            border-bottom: 2px solid #6b7280;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 20px 20px 0 0;
+            color: #F8FAFC;
+        }
+
+        .modal-header-3d-silver .modal-title {
+            color: #FFFFFF;
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.02em;
+        }
+
+        .modal-header-3d-silver .close-btn-3d {
+            background: linear-gradient(145deg, #374151, #1f2937);
+            border: 1px solid #6b7280;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0,0,0,0.4);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #E2E8F0;
+            transition: all 0.2s ease;
+        }
+
+        .modal-header-3d-silver .close-btn-3d:hover {
+            color: #FFFFFF;
+            transform: scale(1.05);
+            border-color: #9ca3af;
+        }
+
+        .comment-feed {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 0;
+            padding: 16px;
+            max-height: 320px;
+            min-height: 150px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .comment-card {
+            display: flex;
+            gap: 12px;
+            background: #F8FAFC;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid #E2E8F0;
+            position: relative;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #0F172A;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .comment-content-wrap { flex: 1; min-width: 0; }
+        .comment-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .comment-author { font-size: 0.85rem; font-weight: 700; color: #0F172A; }
+        .comment-time { font-size: 0.70rem; color: #94A3B8; font-weight: 500; }
+        .comment-body-text { font-size: 0.88rem; color: #334155; margin: 0; line-height: 1.45; word-break: break-word; white-space: pre-line; }
+
+        .comment-delete-btn {
             background: transparent;
             border: none;
-            padding: 0;
+            color: #EF4444;
             cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+
+        .comment-delete-btn:hover {
+            background: #FEE2E2;
+        }
+
+        .comment-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+            padding: 14px 16px 18px 16px;
+            border-top: 1px solid #F1F5F9;
+            background: #FFFFFF;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            font-family: inherit;
+            resize: none;
+            font-size: 0.9rem;
+            outline: none;
+            background: #F8FAFC;
+            color: #0F172A;
+        }
+
+        .comment-action-btn-group { display: flex; gap: 10px; }
+        .btn-primary {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            background: #0F172A;
+            border: 1px solid #0F172A;
+            color: #FFFFFF;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            padding: 11px 18px;
+            border-radius: 10px;
+            background: #F1F5F9;
+            border: 1px solid #F1F5F9;
+            color: #64748B;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* MODULAR SHARE COMPONENT STYLES */
+        .share-modal-box {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            color: #0F172A;
+        }
+
+        .share-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .share-title {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0F172A;
+            letter-spacing: -0.01em;
+        }
+
+        .share-close-btn {
+            background: #F1F5F9;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #64748B;
+            transition: all 0.2s ease;
+        }
+
+        .share-close-btn:hover {
+            background: #E2E8F0;
+            color: #0F172A;
+        }
+
+        .copy-link-btn-full {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 16px 0;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .copy-link-btn-full:hover {
+            background: #1E293B;
+        }
+
+        .copy-link-btn-full:active {
+            transform: scale(0.98);
+        }
+
+        .share-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+            padding: 4px 0;
+        }
+
+        .share-grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #334155;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .share-icon-wrapper {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F8FAFC;
+            border: 1px solid #F1F5F9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .share-icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .share-grid-item:hover .share-icon-wrapper {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .share-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .share-cancel-btn {
+            width: 100%;
+            padding: 11px;
+            border-radius: 10px;
+            background: #F1F5F9;
+            border: 1px solid #F1F5F9;
+            color: #64748B;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .share-cancel-btn:hover {
+            background: #E2E8F0;
+            color: #0F172A;
         }
 
         /* HARD BLOCK PWA FORCE OVERLAY */
@@ -442,16 +769,9 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 16px;
-            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
         }
 
-        .pwa-icon svg {
-            width: 40px;
-            height: 40px;
-            stroke: #FFFFFF;
-            stroke-width: 2.2;
-            fill: none;
-        }
+        .pwa-icon svg { width: 40px; height: 40px; stroke: #FFFFFF; stroke-width: 2.2; fill: none; }
 
         .pwa-install-btn {
             width: 100%;
@@ -464,14 +784,6 @@
             font-weight: 700;
             cursor: pointer;
             margin-top: 18px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: background 0.3s ease, transform 0.1s ease;
-        }
-
-        .pwa-install-btn:disabled {
-            background: #475569;
-            cursor: not-allowed;
-            opacity: 0.9;
         }
 
         .pwa-progress-bar {
@@ -492,16 +804,18 @@
             border-radius: 10px;
         }
 
-        .ios-instructions {
-            display: none;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 14px;
+        /* RATED BADGE STYLES */
+        .already-rated-badge {
             font-size: 0.85rem;
-            color: #93C5FD;
-            text-align: left;
-            line-height: 1.5;
+            font-weight: 700;
+            color: #059669;
+            background: #ECFDF5;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid #A7F3D0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
     </style>
 </head>
@@ -529,36 +843,15 @@
             <div id="pwaProgressBar" class="pwa-progress-bar">
                 <div id="pwaProgressFill" class="pwa-progress-fill"></div>
             </div>
-
-            <div id="iosInstructionBox" class="ios-instructions">
-                <strong>iPhone / iPad Users:</strong><br>
-                1. Tap the <strong>Share</strong> button <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> at the bottom of Safari.<br>
-                2. Scroll down & select <strong>"Add to Home Screen"</strong>.<br>
-                3. Open the installed app from your home screen.
-            </div>
         </div>
     </div>
 
     <div class="app-view">
-        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
-            <defs>
-                <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#081B38"/>
-                    <stop offset="1" stop-color="#0F2C59"/>
-                </linearGradient>
-            </defs>
-        </svg>
-
-        <header class="nav-header">
+        <header class="nav-header" style="padding: 14px 16px; background: #081B38; color: #FFF; display: flex; justify-content: space-between; align-items: center;">
             <div class="header-left-group" style="display:flex; align-items:center; gap:10px;">
-                <button class="back-nav-btn" id="goBackBtn" aria-label="Go Back">
-                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </button>
-                <h1 class="header-title-text" style="font-size: 15px; font-weight: 700;">Rental Details</h1>
+                <h1 class="header-title-text" style="font-size: 15px; font-weight: 700; margin:0;">Rental Details</h1>
             </div>
-            
-            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock" style="font-size: 12px; opacity: 0.8;">00:00:00 AM</div>
         </header>
 
         <main class="app-content full-article-view">
@@ -569,49 +862,43 @@
 
         <nav class="bottom-nav">
             <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                </div>
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
                 <span>Rental</span>
             </a>
-
             <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                </div>
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
                 <span>Selling</span>
             </a>
-
             <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
-                <div class="post-fab-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </div>
+                <div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                 <span class="post-fab-label">Post</span>
             </a>
-
-            <a id="nav-vacancy" href="vacancy.html" class="nav-item" data-filter="Job Vacancy">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                </div>
-                <span>Vacancy</span>
+            <a id="nav-service" href="service.html" class="nav-item" data-filter="Service">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></div>
+                <span>Service</span>
             </a>
-
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                 <span>Profile</span>
             </a>
         </nav>
     </div>
 
+    <!-- UNIFIED CUSTOM ALERT / CONGRATULATIONS MODAL -->
+    <div id="customAlertModal" class="modal-overlay">
+        <div class="modal-box" style="text-align: center;">
+            <div id="customAlertIcon" style="font-size: 2.5rem; margin-bottom: 10px;">🎉</div>
+            <div id="customAlertTitle" class="modal-title" style="justify-content: center; font-size: 1.15rem; font-weight: 800; color: #0F172A;">Notification</div>
+            <div id="customAlertMessage" class="modal-body" style="text-align: center; color: #475569; margin-bottom: 20px;">Message text goes here...</div>
+            <button class="modal-confirm-btn" onclick="closeCustomAlertModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- WARNING & CONTACT MODAL -->
     <div id="warningModal" class="modal-overlay">
         <div class="modal-box">
             <div id="modalWarningSection">
-                <div class="modal-title">⚠️ ጥብቅ ማስጠንቀቂያ!</div>
+                <div class="modal-title" style="color:#DC2626;">⚠️ ጥብቅ ማስጠንቀቂያ!</div>
                 <div class="modal-body">
                     ሕጋዊ ስምምነት ሳይፈረም ምንም ዓይነት ክፍያ እንዳይፈጸም እናስነብባለን። ከማጭበርበር ድርጊቶች ራስዎን ይጠብቁ።
                 </div>
@@ -620,208 +907,115 @@
             </div>
             
             <div id="modalContactSection" style="display: none;">
-                <div class="modal-title" style="color: #0F172A;">📞 Contact Options</div>
+                <div class="modal-title">📞 Contact Options</div>
                 <div id="popupContactButtonsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;"></div>
                 <button class="modal-back-btn" onclick="showPopupWarning()">← Back to Warning</button>
             </div>
         </div>
     </div>
 
-    <!-- 3-PHASE PWA ENFORCER LOGIC WITH IN-APP BROWSER DETECTION & FORCE CHROME REDIRECT -->
-    <script>
-        // Check if the current environment is an In-App Browser (Telegram, Instagram, FB, TikTok, WebViews)
-        function isInAppBrowser() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
-            
-            // Signatures of popular in-app webviews
-            const knownInApps = /FBAN|FBAV|Instagram|Telegram|TikTok|Line|Twitter|LinkedIn|MicroMessenger|Snapchat|GSA|FB_IAB|FB4A|Messenger|Pinterest/i.test(ua);
-            
-            // Android WebView detection
-            const isAndroidWebView = /Android/i.test(ua) && (/;\s*wv\b/i.test(ua) || /Version\/\d+\.\d+/i.test(ua));
-            
-            // iOS Embedded WebView (non-Safari environment)
-            const isIOS = /iPhone|iPad|iPod/i.test(ua);
-            const isIOSWebView = isIOS && (!/Safari/i.test(ua) || knownInApps);
+    <!-- COMMENT MODAL WITH 3D DARK SILVER HEADER -->
+    <div id="commentModal" class="modal-overlay">
+        <div class="comment-modal-box">
+            <div class="modal-header-3d-silver">
+                <div class="modal-title">💬 Comments (<span id="modalCommentCount">0</span>)</div>
+                <button class="close-btn-3d" onclick="closeCommentModal()">✕</button>
+            </div>
+            <div id="commentsFeed" class="comment-feed">
+                <div id="commentsLoadingState" style="text-align: center; color: #94A3B8; font-size: 0.85rem; padding: 30px 0;">⏳ Loading comments...</div>
+            </div>
+            <div class="comment-input-area">
+                <textarea id="commentInputBox" class="comment-textarea" rows="2" placeholder="Write a comment..."></textarea>
+                <div class="comment-action-btn-group">
+                    <button class="btn-primary" onclick="submitComment()">Post Comment</button>
+                    <button class="btn-secondary" onclick="closeCommentModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            return knownInApps || isAndroidWebView || isIOSWebView;
-        }
+    <!-- MODULAR SHARE MODAL -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="share-modal-box">
+            <!-- Header -->
+            <div class="share-header">
+                <div class="share-title">🔗 Share Listing</div>
+                <button class="share-close-btn" onclick="closeShareModal()">✕</button>
+            </div>
 
-        function launchInChrome() {
-            const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            <!-- Clean Copy Link Button -->
+            <button class="copy-link-btn-full" onclick="copyToClipboardAndCount()">
+                📋 Copy Link
+            </button>
 
-            if (/Android/i.test(ua)) {
-                // Use Android Intent to force-launch standalone Google Chrome app
-                window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
-            } else if (/iPhone|iPad|iPod/i.test(ua)) {
-                const iosScheme = window.location.protocol === 'https:'
-                    ? `googlechromes://${cleanUrl}`
-                    : `googlechrome://${cleanUrl}`;
-                window.location.href = iosScheme;
-            } else {
-                window.location.href = window.location.href;
-            }
-        }
+            <!-- Social Apps Grid -->
+            <div class="share-grid">
+                <!-- Telegram -->
+                <a id="shareTelegramBtn" href="#" target="_blank" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="te.jpg" alt="Telegram">
+                    </div>
+                    <span class="share-label">Telegram</span>
+                </a>
 
-        // Trigger bypass from Top-Left Invisible Button to hide PWA gate entirely
-        document.addEventListener('DOMContentLoaded', () => {
-            const invBtn = document.getElementById('invisibleChromeBtn');
-            const pwaGate = document.getElementById('pwaInstallGate');
-            if (invBtn) {
-                invBtn.addEventListener('click', () => {
-                    // Bypass the PWA block and just show the page
-                    if (pwaGate) pwaGate.style.display = 'none';
-                });
-            }
-        });
+                <!-- WhatsApp -->
+                <a id="shareWhatsAppBtn" href="#" target="_blank" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="w.jpg" alt="WhatsApp">
+                    </div>
+                    <span class="share-label">WhatsApp</span>
+                </a>
 
-        (function enforce3PhasePWA() {
-            let deferredPrompt = null;
-            let currentPhase = 1; // 1: Install, 2: 30s Countdown, 3: Open App
+                <!-- Instagram -->
+                <a id="shareInstagramBtn" href="#" target="_blank" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="i.jpg" alt="Instagram">
+                    </div>
+                    <span class="share-label">Instagram</span>
+                </a>
 
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                                 window.navigator.standalone === true ||
-                                 document.referrer.includes('android-app://');
+                <!-- Facebook -->
+                <a id="shareFacebookBtn" href="#" target="_blank" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="f.jpg" alt="Facebook">
+                    </div>
+                    <span class="share-label">Facebook</span>
+                </a>
 
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                <!-- TikTok -->
+                <a id="shareTikTokBtn" href="#" target="_blank" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="t.jpg" alt="TikTok">
+                    </div>
+                    <span class="share-label">TikTok</span>
+                </a>
 
-            // Catch browser native install prompt event
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-            });
+                <!-- Message -->
+                <a id="shareMessageBtn" href="#" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="m.jpg" alt="Message">
+                    </div>
+                    <span class="share-label">Message</span>
+                </a>
 
-            // Listen for completed installation event
-            window.addEventListener('appinstalled', () => {
-                localStorage.setItem('pwa_installed', 'true');
-            });
+                <!-- Email -->
+                <a id="shareEmailBtn" href="#" class="share-grid-item">
+                    <div class="share-icon-wrapper">
+                        <img src="e.jpg" alt="Email">
+                    </div>
+                    <span class="share-label">Email</span>
+                </a>
+            </div>
 
-            if (!isStandalone) {
-                document.addEventListener('DOMContentLoaded', () => {
-                    const gate = document.getElementById('pwaInstallGate');
-                    const installBtn = document.getElementById('pwaInstallBtn');
-                    const progressBar = document.getElementById('pwaProgressBar');
-                    const progressFill = document.getElementById('pwaProgressFill');
-                    const gateStatus = document.getElementById('pwaGateStatus');
-                    const iosBox = document.getElementById('iosInstructionBox');
+            <!-- Cancel Button -->
+            <button class="share-cancel-btn" onclick="closeShareModal()">Cancel</button>
+        </div>
+    </div>
 
-                    // Show full screen gate on web browser
-                    if (gate) gate.style.display = 'flex';
-
-                    if (isIOS && iosBox) {
-                        iosBox.style.display = 'block';
-                    }
-
-                    if (installBtn) {
-                        installBtn.addEventListener('click', async () => {
-
-                            // STRICT IN-APP BROWSER DETECT & FORCE CHROME REDIRECT
-                            if (isInAppBrowser()) {
-                                if (gateStatus) {
-                                    gateStatus.innerText = "🌐 Opening in Google Chrome for PWA installation...";
-                                }
-                                launchInChrome();
-                                return;
-                            }
-
-                            // Check user agent to see if running in native standalone Chrome
-                            const ua = navigator.userAgent || navigator.vendor || window.opera;
-                            const isChrome = (/Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser|wv/i.test(ua)) || /CriOS/.test(ua);
-
-                            // FORCE REDIRECT TO CHROME IF NOT IN CHROME BROWSER
-                            if (!isChrome && !deferredPrompt && !isIOS) {
-                                launchInChrome();
-                                return;
-                            }
-
-                            // PHASE 1: WAIT FOR BROWSER POPUP INSTALL
-                            if (currentPhase === 1) {
-                                if (deferredPrompt) {
-                                    deferredPrompt.prompt();
-
-                                    const choiceResult = await deferredPrompt.userChoice;
-                                    deferredPrompt = null;
-
-                                    if (choiceResult.outcome !== 'accepted') {
-                                        if (gateStatus) {
-                                            gateStatus.innerText = "⚠️ Installation was not completed. Please click Install App again.";
-                                        }
-                                        return;
-                                    }
-                                } else if (!isIOS && !isChrome) {
-                                    if (gateStatus) {
-                                        gateStatus.innerText = "Opening in Chrome to complete installation...";
-                                    }
-                                    launchInChrome();
-                                    return;
-                                }
-
-                                // PHASE 2: RUN 30-SECOND COUNTDOWN (0 - 100%)
-                                currentPhase = 2;
-                                installBtn.disabled = true;
-                                if (progressBar) progressBar.style.display = 'block';
-                                if (gateStatus) gateStatus.innerText = "Installing Hulum Application, please wait...";
-
-                                let durationMs = 30000; // 30 seconds
-                                let elapsedMs = 0;
-                                let stepMs = 300; // Update every 300ms
-
-                                const progressInterval = setInterval(() => {
-                                    elapsedMs += stepMs;
-                                    let percentage = Math.min(Math.floor((elapsedMs / durationMs) * 100), 100);
-
-                                    installBtn.innerText = `⏳ Installing... ${percentage}%`;
-                                    if (progressFill) progressFill.style.width = `${percentage}%`;
-
-                                    if (percentage >= 100) {
-                                        clearInterval(progressInterval);
-                                        currentPhase = 3;
-
-                                        installBtn.disabled = false;
-                                        installBtn.innerText = "🚀 Open App";
-                                        installBtn.style.background = "#10B981";
-                                        installBtn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.4)";
-                                        if (gateStatus) {
-                                            gateStatus.innerText = "Installation Complete! Tap below to open the app directly.";
-                                        }
-                                        
-                                        localStorage.setItem('pwa_installed', 'true');
-                                    }
-                                }, stepMs);
-
-                            // PHASE 3: FORCE JUMP / LAUNCH APP
-                            } else if (currentPhase === 3) {
-                                jumpToInstalledApp();
-                            }
-                        });
-                    }
-                });
-            }
-
-            function jumpToInstalledApp() {
-                const currentUrl = window.location.href;
-                const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
-
-                if (/Android/i.test(navigator.userAgent)) {
-                    const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
-                    window.location.href = intentUrl;
-                } else {
-                    window.location.href = currentUrl;
-                }
-            }
-        })();
-
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
-            });
-        }
-    </script>
-
+    <!-- MAIN APP & FIREBASE MODULE LOGIC -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, update, increment, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dub0jU5VImIqxchW79OME6Q",
@@ -834,47 +1028,100 @@
             measurementId: "G-2XW8F8FKBT"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
         const db = getDatabase(app);
 
-        let cardClockIntervalId = null;
+        // Persistent User Identification
+        let currentUserId = localStorage.getItem('hulum_user_id');
+        if (!currentUserId) {
+            currentUserId = 'user_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('hulum_user_id', currentUserId);
+        }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            initiateLiveInterfaceClocks();
+        // Admin Role Verification
+        const isAdmin = localStorage.getItem('hulum_is_admin') === 'true' || localStorage.getItem('hulum_user_role') === 'admin';
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const itemId = urlParams.get('id');
-            const itemPath = urlParams.get('path') || 'posts';
+        // Global State
+        window.activeItemId = null;
+        window.activeDbPath = null;
+        window.currentRating = 0;
+        window.activeItemTitle = "Check out this listing on Hulum";
+        window.currentItemAuthorId = null;
 
-            const backBtn = document.getElementById('goBackBtn');
-            if (backBtn) {
-                backBtn.addEventListener('click', () => {
-                    if (document.referrer && document.referrer.includes('rental.html')) {
-                        window.history.back();
-                    } else if (itemId) {
-                        window.location.href = `rental.html?returnId=${encodeURIComponent(itemId)}`;
-                    } else {
-                        window.location.href = 'rental.html';
-                    }
-                });
+        /* --- UNIFIED POPUP NOTIFICATION CONTROLLER --- */
+        window.showCustomAlert = function(title, message, icon = 'ℹ️') {
+            const modal = document.getElementById('customAlertModal');
+            const titleEl = document.getElementById('customAlertTitle');
+            const msgEl = document.getElementById('customAlertMessage');
+            const iconEl = document.getElementById('customAlertIcon');
+
+            if (titleEl) titleEl.innerText = title;
+            if (msgEl) msgEl.innerText = message;
+            if (iconEl) iconEl.innerText = icon;
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeCustomAlertModal = function() {
+            const modal = document.getElementById('customAlertModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        /* --- MODAL CONTROLLERS --- */
+        window.openCommentModal = async function() {
+            const modal = document.getElementById('commentModal');
+            if (modal) modal.classList.add('active');
+            await window.loadCommentsFeed();
+        };
+
+        window.closeCommentModal = function() {
+            const modal = document.getElementById('commentModal');
+            if (modal) {
+                modal.classList.remove('active');
+                const input = document.getElementById('commentInputBox');
+                if (input) input.value = '';
             }
+        };
 
-            if (itemId) {
-                await loadItemDetails(itemId, itemPath);
-            } else {
-                renderErrorState("Invalid item ID parameter.");
-            }
-        });
+        window.handleShareClick = function(headline) {
+            if (headline) window.activeItemTitle = headline;
+            
+            const currentUrl = encodeURIComponent(window.location.href);
+            const titleText = encodeURIComponent(window.activeItemTitle);
+
+            const tgBtn = document.getElementById('shareTelegramBtn');
+            const waBtn = document.getElementById('shareWhatsAppBtn');
+            const igBtn = document.getElementById('shareInstagramBtn');
+            const fbBtn = document.getElementById('shareFacebookBtn');
+            const ttBtn = document.getElementById('shareTikTokBtn');
+            const msgBtn = document.getElementById('shareMessageBtn');
+            const mailBtn = document.getElementById('shareEmailBtn');
+
+            if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${currentUrl}&text=${titleText}`;
+            if (waBtn) waBtn.href = `https://api.whatsapp.com/send?text=${titleText}%20${currentUrl}`;
+            if (igBtn) igBtn.href = `https://instagram.com`;
+            if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`;
+            if (ttBtn) ttBtn.href = `https://www.tiktok.com`;
+            if (msgBtn) msgBtn.href = `sms:?body=${titleText}%20${currentUrl}`;
+            if (mailBtn) mailBtn.href = `mailto:?subject=${titleText}&body=${currentUrl}`;
+
+            const shareModalNode = document.getElementById('shareModal');
+            if (shareModalNode) shareModalNode.classList.add('active');
+        };
+
+        window.closeShareModal = function() {
+            const shareModalNode = document.getElementById('shareModal');
+            if (shareModalNode) shareModalNode.classList.remove('active');
+        };
 
         window.triggerContactPopup = function() {
-            showPopupWarning();
+            window.showPopupWarning();
             const modalNode = document.getElementById('warningModal');
-            if (modalNode) modalNode.style.display = 'flex';
+            if (modalNode) modalNode.classList.add('active');
         };
 
         window.closeWarningModal = function() {
             const modalNode = document.getElementById('warningModal');
-            if (modalNode) modalNode.style.display = 'none';
+            if (modalNode) modalNode.classList.remove('active');
         };
 
         window.showPopupContacts = function() {
@@ -887,60 +1134,330 @@
             document.getElementById('modalContactSection').style.display = 'none';
         };
 
-        function initiateLiveInterfaceClocks() {
-            const cornerClockNode = document.getElementById('topCornerLiveClock');
-            
-            if (cardClockIntervalId) clearInterval(cardClockIntervalId);
-            cardClockIntervalId = setInterval(() => {
-                const now = new Date();
-                if (cornerClockNode) {
-                    cornerClockNode.innerText = now.toLocaleTimeString(undefined, {
-                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        /* --- COMMENT OPERATIONS (LOAD, SUBMIT, DELETE) --- */
+        window.loadCommentsFeed = async function() {
+            const feed = document.getElementById('commentsFeed');
+            const countSpan = document.getElementById('modalCommentCount');
+            if (!feed) return;
+
+            if (!window.activeItemId || !window.activeDbPath) {
+                feed.innerHTML = `<div style="text-align:center; color:#94A3B8; font-size:0.85rem; padding:20px;">No active listing found.</div>`;
+                return;
+            }
+
+            try {
+                const commentsRef = ref(db, `${window.activeDbPath}/${window.activeItemId}/comments`);
+                const snapshot = await get(commentsRef);
+
+                if (snapshot.exists()) {
+                    let totalComments = 0;
+                    feed.innerHTML = '';
+
+                    snapshot.forEach((childSnap) => {
+                        totalComments++;
+                        const commentData = {
+                            key: childSnap.key,
+                            ...childSnap.val()
+                        };
+                        feed.appendChild(createCommentCardNode(commentData));
                     });
+
+                    if (countSpan) countSpan.innerText = totalComments;
+                    feed.scrollTop = feed.scrollHeight;
+                } else {
+                    if (countSpan) countSpan.innerText = "0";
+                    feed.innerHTML = `<div style="text-align:center; color:#94A3B8; font-size:0.85rem; padding:20px 0;">No comments yet. Be the first to comment!</div>`;
                 }
-            }, 1000);
+            } catch (e) {
+                console.error("Error loading comments:", e);
+                feed.innerHTML = `<div style="text-align:center; color:#EF4444; font-size:0.85rem; padding:20px 0;">Error loading comments.</div>`;
+            }
+        };
+
+        window.submitComment = async function() {
+            const input = document.getElementById('commentInputBox');
+            if (!input) return;
+            const text = input.value.trim();
+
+            if (!text) {
+                window.showCustomAlert('Required', 'Please write a comment before posting.', '⚠️');
+                return;
+            }
+
+            if (window.activeItemId && window.activeDbPath) {
+                try {
+                    const userName = localStorage.getItem('hulum_user_name') || 'Verified User';
+                    const newComment = {
+                        userId: currentUserId,
+                        userName: userName,
+                        text: text,
+                        timestamp: Date.now()
+                    };
+
+                    const commentsRef = ref(db, `${window.activeDbPath}/${window.activeItemId}/comments`);
+                    const newCommentRef = push(commentsRef);
+                    await update(newCommentRef, newComment);
+
+                    await update(ref(db, `${window.activeDbPath}/${window.activeItemId}`), {
+                        commentsCount: increment(1)
+                    });
+
+                    const commentCountEl = document.getElementById('actionCommentCount');
+                    if (commentCountEl) {
+                        commentCountEl.innerText = (parseInt(commentCountEl.innerText || "0") || 0) + 1;
+                    }
+
+                    const feed = document.getElementById('commentsFeed');
+                    if (feed) {
+                        if (feed.querySelector('#commentsLoadingState') || feed.innerText.includes('No comments yet')) {
+                            feed.innerHTML = '';
+                        }
+                        newComment.key = newCommentRef.key;
+                        feed.appendChild(createCommentCardNode(newComment));
+                        feed.scrollTop = feed.scrollHeight;
+                    }
+
+                    const countSpan = document.getElementById('modalCommentCount');
+                    if (countSpan) {
+                        countSpan.innerText = (parseInt(countSpan.innerText || "0") || 0) + 1;
+                    }
+
+                    input.value = '';
+                } catch (e) {
+                    console.error("Error submitting comment:", e);
+                    window.showCustomAlert('Error', 'Could not post your comment.', '⚠️');
+                }
+            }
+        };
+
+        window.deleteComment = async function(commentKey) {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+
+            if (window.activeItemId && window.activeDbPath && commentKey) {
+                try {
+                    await remove(ref(db, `${window.activeDbPath}/${window.activeItemId}/comments/${commentKey}`));
+                    await update(ref(db, `${window.activeDbPath}/${window.activeItemId}`), {
+                        commentsCount: increment(-1)
+                    });
+
+                    window.showCustomAlert('Deleted', 'Comment deleted successfully.', '🗑️');
+                    await window.loadCommentsFeed();
+
+                    const commentCountEl = document.getElementById('actionCommentCount');
+                    if (commentCountEl) {
+                        const currentVal = parseInt(commentCountEl.innerText || "0") || 0;
+                        commentCountEl.innerText = Math.max(0, currentVal - 1);
+                    }
+                } catch (e) {
+                    console.error("Error deleting comment:", e);
+                    window.showCustomAlert('Error', 'Could not delete comment.', '⚠️');
+                }
+            }
+        };
+
+        /* --- DELETE ENTIRE POST / LISTING (ADMIN OR OWNER) --- */
+        window.deleteCurrentPost = async function() {
+            if (!confirm('🚨 WARNING: Are you sure you want to delete this listing permanently?')) return;
+
+            if (window.activeItemId && window.activeDbPath) {
+                try {
+                    await remove(ref(db, `${window.activeDbPath}/${window.activeItemId}`));
+                    window.showCustomAlert('Listing Deleted', 'The listing has been permanently removed.', '🗑️');
+                    setTimeout(() => {
+                        window.location.href = 'rental.html';
+                    }, 1500);
+                } catch (e) {
+                    console.error("Error deleting listing:", e);
+                    window.showCustomAlert('Error', 'Could not delete listing.', '⚠️');
+                }
+            }
+        };
+
+        function createCommentCardNode(data) {
+            const name = data.userName || "User";
+            const initial = name.charAt(0).toUpperCase();
+            const timeStr = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            const isCommentAuthor = data.userId === currentUserId;
+            const canDelete = isCommentAuthor || isAdmin;
+
+            const card = document.createElement('div');
+            card.className = 'comment-card';
+            card.innerHTML = `
+                <div class="comment-avatar">${initial}</div>
+                <div class="comment-content-wrap">
+                    <div class="comment-meta">
+                        <span class="comment-author">${escapeHtml(name)}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="comment-time">${timeStr}</span>
+                            ${canDelete ? `<button class="comment-delete-btn" onclick="window.deleteComment('${data.key}')" title="Delete Comment">🗑️ Delete</button>` : ''}
+                        </div>
+                    </div>
+                    <p class="comment-body-text">${escapeHtml(data.text)}</p>
+                </div>
+            `;
+            return card;
         }
 
-        function formatExactTimestampWithSeconds(baseEpoch) {
-            const dateObj = new Date(baseEpoch);
-            if (isNaN(dateObj.getTime())) return "recent";
-            return dateObj.toLocaleDateString(undefined, { 
-                month: 'short', day: 'numeric', year: 'numeric' 
-            }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        function escapeHtml(text) {
+            return String(text).replace(/&/g, "&amp;")
+                               .replace(/</g, "&lt;")
+                               .replace(/>/g, "&gt;")
+                               .replace(/"/g, "&quot;")
+                               .replace(/'/g, "&#039;");
+        }
+
+        /* --- SHARE COUNTER & CLIPBOARD --- */
+        window.copyToClipboardAndCount = async function() {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                window.showCustomAlert('Copied!', 'Link copied to clipboard.', '📋');
+            } catch (err) {
+                const tempInput = document.createElement('input');
+                tempInput.value = window.location.href;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                window.showCustomAlert('Copied!', 'Link copied to clipboard.', '📋');
+            }
+
+            const shareCountEl = document.getElementById('actionShareCount');
+            if (shareCountEl) {
+                shareCountEl.innerText = (parseInt(shareCountEl.innerText || "0") || 0) + 1;
+            }
+
+            if (window.activeItemId && window.activeDbPath) {
+                try {
+                    await update(ref(db, `${window.activeDbPath}/${window.activeItemId}`), {
+                        copyLinkCount: increment(1)
+                    });
+                } catch(e) { console.error("Error updating share count:", e); }
+            }
+
+            window.closeShareModal();
+        };
+
+        /* --- RATING SYSTEM WITH ONE-TIME LOCK & UI POPUP --- */
+        window.setRating = function(value) {
+            window.currentRating = value;
+            const stars = document.querySelectorAll('.star-rating span');
+            stars.forEach((star, index) => {
+                if (index < value) {
+                    star.classList.add('active-star');
+                    star.style.color = '#F59E0B';
+                } else {
+                    star.classList.remove('active-star');
+                    star.style.color = '#CBD5E1';
+                }
             });
-        }
+        };
 
-        function extractAllImages(item) {
-            let list = [];
-            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
-                list.push(item.imageUrl.trim());
-            }
-            if (item.images) {
-                if (Array.isArray(item.images)) {
-                    item.images.forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
+        window.submitRating = async function() {
+            if (window.currentRating >= 1 && window.currentRating <= 5) {
+                if (window.activeItemId && window.activeDbPath) {
+                    try {
+                        const itemRef = ref(db, `${window.activeDbPath}/${window.activeItemId}`);
+                        const snapshot = await get(itemRef);
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            const ratings = data.ratings || {};
+                            
+                            // Prevent re-rating if already rated
+                            if (ratings[currentUserId]) {
+                                window.showCustomAlert('Already Rated', 'You have already rated this item.', '⭐');
+                                return;
+                            }
+
+                            let totalCount = (data.ratingsCount || 0) + 1;
+                            let currentAvg = data.averageRating || 0;
+                            let currentSum = (currentAvg * (totalCount - 1)) + window.currentRating;
+                            const newAvg = parseFloat((currentSum / totalCount).toFixed(1));
+
+                            const updates = {};
+                            updates[`ratings/${currentUserId}`] = {
+                                rating: window.currentRating,
+                                timestamp: Date.now()
+                            };
+                            updates[`ratingsCount`] = totalCount;
+                            updates[`averageRating`] = newAvg;
+
+                            await update(itemRef, updates);
+
+                            const countEl = document.getElementById('totalRatingsCount');
+                            const avgValEl = document.getElementById('avgRatingValue');
+                            if (countEl) countEl.innerText = totalCount;
+                            if (avgValEl) avgValEl.innerText = `${newAvg} / 5.0`;
+
+                            // Hide submit button and display "You are already rated"
+                            const submitBtn = document.getElementById('submitRatingBtn');
+                            const ratingContainer = document.getElementById('ratingActionContainer');
+                            if (submitBtn) submitBtn.style.display = 'none';
+                            if (ratingContainer) {
+                                ratingContainer.innerHTML = `<span class="already-rated-badge">✓ You are already rated</span>`;
+                            }
+
+                            window.showCustomAlert('Congratulations! 🎉', `Thank you! You gave a ${window.currentRating}-star rating.`, '⭐');
                         }
-                    });
-                } else if (typeof item.images === 'object') {
-                    Object.values(item.images).forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
-                        }
-                    });
+                    } catch (e) {
+                        console.error("Error submitting rating:", e);
+                        window.showCustomAlert('Error', 'Could not submit rating. Please try again.', '⚠️');
+                    }
                 }
+            } else {
+                window.showCustomAlert('Select Rating', 'Please select 1 to 5 stars before submitting.', '⭐');
             }
-            return list;
-        }
+        };
+
+        window.handleLikeClick = async function() {
+            const likeBtn = document.getElementById('actionLikeBtn');
+            const likeCountEl = document.getElementById('actionLikeCount');
+            if (!likeBtn || !likeCountEl) return;
+
+            let isLiked = likeBtn.getAttribute('data-liked') === 'true';
+            let currentLikes = parseInt(likeCountEl.innerText || "0") || 0;
+            let delta = isLiked ? -1 : 1;
+            let newLikedState = !isLiked;
+
+            likeBtn.setAttribute('data-liked', newLikedState ? 'true' : 'false');
+            likeCountEl.innerText = Math.max(0, currentLikes + delta);
+
+            const svg = likeBtn.querySelector('svg');
+            if (svg) {
+                svg.style.fill = newLikedState ? '#EF4444' : 'none';
+                svg.style.stroke = newLikedState ? '#EF4444' : '#0F172A';
+            }
+
+            if (window.activeItemId && window.activeDbPath) {
+                try {
+                    const updates = {};
+                    updates[`likes`] = increment(delta);
+                    updates[`likedBy/${currentUserId}`] = newLikedState ? true : null;
+                    await update(ref(db, `${window.activeDbPath}/${window.activeItemId}`), updates);
+                } catch(e) { console.error("Error updating likes:", e); }
+            }
+        };
+
+        window.handleProfileClick = async function(targetUrl) {
+            if (window.activeItemId && window.activeDbPath) {
+                try {
+                    await update(ref(db, `${window.activeDbPath}/${window.activeItemId}`), {
+                        profileViewsCount: increment(1)
+                    });
+                } catch(e) { console.error("Error updating profile view count:", e); }
+            }
+            window.location.href = targetUrl;
+        };
 
         async function loadItemDetails(itemId, dbPath) {
             try {
                 let snapshot = await get(ref(db, `${dbPath}/${itemId}`));
                 
                 if (!snapshot.exists()) {
-                    const fallbackPath = dbPath === 'posts' ? 'delalaListings' : 'posts';
+                    const fallbackPath = dbPath === 'posts' ? 'delala_new' : 'posts';
                     snapshot = await get(ref(db, `${fallbackPath}/${itemId}`));
+                    if (snapshot.exists()) {
+                        window.activeDbPath = fallbackPath;
+                    }
                 }
 
                 if (!snapshot.exists()) {
@@ -949,6 +1466,15 @@
                 }
 
                 const item = { id: itemId, ...snapshot.val() };
+                window.currentItemAuthorId = item.userId || item.authorId || null;
+                
+                try {
+                    const updates = {};
+                    updates[`views`] = increment(1);
+                    updates[`uniqueViews/${currentUserId}`] = true;
+                    update(ref(db, `${window.activeDbPath}/${itemId}`), updates);
+                } catch(e) { console.error("Error updating view count:", e); }
+
                 renderFullItemHTML(item);
 
             } catch (err) {
@@ -960,11 +1486,7 @@
         function renderErrorState(msg) {
             const readerBody = document.getElementById('fullNewsReaderBody');
             if (readerBody) {
-                readerBody.innerHTML = `
-                    <div style="text-align:center; padding:40px 20px; color:#EF4444; font-weight:700;">
-                        ⚠️ ${msg}
-                    </div>
-                `;
+                readerBody.innerHTML = `<div style="text-align:center; padding:40px 20px; color:#EF4444; font-weight:700;">⚠️ ${msg}</div>`;
             }
         }
 
@@ -972,52 +1494,25 @@
             const readerBody = document.getElementById('fullNewsReaderBody');
             if (!readerBody) return;
 
+            window.currentRating = 0;
             const headline = item.title || "Rental Item";
+            window.activeItemTitle = headline;
+
             const fullContent = item.body || item.content || item.description || "No additional description provided.";
             const category = item.rentalType || item.category || "Rental";
-            const allImages = extractAllImages(item);
             
-            const postedByUserName = item.authorName || item.postedBy || item.userName || item.name || item.userId || "Verified User";
-            
+            let allImages = [];
+            if (item.imageUrl) allImages.push(item.imageUrl);
+            if (item.images && Array.isArray(item.images)) allImages.push(...item.images);
+
+            const postedByUserName = item.authorName || item.postedBy || item.userName || "Verified User";
+
             let locationParts = [];
             if (item.locationDetails) {
-                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
-                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
-                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
                 if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
                 if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
-                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
             }
             const fullLocationStr = locationParts.length > 0 ? locationParts.join(', ') : (item.location || 'Not Specified');
-
-            let lat = item.location?.latitude || item.latitude || null;
-            let lng = item.location?.longitude || item.longitude || null;
-
-            const mapRedirectUrl = `maploc.html?lat=${encodeURIComponent(lat || '')}&lng=${encodeURIComponent(lng || '')}&title=${encodeURIComponent(headline)}&address=${encodeURIComponent(fullLocationStr)}`;
-            
-            let mapPreviewHTML = `
-                <div style="margin-top: 16px; width: 100%; box-sizing: border-box;">
-                    <div class="category-specs-title">Location Preview</div>
-                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box;">
-                        <span style="font-size: 0.95rem; color: #0F172A; font-weight: 600;">📍 ${fullLocationStr}</span>
-                        <a href="${mapRedirectUrl}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 12px; background: #0F172A; color: #FFFFFF; font-size: 0.92rem; font-weight: 700; text-decoration: none; border-radius: 10px; text-align: center; margin-top: 4px;">
-                            Open Location Map
-                        </a>
-                    </div>
-                </div>
-            `;
-
-            let phone = "", telegram = "", whatsapp = "", email = "", instagram = "";
-            if (item.contactInfo) {
-                phone = item.contactInfo.phone || "";
-                telegram = item.contactInfo.telegram || "";
-                whatsapp = item.contactInfo.whatsapp || "";
-                email = item.contactInfo.email || "";
-                instagram = item.contactInfo.instagram || "";
-            }
-
-            let numericalTime = item.createdAt || item.timestamp || Date.now();
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
 
             let imageGalleryHTML = "";
             if (allImages.length > 0) {
@@ -1025,7 +1520,7 @@
                 allImages.forEach((imgUrl, idx) => {
                     imageGalleryHTML += `
                         <div class="gallery-img-container">
-                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" decoding="async" onclick="window.open('${imgUrl}', '_blank')">
+                            <img src="${imgUrl}" alt="Photo ${idx + 1}" loading="lazy" onclick="window.open('${imgUrl}', '_blank')">
                             <span style="position:absolute; bottom:10px; right:10px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.72rem; padding:4px 8px; border-radius:6px; font-weight:700;">${idx + 1} / ${allImages.length}</span>
                         </div>
                     `;
@@ -1033,49 +1528,22 @@
                 imageGalleryHTML += `</div>`;
             }
 
-            const firstImg = allImages.length > 0 ? allImages[0] : '#';
-            
-            let imageActionBarHTML = `
-                <div class="image-action-bar">
-                    <button class="img-action-btn" title="View Fullscreen" onclick="if('${firstImg}' !== '#') window.open('${firstImg}', '_blank')">
-                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
-                    <button class="img-action-btn" title="Like" onclick="alert('Liked!')">
-                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                    <button class="img-action-btn" title="Comment" onclick="alert('Comments opened')">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    </button>
-                    <button class="img-action-btn" title="Share" onclick="if(navigator.share){navigator.share({title:'${headline.replace(/'/g, "\\'")}',url:window.location.href})}else{navigator.clipboard.writeText(window.location.href);alert('Link copied!')}">
-                        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    </button>
-                </div>
-            `;
+            const views = (item.views || 0) + 1;
+            const profileViewsCount = item.profileViewsCount || 0;
+            const likes = item.likes || 0;
+            const isLiked = item.likedBy && item.likedBy[currentUserId] === true;
+            const commentsCount = item.commentsCount || 0;
+            const copyLinkCount = item.copyLinkCount || 0;
 
-            let categorySpecsHTML = "";
-            if (item.categorySpecificDetails && typeof item.categorySpecificDetails === 'object') {
-                categorySpecsHTML = `
-                    <div class="category-specs-container">
-                        <div class="category-specs-title">Property Specifications</div>
-                        <div class="info-terms-list" style="margin:0; background:none; padding:0; border:none; box-shadow:none;">
-                `;
-                Object.keys(item.categorySpecificDetails).forEach(key => {
-                    const val = item.categorySpecificDetails[key];
-                    categorySpecsHTML += `
-                        <div class="info-term-item">
-                            <span class="info-term-label">${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
-                            <span class="info-term-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span>
-                        </div>
-                    `;
-                });
-                categorySpecsHTML += `</div></div>`;
-            }
+            const ratingsCount = item.ratingsCount || 0;
+            const averageRating = item.averageRating !== undefined ? item.averageRating.toFixed(1) : "0.0";
+            const userPreviousRating = (item.ratings && item.ratings[currentUserId]) ? item.ratings[currentUserId].rating : 0;
+            const userHasRated = userPreviousRating > 0;
 
-            let contactButtonsHTML = `
-                <button id="contactTriggerBtn" class="contact-trigger-btn" onclick="triggerContactPopup()">
-                    📞 Contact Us
-                </button>
-            `;
+            const isPostOwner = (item.userId === currentUserId || item.authorId === currentUserId);
+            const canDeletePost = isPostOwner || isAdmin;
+
+            let phone = item.contactInfo?.phone || "", telegram = item.contactInfo?.telegram || "", whatsapp = item.contactInfo?.whatsapp || "", email = item.contactInfo?.email || "", instagram = item.contactInfo?.instagram || "";
 
             let popupButtonsContent = "";
             if (phone) popupButtonsContent += `<a href="tel:${phone}" class="contact-btn contact-btn-phone">📞 Call Owner (${phone})</a>`;
@@ -1085,66 +1553,114 @@
             if (instagram) popupButtonsContent += `<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="contact-btn contact-btn-instagram">📷 Instagram</a>`;
             
             if (!popupButtonsContent) {
-                popupButtonsContent = `<div style="font-size:0.85rem; color:#64748B; padding:10px 0;">No direct contact information provided for this listing.</div>`;
+                popupButtonsContent = `<div style="font-size:0.85rem; color:#64748B; padding:10px 0;">No direct contact information provided.</div>`;
             }
 
             const popupContainerList = document.getElementById('popupContactButtonsList');
-            if (popupContainerList) {
-                popupContainerList.innerHTML = popupButtonsContent;
-            }
+            if (popupContainerList) popupContainerList.innerHTML = popupButtonsContent;
 
             readerBody.innerHTML = `
-                <div class="reader-meta-bar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; width:100%;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="spotlight-pill" style="font-size:0.75rem; padding:4px 8px; background:#0F172A; color:#FFF; border-radius:6px; font-weight:700;">${category}</span>
-                        <span style="font-size:0.75rem; color:#64748B;">ID: ${item.id}</span>
-                    </div>
-                    <span class="timestamp-log-text" style="font-size:0.75rem; color:#64748B;">${initialFormattedClock}</span>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <span style="font-size:0.75rem; padding:4px 8px; background:#0F172A; color:#FFF; border-radius:6px; font-weight:700;">${category}</span>
+                    <span style="font-size:0.75rem; color:#64748B;">👁️ <strong>${views}</strong> views</span>
                 </div>
 
-                <h1 class="reader-title" style="margin-top:6px; font-size:1.3rem; color:#0F172A; font-weight:800; line-height:1.35; width:100%; box-sizing:border-box;">${headline}</h1>
+                <h1 style="margin-top:6px; font-size:1.3rem; color:#0F172A; font-weight:800; line-height:1.35;">${headline}</h1>
+
+                ${canDeletePost ? `
+                    <button onclick="window.deleteCurrentPost()" style="width:100%; padding:10px; background:#FEE2E2; border:1px solid #FCA5A5; color:#DC2626; font-weight:700; border-radius:10px; margin:10px 0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        🗑️ Delete Listing ${isAdmin ? '(Admin)' : '(Owner)'}
+                    </button>
+                ` : ''}
 
                 ${imageGalleryHTML}
-                ${imageActionBarHTML}
+
+                <div class="image-action-bar">
+                    <button class="img-action-btn" title="View Profile" onclick="window.handleProfileClick('user.html')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span class="img-action-count">${profileViewsCount}</span>
+                    </button>
+                    <button id="actionLikeBtn" class="img-action-btn" title="Like" data-liked="${isLiked ? 'true' : 'false'}" onclick="window.handleLikeClick()">
+                        <svg viewBox="0 0 24 24" fill="${isLiked ? '#EF4444' : 'none'}" stroke="${isLiked ? '#EF4444' : '#0F172A'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <span class="img-action-count" id="actionLikeCount">${likes}</span>
+                    </button>
+                    <button class="img-action-btn" title="Comment" onclick="window.openCommentModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span class="img-action-count" id="actionCommentCount">${commentsCount}</span>
+                    </button>
+                    <button class="img-action-btn" title="Share" onclick="window.handleShareClick('${headline.replace(/'/g, "\\'")}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <span class="img-action-count" id="actionShareCount">${copyLinkCount}</span>
+                    </button>
+                </div>
 
                 <div class="info-terms-list">
                     <div class="info-term-item">
                         <span class="info-term-label">Location</span>
                         <span class="info-term-value">${fullLocationStr}</span>
                     </div>
-
                     <div class="info-term-item">
                         <span class="info-term-label">Price Rate</span>
                         <span class="info-term-value">${item.price ? 'ETB ' + Number(item.price).toLocaleString() : 'Negotiable'}</span>
                     </div>
-
-                    <div class="info-term-item">
-                        <span class="info-term-label">Payment Term</span>
-                        <span class="info-term-value">${item.paymentPeriod || item.paymentTerm || 'N/A'}</span>
-                    </div>
-
                     <div class="info-term-item">
                         <span class="info-term-label">Posted By</span>
                         <span class="info-term-value">${postedByUserName}</span>
                     </div>
-
                     <div class="info-term-item">
-                        <span class="info-term-label">Views / Likes</span>
-                        <span class="info-term-value">${item.views || 0} views • ${item.likes || 0} likes</span>
+                        <span class="info-term-label" style="margin-bottom:6px;">Rate Article</span>
+                        <span class="info-term-value" style="display:flex; align-items:center; justify-content:space-between;">
+                            <div class="star-rating">
+                                <span onclick="window.setRating(1)">★</span>
+                                <span onclick="window.setRating(2)">★</span>
+                                <span onclick="window.setRating(3)">★</span>
+                                <span onclick="window.setRating(4)">★</span>
+                                <span onclick="window.setRating(5)">★</span>
+                            </div>
+                            <div id="ratingActionContainer">
+                                ${userHasRated ? 
+                                    `<span class="already-rated-badge">✓ You are already rated</span>` : 
+                                    `<button id="submitRatingBtn" onclick="window.submitRating()" style="padding:6px 12px; background:#0F172A; color:#FFF; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">Submit</button>`
+                                }
+                            </div>
+                        </span>
+                        <div style="margin-top:10px; padding:10px 12px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; font-size:0.85rem; color:#475569; display:flex; align-items:center; justify-content:space-between;">
+                            <span>Average Rating:</span>
+                            <span style="font-weight:800; color:#0F172A;">⭐ <span id="avgRatingValue">${averageRating} / 5.0</span> (<span id="totalRatingsCount">${ratingsCount}</span> votes)</span>
+                        </div>
                     </div>
                 </div>
 
-                ${categorySpecsHTML}
-                ${mapPreviewHTML}
-
-                <div style="margin-top:16px; width:100%; box-sizing:border-box;">
+                <div style="margin-top:16px;">
                     <div class="category-specs-title">Full Description</div>
                     <div class="reader-full-body">${fullContent}</div>
                 </div>
 
-                ${contactButtonsHTML}
+                <button id="contactTriggerBtn" class="contact-trigger-btn" onclick="window.triggerContactPopup()">📞 Contact Us</button>
             `;
+
+            if (userHasRated) window.setRating(userPreviousRating);
         }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', async () => {
+            const cornerClockNode = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (cornerClockNode) cornerClockNode.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }, 1000);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const itemId = urlParams.get('id');
+            const itemPath = urlParams.get('path') || 'posts';
+
+            if (itemId) {
+                window.activeItemId = itemId;
+                window.activeDbPath = itemPath;
+                await loadItemDetails(itemId, itemPath);
+            } else {
+                renderErrorState("Invalid item ID parameter.");
+            }
+        });
     </script>
 </body>
 </html>
