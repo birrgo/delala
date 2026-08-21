@@ -78,7 +78,7 @@
             flex-direction: column;
         }
 
-        /* Small Top 3 Step Indicator Circles */
+        /* Small Top Step Indicator Circles */
         .step-indicator {
             display: flex;
             align-items: center;
@@ -255,8 +255,9 @@
         }
 
         .action-area {
-            margin-top: auto;
-            padding-top: 20px;
+            /* Modified to integrate with content below guide */
+            margin-top: 24px;
+            padding-top: 0;
         }
 
         .btn-primary {
@@ -409,12 +410,12 @@
             <span id="summaryDurationBadge" style="font-size: 10px; background: #DBEAFE; color: #1E40AF; padding: 4px 8px; border-radius: 6px; font-weight: 700;">Pending Payment</span>
         </div>
 
-        <!-- Step Progress Dots (Resized to small circles) -->
+        <!-- Step Progress Dots (Second Step Dots Hidden) -->
         <div class="step-indicator">
             <div class="step-dot active" id="dot-1"></div>
             <div class="step-line" id="line-1"></div>
-            <div class="step-dot" id="dot-2"></div>
-            <div class="step-line" id="line-2"></div>
+            <div class="step-dot" id="dot-2" style="display: none;"></div>
+            <div class="step-line" id="line-2" style="display: none;"></div>
             <div class="step-dot" id="dot-3"></div>
         </div>
 
@@ -468,8 +469,8 @@
                 </div>
             </div>
 
-            <!-- STEP 2: Amount Entry -->
-            <div class="step-view" id="screen-amount">
+            <!-- STEP 2: Amount Entry (HIDDEN) -->
+            <div class="step-view" id="screen-amount" style="display: none !important;">
                 <div class="screen-title">Publishing Fee</div>
                 <div class="screen-subtitle">Required duration and image fee to publish your service listing</div>
                 
@@ -510,14 +511,16 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Action button moved to the end of instructions -->
+                <div class="action-area">
+                    <button id="primaryBtn" class="btn-primary" style="display:none;">
+                        <span id="primaryBtnText">Proceed to Payment</span>
+                    </button>
+                </div>
+
             </div>
 
-        </div>
-
-        <div class="action-area">
-            <button id="primaryBtn" class="btn-primary" style="display:none;">
-                <span id="primaryBtnText">Continue</span>
-            </button>
         </div>
 
     </div>
@@ -635,10 +638,12 @@
 
         const screens = {
             method: document.getElementById('screen-method'),
-            amount: document.getElementById('screen-amount'),
+            amount: document.getElementById('screen-amount'), // Kept but hidden
             guide: document.getElementById('screen-guide')
         };
-        const steps = ['method', 'amount', 'guide'];
+        
+        // Remove amount step from logic array to make it a 2-step process
+        const steps = ['method', 'guide'];
 
         const primaryBtn = document.getElementById('primaryBtn');
         const primaryBtnText = document.getElementById('primaryBtnText');
@@ -671,8 +676,19 @@
 
         window.selectMethod = function(method) {
             selectedMethodId = method;
-            history.pushState({ step: 'amount' }, "Amount", "");
-            showScreen('amount');
+            
+            if (!transactionAmount || transactionAmount <= 0) {
+                showCustomAlert("Error", "Invalid payment amount. Please go back and try again.");
+                return;
+            }
+
+            orderReferenceId = generateOrderRef(); 
+
+            // Directly create database record and proceed to terms/guide
+            createUnpaidDatabaseRecord(() => {
+                history.pushState({ step: 'guide' }, "Guide", "");
+                showScreen('guide');
+            });
         };
 
         function generateOrderRef() {
@@ -680,16 +696,19 @@
         }
 
         function updateProgressIndicator() {
-            const index = steps.indexOf(currentStep);
-            for (let i = 1; i <= 3; i++) {
-                const dot = document.getElementById(`dot-${i}`);
-                const line = document.getElementById(`line-${i}`);
-                if (i <= index + 1) dot.classList.add('active');
-                else dot.classList.remove('active');
-                if (line) {
-                    if (i <= index) line.classList.add('active');
-                    else line.classList.remove('active');
-                }
+            const dot1 = document.getElementById('dot-1');
+            const line1 = document.getElementById('line-1');
+            const dot3 = document.getElementById('dot-3');
+
+            // Explicitly handling 2 visible steps mapping
+            if (currentStep === 'method') {
+                dot1.classList.add('active');
+                line1.classList.remove('active');
+                dot3.classList.remove('active');
+            } else if (currentStep === 'guide') {
+                dot1.classList.add('active');
+                line1.classList.add('active');
+                dot3.classList.add('active');
             }
         }
 
@@ -705,13 +724,9 @@
         function updateNavigationButtons() {
             if (currentStep === 'method') {
                 primaryBtn.style.display = "none"; 
-            } else {
+            } else if (currentStep === 'guide') {
                 primaryBtn.style.display = "block";
-                if (currentStep === 'amount') {
-                    primaryBtnText.innerText = "Continue";
-                } else if (currentStep === 'guide') {
-                    primaryBtnText.innerText = "Proceed to Payment";
-                }
+                primaryBtnText.innerText = "Proceed to Payment";
             }
         }
 
@@ -855,20 +870,7 @@
         }
 
         primaryBtn.addEventListener('click', () => {
-            if (currentStep === 'amount') {
-                const amount = parseFloat(depositAmountInput.value);
-                if (isNaN(amount) || amount <= 0) {
-                    showCustomAlert("Validation Error", "Please enter a valid amount.");
-                    return;
-                }
-                transactionAmount = amount;
-                orderReferenceId = generateOrderRef(); 
-
-                createUnpaidDatabaseRecord(() => {
-                    history.pushState({ step: 'guide' }, "Guide", "");
-                    showScreen('guide');
-                });
-            } else if (currentStep === 'guide') {
+            if (currentStep === 'guide') {
                 sendAdminNotificationAndRedirect();
             }
         });
