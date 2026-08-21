@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala | Pay to Publish</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- SDKs -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <!-- Styling -->
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --brand-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            --brand-gradient-hover: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation Header */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+
+        /* Post Summary Banner */
+        .post-summary-card {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-summary-title { font-size: 12px; font-weight: 800; color: #1E40AF; }
+        .post-summary-sub { font-size: 11px; color: #3B82F6; font-weight: 600; }
+
+        /* Main View Container */
+        .app-view {
+            padding: 16px 16px 100px;
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Step Indicators */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #CBD5E1;
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.15);
+        }
+
+        .step-line {
+            height: 2px;
+            width: 40px;
+            background: #CBD5E1;
+        }
+
+        .step-line.active {
+            background: var(--primary-dark);
+        }
+
+        .step-view { display: none; }
+        .step-view.active { display: block; }
+
+        .screen-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .screen-subtitle {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Payment Option Cards */
+        .p2p-list { display: flex; flex-direction: column; gap: 10px; }
+        .p2p-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02); transition: border-color 0.2s, box-shadow 0.2s; }
+        .p2p-card:hover { border-color: var(--primary-dark); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .p2p-info { display: flex; align-items: center; gap: 12px; }
+        .p2p-icon img { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color); }
+        .p2p-name { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+        .btn-card-action { background: #F1F5F9; border: 1px solid var(--border-color); color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+
+        /* Form Inputs & Guide */
+        .input-group { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02); }
+        .currency-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+        .amount-input { width: 100%; background: #F8FAFC; border: 1px solid var(--border-color); color: var(--primary-dark); padding: 12px; border-radius: 10px; font-size: 18px; font-weight: 800; outline: none; margin-bottom: 8px; }
+        
+        .guide-box { display: flex; flex-direction: column; gap: 10px; }
+        .guide-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; display: flex; gap: 12px; }
+        .guide-number { background: var(--primary-dark); color: #FFFFFF; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+        .guide-text { font-size: 12px; font-weight: 700; color: var(--primary-dark); }
+        .guide-text span { display: block; font-weight: 500; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* UI Components - Details & Modals */
+        .centered-popup-card { background: var(--card-bg); border-radius: 18px; padding: 20px 18px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); margin: 0 auto; width: 100%; text-align: center; }
+        .drawer-step-light-title { font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+        .bank-details-box { background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align: left; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13.5px; }
+        .detail-row:last-child { margin-bottom: 0; }
+        .detail-label { color: var(--text-muted); font-weight: 500; }
+        .detail-val { color: var(--text-main); font-weight: 700; text-align: right; }
+        .btn-copy-acc { background: #F1F5F9; color: var(--primary-dark); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; margin-left: 6px; }
+        
+        .upload-receipt-card { border: 2px dashed var(--border-color); background: #F8FAFC; border-radius: 12px; padding: 24px 16px; text-align: center; cursor: pointer; transition: 0.2s; margin-bottom: 14px; }
+        .upload-receipt-card:hover { border-color: var(--primary-dark); background: #FFFFFF; }
+        .upload-receipt-title { font-size: 14px; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px; }
+        .upload-receipt-sub { font-size: 12px; color: var(--text-muted); }
+
+        .cancel-trigger-wrapper { margin-top: 10px; }
+        .btn-3d-cancel { width: 100%; background: linear-gradient(145deg, #64748B 0%, #334155 100%); color: #ffffff; border: 1px solid #475569; border-radius: 12px; padding: 12px 16px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 0 #1E293B; transition: all 0.15s ease; }
+        .btn-3d-cancel:active { transform: translateY(3px); box-shadow: 0 1px 0 #1E293B; }
+        .icon-3d-box { width: 22px; height: 22px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+
+        /* Action Buttons */
+        .action-area { margin-top: auto; padding-top: 20px; }
+        .btn-primary { width: 100%; background: var(--primary-dark); border: none; color: #FFFFFF; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+        
+        /* Scan View specific */
+        .preview-scan-wrapper { width: 100%; max-height: 240px; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; }
+        .receipt-thumbnail { width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; }
+        .btn-drawer-submit { width: 100%; background: var(--brand-gradient); color: #ffffff; border: none; border-radius: 12px; padding: 14px; font-size: 14.5px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+        .btn-drawer-submit:hover { background: var(--brand-gradient-hover); }
+        .btn-drawer-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Bottom Fixed Navigation Menu */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFFFFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .nav-item-post-center { position: relative; top: -14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; z-index: 1010; }
+        .post-fab-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #334155); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF; display: flex; align-items: center; justify-content: center; color: #ffffff; border: none; cursor: pointer; }
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+
+        /* Modal Overlays */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+        .modal-overlay.active { display: flex !important; }
+        .modal-card { background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 380px; padding: 20px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .modal-icon { color: #F59E0B; margin-bottom: 8px; }
+        .modal-title { font-size: 14px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; }
+        .modal-text { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+        .modal-btn { background: var(--primary-dark); border: none; color: #FFFFFF; width: 100%; padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        /* OCR Scanning Modals */
+        .center-scan-modal-card { background: #0F172A; width: 90%; max-width: 340px; border-radius: 20px; padding: 20px; color: #FFFFFF; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.5); }
+        .center-scan-frame { position: relative; width: 100%; height: 180px; border-radius: 12px; overflow: hidden; background: #000; margin-bottom: 14px; border: 1px solid #1E293B; }
+        .center-scan-frame img { width: 100%; height: 100%; object-fit: contain; }
+        .center-scan-line { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #38BDF8; box-shadow: 0 0 12px #38BDF8, 0 0 20px #38BDF8; animation: centerScanAnim 1.6s ease-in-out infinite alternate; }
+        @keyframes centerScanAnim { 0% { top: 0%; } 100% { top: 96%; } }
+        .center-scan-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+
+        .loading-card { background: #FFFFFF; border-radius: 18px; padding: 24px; text-align: center; max-width: 260px; }
+        .spinner-ring { width: 38px; height: 38px; border: 3.5px solid #E2E8F0; border-top: 3.5px solid var(--primary-dark); border-radius: 50%; margin: 0 auto 12px auto; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Shared Modals -->
+    <div class="modal-overlay" id="appAlertModal">
+        <div class="modal-card">
+            <div class="modal-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <div class="modal-title" id="alertModalTitle">Notice</div>
+            <div class="modal-text" id="alertModalText">Notification text here</div>
+            <button class="modal-btn" onclick="closeCustomAlert()">Understood</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-card" style="text-align: left;">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px; text-align: center;">Remove Listing & Erase Data</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px; text-align: center;">Select the reason why you are cancelling:</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+                <label style="font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><input type="radio" name="cancelReason" value="Do not want to publish rent" checked> Do not want to publish rent</label>
+                <label style="font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><input type="radio" name="cancelReason" value="System error"> System error</label>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="confirmCancelBtn" style="flex: 1; padding: 11px; background: #475569; border: none; border-radius: 10px; font-weight: 600; color: #fff; cursor: pointer;">Confirm & Erase</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="draftAlertModal">
+        <div class="modal-card">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Draft Found</div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">You have an unsaved receipt from a previous session. Restore it?</div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="discardDraftBtn" style="flex: 1; padding: 11px; border: none; background: #F1F5F9; border-radius: 10px; font-weight: 600; cursor: pointer;">Discard</button>
+                <button type="button" id="restoreDraftBtn" style="flex: 1; padding: 11px; border: none; background: var(--brand-gradient); color: #fff; border-radius: 10px; font-weight: 600; cursor: pointer;">Restore</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Status Modals -->
+    <div class="modal-overlay" id="scanningModal">
+        <div class="center-scan-modal-card">
+            <div class="center-scan-frame">
+                <img id="modalScanImg" src="">
+                <div class="center-scan-line"></div>
+            </div>
+            <div class="center-scan-title">Scanning Receipt Image...</div>
+            <div style="font-size: 12px; color: #94A3B8;">Detecting payment details and reference code</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="spinner-ring"></div>
+            <div id="loadingTitleText" style="font-weight:700; margin-bottom:4px;">Verifying Receipt</div>
+            <div id="loadingSubText" style="font-size:12px; color:var(--text-muted);">Analyzing receipt details in background...</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="statusAlertModal">
+        <div class="modal-card">
+            <div id="statusAlertIcon" style="width:46px; height:46px; margin:0 auto 12px auto; border-radius:50%; display:flex; align-items:center; justify-content:center;"></div>
+            <div id="statusAlertTitle" style="font-size:16px; font-weight:700; margin-bottom:6px;">Notification</div>
+            <div id="statusAlertMessage" style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">Details...</div>
+            <button type="button" id="statusAlertCloseBtn" style="width:100%; padding:11px; background:var(--brand-gradient); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="nav-header">
+        <div class="header-left-group">
+            <h1 class="header-title-text" id="headerTitleText">Pay to Publish</h1>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="app-view">
+        
+        <!-- Post Summary Display -->
+        <div class="post-summary-card" id="postSummaryCard" style="display: none;">
+            <div>
+                <div class="post-summary-title" id="summaryPostTitle">Rental Listing</div>
+                <div class="post-summary-sub" id="summaryPostId">Post ID: --</div>
+            </div>
+            <span id="summaryDurationBadge" style="font-size: 10px; background: #DBEAFE; color: #1E40AF; padding: 4px 8px; border-radius: 6px; font-weight: 700;">Pending Payment</span>
+        </div>
+
+        <!-- Step Progress Dots -->
+        <div class="step-indicator" id="mainStepIndicator">
+            <div class="step-dot active" id="dot-1"></div>
+            <div class="step-line" id="line-1"></div>
+            <div class="step-dot" id="dot-2"></div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step-dot" id="dot-3"></div>
+        </div>
+
+        <div class="main-body-content">
+
+            <!-- STEP 1: Payment Method -->
+            <div class="step-view active" id="screen-method">
+                <div class="screen-title">Select Payment Method</div>
+                <div class="screen-subtitle">Choose your payment method to activate your listing</div>
+                
+                <div class="p2p-list">
+                    <div class="p2p-card" id="card-cbe" onclick="selectMethod('cbe')">
+                        <div class="p2p-info">
+                            <div class="p2p-icon"><img src="c2.jpg" alt="CBE"></div>
+                            <div class="p2p-name">Commercial Bank of Ethiopia</div>
+                        </div>
+                        <span class="btn-card-action">Select</span>
+                    </div>
+
+                    <div class="p2p-card" id="card-boa" onclick="selectMethod('boa')">
+                        <div class="p2p-info">
+                            <div class="p2p-icon"><img src="a1.jpg" alt="Abyssinia"></div>
+                            <div class="p2p-name">Bank of Abyssinia</div>
+                        </div>
+                        <span class="btn-card-action">Select</span>
+                    </div>
+
+                    <div class="p2p-card" id="card-telebirr" onclick="selectMethod('telebirr')">
+                        <div class="p2p-info">
+                            <div class="p2p-icon"><img src="t1.jpg" alt="Telebirr"></div>
+                            <div class="p2p-name">Telebirr</div>
+                        </div>
+                        <span class="btn-card-action">Select</span>
+                    </div>
+
+                    <div class="p2p-card" id="card-cbebirr" onclick="selectMethod('cbebirr')">
+                        <div class="p2p-info">
+                            <div class="p2p-icon"><img src="c1.jpg" alt="CBE Birr"></div>
+                            <div class="p2p-name">CBE Birr</div>
+                        </div>
+                        <span class="btn-card-action">Select</span>
+                    </div>
+
+                    <div class="p2p-card" id="card-mpesa" onclick="selectMethod('mpesa')">
+                        <div class="p2p-info">
+                            <div class="p2p-icon"><img src="m1.jpg" alt="M-Pesa"></div>
+                            <div class="p2p-name">M-Pesa</div>
+                        </div>
+                        <span class="btn-card-action">Select</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Amount Entry -->
+            <div class="step-view" id="screen-amount">
+                <div class="screen-title">Publishing Fee</div>
+                <div class="screen-subtitle">Required duration fee to publish your listing</div>
+                
+                <div class="input-group">
+                    <div class="currency-label">FEE AMOUNT</div>
+                    <div class="amount-input-wrapper">
+                        <input type="number" id="depositAmount" class="amount-input" placeholder="Amount" readonly>
+                    </div>
+                    <div class="currency-label" style="font-weight: 600;">Ethiopian Birr (ETB)</div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Instructions Guide -->
+            <div class="step-view" id="screen-guide">
+                <div class="screen-title">How It Works</div>
+                <div class="screen-subtitle">Read the payment instructions carefully to complete publication</div>
+                
+                <div class="guide-box">
+                    <div class="guide-item">
+                        <div class="guide-number">1</div>
+                        <div class="guide-text">
+                            Retrieve Account Details
+                            <span>The next page provides recipient details for payment.</span>
+                        </div>
+                    </div>
+                    <div class="guide-item">
+                        <div class="guide-number">2</div>
+                        <div class="guide-text">
+                            Make Transfer & Upload Receipt
+                            <span>Pay ETB amount and submit screenshot receipt.</span>
+                        </div>
+                    </div>
+                    <div class="guide-item">
+                        <div class="guide-number">3</div>
+                        <div class="guide-text">
+                            Admin Verification & Auto-Publish
+                            <span>Your listing will go live as soon as admin approves payment.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STEP 4: Final Payment Screen / Upload Receipt -->
+            <div class="step-view" id="screen-pay">
+                <div class="centered-popup-card">
+                    <div class="drawer-step-light-title">PAY FOR CATEGORIES</div>
+                    
+                    <div class="bank-details-box">
+                        <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-val" id="dispCategory" style="color: var(--primary-dark);">Rental Posting</span></div>
+                        <div class="detail-row"><span class="detail-label">Property Type:</span><span class="detail-val" id="dispRentType">Residential Rent</span></div>
+                        <div class="detail-row"><span class="detail-label">Time Period:</span><span class="detail-val" id="dispTimePeriod">--</span></div>
+                    </div>
+
+                    <div class="bank-details-box">
+                        <div class="detail-row"><span class="detail-label">Listing Ref:</span><span class="detail-val" id="drawerDispRef">DL-000000</span></div>
+                        <div class="detail-row"><span class="detail-label">Merchant Name:</span><span class="detail-val" id="drawerDispMerchant">Loading...</span></div>
+                        <div class="detail-row">
+                            <span class="detail-label">Account No:</span>
+                            <div style="display:flex; align-items:center; justify-content: flex-end;">
+                                <span class="detail-val" id="drawerDispAccount">Loading...</span>
+                                <button type="button" class="btn-copy-acc" id="copyAccBtn"><span id="copyBtnText">Copy</span></button>
+                            </div>
+                        </div>
+                        <div class="detail-row"><span class="detail-label">Category Fee:</span><span class="detail-val" id="drawerDispFee">-- Birr</span></div>
+                    </div>
+
+                    <!-- Upload Box triggering scanning flow -->
+                    <div class="upload-receipt-card" id="uploadAreaCard">
+                        <span class="upload-receipt-title" id="receipt-title">Upload Transfer Receipt</span>
+                        <p class="upload-receipt-sub" id="receipt-sub">Select screenshot to begin auto-scan</p>
+                        <input type="file" id="receipt-file" accept="image/png, image/jpeg, image/jpg, image/*" style="display:none;">
+                    </div>
+
+                    <div class="cancel-trigger-wrapper">
+                        <button type="button" class="btn-3d-cancel" id="cancelTicketTriggerBtn">
+                            <div class="icon-3d-box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                            <span>Remove Listing & Erase Data</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Scan Receipt (Merged from scaning.html) -->
+            <div class="step-view" id="screen-scan">
+                <div class="centered-popup-card" style="border-radius: 18px; padding: 20px 18px;">
+                    <div class="drawer-step-light-title">RECEIPT SCANNING</div>
+                    
+                    <div class="upload-receipt-card" style="padding: 16px;">
+                        <div class="preview-scan-wrapper"><img id="imagePreview" class="receipt-thumbnail" src="" alt="Receipt Preview"></div>
+                        <span style="font-size: 14px; font-weight: 700; color: var(--text-main); display:block; margin-top: 8px;">Ready for Verification</span>
+                        <p style="font-size: 12px; color: var(--text-muted);">Ensure image is clear before submitting</p>
+                    </div>
+
+                    <button type="button" class="btn-drawer-submit" id="submitDepositReceiptBtn">Scan & Publish Listing</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="action-area" id="mainActionArea">
+            <button id="primaryBtn" class="btn-primary" style="display:none;">
+                <span id="primaryBtnText">Continue</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Hidden Canvas for OCR processing -->
+    <canvas id="ocrCanvas" style="display:none;"></canvas>
+
+    <!-- Bottom Fixed Navigation Menu -->
+    <nav class="bottom-nav">
+        <a href="rental.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <span>Rental</span>
+        </a>
+        <a href="selling.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+            <span>Selling</span>
+        </a>
+        <a href="rentalpost.html" class="nav-item-post-center">
+            <div class="post-fab-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+            <span class="post-fab-label">Post</span>
+        </a>
+        <a href="vacancy.html" class="nav-item">
+            <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+            <span>Vacancy</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, onValue, set, push, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // UPDATED FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Core URL and Data extraction
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeStepParam = urlParams.get('step');
+
+        function parsePaymentPlanData() {
+            let paymentPlan = {};
+            try { paymentPlan = JSON.parse(sessionStorage.getItem('delalaPaymentPlan') || '{}'); } catch (e) {}
+
+            let pending = {};
+            try { pending = JSON.parse(sessionStorage.getItem('delalaPendingListing') || '{}'); } catch (e) {}
+
+            const catId = urlParams.get('cat') || paymentPlan.categoryId || pending.category || '1';
+            const perKey = urlParams.get('period') || paymentPlan.periodKey || '1m';
+            const amountParam = urlParams.get('amount') || paymentPlan.amount || '';
+            const t = pending.title || localStorage.getItem("pending_post_title") || "New Listing";
+            const id = pending.id || pending.postId || localStorage.getItem("pending_post_id") || "";
+
+            return {
+                categoryId: catId,
+                periodKey: perKey,
+                periodLabel: paymentPlan.periodLabel || `${perKey.toUpperCase()} Period`,
+                amount: amountParam ? parseFloat(amountParam) : '',
+                postId: id,
+                title: t,
+                listingData: pending
+            };
+        }
+
+        const planInfo = parsePaymentPlanData();
+        let categoryId = planInfo.categoryId;
+        let periodKey = planInfo.periodKey;
+        let periodLabel = planInfo.periodLabel;
+        let transactionAmount = planInfo.amount;
+        let postId = planInfo.postId;
+        let postTitle = planInfo.title;
+        let pendingPayload = planInfo.listingData;
+
+        let userId = pendingPayload.userId || localStorage.getItem("auth_session_phone") || localStorage.getItem("current_user_id") || "DEV_USER";
+
+        let currentStep = 'method'; 
+        let selectedMethodId = '';
+        let orderReferenceId = '';
+        let databaseOrderKey = '';
+
+        const screens = {
+            method: document.getElementById('screen-method'),
+            amount: document.getElementById('screen-amount'),
+            guide: document.getElementById('screen-guide'),
+            pay: document.getElementById('screen-pay'),
+            scan: document.getElementById('screen-scan')
+        };
+        const steps = ['method', 'amount', 'guide'];
+
+        const primaryBtn = document.getElementById('primaryBtn');
+        const primaryBtnText = document.getElementById('primaryBtnText');
+        const depositAmountInput = document.getElementById('depositAmount');
+
+        let paymentConfigs = {
+            cbe: { name: 'Commercial Bank of Ethiopia', account: '', holder_name: '' },
+            boa: { name: 'Bank of Abyssinia', account: '', holder_name: '' }, 
+            telebirr: { name: 'Telebirr', account: '', holder_name: '' },
+            cbebirr: { name: 'CBE Birr', account: '', holder_name: '' },
+            mpesa: { name: 'M-Pesa', account: '', holder_name: '' }
+        };
+
+        // Shared OCR image variables
+        let imgData = ""; 
+        let extractedOcrText = ""; 
+        let backgroundExtractedTxnRef = "";
+        let isReceiptValidImage = false;
+
+        // UI Helpers
+        window.showCustomAlert = function(title, text) {
+            document.getElementById('alertModalTitle').innerText = title;
+            document.getElementById('alertModalText').innerText = text;
+            document.getElementById('appAlertModal').style.display = 'flex';
+        };
+
+        window.closeCustomAlert = function() {
+            document.getElementById('appAlertModal').style.display = 'none';
+        };
+
+        // Scanning UI Helpers
+        function showPopupState(type, title, message) {
+            const modal = document.getElementById('statusAlertModal');
+            const icon = document.getElementById('statusAlertIcon');
+            document.getElementById('statusAlertTitle').innerText = title;
+            document.getElementById('statusAlertMessage').innerText = message;
+            icon.style.background = type === 'success' ? "#D1FAE5" : "#FEE2E2";
+            icon.style.color = type === 'success' ? "#10B981" : "#EF4444";
+            icon.innerHTML = type === 'success' 
+                ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>` 
+                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+            modal.classList.add('active');
+        }
+
+        function showLoading(show, title = "Loading", subtitle = "Please wait...") {
+            document.getElementById('loadingTitleText').innerText = title;
+            document.getElementById('loadingSubText').innerText = subtitle;
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        // Main logic to determine which flow we are inside
+        if (activeStepParam === 'pay') {
+            // Adjust header/layout for clean payment screen
+            document.getElementById('mainStepIndicator').style.display = 'none';
+            document.getElementById('mainActionArea').style.display = 'none';
+            document.getElementById('postSummaryCard').style.display = 'none';
+            document.getElementById('headerTitleText').innerText = 'Delala Premium';
+            
+            Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+            screens.pay.classList.add('active');
+            
+            // Read details from URL parameters
+            let passedMethod = urlParams.get('method') || 'cbe';
+            let passedAmount = urlParams.get('amount') || 0;
+            let currentOrderRefLocal = urlParams.get('ref') || 'DL-000000';
+            let dbKey = urlParams.get('key');
+            let passedPostId = urlParams.get('postId') || postId;
+            
+            // Populate UI dynamically
+            const rentCategoryNameLocal = pendingPayload.category || localStorage.getItem('pending_delala_category') || 'Rental Posting';
+            const rtType = pendingPayload.rentalType || localStorage.getItem('pending_delala_rentType') || 'Residential Rent';
+            const userCityLocal = localStorage.getItem('pending_delala_location') || 'Adama';
+            
+            document.getElementById('dispCategory').innerText = rentCategoryNameLocal;
+            document.getElementById('dispRentType').innerText = rtType;
+            document.getElementById('dispTimePeriod').innerText = periodLabel || '1 Month';
+            document.getElementById('drawerDispRef').innerText = currentOrderRefLocal;
+            document.getElementById('drawerDispFee').innerText = `${passedAmount} Birr`;
+
+            // Retrieve selected bank details & exact prices for OCR Verification
+            let categoryPrice = 0;
+            let dynamicAdminAccounts = {};
+
+            const accountsRef = ref(db, 'settings/accounts');
+            onValue(accountsRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    dynamicAdminAccounts = snapshot.val();
+                    const config = dynamicAdminAccounts[passedMethod] || {};
+                    document.getElementById('drawerDispMerchant').innerText = config.holder_name || config.name || 'Delala PLC';
+                    document.getElementById('drawerDispAccount').innerText = config.number || config.account || '---';
+                }
+            }, { onlyOnce: true });
+
+            get(ref(db, `settings/category_prices/${rentCategoryNameLocal}`)).then((snap) => {
+                if (snap.exists()) {
+                    const data = snap.val();
+                    // Match the EXACT price for the category and chosen period
+                    categoryPrice = data[periodKey] !== undefined ? parseFloat(data[periodKey]) : (typeof data === 'object' ? Math.min(...Object.values(data).map(Number).filter(v => !isNaN(v) && v > 0)) : parseFloat(data));
+                    
+                    // Force the displayed UI amount to exact DB price
+                    if (categoryPrice > 0) {
+                        document.getElementById('drawerDispFee').innerText = `${categoryPrice} Birr`;
+                    }
+                }
+            });
+
+            // Pay Screen Action Events
+            document.getElementById('uploadAreaCard').addEventListener('click', () => document.getElementById('receipt-file').click());
+            
+            document.getElementById('copyAccBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('drawerDispAccount').innerText).then(() => {
+                    document.getElementById('copyBtnText').innerText = 'Copied!';
+                    setTimeout(() => document.getElementById('copyBtnText').innerText = 'Copy', 2000);
+                });
+            });
+
+            // Handle receipt image processing safely and switch to SCAN mode
+            document.getElementById('receipt-file').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if(!file) return;
+                document.getElementById('receipt-sub').innerText = "Processing image...";
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        const MAX = 1000;
+                        if (w > h && w > MAX) { h *= MAX / w; w = MAX; } 
+                        else if (h > MAX) { w *= MAX / h; h = MAX; }
+                        
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        
+                        try {
+                            imgData = canvas.toDataURL('image/jpeg', 0.85);
+                            localStorage.setItem('pending_receipt_image_data', imgData);
+                            
+                            // Ensure scan variables are maintained
+                            localStorage.setItem('pending_delala_orderRef', currentOrderRefLocal);
+                            localStorage.setItem('pending_delala_txKey', dbKey);
+                            localStorage.setItem('pending_delala_listingKey', passedPostId);
+                            localStorage.setItem('pending_delala_collection', 'posts'); 
+
+                            // Move to Scan screen natively
+                            document.getElementById('imagePreview').src = imgData;
+                            document.getElementById('modalScanImg').src = imgData;
+                            document.getElementById('headerTitleText').innerText = 'Verify Receipt';
+                            
+                            Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+                            screens.scan.classList.add('active');
+
+                        } catch(err) {
+                            showCustomAlert("Upload Error", "Image size is too large. Please select a smaller or cropped screenshot.");
+                            document.getElementById('receipt-sub').innerText = "Select screenshot to begin auto-scan";
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Cancellation and Erasure Logic
+            document.getElementById('cancelTicketTriggerBtn').addEventListener('click', () => {
+                document.getElementById('cancelModal').style.display = 'flex';
+            });
+            document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('confirmCancelBtn');
+                btn.disabled = true; btn.innerText = 'Erasing Data...';
+                
+                try {
+                    const updates = {};
+                    let completeRawCardSequence = userId.replace(/\D/g, '');
+                    
+                    updates[`/cancellations/${push(ref(db, 'cancellations')).key}`] = {
+                        category: rentCategoryNameLocal, 
+                        rentType: rtType, 
+                        userPhone: completeRawCardSequence,
+                        reason: document.querySelector('input[name="cancelReason"]:checked')?.value || "Cancelled by user",
+                        timestamp: Date.now(), 
+                        orderRef: currentOrderRefLocal, 
+                        action: "cancelled_and_erased"
+                    };
+                    
+                    if (passedPostId) {
+                        updates[`/posts/${passedPostId}`] = null;
+                        updates[`/rentals/${passedPostId}`] = null;
+                    }
+                    if (dbKey && completeRawCardSequence) {
+                        updates[`/users/${completeRawCardSequence}/transactions/${dbKey}`] = null;
+                        updates[`/deposits/${dbKey}`] = null;
+                    }
+                    
+                    await update(ref(db), updates);
+                    ['listingKey', 'txKey', 'orderRef', 'category', 'rentType', 'location', 'timePeriod'].forEach(k => localStorage.removeItem(`pending_delala_${k}`));
+                    window.location.href = 'rental.html';
+                } catch (err) { 
+                    btn.disabled = false; 
+                    btn.innerText = 'Confirm & Erase'; 
+                    showCustomAlert("Error", "There was an error erasing your data.");
+                }
+            });
+
+            // Handle unsubmitted Draft logic
+            const draftRaw = localStorage.getItem('delala_payment_draft_info');
+            if (draftRaw && JSON.parse(draftRaw).receiptImageSrc) {
+                document.getElementById('draftAlertModal').style.display = 'flex';
+            }
+            document.getElementById('discardDraftBtn').addEventListener('click', () => { 
+                localStorage.removeItem('delala_payment_draft_info'); 
+                document.getElementById('draftAlertModal').style.display = 'none'; 
+            });
+            document.getElementById('restoreDraftBtn').addEventListener('click', () => { 
+                imgData = JSON.parse(draftRaw).receiptImageSrc;
+                localStorage.setItem('pending_receipt_image_data', imgData);
+                document.getElementById('imagePreview').src = imgData;
+                document.getElementById('modalScanImg').src = imgData;
+                document.getElementById('headerTitleText').innerText = 'Verify Receipt';
+                
+                document.getElementById('draftAlertModal').style.display = 'none';
+                Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+                screens.scan.classList.add('active');
+            });
+
+            // -------------------------------------------------------------
+            // SCANNING PROCESS LOGIC (Tesseract & DB Verification)
+            // -------------------------------------------------------------
+            document.getElementById('statusAlertCloseBtn').addEventListener('click', () => {
+                document.getElementById('statusAlertModal').classList.remove('active');
+                const title = document.getElementById('statusAlertTitle').innerText;
+                if (title.includes("Verified") || title.includes("Approved")) {
+                    localStorage.removeItem('pending_receipt_image_data');
+                    localStorage.removeItem('delala_payment_draft_info');
+                    window.location.href = "test6.html";
+                } else {
+                    localStorage.removeItem('pending_receipt_image_data');
+                    // Return back to payment upload
+                    document.getElementById('headerTitleText').innerText = 'Delala Premium';
+                    document.getElementById('receipt-sub').innerText = "Select screenshot to begin auto-scan";
+                    Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+                    screens.pay.classList.add('active');
+                }
+            });
+
+            document.getElementById('submitDepositReceiptBtn').addEventListener('click', async () => {
+                const submitBtn = document.getElementById('submitDepositReceiptBtn');
+                submitBtn.disabled = true;
+
+                const res = await runOcrProcess(imgData);
+                if (!res || !isReceiptValidImage) {
+                    submitBtn.disabled = false;
+                    showPopupState("invalid", "Scan Failed", "Image could not be validated. Screenshot rejected.");
+                    return;
+                }
+
+                showLoading(true, "Verifying Payment", "Checking recipient details and duplicate records...");
+                try {
+                    if (!backgroundExtractedTxnRef) {
+                        showLoading(false); submitBtn.disabled = false;
+                        showPopupState("invalid", "Unreadable ID", "Could not detect transaction reference. Upload a clearer image.");
+                        return;
+                    }
+
+                    const merchantObj = dynamicAdminAccounts[passedMethod] || {};
+                    const merchantHolder = (merchantObj.holder_name || merchantObj.name || "").toLowerCase();
+                    const merchantAcc = (merchantObj.number || merchantObj.account || "").replace(/[^A-Z0-9]/ig, '');
+                    
+                    const nameParts = merchantHolder.split(/\s+/).filter(p => p.length > 2);
+                    const isNameMatch = nameParts.length === 0 || nameParts.some(p => extractedOcrText.includes(p));
+                    const isAccMatch = merchantAcc.length > 4 && extractedOcrText.replace(/[^A-Z0-9]/ig, '').includes(merchantAcc);
+                    
+                    const scannedAmount = extractAmountFromOcr(extractedOcrText, categoryPrice);
+                    // Match Exact required Price
+                    const isAmountValid = scannedAmount === categoryPrice || extractedOcrText.includes(categoryPrice.toString());
+
+                    if (!isNameMatch && !isAccMatch) {
+                        showLoading(false); submitBtn.disabled = false;
+                        showPopupState("invalid", "Incorrect Recipient", "Recipient name or account does not match our merchant details.");
+                        return;
+                    }
+                    if (!isAmountValid && categoryPrice > 0) {
+                        showLoading(false); submitBtn.disabled = false;
+                        showPopupState("invalid", "Incorrect Amount", `Payment amount must be exactly ${categoryPrice.toLocaleString()} Birr.`);
+                        return;
+                    }
+
+                    const depositsSnap = await get(ref(db, 'deposits'));
+                    if (depositsSnap.exists()) {
+                        const cleanDetected = backgroundExtractedTxnRef.replace(/[^A-Z0-9]/ig, '');
+                        const isDup = Object.values(depositsSnap.val()).some(d => {
+                            const existingTxn = (d.txnRef || d.ref || "").replace(/[^A-Z0-9]/ig, '');
+                            return existingTxn.length >= 6 && cleanDetected.length >= 6 && existingTxn === cleanDetected;
+                        });
+                        if (isDup) {
+                            showLoading(false); submitBtn.disabled = false;
+                            showPopupState("invalid", "Duplicate", `Transaction ID (${backgroundExtractedTxnRef}) has already been submitted.`);
+                            return;
+                        }
+                    }
+
+                    // --- UPDATED SAFE VARIABLES & FIREBASE PAYLOAD ---
+                    let completeRawCardSequence = userId.replace(/\D/g, '') || "unknown_user";
+                    const foundCollectionPath = localStorage.getItem('pending_delala_collection') || 'rentals'; 
+
+                    const depositRefNode = push(ref(db, 'deposits'));
+                    const publishPostRefNode = push(ref(db, 'published_posts'));
+                    const adminNotifRefNode = push(ref(db, 'notifications'));
+
+                    const atomicUpdates = {};
+                    
+                    // Fallback to ensure amount is NEVER 0 (which violates DB rules)
+                    const finalSafeAmount = Number(categoryPrice) > 0 ? Number(categoryPrice) : (Number(passedAmount) || 1);
+
+                    atomicUpdates[`/deposits/${depositRefNode.key}`] = {
+                        ref: currentOrderRefLocal || "DL-000000", 
+                        txnRef: backgroundExtractedTxnRef, 
+                        method: merchantObj.name || passedMethod.toUpperCase(),
+                        userId: completeRawCardSequence, 
+                        amount: finalSafeAmount, 
+                        status: 'verified', 
+                        receiptUrl: imgData,
+                        category: rentCategoryNameLocal || 'Uncategorized', 
+                        rentType: rtType || 'Standard', 
+                        location: userCityLocal || 'Unknown', 
+                        timePeriod: periodLabel || '1 Month', 
+                        timestamp: Date.now()
+                    };
+                    
+                    atomicUpdates[`/published_posts/${publishPostRefNode.key}`] = {
+                        orderRef: currentOrderRefLocal || "DL-000000", 
+                        userId: completeRawCardSequence, 
+                        category: rentCategoryNameLocal || 'Uncategorized', 
+                        rentType: rtType || 'Standard',
+                        location: userCityLocal || 'Unknown', 
+                        timePeriod: periodLabel || '1 Month', 
+                        status: 'published', 
+                        txnRef: backgroundExtractedTxnRef, 
+                        timestamp: Date.now()
+                    };
+
+                    atomicUpdates[`/notifications/${adminNotifRefNode.key}`] = {
+                        type: 'NEW_CATEGORY_DEPOSIT', 
+                        depositId: depositRefNode.key, 
+                        userPhone: completeRawCardSequence, 
+                        amount: finalSafeAmount,
+                        category: rentCategoryNameLocal || 'Uncategorized', 
+                        txnRef: backgroundExtractedTxnRef, 
+                        status: 'unread', 
+                        timestamp: Date.now()
+                    };
+
+                    if (passedPostId) {
+                        atomicUpdates[`/${foundCollectionPath}/${passedPostId}/status`] = 'published';
+                        atomicUpdates[`/${foundCollectionPath}/${passedPostId}/depositRef`] = depositRefNode.key;
+                        atomicUpdates[`/${foundCollectionPath}/${passedPostId}/txnRef`] = backgroundExtractedTxnRef;
+                        
+                        if (foundCollectionPath !== 'rentals') {
+                            atomicUpdates[`/rentals/${passedPostId}/status`] = 'published';
+                        }
+                    }
+
+                    if (dbKey && completeRawCardSequence !== "unknown_user") {
+                        atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/status`] = 'published';
+                        atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/txnRef`] = backgroundExtractedTxnRef;
+                    }
+
+                    await update(ref(db), atomicUpdates);
+                    showLoading(false); submitBtn.disabled = false;
+                    showPopupState("success", "Receipt Approved & Verified!", `Payment verified! Listing for ${rentCategoryNameLocal} in ${userCityLocal} published.`);
+                    
+                } catch (err) {
+                    console.error(err); 
+                    showLoading(false); 
+                    submitBtn.disabled = false;
+                    
+                    // Surface the actual Firebase database rejection message for easier debugging
+                    const errorMsg = err.message ? err.message : "Unable to submit category verification.";
+                    showPopupState("invalid", "Database Error", errorMsg);
+                }
+            });
+
+            function preprocessImageForOcr(src) {
+                return new Promise((resolve) => {
+                    const img = new Image(); img.crossOrigin = "Anonymous";
+                    img.onload = () => {
+                        const canvas = document.getElementById('ocrCanvas'); const ctx = canvas.getContext('2d');
+                        const scale = Math.min(1000 / img.width, 1000 / img.height, 1);
+                        canvas.width = Math.floor(img.width * scale); canvas.height = Math.floor(img.height * scale);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const imgDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const d = imgDataObj.data;
+                        for (let i = 0; i < d.length; i += 4) { const v = ((d[i] + d[i+1] + d[i+2])/3) > 125 ? 255 : 0; d[i]=d[i+1]=d[i+2]=v; }
+                        ctx.putImageData(imgDataObj, 0, 0); resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = () => resolve(src);
+                    img.src = src;
+                });
+            }
+
+            async function runOcrProcess(src) {
+                const scanningModal = document.getElementById('scanningModal');
+                scanningModal.classList.add('active');
+                try {
+                    const optimizedImage = await preprocessImageForOcr(src);
+                    const result = await Tesseract.recognize(optimizedImage, 'eng');
+                    extractedOcrText = (result.data.text || "").toLowerCase();
+                    
+                    const kws = ["transaction", "transfer", "cbe", "telebirr", "bank", "amount", "birr", "successful", "paid", "ref", "account"];
+                    if (!kws.some(kw => extractedOcrText.includes(kw)) || extractedOcrText.length < 8) {
+                        scanningModal.classList.remove('active'); return false;
+                    }
+
+                    isReceiptValidImage = true; backgroundExtractedTxnRef = "";
+                    const lines = result.data.text.split("\n");
+                    for (let line of lines) {
+                        const cleaned = line.replace(/[^A-Z0-9]/ig, '').toUpperCase();
+                        if (cleaned.length >= 8 && /\d/.test(cleaned) && /[A-Z]/.test(cleaned)) { backgroundExtractedTxnRef = cleaned; break; }
+                    }
+
+                    scanningModal.classList.remove('active'); return true;
+                } catch (err) { scanningModal.classList.remove('active'); return false; }
+            }
+
+            // Updated to ensure exactly matching extracted OCR targetPrice 
+            function extractAmountFromOcr(text, targetPrice) {
+                if (!text || targetPrice <= 0) return 0;
+                const norm = text.replace(/,/g, '');
+                for (let regex of [/(?:amount|birr|etb|br|paid|total|val)\D*(\d{2,6}(?:\.\d{2})?)/gi, /\b([1-9]\d{2,6}(?:\.\d{2})?)\b/g]) {
+                    let match; while ((match = regex.exec(norm)) !== null) {
+                        const v = parseFloat(match[1]); if (!isNaN(v) && v === targetPrice) return v;
+                    }
+                } return 0;
+            }
+
+        } else {
+            // STEP 1-3 FLOW LOGIC
+            if (postId || postTitle) {
+                document.getElementById('postSummaryCard').style.display = 'flex';
+                document.getElementById('summaryPostTitle').innerText = postTitle;
+                document.getElementById('summaryPostId').innerText = postId ? `Post ID: ${postId}` : `Duration: ${periodLabel}`;
+                document.getElementById('summaryDurationBadge').innerText = periodLabel;
+            }
+
+            window.selectMethod = function(method) {
+                selectedMethodId = method;
+                showScreen('amount');
+            };
+
+            function generateOrderRef() {
+                return 'DL-' + Math.floor(100000 + Math.random() * 900000);
+            }
+
+            function updateProgressIndicator() {
+                const index = steps.indexOf(currentStep);
+                for (let i = 1; i <= 3; i++) {
+                    const dot = document.getElementById(`dot-${i}`);
+                    const line = document.getElementById(`line-${i}`);
+                    if (dot) {
+                        if (i <= index + 1) dot.classList.add('active');
+                        else dot.classList.remove('active');
+                    }
+                    if (line) {
+                        if (i <= index) line.classList.add('active');
+                        else line.classList.remove('active');
+                    }
+                }
+            }
+
+            function showScreen(step) {
+                currentStep = step;
+                Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+                screens[step].classList.add('active');
+
+                updateProgressIndicator();
+                updateNavigationButtons();
+            }
+
+            function updateNavigationButtons() {
+                if (currentStep === 'method') {
+                    primaryBtn.style.display = "none"; 
+                } else {
+                    primaryBtn.style.display = "block";
+                    if (currentStep === 'amount') {
+                        primaryBtnText.innerText = "Continue";
+                    } else if (currentStep === 'guide') {
+                        primaryBtnText.innerText = "Proceed to Payment";
+                    }
+                }
+            }
+
+            function createUnpaidDatabaseRecord(callback) {
+                let activePostId = postId;
+
+                if (!activePostId && pendingPayload && Object.keys(pendingPayload).length > 0) {
+                    const postsRef = ref(db, 'posts');
+                    const newPostRef = push(postsRef);
+                    activePostId = newPostRef.key;
+                    postId = activePostId;
+
+                    const fullPostRecord = {
+                        ...pendingPayload,
+                        id: activePostId,
+                        status: 'pending_payment',
+                        category: categoryId,
+                        periodKey: periodKey,
+                        periodLabel: periodLabel,
+                        createdAt: Date.now()
+                    };
+
+                    set(newPostRef, fullPostRecord);
+                }
+
+                const globalDepositsRef = ref(db, 'deposits');
+                const newOrderRef = push(globalDepositsRef);
+                databaseOrderKey = newOrderRef.key;
+
+                const timestampNow = Date.now();
+                const methodName = paymentConfigs[selectedMethodId] ? paymentConfigs[selectedMethodId].name : selectedMethodId.toUpperCase();
+
+                const unpaidPayload = {
+                    ref: orderReferenceId,
+                    txnRef: orderReferenceId,
+                    method: methodName,
+                    userId: String(userId),
+                    amount: Number(transactionAmount),
+                    status: 'Unpaid',
+                    receiptUrl: '',
+                    category: String(categoryId),
+                    rentType: String(pendingPayload.rentalType || 'Standard'),
+                    location: String(pendingPayload.locationDetails?.city || 'Default'),
+                    timestamp: timestampNow
+                };
+
+                set(newOrderRef, unpaidPayload).then(() => {
+                    const userHistoryRef = ref(db, `users/${userId}/transactions/${databaseOrderKey}`);
+                    
+                    const userTxData = {
+                        status: 'unpaid',
+                        depositRef: databaseOrderKey,
+                        txnRef: orderReferenceId,
+                        title: `Listing Payment [${postTitle}] (${periodLabel})`,
+                        amount: Number(transactionAmount),
+                        type: 'expense',
+                        timestamp: timestampNow,
+                        sortingTime: timestampNow,
+                        orderRef: orderReferenceId,
+                        ticketNum: orderReferenceId,
+                        userRead: false,
+                        reason: ''
+                    };
+
+                    set(userHistoryRef, userTxData).then(() => {
+                        if (activePostId) {
+                            const postRef = ref(db, `posts/${activePostId}`);
+                            update(postRef, {
+                                status: 'pending_payment',
+                                periodKey: periodKey,
+                                paymentOrderRef: orderReferenceId,
+                                paymentOrderKey: databaseOrderKey
+                            }).then(() => callback()).catch(() => callback());
+                        } else {
+                            callback();
+                        }
+                    }).catch(() => callback());
+                }).catch(err => {
+                    console.error("Database initialization failed:", err);
+                    callback();
+                });
+            }
+
+            function sendAdminNotificationAndRedirect() {
+                const emailConfigRef = ref(db, 'settings/email_config');
+                
+                const goToOrder = () => {
+                    window.location.href = `order.html?step=pay&method=${selectedMethodId}&amount=${transactionAmount}&ref=${orderReferenceId}&key=${databaseOrderKey}&postId=${postId}`;
+                };
+
+                onValue(emailConfigRef, (snapshot) => {
+                    const emailConfig = snapshot.val();
+
+                    if (emailConfig && emailConfig.emailjs_public_key) {
+                        try {
+                            window.emailjs.init(emailConfig.emailjs_public_key);
+                            
+                            const templateParams = {
+                                name: userId, 
+                                email: emailConfig.alert_email_target || "admin@delala.app",
+                                amount: transactionAmount,
+                                post_id: postId || "N/A",
+                                post_title: postTitle || "Rental Listing",
+                                period_label: periodLabel,
+                                user_os: navigator.platform,
+                                user_browser: navigator.userAgent
+                            };
+
+                            window.emailjs.send(
+                                emailConfig.emailjs_service_id, 
+                                emailConfig.emailjs_template_id, 
+                                templateParams
+                            )
+                            .then(() => goToOrder())
+                            .catch((err) => {
+                                console.error("EmailJS sending failed:", err);
+                                goToOrder();
+                            });
+                        } catch (e) {
+                            goToOrder();
+                        }
+                    } else {
+                        goToOrder();
+                    }
+                }, { onlyOnce: true });
+            }
+
+            primaryBtn.addEventListener('click', () => {
+                if (currentStep === 'amount') {
+                    const amount = parseFloat(depositAmountInput.value);
+                    if (isNaN(amount) || amount <= 0) {
+                        showCustomAlert("Validation Error", "Please enter a valid amount.");
+                        return;
+                    }
+                    transactionAmount = amount;
+                    orderReferenceId = generateOrderRef(); 
+
+                    createUnpaidDatabaseRecord(() => {
+                        showScreen('guide');
+                    });
+                } else if (currentStep === 'guide') {
+                    sendAdminNotificationAndRedirect();
+                }
+            });
+
+            function runDatabaseIntegration() {
+                // Fetch the exact price based on category and time period to auto-populate amount
+                const catName = pendingPayload.category || categoryId || 'Rental Posting';
+                
+                get(ref(db, `settings/category_prices/${catName}`)).then((snap) => {
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        let exactPrice = data[periodKey] !== undefined ? parseFloat(data[periodKey]) : (typeof data === 'object' ? Math.min(...Object.values(data).map(Number).filter(v => !isNaN(v) && v > 0)) : parseFloat(data));
+                        
+                        if (exactPrice > 0) {
+                            transactionAmount = exactPrice;
+                            depositAmountInput.value = exactPrice;
+                        } else {
+                            depositAmountInput.value = transactionAmount;
+                        }
+                    } else {
+                        depositAmountInput.value = transactionAmount;
+                    }
+                });
+
+                const dynamicAccountsRef = ref(db, 'settings/accounts');
+                onValue(dynamicAccountsRef, (snapshot) => {
+                    let availableMethods = [];
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.keys(paymentConfigs).forEach(key => {
+                            let accNo = '';
+                            let holderName = '';
+
+                            if (data[key]) {
+                                const config = data[key];
+                                if (typeof config === 'object') {
+                                    accNo = (config.number || config.account || '').toString().trim();
+                                    holderName = (config.holder_name || config.holder || '').toString().trim();
+                                } else {
+                                    accNo = config.toString().trim();
+                                }
+                            }
+
+                            paymentConfigs[key].account = accNo;
+                            paymentConfigs[key].holder_name = holderName;
+
+                            const cardElem = document.getElementById(`card-${key}`);
+                            if (accNo !== '') {
+                                if (cardElem) cardElem.style.display = 'flex';
+                                availableMethods.push(key);
+                            } else {
+                                if (cardElem) cardElem.style.display = 'none';
+                            }
+                        });
+                    } else {
+                        Object.keys(paymentConfigs).forEach(key => {
+                            const cardElem = document.getElementById(`card-${key}`);
+                            if (cardElem) cardElem.style.display = 'none';
+                        });
+                    }
+
+                    if (availableMethods.length === 1) {
+                        selectMethod(availableMethods[0]);
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                runDatabaseIntegration();
+            });
+        }
+    </script>
+</body>
+</html>

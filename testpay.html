@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Service Listing Duration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .category-badge {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            color: #1D4ED8;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .period-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .period-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .period-card:hover { border-color: #94A3B8; }
+
+        .period-card.selected {
+            border-color: var(--primary-dark);
+            background: #F8FAFC;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+        }
+
+        .period-info { display: flex; flex-direction: column; gap: 2px; }
+        .period-name { font-size: 13px; font-weight: 800; color: var(--primary-dark); }
+        .period-subtext { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+        /* New 3-line styles */
+        .period-price { 
+            text-align: right; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+        }
+        .price-line { 
+            font-size: 11px; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+        }
+        .price-line.total-line { 
+            font-size: 13px; 
+            font-weight: 800; 
+            color: var(--primary-dark); 
+            margin-top: 2px;
+        }
+
+        .price-breakdown-card {
+            background: #F8FAFC;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .breakdown-row.total {
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            margin-top: 4px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .loader {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+
+        .submit-post-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+        .submit-post-btn:disabled { background: #94A3B8; box-shadow: none; cursor: not-allowed; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text" id="headerTitle">Select Duration</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card">
+                <div id="sectionDuration" class="form-step-page">
+                    <div class="step-title">Choose Listing Duration</div>
+                    
+                    <div class="category-badge" id="categoryBadge">
+                        <span id="catNameText">Identifying category...</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+
+                    <div id="loader" class="loader">Loading database pricing plans...</div>
+
+                    <div class="period-list" id="periodList" style="display: none;"></div>
+
+                    <div id="priceBreakdown" class="price-breakdown-card" style="display: none;">
+                        <div class="breakdown-row">
+                            <span>Period Fee:</span>
+                            <span id="durationFeeText">0 ETB</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span id="photoCountLabel">Photos Fee:</span>
+                            <span id="photoFeeText">+ 0 ETB</span>
+                        </div>
+                        <div class="breakdown-row total">
+                            <span>Sum Total:</span>
+                            <span id="totalFeeText">0 ETB</span>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button type="button" class="submit-post-btn" id="proceedBtn" disabled>Select Period</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <!-- Navigation items unchanged -->
+            <a href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
+            <a href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
+            <a href="servicepost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="service.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Service</span></a>
+            <a href="profile.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let selectedPlan = null;
+        let imageCount = 0;
+        let perImagePrice = 0;
+        let totalPhotoFee = 0;
+        
+        const SESSION_KEY = 'delela_post_draft';
+        const STEP1_KEY = 'test1';
+
+        const categoryNames = {
+            "government": "Government",
+            "non_government": "Non-Government",
+            "religion": "Religion"
+        };
+
+        const durationMeta = {
+            "1m": { label: "1 Month", desc: "30 days active listing" },
+            "3m": { label: "3 Months", desc: "90 days active listing" },
+            "6m": { label: "6 Months", desc: "180 days active listing" },
+            "1y": { label: "1 Year", desc: "365 days active listing" },
+            "2y": { label: "2 Years", desc: "730 days active listing" }
+        };
+
+        function getFormSession() {
+            const rawDraft = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+            const rawStep1 = sessionStorage.getItem(STEP1_KEY) || localStorage.getItem(STEP1_KEY);
+            let draft = {};
+            let step1 = {};
+            try { draft = rawDraft ? JSON.parse(rawDraft) : {}; } catch (e) { draft = {}; }
+            try { step1 = rawStep1 ? JSON.parse(rawStep1) : {}; } catch (e) { step1 = {}; }
+
+            const mainCategory = draft.serviceType || draft.category || step1.serviceType || step1.category || "";
+
+            return {
+                ...step1,
+                ...draft,
+                serviceType: mainCategory,
+                category: mainCategory
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            initDurationSection();
+            document.getElementById('proceedBtn').addEventListener('click', handleFinalProceed);
+        });
+
+        async function initDurationSection() {
+            const draftData = getFormSession();
+
+            const photosArray = draftData.photos || (draftData.photoDetails && draftData.photoDetails.photos) || draftData.images || [];
+            imageCount = Array.isArray(photosArray) ? photosArray.length : 0;
+
+            totalPhotoFee = Number(draftData.photoFee) || (draftData.photoDetails ? Number(draftData.photoDetails.photoFee) : 0) || 0;
+
+            let rawCat = String(draftData.category || 'non_government').toLowerCase();
+            let cleanCategoryId = 'non_government';
+
+            if (rawCat.includes('gov') && !rawCat.includes('non')) {
+                cleanCategoryId = 'government';
+            } else if (rawCat.includes('relig')) {
+                cleanCategoryId = 'religion';
+            } else {
+                cleanCategoryId = 'non_government';
+            }
+
+            const displayCatName = categoryNames[cleanCategoryId];
+            document.getElementById('catNameText').innerText = `Category: ${displayCatName}`;
+
+            await fetchAllPricing(cleanCategoryId);
+        }
+
+        async function fetchAllPricing(cleanCategoryId) {
+            const loader = document.getElementById('loader');
+            const container = document.getElementById('periodList');
+            loader.style.display = 'block';
+            container.style.display = 'none';
+
+            let dbPrices = {};
+
+            try {
+                const categoryPriceRef = ref(db, `settings/category_prices/${cleanCategoryId}`);
+                const categorySnap = await get(categoryPriceRef);
+
+                if (categorySnap.exists()) {
+                    dbPrices = categorySnap.val() || {};
+                }
+
+                const recordsRef = ref(db, 'settings/pricing_records');
+                const recordsSnap = await get(recordsRef);
+
+                if (recordsSnap.exists()) {
+                    const records = recordsSnap.val();
+                    Object.values(records).forEach(rec => {
+                        if (rec.category === cleanCategoryId || !rec.category) {
+                            if (rec.photo_price !== undefined) {
+                                perImagePrice = Number(rec.photo_price) || 0;
+                            }
+                            
+                            if (rec.months === 1 && dbPrices['1m'] === undefined) dbPrices['1m'] = Number(rec.listing_price) || 0;
+                            if (rec.months === 3 && dbPrices['3m'] === undefined) dbPrices['3m'] = Number(rec.listing_price) || 0;
+                            if (rec.months === 6 && dbPrices['6m'] === undefined) dbPrices['6m'] = Number(rec.listing_price) || 0;
+                            if (rec.years === 1 && dbPrices['1y'] === undefined) dbPrices['1y'] = Number(rec.listing_price) || 0;
+                            if (rec.years === 2 && dbPrices['2y'] === undefined) dbPrices['2y'] = Number(rec.listing_price) || 0;
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to read prices from database:", err);
+            }
+
+            if (totalPhotoFee === 0 && imageCount > 0 && perImagePrice > 0) {
+                totalPhotoFee = imageCount * perImagePrice;
+            }
+
+            if (Object.keys(dbPrices).length === 0) {
+                loader.innerText = "No database pricing plans found for this category.";
+                return;
+            }
+
+            renderDurationOptions(dbPrices, cleanCategoryId);
+        }
+
+        function renderDurationOptions(prices, cleanCategoryId) {
+            const container = document.getElementById('periodList');
+            container.innerHTML = '';
+
+            Object.keys(prices).forEach(key => {
+                const durationPrice = Number(prices[key]) || 0;
+                const meta = durationMeta[key] || { label: key.toUpperCase(), desc: `${key} active listing` };
+                
+                const calculatedTotal = durationPrice + totalPhotoFee;
+
+                const card = document.createElement('div');
+                card.className = 'period-card';
+                card.onclick = () => selectPeriod(card, key, durationPrice, calculatedTotal, meta.label, cleanCategoryId);
+
+                // --- CHANGED TO 3 LINES HERE ---
+                card.innerHTML = `
+                    <div class="period-info">
+                        <span class="period-name">${meta.label}</span>
+                        <span class="period-subtext">${meta.desc}</span>
+                    </div>
+                    <div class="period-price">
+                        <div class="price-line">Duration: ${durationPrice} ETB</div>
+                        <div class="price-line">Photo select: +${totalPhotoFee} ETB</div>
+                        <div class="price-line total-line">Total = ${calculatedTotal} ETB</div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            container.style.display = 'flex';
+        }
+
+        function selectPeriod(element, periodKey, durationPrice, totalAmount, periodLabel, cleanCategoryId) {
+            document.querySelectorAll('.period-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            const storedDraft = getFormSession();
+
+            document.getElementById('durationFeeText').innerText = `${durationPrice} ETB`;
+            
+            document.getElementById('photoCountLabel').innerText = `Photos Fee (${imageCount} photo${imageCount !== 1 ? 's' : ''}):`;
+            
+            document.getElementById('photoFeeText').innerText = `+ ${totalPhotoFee} ETB`;
+            document.getElementById('totalFeeText').innerText = `= ${totalAmount} ETB`;
+            document.getElementById('priceBreakdown').style.display = 'flex';
+
+            selectedPlan = {
+                categoryId: cleanCategoryId,
+                periodKey: periodKey,
+                periodLabel: periodLabel,
+                durationAmount: durationPrice,
+                photoAmount: totalPhotoFee,
+                totalAmount: totalAmount,
+                imageCount: imageCount,
+                listingData: storedDraft
+            };
+
+            const proceedBtn = document.getElementById('proceedBtn');
+            proceedBtn.disabled = false;
+            proceedBtn.innerText = `Proceed with Sum (${totalAmount} ETB)`;
+        }
+
+        function handleFinalProceed() {
+            if (!selectedPlan) return;
+            sessionStorage.setItem('delalaPaymentPlan', JSON.stringify(selectedPlan));
+            window.location.href = `testmethod.html?cat=${selectedPlan.categoryId}&period=${selectedPlan.periodKey}&amount=${selectedPlan.totalAmount}`;
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
