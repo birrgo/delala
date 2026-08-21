@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Review Listing</title>
+    <title>Delala - Review & Publish Listing</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -188,7 +188,7 @@
         </main>
 
         <div class="action-bar" id="actionBarLayout">
-            <button type="button" class="confirm-publish-btn" id="confirmPublishBtn">Continue to Next Step</button>
+            <button type="button" class="confirm-publish-btn" id="confirmPublishBtn">Confirm & Publish</button>
             <button type="button" class="edit-info-btn" id="cancelModalBtn">Edit Info</button>
         </div>
     </div>
@@ -216,6 +216,7 @@
         let currentUser = null;
         let previewMapInstance = null;
         let pendingPayload = null;
+        let isPublishing = false;
         let isInitialized = false;
 
         function sanitizePath(value) {
@@ -250,7 +251,32 @@
             return Array.from(new Set((arr || []).filter(Boolean)));
         }
 
+        // BFCache (Back-Forward Cache) recovery to unlock ghost state
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                isPublishing = false;
+                sessionStorage.removeItem('delalaSubmitLock');
+                
+                const publishBtn = document.getElementById('confirmPublishBtn');
+                const editBtn = document.getElementById('cancelModalBtn');
+                
+                if (publishBtn) {
+                    publishBtn.disabled = false;
+                    publishBtn.style.pointerEvents = 'auto';
+                    publishBtn.textContent = "Confirm & Publish";
+                }
+                if (editBtn) {
+                    editBtn.disabled = false;
+                    editBtn.style.pointerEvents = 'auto';
+                }
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Un-stick any potential locks left over from previous visits
+            sessionStorage.removeItem('delalaSubmitLock');
+            isPublishing = false;
+
             onAuthStateChanged(auth, (user) => { 
                 currentUser = user; 
                 if (!isInitialized) {
@@ -263,7 +289,7 @@
             document.getElementById('cancelModalBtn').addEventListener('click', goBackToEdit);
             
             const publishBtn = document.getElementById('confirmPublishBtn');
-            publishBtn.addEventListener('click', proceedToNextStep);
+            publishBtn.addEventListener('click', handoverUploadToProfile);
         });
 
         function goBackToEdit() {
@@ -346,27 +372,6 @@
             }, 200);
         }
 
-        function initPreviewMap(lat, lng) {
-            if (!lat || !lng) return;
-            const mapContainer = document.getElementById('userPreviewMap');
-            if (!mapContainer || typeof L === 'undefined') return;
-
-            if (previewMapInstance) {
-                previewMapInstance.remove();
-            }
-
-            previewMapInstance = L.map('userPreviewMap', {
-                zoomControl: false,
-                attributionControl: false
-            }).setView([lat, lng], 14);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }).addTo(previewMapInstance);
-
-            L.marker([lat, lng]).addTo(previewMapInstance);
-        }
-
         function renderPublishContent(data) {
             const container = document.getElementById('publishContainer');
 
@@ -413,22 +418,60 @@
             `;
         }
 
-        function proceedToNextStep(e) {
+        function handoverUploadToProfile(e) {
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
             }
 
-            if (!pendingPayload) {
+            // Enhanced multi-click block
+            if (!pendingPayload || isPublishing || sessionStorage.getItem('delalaSubmitLock') === 'true') {
                 return;
             }
 
-            // Save reviewed/consolidated data to sessionStorage without uploading or deleting drafts
-            sessionStorage.setItem('delalaReviewPayload', JSON.stringify(pendingPayload));
+            isPublishing = true;
+            sessionStorage.setItem('delalaSubmitLock', 'true');
 
-            // Forward directly to the next page (change 'rentalpost4.html' to your actual target HTML filename)
-            window.location.href = "rentalpost4.html";
+            // Hard disable all UI elements safely
+            const publishBtn = document.getElementById('confirmPublishBtn');
+            const editBtn = document.getElementById('cancelModalBtn');
+            
+            if (publishBtn) {
+                publishBtn.disabled = true;
+                publishBtn.style.pointerEvents = 'none';
+                publishBtn.textContent = "Publishing...";
+            }
+            if (editBtn) {
+                editBtn.disabled = true;
+                editBtn.style.pointerEvents = 'none';
+            }
+
+            const uploadTask = {
+                uploadId: pendingPayload.id,
+                payload: pendingPayload,
+                status: 'pending', // Set to pending so profile.html knows it's a fresh task
+                progress: 0,
+                timestamp: Date.now()
+            };
+
+            // Safely write to payload
+            localStorage.setItem('delalaActiveUpload', JSON.stringify(uploadTask));
+
+            // Obliterate drafts to prevent ghost recreation
+            sessionStorage.removeItem('delalaDraftPart1');
+            sessionStorage.removeItem('delalaDraftPart2');
+            sessionStorage.removeItem('selectedGpsLocation');
+            sessionStorage.removeItem('delalaCurrentPostId');
+
+            // Force a 150ms delay. In mobile webviews, instant location.replace() can sometimes 
+            // sever the thread before localStorage completes writing, causing weird retries in profile.html
+            setTimeout(() => {
+                window.location.replace("profile.html");
+            }, 150);
         }
     </script>
 </body>
 </html>
+
+
