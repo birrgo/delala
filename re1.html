@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Edit Post (Part 1)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body { font-family: var(--font-main); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .nav-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid var(--border-color); }
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+        .post-form-card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); margin: 12px 16px 24px; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 24px; position: relative; }
+        .step-indicator::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--border-color); z-index: 1; transform: translateY(-50%); }
+        .step-node { position: relative; z-index: 2; background: #F1F5F9; border: 2px solid var(--border-color); color: var(--text-muted); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+        .step-node.active { background: var(--primary-dark); border-color: var(--primary-dark); color: #FFFFFF; box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12); }
+        .form-step-page { display: block; }
+        .step-title { font-size: 15px; font-weight: 800; color: var(--primary-dark); margin-bottom: 18px; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+        .category-select-trigger { width: 100%; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.2); background: linear-gradient(145deg, #38414e, #1e2530, #131821); font-size: 14px; font-weight: 800; color: #E2E8F0; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; text-align: left; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25); transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }
+        .category-select-trigger:active { transform: scale(0.98); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.2); }
+        .category-select-trigger:focus { border-color: #38BDF8; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 0 3px rgba(56, 189, 248, 0.3); }
+        .category-select-trigger svg { stroke: #38BDF8; width: 18px; height: 18px; }
+        .image-upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+        .image-upload-box { aspect-ratio: 1; border: 2px dashed #CBD5E1; border-radius: 14px; background: #F8FAFC; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.15s ease, border-color 0.15s ease; padding: 6px; }
+        .image-upload-box:active { transform: scale(0.96); border-color: var(--primary-dark); }
+        .image-upload-box input[type="file"] { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+        .upload-text { font-size: 10px; font-weight: 700; color: #334155; text-align: center; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; display: none; z-index: 5; }
+        .upload-progress-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(2px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 15; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .upload-progress-overlay.active { opacity: 1; pointer-events: auto; }
+        .progress-spinner { width: 22px; height: 22px; border: 2px solid rgba(255, 255, 255, 0.2); border-top-color: #38BDF8; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 6px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-percentage { font-size: 11px; font-weight: 800; color: #38BDF8; }
+        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+        .btn-next { flex: 1; padding: 13px; border-radius: 14px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #1E293B, #334155); color: #FFFFFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .btn-next:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1); }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFFFFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
+        .nav-item.active { color: #0F172A; font-weight: 700; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .nav-item-post-center { position: relative; top: -14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; z-index: 1010; }
+        .post-fab-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #334155); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF; display: flex; align-items: center; justify-content: center; color: #ffffff; border: none; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .post-fab-btn:active { transform: scale(0.92); }
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .category-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .category-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .category-modal-card { width: 90%; max-width: 360px; background: linear-gradient(145deg, #38414e, #1e2530, #131821); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 20px 45px rgba(0, 0, 0, 0.85); transform: translateY(12px) scale(0.95); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .category-modal-overlay.active .category-modal-card { transform: translateY(0) scale(1); }
+        .category-modal-header { padding: 16px 18px; font-size: 13px; font-weight: 800; color: #94A3B8; background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; }
+        .category-modal-list { display: flex; flex-direction: column; max-height: 440px; overflow-y: auto; }
+        .category-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; min-height: 54px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); cursor: pointer; transition: background 0.15s ease, transform 0.1s ease; }
+        .category-item:active { transform: scale(0.98); }
+        .category-item:last-child { border-bottom: none; }
+        .category-item:hover, .category-item.selected { background: rgba(255, 255, 255, 0.08); }
+        .category-text-group { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #E2E8F0; }
+        .category-text-am { color: #CBD5E1; font-weight: 600; }
+        .custom-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748B; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); flex-shrink: 0; }
+        .category-item.selected .custom-radio { border-color: #38BDF8; background: #38BDF8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.6); }
+        .category-item.selected .custom-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #FFFFFF; }
+
+        .metal-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease-in-out; }
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .metal-modal-card { width: 85%; max-width: 320px; background: linear-gradient(135deg, #4A5568, #2D3748, #1A202C); border-radius: 20px; padding: 20px 16px 16px; text-align: center; border: 1px solid #718096; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: translateY(12px) scale(0.95); transition: transform 0.25s ease; }
+        .metal-modal-overlay.active .metal-modal-card { transform: translateY(0) scale(1); }
+        .metal-icon-wrapper { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: linear-gradient(135deg, #718096, #2D3748); display: flex; align-items: center; justify-content: center; border: 1px solid #A0AEC0; }
+        .metal-icon-wrapper svg { width: 22px; height: 22px; stroke: #E2E8F0; }
+        .metal-modal-title { font-size: 13px; font-weight: 800; color: #E2E8F0; margin: 0 0 6px; text-transform: uppercase; }
+        .metal-modal-message { font-size: 11px; font-weight: 600; color: #CBD5E0; margin-bottom: 16px; }
+        .metal-modal-btn { width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #718096; background: linear-gradient(180deg, #4A5568 0%, #2D3748 100%); color: #EDF2F7; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: transform 0.15s ease; }
+        .metal-modal-btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text" id="pageMainTitle">Delala - Post Rental</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card" id="step1Form">
+                <div class="step-indicator">
+                    <div class="step-node active" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
+                    <div class="step-node" id="node-3">3</div>
+                    <div class="step-node" id="node-4">4</div>
+                </div>
+
+                <div class="form-step-page" id="stepPage1">
+                    <div class="step-title">Step 1: Category & Images</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rental Category *</label>
+                        <button type="button" class="category-select-trigger" id="categoryTrigger">
+                            <span id="selectedCategoryText">Select Category / ዘርፍ ይምረጡ</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <input type="hidden" id="rentalType" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Upload Images (At least 1 required) *</label>
+                        <div class="image-upload-grid">
+                            <div class="image-upload-box" id="uploadBox1">
+                                <span class="upload-text">Upload Image</span>
+                                <input type="file" id="imgInput1" accept="image/*">
+                                <img id="preview1" class="preview-img" alt="Preview 1">
+                                <div class="upload-progress-overlay" id="progressOverlay1"><div class="progress-spinner"></div><span class="progress-percentage" id="progressText1">0%</span></div>
+                            </div>
+                            <div class="image-upload-box" id="uploadBox2">
+                                <span class="upload-text">Upload Image</span>
+                                <input type="file" id="imgInput2" accept="image/*">
+                                <img id="preview2" class="preview-img" alt="Preview 2">
+                                <div class="upload-progress-overlay" id="progressOverlay2"><div class="progress-spinner"></div><span class="progress-percentage" id="progressText2">0%</span></div>
+                            </div>
+                            <div class="image-upload-box" id="uploadBox3">
+                                <span class="upload-text">Upload Image</span>
+                                <input type="file" id="imgInput3" accept="image/*">
+                                <img id="preview3" class="preview-img" alt="Preview 3">
+                                <div class="upload-progress-overlay" id="progressOverlay3"><div class="progress-spinner"></div><span class="progress-percentage" id="progressText3">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button type="button" class="btn-next" id="btnNext1">
+                            Next: Info 
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <footer class="verified-footer-shield"><span class="footer-shield-text">Delala Marketplace Verified</span></footer>
+        </main>
+        
+        <nav class="bottom-nav">
+            <!-- Nav contents truncated for brevity, same as previous -->
+            <a href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
+            <a href="profile.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+        </nav>
+    </div>
+
+    <!-- Modals block (category and error modals) same as before -->
+    <div class="category-modal-overlay" id="categoryModalOverlay">
+        <div class="category-modal-card">
+            <div class="category-modal-header"><span>Select Category / ዘርፍ ይምረጡ</span><div class="custom-radio"></div></div>
+            <div class="category-modal-list">
+                <div class="category-item" data-val="Residential Property" data-label="Residential Property — የመኖሪያ ቤት"><div class="category-text-group"><span class="category-text-en">Residential Property</span><span>—</span><span class="category-text-am">የመኖሪያ ቤት</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Workplace" data-label="Workplace — የሥራ ቦታ"><div class="category-text-group"><span class="category-text-en">Workplace</span><span>—</span><span class="category-text-am">የሥራ ቦታ</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Vehicle" data-label="Vehicle — ተሽከርካሪ"><div class="category-text-group"><span class="category-text-en">Vehicle</span><span>—</span><span class="category-text-am">ተሽከርካሪ</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Event Equipment" data-label="Event Equipment — የፕሮግራም ዕቃዎች"><div class="category-text-group"><span class="category-text-en">Event Equipment</span><span>—</span><span class="category-text-am">የፕሮግራም ዕቃዎች</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Clothing" data-label="Clothing — አልባሳት"><div class="category-text-group"><span class="category-text-en">Clothing</span><span>—</span><span class="category-text-am">አልባሳት</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Machinery" data-label="Machinery — ማሽን"><div class="category-text-group"><span class="category-text-en">Machinery</span><span>—</span><span class="category-text-am">ማሽን</span></div><div class="custom-radio"></div></div>
+                <div class="category-item" data-val="Miscellaneous Items" data-label="Miscellaneous Items — ሌሎች ነገሮች"><div class="category-text-group"><span class="category-text-en">Miscellaneous Items</span><span>—</span><span class="category-text-am">ሌሎች ነገሮች</span></div><div class="custom-radio"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="metal-modal-overlay" id="errorModalOverlay">
+        <div class="metal-modal-card">
+            <div class="metal-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+            <h3 class="metal-modal-title" id="errorModalTitle">Attention Required</h3>
+            <p class="metal-modal-message" id="errorModalMessage">An error has occurred.</p>
+            <button type="button" class="metal-modal-btn" onclick="closeErrorModal()">Dismiss</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Initialize Firebase
+        const primaryConfig = { apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", projectId: "delala-1b582" };
+        const app = initializeApp(primaryConfig);
+        const db = getDatabase(app);
+
+        const serviceDbConfig = { apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw", databaseURL: "https://tsestlive-default-rtdb.firebaseio.com", projectId: "tsestlive" };
+        const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
+        const serviceDb = getDatabase(serviceApp);
+
+        let uploadedBase64Images = ["", "", ""];
+        
+        // Parse URL params for edit flow
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('postId');
+        const dbParam = urlParams.get('db') || 'primary';
+        let isEditing = !!postId;
+
+        window.showErrorModal = function(message, title = "Validation Error") {
+            document.getElementById('errorModalTitle').innerText = title; document.getElementById('errorModalMessage').innerText = message; document.getElementById('errorModalOverlay').classList.add('active');
+        };
+        window.closeErrorModal = function() { document.getElementById('errorModalOverlay').classList.remove('active'); };
+
+        function getAuthenticatedUser() {
+            const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
+            const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
+            if (!userPhone) { showErrorModal("You must be logged in.", "Account Required"); setTimeout(() => { window.location.href = 'login.html'; }, 2000); return null; }
+            return { phone: userPhone, id: userId || userPhone };
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initClock();
+            if (!getAuthenticatedUser()) return;
+
+            setupImageUploaders();
+            setupCategoryModal();
+
+            if (isEditing) {
+                document.getElementById('pageMainTitle').innerText = "Delala - Edit Post";
+                await fetchPostDataForEdit();
+            } else {
+                restoreSavedDraft();
+            }
+
+            document.getElementById('btnNext1').addEventListener('click', () => {
+                if (!getAuthenticatedUser()) return;
+                const category = document.getElementById('rentalType').value;
+                if (!category) { showErrorModal("Please select a Rental Category before proceeding."); return; }
+                if (!uploadedBase64Images[0]) { showErrorModal("Please upload at least 1 property image to continue."); return; }
+                
+                if (isEditing) {
+                    saveEditDraftToSession();
+                    // Direct to step 2 dynamically for edit mode
+                    window.location.href = `re2.html?postId=${postId}&db=${dbParam}`;
+                } else {
+                    saveDraftToSession();
+                    // Original Routing
+                    if (category === "Residential Property") window.location.href = 'renthome.html';
+                    else if (category === "Workplace") window.location.href = 'rentwork.html';
+                    else if (category === "Vehicle") window.location.href = 'rentcar.html';
+                    else if (category === "Machinery") window.location.href = 'rentmachine.html';
+                    else if (category === "Event Equipment") window.location.href = 'rentevent.html';
+                    else if (category === "Clothing") window.location.href = 'rentcloth.html';
+                    else if (category === "Miscellaneous Items") window.location.href = 'rentother.html';
+                    else window.location.href = 'rentalpost4.html';
+                }
+            });
+        });
+
+        async function fetchPostDataForEdit() {
+            try {
+                const targetDb = dbParam === 'service' ? serviceDb : db;
+                const snapshot = await get(ref(targetDb, `posts/${postId}`));
+                if (snapshot.exists()) {
+                    const postData = snapshot.val();
+                    // Store complete post object in EditDraft to carry over to other steps
+                    sessionStorage.setItem('delalaEditDraft', JSON.stringify(postData));
+                    
+                    // Pre-fill fields
+                    if (postData.category || postData.rentalType) {
+                        const matchedCat = postData.rentalType || postData.category;
+                        document.getElementById('rentalType').value = matchedCat;
+                        const item = document.querySelector(`.category-item[data-val="${matchedCat}"]`);
+                        if (item) {
+                            document.querySelectorAll('.category-item').forEach(i => i.classList.remove('selected'));
+                            item.classList.add('selected');
+                            document.getElementById('selectedCategoryText').innerText = item.getAttribute('data-label');
+                        }
+                    }
+
+                    // Pre-fill images
+                    const images = postData.images || (postData.imageUrl ? [postData.imageUrl] : []);
+                    images.forEach((img, idx) => {
+                        if (img && idx < 3) {
+                            uploadedBase64Images[idx] = img;
+                            const preview = document.getElementById(`preview${idx + 1}`);
+                            if (preview) { preview.src = img; preview.style.display = 'block'; }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Failed fetching post", err);
+                showErrorModal("Failed to fetch post for editing.");
+            }
+        }
+
+        function setupCategoryModal() {
+            const trigger = document.getElementById('categoryTrigger'), overlay = document.getElementById('categoryModalOverlay'), items = document.querySelectorAll('.category-item'), hiddenInput = document.getElementById('rentalType'), displayText = document.getElementById('selectedCategoryText');
+            trigger.addEventListener('click', () => overlay.classList.add('active'));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    const selectedVal = item.getAttribute('data-val'), selectedLabel = item.getAttribute('data-label');
+                    items.forEach(i => i.classList.remove('selected')); item.classList.add('selected');
+                    hiddenInput.value = selectedVal; displayText.innerText = selectedLabel;
+                    if (isEditing) saveEditDraftToSession(); else saveDraftToSession();
+                    overlay.classList.remove('active');
+                });
+            });
+        }
+
+        function saveDraftToSession() {
+            const draftData = JSON.parse(sessionStorage.getItem('delalaDraftPart1') || '{}');
+            const activeImages = uploadedBase64Images.filter(img => img !== "");
+            draftData.rentalType = document.getElementById('rentalType').value;
+            draftData.images = activeImages; draftData.imageUrl = activeImages[0] || "";
+            sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
+        }
+
+        function saveEditDraftToSession() {
+            const editData = JSON.parse(sessionStorage.getItem('delalaEditDraft') || '{}');
+            const activeImages = uploadedBase64Images.filter(img => img !== "");
+            editData.rentalType = document.getElementById('rentalType').value;
+            editData.images = activeImages; editData.imageUrl = activeImages[0] || "";
+            sessionStorage.setItem('delalaEditDraft', JSON.stringify(editData));
+        }
+
+        function restoreSavedDraft() {
+            const rawDraft = sessionStorage.getItem('delalaDraftPart1'); if (!rawDraft) return;
+            try {
+                const draft = JSON.parse(rawDraft);
+                if (draft.rentalType) { document.getElementById('rentalType').value = draft.rentalType; const selectedItem = document.querySelector(`.category-item[data-val="${draft.rentalType}"]`); if (selectedItem) { document.querySelectorAll('.category-item').forEach(i => i.classList.remove('selected')); selectedItem.classList.add('selected'); document.getElementById('selectedCategoryText').innerText = selectedItem.getAttribute('data-label'); } }
+                if (draft.images && Array.isArray(draft.images)) { draft.images.forEach((img, idx) => { if (img && idx < 3) { uploadedBase64Images[idx] = img; const preview = document.getElementById(`preview${idx + 1}`); if (preview) { preview.src = img; preview.style.display = 'block'; } } }); }
+            } catch (err) {}
+        }
+
+        function setupImageUploaders() {
+            [1, 2, 3].forEach((idx) => {
+                const input = document.getElementById(`imgInput${idx}`), preview = document.getElementById(`preview${idx}`), overlay = document.getElementById(`progressOverlay${idx}`), progressText = document.getElementById(`progressText${idx}`);
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    overlay.classList.add('active'); progressText.innerText = '0%';
+                    const reader = new FileReader();
+                    reader.onprogress = (event) => { if (event.lengthComputable) { progressText.innerText = `${Math.round((event.loaded / event.total) * 40)}%`; } };
+                    reader.onload = (event) => {
+                        progressText.innerText = '50%'; const img = new Image();
+                        img.onload = () => {
+                            progressText.innerText = '75%';
+                            const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+                            const maxDimension = 1200; let width = img.width, height = img.height;
+                            if (width > maxDimension || height > maxDimension) { if (width > height) { height = Math.round((height * maxDimension) / width); width = maxDimension; } else { width = Math.round((width * maxDimension) / height); height = maxDimension; } }
+                            canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                            progressText.innerText = '100%';
+                            setTimeout(() => { uploadedBase64Images[idx - 1] = compressedBase64; preview.src = compressedBase64; preview.style.display = 'block'; overlay.classList.remove('active'); if (isEditing) saveEditDraftToSession(); else saveDraftToSession(); }, 200);
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+        function initClock() { const node = document.getElementById('topCornerLiveClock'); setInterval(() => { if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }); }, 1000); }
+    </script>
+</body>
+</html>
