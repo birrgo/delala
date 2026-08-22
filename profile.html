@@ -299,37 +299,8 @@
     </div>
 
     <!-- MODALS -->
-    <div class="modal-overlay" id="editProfileModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Edit Profile</h3>
-                <button type="button" class="modal-close-btn" id="closeEditProfileBtn">✕</button>
-            </div>
-            <div class="modal-body">
-                <div style="text-align: center;">
-                    <img src="s.png" id="editAvatarPreview" class="avatar-edit-preview" alt="Avatar Preview">
-                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
-                    <button type="button" class="btn-secondary" id="triggerAvatarUpload" style="margin-top: 8px; padding: 6px 12px; font-size: 11px;">Change Photo</button>
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label" for="editNameInput">Display Name</label>
-                    <input type="text" id="editNameInput" class="form-field-input" placeholder="e.g. Abebe Bikila">
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label" for="editHandleInput">Username</label>
-                    <input type="text" id="editHandleInput" class="form-field-input" placeholder="e.g. abebe_b">
-                </div>
-
-                <div class="verify-btn-group" style="margin-top: 12px;">
-                    <button type="button" class="btn-secondary" id="cancelEditProfileBtn">Cancel</button>
-                    <button type="button" class="auth-btn-primary" id="saveProfileBtn" style="flex:1;">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
+    <!-- Auth Prompt Modal -->
     <div class="modal-overlay" id="authPromptModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -348,6 +319,7 @@
         </div>
     </div>
 
+    <!-- Post Preview Modal -->
     <div class="modal-overlay" id="postPreviewModal">
         <div class="modal-card">
             <div class="modal-header"><h3>Post Details</h3><button type="button" class="modal-close-btn" id="closePreviewModalBtn">✕</button></div>
@@ -355,6 +327,7 @@
         </div>
     </div>
 
+    <!-- Verify Delete Modal -->
     <div class="modal-overlay" id="verifyDeleteModal">
         <div class="modal-card">
             <div class="modal-header"><h3>Verify Deletion</h3><button type="button" class="modal-close-btn" id="closeVerifyModalBtn">✕</button></div>
@@ -426,7 +399,7 @@
 
         let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, 
             postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
-            pendingPostToDelete = null, isLoggedInUser = false, selectedAvatarFile = null;
+            pendingPostToDelete = null, isLoggedInUser = false;
             
         let primaryPosts = [];
         let servicePosts = [];
@@ -502,82 +475,21 @@
         });
 
         function setupEditProfileHandlers() {
-            const editModal = document.getElementById('editProfileModal'),
-                  openBtn = document.getElementById('openEditProfileBtn'),
-                  closeBtn = document.getElementById('closeEditProfileBtn'),
-                  cancelBtn = document.getElementById('cancelEditProfileBtn'),
-                  saveBtn = document.getElementById('saveProfileBtn'),
-                  avatarPreview = document.getElementById('editAvatarPreview'),
-                  fileInput = document.getElementById('avatarFileInput'),
-                  triggerBtn = document.getElementById('triggerAvatarUpload');
+            const openBtn = document.getElementById('openEditProfileBtn');
+            const avatarGroup = document.getElementById('avatarClickGroup');
 
             const openEdit = () => {
-                if (!isLoggedInUser) { showAuthModal(); return; }
-                document.getElementById('editNameInput').value = document.getElementById('userDisplayName').innerText || "";
-                document.getElementById('editHandleInput').value = (document.getElementById('userHandle').innerText || "").replace(/^@/, '');
-                avatarPreview.src = document.getElementById('userAvatarImg').src;
-                selectedAvatarFile = null;
-                editModal.classList.add('active'); editModal.style.display = 'flex';
+                if (!isLoggedInUser) { 
+                    showAuthModal(); 
+                    return; 
+                }
+                // Redirect directly to the dedicated edit page
+                window.location.href = 'edit.html';
             };
 
-            const closeEdit = () => { editModal.classList.remove('active'); editModal.style.display = 'none'; };
-
             openBtn?.addEventListener('click', openEdit);
-            document.getElementById('avatarClickGroup')?.addEventListener('click', () => { if (isLoggedInUser) openEdit(); });
-            closeBtn?.addEventListener('click', closeEdit);
-            cancelBtn?.addEventListener('click', closeEdit);
-            triggerBtn?.addEventListener('click', () => fileInput.click());
-            avatarPreview?.addEventListener('click', () => fileInput.click());
-
-            fileInput?.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    selectedAvatarFile = file;
-                    const reader = new FileReader();
-                    reader.onload = (evt) => avatarPreview.src = evt.target.result;
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            saveBtn?.addEventListener('click', async () => {
-                if (!currentActiveUserId) return;
-                const newName = document.getElementById('editNameInput').value.trim();
-                const newHandle = document.getElementById('editHandleInput').value.trim().replace(/^@/, '');
-
-                if (!newName) { showToast("Display name cannot be empty."); return; }
-
-                saveBtn.disabled = true; saveBtn.innerText = "Saving...";
-
-                try {
-                    let photoURL = document.getElementById('userAvatarImg').src;
-                    if (selectedAvatarFile) {
-                        const avatarRef = storageRef(storage, `avatars/${currentActiveUserId}_${Date.now()}`);
-                        await uploadBytes(avatarRef, selectedAvatarFile);
-                        photoURL = await getDownloadURL(avatarRef);
-                    }
-
-                    const nameParts = newName.split(/\s+/);
-                    const firstName = nameParts[0] || "", middleName = nameParts.slice(1).join(" ") || "";
-
-                    const profileUpdate = { displayName: newName, firstName: firstName, middleName: middleName, username: newHandle, photoURL: photoURL, profilePicture: photoURL };
-                    await update(ref(db, `users/${currentActiveUserId}`), profileUpdate);
-                    if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: newName, photoURL: photoURL });
-
-                    const cached = localStorage.getItem('delala_cached_profile');
-                    let currentObj = cached ? JSON.parse(cached) : {};
-                    const updatedProfile = { ...currentObj, ...profileUpdate };
-
-                    localStorage.setItem('delala_cached_profile', JSON.stringify(updatedProfile));
-                    applyProfileToDOM(updatedProfile);
-                    logToServiceManagement('PROFILE_UPDATE', { updatedName: newName, updatedHandle: newHandle });
-
-                    closeEdit();
-                    showToast("Profile updated successfully!");
-                } catch (err) {
-                    showToast("Failed to update profile.");
-                } finally {
-                    saveBtn.disabled = false; saveBtn.innerText = "Save Changes";
-                }
+            avatarGroup?.addEventListener('click', () => { 
+                if (isLoggedInUser) openEdit(); 
             });
         }
 
@@ -1001,6 +913,14 @@
                     ${contact.email ? `<div>✉️ Email: <strong>${contact.email}</strong></div>` : ''}
                     ${contact.instagram ? `<div>📷 Instagram: <strong>${contact.instagram}</strong></div>` : ''}
                 </div>
+                
+                <div class="preview-section" style="border-color: #CBD5E1; background: #F8FAFC; margin-bottom: 8px;">
+                    <button type="button" class="btn-secondary" id="editPostBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; color: #0F172A; border: 1px solid #CBD5E1;">
+                        <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Edit Post</span>
+                    </button>
+                </div>
+
                 <div class="preview-section" style="border-color: #FEE2E2; background: #FEF2F2;">
                     <button type="button" class="delete-post-btn" id="deletePostBtn">
                         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1010,7 +930,14 @@
 
             const previewModal = document.getElementById('postPreviewModal');
             previewModal.classList.add('active'); previewModal.style.display = 'flex';
+            
             document.getElementById('deletePostBtn')?.addEventListener('click', () => openVerifyModal(post));
+            
+            document.getElementById('editPostBtn')?.addEventListener('click', () => {
+                // Pass postId and database source as URL parameters to the new Edit Page flow
+                const sourceDb = post._dbSource || 'primary';
+                window.location.href = `edit1.html?postId=${post.id}&db=${sourceDb}`;
+            });
 
             if (post.location && post.location.latitude && post.location.longitude) {
                 setTimeout(() => initPreviewMap(post.location.latitude, post.location.longitude), 200);

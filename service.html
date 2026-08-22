@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Hulum - Rental Items</title>
+    <title>Hulum - Service Items</title>
     
     <!-- Ultra-Fast Preconnections & Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,296 +13,85 @@
     <!-- Non-blocking Google Font Load -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
-    <!-- Deferred news.css stylesheet -->
-    <link rel="preload" href="news.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="news.css"></noscript>
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="news.css">
+    <link rel="stylesheet" href="rental.css">
 
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            letter-spacing: -0.011em;
-            color: #0F172A;
-        }
-
-        .header-title-text {
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .header-live-clock-badge {
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        /* Social Action & Author Header Styles */
+        .author-actions-right {
             display: flex;
             align-items: center;
-            justify-content: space-around;
-            background: #FFFFFF;
-            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid #E2E8F0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #64748B;
-            font-size: 11px;
-            font-weight: 600;
-            flex: 1;
-            text-align: center;
-            letter-spacing: -0.01em;
-        }
-
-        .nav-item.active { color: #0F172A; }
-
-        .nav-item .icon-bg svg {
-            width: 22px;
-            height: 22px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .nav-item-post-center {
-            position: relative;
-            top: -14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            z-index: 1010;
-        }
-
-        .post-fab-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1E293B, #334155);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .post-fab-btn:active { transform: scale(0.92); }
-
-        .post-fab-btn svg {
-            width: 22px;
-            height: 22px;
-            stroke: #ffffff;
-            stroke-width: 2.8;
-        }
-
-        .post-fab-label {
-            margin-top: 3px;
-            font-size: 10px;
-            font-weight: 700;
-            color: #334155;
-            letter-spacing: -0.01em;
-        }
-
-        .header-actions-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-        }
-
-        .location-action-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #38BDF8;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-
-        .location-action-btn:active {
-            transform: scale(0.92);
-        }
-
-        .location-action-btn.active-gps,
-        .location-action-btn.active-category {
-            background: #10B981;
-            color: #ffffff;
-            border-color: #059669;
-        }
-
-        .location-action-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .category-dropdown-menu {
-            position: absolute;
-            top: 45px;
-            right: 0;
-            background: #1E293B;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            display: none;
-            flex-direction: column;
-            z-index: 1100;
-            min-width: 170px;
-            overflow: hidden;
-            padding: 4px 0;
-        }
-
-        .category-dropdown-menu.show {
-            display: flex;
-        }
-
-        .category-dropdown-item {
-            padding: 10px 16px;
-            color: #94A3B8;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            background: transparent;
-            border: none;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease;
-        }
-
-        .category-dropdown-item:hover, 
-        .category-dropdown-item.active {
-            background: rgba(56, 189, 248, 0.15);
-            color: #38BDF8;
-            font-weight: 700;
-        }
-
-        .category-specs-container {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 12px 0;
-        }
-
-        .category-specs-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-
-        .info-terms-list {
-            display: flex;
-            flex-direction: column;
             gap: 6px;
+            flex-wrap: nowrap;
         }
 
-        .info-term-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            border-bottom: 1px dashed #E2E8F0;
-            padding-bottom: 4px;
-        }
-
-        .info-term-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .info-term-label {
-            color: #64748B;
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-
-        .info-term-value {
-            color: #0F172A;
-            font-weight: 700;
-        }
-
-        .infinite-scroll-trigger {
-            text-align: center;
-            padding: 18px;
-            font-size: 12px;
-            color: #64748B;
-            font-weight: 600;
-            min-height: 50px;
-        }
-
-        .distance-pill {
-            font-size: 11px;
-            background: #ECFDF5;
-            color: #047857;
-            border: 1px solid #A7F3D0;
-            padding: 3px 8px;
+        /* Animated GPS Distance Chip placed directly before Follow button */
+        .animated-distance-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
             border-radius: 12px;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .broadcast-title {
-            color: #0F172A !important;
-            font-size: 16px;
-            font-weight: 700;
-            line-height: 1.35;
-            letter-spacing: -0.02em;
-        }
-
-        .location-text-val {
-            color: #334155 !important;
-            font-weight: 600;
-        }
-
-        .spotlight-pill {
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .timestamp-log-text {
             font-size: 11px;
-            font-weight: 500;
-            color: #64748B !important;
-        }
-
-        .featured-broadcast-card {
+            font-weight: 700;
+            color: #0284c7;
+            background: rgba(2, 132, 199, 0.08);
+            border: 1px solid rgba(2, 132, 199, 0.25);
+            white-space: nowrap;
             cursor: pointer;
-            scroll-margin-top: 70px;
-            contain: content;
+            transition: all 0.3s ease;
+            animation: distancePulse 2.5s infinite ease-in-out;
         }
 
-        .broadcast-image-frame {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-color: #E2E8F0;
-            overflow: hidden;
-            border-radius: 8px;
+        .animated-distance-chip.no-gps {
+            color: #64748b;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            animation: none;
         }
-        .broadcast-image-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+
+        .animated-distance-chip .gps-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #0284c7;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotGlow 1.5s infinite;
+        }
+
+        .animated-distance-chip.no-gps .gps-dot {
+            background-color: #94a3b8;
+            animation: none;
+        }
+
+        @keyframes distancePulse {
+            0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.25); }
+            50% { box-shadow: 0 0 0 5px rgba(2, 132, 199, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+        }
+
+        @keyframes dotGlow {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .btn-follow-author.following {
+            background-color: #e2e8f0 !important;
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .social-action-btn.liked svg {
+            fill: #ef4444;
+            stroke: #ef4444;
+            animation: likeHeart 0.3s ease-in-out;
+        }
+
+        @keyframes likeHeart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -338,14 +127,14 @@
             </div>
             <div class="search-results-area" id="searchResultsArea">
                 <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                    Type to search rental items...
+                    Type to search service items...
                 </div>
             </div>
         </div>
 
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Rental Items</h1>
+                <h1 class="header-title-text">Service Items</h1>
             </div>
             
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
@@ -359,12 +148,11 @@
 
                 <div class="category-dropdown-menu" id="categoryDropdownMenu">
                     <button class="category-dropdown-item active" data-category="all">All Categories</button>
-                    <button class="category-dropdown-item" data-category="residence">Residence</button>
-                    <button class="category-dropdown-item" data-category="work">Work</button>
-                    <button class="category-dropdown-item" data-category="vehicle">Vehicle</button>
-                    <button class="category-dropdown-item" data-category="machine">Machine</button>
-                    <button class="category-dropdown-item" data-category="cloth">Cloth</button>
-                    <button class="category-dropdown-item" data-category="event">Event</button>
+                    <button class="category-dropdown-item" data-category="consulting">Consulting</button>
+                    <button class="category-dropdown-item" data-category="repair">Repair & Fix</button>
+                    <button class="category-dropdown-item" data-category="delivery">Delivery</button>
+                    <button class="category-dropdown-item" data-category="cleaning">Cleaning</button>
+                    <button class="category-dropdown-item" data-category="tech">Technology</button>
                     <button class="category-dropdown-item" data-category="other">Other</button>
                 </div>
 
@@ -389,12 +177,13 @@
             </div>
 
             <footer class="verified-footer-shield">
-                <span class="footer-shield-text">Delala Secure Matrix Verified</span>
+                <span class="footer-shield-text" id="footerShieldText">Delala Secure Matrix Verified</span>
             </footer>
         </main>
 
+        <!-- Navigation updated for Service active state -->
         <nav class="bottom-nav">
-            <a id="nav-rental" href="rental.html" class="nav-item active" data-filter="Rental">
+            <a id="nav-rental" href="rental.html" class="nav-item" data-filter="Rental">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 </div>
@@ -418,7 +207,7 @@
                 <span class="post-fab-label">Post</span>
             </a>
 
-            <a id="nav-service" href="service.html" class="nav-item" data-filter="Service">
+            <a id="nav-service" href="service.html" class="nav-item active" data-filter="Service">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                 </div>
@@ -427,18 +216,21 @@
 
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <img id="navProfilePic" class="nav-profile-img" src="" alt="Profile" style="display:none; width: 24px; height: 24px; border-radius: 50%;">
+                    <svg id="navProfileIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
-                <span>Profile</span>
+                <span id="navProfileName">Profile</span>
             </a>
         </nav>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get, set, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        // Added Auth for the Like/Comment/Follow functionality
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Updated Database Configuration based on target schema configuration
+        // Using the tsestlive Config as requested
         const firebaseConfig = {
             apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
             authDomain: "tsestlive.firebaseapp.com",
@@ -451,8 +243,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
-        // Updated batch size to fetch items
         const BATCH_LIMIT = 4;
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
@@ -463,8 +255,165 @@
         let currentUserCoordinates = null;
         let isGpsActive = false;
         let activeCategoryFilter = 'all';
+        
+        // State variables for Auth & Social actions
+        let currentUser = null;
+        let userFollowingSet = new Set();
 
         const DOM = {};
+
+        // --- Social Action Functions --- //
+
+        window.navigateToAuthorProfile = function(event, userId, userName) {
+            if (event) event.stopPropagation();
+            if (!userId || userId === 'unknown') return;
+            window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
+        };
+
+        window.toggleFollowUser = async function(event, authorId) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to follow this user.", "🔐");
+                return;
+            }
+            if (currentUser.uid === authorId) {
+                triggerSystemAlert("Action Restricted", "You cannot follow your own account.", "ℹ️");
+                return;
+            }
+
+            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
+            const isFollowing = userFollowingSet.has(authorId);
+
+            try {
+                if (isFollowing) {
+                    await remove(followRef);
+                    userFollowingSet.delete(authorId);
+                } else {
+                    await set(followRef, true);
+                    userFollowingSet.add(authorId);
+                }
+                updateFollowButtonsUI(authorId, !isFollowing);
+            } catch (err) {
+                console.error("Follow error:", err);
+            }
+        };
+
+        function updateFollowButtonsUI(authorId, isFollowing) {
+            document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
+                if (isFollowing) {
+                    btn.innerText = "Following";
+                    btn.classList.add('following');
+                } else {
+                    btn.innerText = "+ Follow";
+                    btn.classList.remove('following');
+                }
+            });
+        }
+
+        window.toggleLikePost = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
+                return;
+            }
+
+            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${currentUser.uid}`);
+            const likesCountRef = ref(db, `${path}/${itemId}/likes`);
+
+            try {
+                const snap = await get(likedByRef);
+                const isLiked = snap.exists() && snap.val() === true;
+
+                if (isLiked) {
+                    await remove(likedByRef);
+                    await runTransaction(likesCountRef, (current) => Math.max(0, (current || 1) - 1));
+                } else {
+                    await set(likedByRef, true);
+                    await runTransaction(likesCountRef, (current) => (current || 0) + 1);
+                }
+
+                // Update Local Cache
+                const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
+                if (cachedItem) {
+                    if (!cachedItem.likedBy) cachedItem.likedBy = {};
+                    if (isLiked) {
+                        delete cachedItem.likedBy[currentUser.uid];
+                        cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1);
+                    } else {
+                        cachedItem.likedBy[currentUser.uid] = true;
+                        cachedItem.likes = (cachedItem.likes || 0) + 1;
+                    }
+                }
+
+                // Update UI visually
+                const likeBtn = document.getElementById(`like-btn-${itemId}`);
+                const likeCountNode = document.getElementById(`like-count-${itemId}`);
+                if (likeBtn && likeCountNode) {
+                    let currentCount = parseInt(likeCountNode.innerText || '0', 10);
+                    if (isLiked) {
+                        likeBtn.classList.remove('liked');
+                        likeCountNode.innerText = Math.max(0, currentCount - 1);
+                    } else {
+                        likeBtn.classList.add('liked');
+                        likeCountNode.innerText = currentCount + 1;
+                    }
+                }
+            } catch (err) {
+                console.error("Like toggle failed:", err);
+            }
+        };
+
+        window.toggleCommentBox = function(event, itemId) {
+            if (event) event.stopPropagation();
+            const commentBox = document.getElementById(`comments-box-${itemId}`);
+            if (commentBox) {
+                commentBox.classList.toggle('show');
+            }
+        };
+
+        window.submitInlineComment = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) {
+                triggerSystemAlert("Sign In Required", "Please sign in to post comments.", "💬");
+                return;
+            }
+
+            const inputEl = document.getElementById(`comment-input-${itemId}`);
+            if (!inputEl || !inputEl.value.trim()) return;
+
+            const commentText = inputEl.value.trim();
+            inputEl.value = '';
+
+            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
+            const newCommentRef = ref(db, `${path}/${itemId}/comments/${Date.now()}`);
+
+            try {
+                await set(newCommentRef, {
+                    userId: currentUser.uid,
+                    userName: userFirstName,
+                    text: commentText,
+                    timestamp: Date.now()
+                });
+
+                const listContainer = document.getElementById(`comments-list-${itemId}`);
+                if (listContainer) {
+                    const cItem = document.createElement('div');
+                    cItem.className = 'comment-item-preview';
+                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`;
+                    listContainer.appendChild(cItem);
+                }
+
+                const cCountNode = document.getElementById(`comment-count-${itemId}`);
+                if (cCountNode) {
+                    let currentVal = parseInt(cCountNode.innerText || '0', 10);
+                    cCountNode.innerText = currentVal + 1;
+                }
+            } catch (err) {
+                console.error("Comment submit error:", err);
+            }
+        };
+
+        // --- Initialization --- //
 
         document.addEventListener('DOMContentLoaded', () => {
             DOM.container = document.getElementById('broadcastsContainer');
@@ -488,6 +437,7 @@
             setupInfiniteScrollObserver();
             setupGpsDetectionControl();
             setupCategoryDropdownMenu();
+            initUserProfile();
 
             if (DOM.closePopupBtn) {
                 DOM.closePopupBtn.addEventListener('click', () => {
@@ -498,6 +448,55 @@
             initiateLiveInterfaceClocks();
             fetchItemsBatch();
         });
+
+        function initUserProfile() {
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                const imgEl = document.getElementById('navProfilePic');
+                const iconEl = document.getElementById('navProfileIcon');
+                const nameEl = document.getElementById('navProfileName');
+                const footerShieldEl = document.getElementById('footerShieldText');
+
+                if (user) {
+                    let photoURL = user.photoURL;
+                    let displayName = user.displayName;
+
+                    try {
+                        const userSnap = await get(ref(db, `users/${user.uid}`));
+                        if (userSnap.exists()) {
+                            const uData = userSnap.val();
+                            if (uData.photoURL) photoURL = uData.photoURL;
+                            if (uData.firstName || uData.displayName || uData.name) {
+                                displayName = uData.firstName || uData.displayName || uData.name;
+                            }
+                            if (uData.following && typeof uData.following === 'object') {
+                                userFollowingSet = new Set(Object.keys(uData.following));
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Could not load user profile details:", e);
+                    }
+
+                    const firstName = displayName ? displayName.trim().split(' ')[0] : 'User';
+
+                    if (photoURL && imgEl) {
+                        imgEl.src = photoURL;
+                        imgEl.style.display = 'inline-block';
+                        if (iconEl) iconEl.style.display = 'none';
+                    }
+
+                    if (nameEl) nameEl.innerText = firstName;
+                    if (footerShieldEl) footerShieldEl.innerText = `${firstName} Verified`;
+
+                    // Re-render to show correct Like/Follow button statuses
+                    renderFilteredListings();
+                } else {
+                    userFollowingSet.clear();
+                    if (footerShieldEl) footerShieldEl.innerText = "Guest - Unverified";
+                    renderFilteredListings();
+                }
+            });
+        }
 
         function restoreScrollPosition() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -557,7 +556,8 @@
 
         function itemMatchesCategory(item) {
             if (activeCategoryFilter === 'all') return true;
-            const itemCat = String(item.subCategory || item.category || item.rentalSubCategory || item.rentalType || '').trim().toLowerCase();
+            // Adjusted logic to look for service properties
+            const itemCat = String(item.subCategory || item.category || item.serviceCategory || item.serviceType || '').trim().toLowerCase();
             return itemCat.includes(activeCategoryFilter);
         }
 
@@ -571,9 +571,9 @@
             if (filtered.length === 0) {
                 DOM.container.innerHTML = `
                     <article class="featured-broadcast-card">
-                        <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                        <h2 class="broadcast-title">No Items Found</h2>
-                        <p class="broadcast-body-text" style="color: #64748B;">No rental items found for the selected category.</p>
+                        <div class="badge-meta-row"><span class="spotlight-pill">Service Market</span></div>
+                        <h2 class="broadcast-title">No Service Items Found</h2>
+                        <p class="broadcast-body-text" style="color: #64748B;">No service items found for the selected category.</p>
                     </article>
                 `;
                 return;
@@ -612,16 +612,6 @@
                     });
                 }
             }, 1000);
-
-            setInterval(() => {
-                const clockNodes = document.querySelectorAll('.timestamp-log-text[data-timestamp]');
-                clockNodes.forEach(node => {
-                    const rawTime = parseInt(node.getAttribute('data-timestamp'));
-                    if (rawTime && !isNaN(rawTime)) {
-                        node.innerText = formatExactTimestampWithSeconds(rawTime);
-                    }
-                });
-            }, 10000);
         }
 
         function formatExactTimestampWithSeconds(baseEpoch) {
@@ -629,8 +619,6 @@
             if (isNaN(dateObj.getTime())) return "Recent";
             return dateObj.toLocaleDateString(undefined, { 
                 month: 'short', day: 'numeric', year: 'numeric' 
-            }) + ' • ' + dateObj.toLocaleTimeString(undefined, { 
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
             });
         }
 
@@ -741,7 +729,6 @@
 
         function extractAllImages(item) {
             let list = [];
-            // Target schema uses photo field
             if (item.photo && typeof item.photo === 'string' && item.photo.trim() !== '') {
                 list.push(item.photo.trim());
             }
@@ -772,7 +759,6 @@
 
             if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
 
-            // Configured to target single primary post schema
             const nodePath = 'posts';
 
             try {
@@ -868,9 +854,9 @@
             
             DOM.container.innerHTML = `
                 <article class="featured-broadcast-card">
-                    <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                    <h2 class="broadcast-title">No Rental Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B;">There are currently no active rental listings available in the database.</p>
+                    <div class="badge-meta-row"><span class="spotlight-pill">Service Market</span></div>
+                    <h2 class="broadcast-title">No Service Items Found</h2>
+                    <p class="broadcast-body-text" style="color: #64748B;">There are currently no active service listings available in the database.</p>
                 </article>
             `;
         }
@@ -878,7 +864,6 @@
         function extractFullLocationString(item) {
             let locationParts = [];
             
-            // Map zone and city directly from target post structure
             if (item.zone) locationParts.push(item.zone);
             if (item.city) locationParts.push(item.city);
 
@@ -900,10 +885,11 @@
             if (specsObj && typeof specsObj === 'object' && Object.keys(specsObj).length > 0) {
                 let html = `
                     <div class="category-specs-container">
-                        <div class="category-specs-title">Property Specifications</div>
+                        <div class="category-specs-title">Service Details</div>
                         <div class="info-terms-list">
                 `;
-                Object.keys(specsObj).forEach(key => {
+                const keys = Object.keys(specsObj).slice(0, 3);
+                keys.forEach(key => {
                     const val = specsObj[key];
                     if (val !== undefined && val !== null && val !== '') {
                         const formattedLabel = key.replace(/([A-Z])/g, ' $1').toLowerCase();
@@ -922,21 +908,35 @@
 
             return `
                 <div class="category-specs-container">
-                    <div class="category-specs-title">Property Specifications</div>
-                    <div style="font-size:12px; color:#64748B; font-weight: 500;">Standard property specifications apply.</div>
+                    <div class="category-specs-title">Service Details</div>
+                    <div style="font-size:12px; color:#64748B; font-weight: 500;">Standard service terms apply.</div>
                 </div>
             `;
         }
 
         function buildSingleNewsCardHTML(item) {
-            // Target database uses titleName for headlines
-            const headline = item.titleName || item.title || "Rental Item";
-            const category = item.category || item.subCategory || "Rental";
+            const headline = item.titleName || item.title || "Service Item";
+            const category = item.category || item.subCategory || "Service";
             const allImages = extractAllImages(item);
-
             let numericalTime = item.createdAt || item.timestamp || Date.now();
-            const initialFormattedClock = formatExactTimestampWithSeconds(numericalTime);
+            
+            // Extract Author Details
+            const authorId = item.userId || item.uid || item.postedBy || item.authorId || item.postedById || 'unknown';
+            const fullAuthorName = item.userName || item.displayName || item.authorName || item.postedByName || item.username || 'User';
+            const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
+            const authorPhoto = item.userPhoto || item.authorPhoto || item.userAvatar || item.photoURL || '';
 
+            // Like / Comment processing
+            const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
+            const isLikedByMe = !!(currentUser && (
+                (item.likedBy && item.likedBy[currentUser.uid]) ||
+                (typeof item.likes === 'object' && item.likes && item.likes[currentUser.uid])
+            ));
+            
+            const commentsList = item.comments ? Object.values(item.comments) : [];
+            const commentCount = item.commentsCount || commentsList.length;
+            const isFollowingAuthor = userFollowingSet.has(authorId);
+            
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
 
@@ -945,7 +945,8 @@
                 imageHTML = `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
             }
 
-            let distanceBadge = "";
+            // Construct GPS Distance Logic
+            let distanceChipHTML = "";
             if (isGpsActive && currentUserCoordinates) {
                 let distVal = item._calculatedDistance;
                 if (distVal === undefined) {
@@ -954,29 +955,108 @@
                 }
 
                 if (distVal !== undefined && distVal !== Infinity) {
-                    const displayKm = distVal < 1 ? `${Math.round(distVal * 1000)} m away` : `${distVal.toFixed(1)} km away`;
-                    distanceBadge = `<span class="distance-pill">📍 ${displayKm}</span>`;
-                } else {
-                    distanceBadge = `<span class="distance-pill" style="color:#64748B; border-color:#E2E8F0; background:#F1F5F9;">📍 Distance Unknown</span>`;
+                    const displayDist = distVal < 1 ? `${Math.round(distVal * 1000)}m` : `${distVal.toFixed(1)}km`;
+                    distanceChipHTML = `
+                        <span class="animated-distance-chip" title="Calculated distance">
+                            <span class="gps-dot"></span>
+                            <span>${displayDist}</span>
+                        </span>
+                    `;
                 }
+            } else {
+                distanceChipHTML = `
+                    <span class="animated-distance-chip no-gps" title="GPS Inactive">
+                        <span class="gps-dot"></span>
+                        <span>GPS</span>
+                    </span>
+                `;
+            }
+
+            // Preview recent comments
+            let commentsPreviewHTML = "";
+            if (commentsList.length > 0) {
+                const recentComments = commentsList.slice(-2);
+                recentComments.forEach(c => {
+                    commentsPreviewHTML += `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`;
+                });
             }
 
             return `
-                <div class="badge-meta-row">
+                <!-- Author and Actions Header -->
+                <div class="post-author-header">
+                    <div class="author-info-left" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
+                        ${authorPhoto 
+                            ? `<img class="author-avatar" src="${authorPhoto}" alt="${firstName}">` 
+                            : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`
+                        }
+                        <div class="author-name-box">
+                            <span class="author-first-name">${firstName}</span>
+                            <span class="author-sub-label">Posted service</span>
+                        </div>
+                    </div>
+                    
+                    <div class="author-actions-right">
+                        ${distanceChipHTML}
+
+                        ${authorId !== 'unknown' ? `
+                            <button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">
+                                ${isFollowingAuthor ? 'Following' : '+ Follow'}
+                            </button>
+                        ` : ''}
+                        
+                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Existing Meta Row -->
+                <div class="badge-meta-row" style="margin-bottom:8px;">
                     <div style="display:flex; align-items:center; gap:6px;">
                         <span class="spotlight-pill">${category}</span>
-                        ${distanceBadge}
                         ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
                     </div>
-                    <span class="timestamp-log-text" data-timestamp="${numericalTime}">${initialFormattedClock}</span>
+                    <span class="timestamp-log-text" data-timestamp="${numericalTime}">${formatExactTimestampWithSeconds(numericalTime)}</span>
                 </div>
+
                 ${imageHTML}
+                
                 <div class="clickable-news-content">
                     <h2 class="broadcast-title">${headline}</h2>
                     <div style="margin-top: 8px; font-size: 13px; color: #475569; font-weight: 600;">
                         📍 Location: <span class="location-text-val">${fullLocationStr}</span>
                     </div>
                     ${categorySpecsHTML}
+                </div>
+
+                <!-- Social Action Bar -->
+                <div class="post-social-bar">
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <button class="social-action-btn ${isLikedByMe ? 'liked' : ''}" id="like-btn-${item.id}" onclick="toggleLikePost(event, '${item.id}', '${item._dbPath || 'posts'}')">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            <span id="like-count-${item.id}">${likeCount}</span>
+                        </button>
+
+                        <button class="social-action-btn" onclick="toggleCommentBox(event, '${item.id}')">
+                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <span id="comment-count-${item.id}">${commentCount}</span>
+                        </button>
+                    </div>
+
+                    <button class="btn-details-dark-flat" onclick="openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')">
+                        Details &rarr;
+                    </button>
+                </div>
+
+                <!-- Comment Input Box -->
+                <div class="quick-comments-preview" id="comments-box-${item.id}">
+                    <div id="comments-list-${item.id}">
+                        ${commentsPreviewHTML}
+                    </div>
+                    <div class="comment-input-inline-box" onclick="event.stopPropagation()">
+                        <input type="text" class="comment-input-field" id="comment-input-${item.id}" placeholder="Ask a question..." />
+                        <button class="comment-submit-btn" onclick="submitInlineComment(event, '${item.id}', '${item._dbPath || 'posts'}')">Post</button>
+                    </div>
                 </div>
             `;
         }
@@ -1019,7 +1099,7 @@
             if (!cleanQuery) {
                 DOM.searchResultsArea.innerHTML = `
                     <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        Type a keyword, city, or title above to find rental items.
+                        Type a keyword, city, or title above to find service items.
                     </div>
                 `;
                 return;
@@ -1038,7 +1118,7 @@
             if (matchedNews.length === 0) {
                 DOM.searchResultsArea.innerHTML = `
                     <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        No rental listings matching "<strong>${cleanQuery}</strong>" found.
+                        No service listings matching "<strong>${cleanQuery}</strong>" found.
                     </div>
                 `;
                 return;

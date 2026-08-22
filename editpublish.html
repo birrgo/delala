@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Review & Update Listing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="news.css">
+
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+
+        .header-back-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            border-radius: 8px;
+        }
+
+        .header-back-btn:active { background: #F1F5F9; }
+
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+
+        .publish-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .preview-section {
+            background: #F8FAFC;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .preview-map-box {
+            width: 100%;
+            height: 180px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .leaflet-control-container .leaflet-control-attribution { display: none !important; }
+
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .confirm-publish-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .confirm-publish-btn:disabled {
+            background: #94A3B8;
+            cursor: not-allowed;
+            pointer-events: none !important;
+            box-shadow: none;
+        }
+
+        .edit-info-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            background: #F1F5F9;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .edit-info-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none !important;
+        }
+
+        .verified-footer-shield { text-align: center; padding: 16px 0 90px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        /* Small spinner for the update button */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #FFFFFF;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <button type="button" class="header-back-btn" id="headerBackBtn" title="Back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="header-title-text">Review Update</h1>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div class="publish-card" id="publishContainer">
+                <!-- Content injected dynamically -->
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <div class="action-bar" id="actionBarLayout">
+            <button type="button" class="confirm-publish-btn" id="confirmPublishBtn">
+                <div class="spinner" id="updateSpinner"></div>
+                <span id="updateBtnText">Confirm & Update</span>
+            </button>
+            <button type="button" class="edit-info-btn" id="cancelModalBtn">Edit Info</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Primary DB Config
+        const primaryConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+        const app = initializeApp(primaryConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Service DB Config
+        const serviceDbConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive"
+        };
+        const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
+        const serviceDb = getDatabase(serviceApp);
+
+        // Grab values from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPostId = urlParams.get('postId');
+        const urlDbSource = urlParams.get('db') || 'primary';
+        const activeDb = (urlDbSource === 'service') ? serviceDb : db;
+
+        let currentUser = null;
+        let previewMapInstance = null;
+        let pendingPayload = null;
+        let isPublishing = false;
+        let isInitialized = false;
+
+        function removeDuplicates(arr) {
+            return Array.from(new Set((arr || []).filter(Boolean)));
+        }
+
+        // BFCache (Back-Forward Cache) recovery to unlock ghost state
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                isPublishing = false;
+                sessionStorage.removeItem('delalaSubmitLock');
+                
+                const publishBtn = document.getElementById('confirmPublishBtn');
+                const editBtn = document.getElementById('cancelModalBtn');
+                const spinner = document.getElementById('updateSpinner');
+                const textSpan = document.getElementById('updateBtnText');
+                
+                if (publishBtn) {
+                    publishBtn.disabled = false;
+                    publishBtn.style.pointerEvents = 'auto';
+                    spinner.style.display = 'none';
+                    textSpan.textContent = "Confirm & Update";
+                }
+                if (editBtn) {
+                    editBtn.disabled = false;
+                    editBtn.style.pointerEvents = 'auto';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            sessionStorage.removeItem('delalaSubmitLock');
+            isPublishing = false;
+
+            onAuthStateChanged(auth, (user) => { 
+                currentUser = user; 
+                if (!isInitialized) {
+                    isInitialized = true;
+                    buildAndRenderData();
+                }
+            });
+
+            document.getElementById('headerBackBtn').addEventListener('click', goBackToEdit);
+            document.getElementById('cancelModalBtn').addEventListener('click', goBackToEdit);
+            
+            const publishBtn = document.getElementById('confirmPublishBtn');
+            publishBtn.addEventListener('click', executeUpdatePost);
+        });
+
+        function goBackToEdit() {
+            window.location.href = `editpub.html?postId=${urlPostId}&db=${urlDbSource}`;
+        }
+
+        function buildAndRenderData() {
+            // STRICTLY reading from the Edit session, NOT the regular "Post" session
+            const rawPending = sessionStorage.getItem('delalaEditPendingListing');
+            if (!rawPending) {
+                alert("Update draft missing. Redirecting back to profile...");
+                window.location.href = "profile.html";
+                return;
+            }
+
+            const data = JSON.parse(rawPending);
+            const rawImages = [...(data.images || []), data.imageUrl];
+            const cleanImages = removeDuplicates(rawImages);
+
+            // Reconstruct the payload safely for DB Update.
+            // Notice how we prioritize the new flat `data.lat` and `data.country` over nested fallback details.
+            pendingPayload = {
+                rentalType: data.rentalType || "Rental",
+                images: cleanImages,
+                imageUrl: cleanImages[0] || "",
+                title: data.title || "",
+                price: data.price || 0,
+                paymentPeriod: data.paymentPeriod || "Month",
+                body: data.body || "",
+                categorySpecificDetails: data.categorySpecificDetails || {},
+                locationDetails: {
+                    country: data.country || (data.locationDetails && data.locationDetails.country) || "",
+                    region: data.region || (data.locationDetails && data.locationDetails.region) || "",
+                    zone: data.zone || (data.locationDetails && data.locationDetails.zone) || "",
+                    city: data.city || (data.locationDetails && data.locationDetails.city) || "",
+                    subcity: data.subcity || (data.locationDetails && data.locationDetails.subcity) || "",
+                    uniqueName: data.uniqueName || (data.locationDetails && data.locationDetails.uniqueName) || ""
+                },
+                location: {
+                    latitude: data.lat ? Number(data.lat) : (data.location && data.location.latitude ? Number(data.location.latitude) : 0),
+                    longitude: data.lng ? Number(data.lng) : (data.location && data.location.longitude ? Number(data.location.longitude) : 0)
+                },
+                contactInfo: data.contactInfo || {},
+                updatedAt: new Date().toISOString()
+            };
+
+            // Maintain any flat level elements that were updated
+            if (data.workplaceSubCategory) pendingPayload.workplaceSubCategory = data.workplaceSubCategory;
+            if (data.activeCategoryOnStep2) pendingPayload.activeCategoryOnStep2 = data.activeCategoryOnStep2;
+
+            renderPublishContent(pendingPayload);
+
+            setTimeout(() => {
+                if(pendingPayload.location && pendingPayload.location.latitude) {
+                    initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
+                }
+            }, 200);
+        }
+
+        function renderPublishContent(data) {
+            const container = document.getElementById('publishContainer');
+
+            let imagesHTML = '';
+            if (data.images && data.images.length > 0) {
+                imagesHTML = `
+                <div class="preview-section">
+                    <div class="preview-section-title">ATTACHED IMAGES (${data.images.length})</div>
+                    <div style="display:flex; gap:8px; overflow-x:auto; padding-top:4px;">
+                        ${data.images.map(img => `<img src="${img}" style="width:72px; height:72px; border-radius:10px; object-fit:cover; border:1px solid var(--border-color);">`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // Using the properly mapped pendingPayload details to ensure UI matches DB save data exactly
+            const locHeader = [data.locationDetails.city, data.locationDetails.region, data.locationDetails.country].filter(Boolean).join(', ');
+            const locSubText = [data.locationDetails.zone, data.locationDetails.subcity].filter(Boolean).join(' • ');
+
+            container.innerHTML = `
+                ${imagesHTML}
+                <div class="preview-section">
+                    <div class="preview-section-title">UPDATED LISTING DETAILS</div>
+                    <div style="font-size:15px; font-weight:800; color:var(--primary-dark);">${data.title || 'Untitled Rental'}</div>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${data.price ? data.price + ' ETB / ' + data.paymentPeriod : 'Price Negotiable'}</div>
+                    <p style="margin:8px 0 0; color:var(--text-muted); font-size:12px; line-height:1.4;">${data.body || 'No description provided.'}</p>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">EXACT MAP LOCATION DETECTED FOR USERS</div>
+                    <div style="font-weight:700; color:var(--primary-dark);">${locHeader || 'N/A'}</div>
+                    ${locSubText ? `<div style="color:var(--text-muted); margin-top:2px; font-size:12px;">${locSubText}</div>` : ''}
+                    ${data.locationDetails.uniqueName ? `<div style="color:var(--text-muted); font-style:italic; font-size:12px;">Landmark: ${data.locationDetails.uniqueName}</div>` : ''}
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Coordinates: ${data.location.latitude}, ${data.location.longitude}</div>
+                    <div id="userPreviewMap" class="preview-map-box"></div>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">CONTACT INFORMATION</div>
+                    ${data.contactInfo.phone ? `<div style="font-size:12px;">📞 Phone: <strong>${data.contactInfo.phone}</strong></div>` : ''}
+                    ${data.contactInfo.telegram ? `<div style="font-size:12px;">✈️ Telegram: <strong>${data.contactInfo.telegram}</strong></div>` : ''}
+                    ${data.contactInfo.whatsapp ? `<div style="font-size:12px;">💬 WhatsApp: <strong>${data.contactInfo.whatsapp}</strong></div>` : ''}
+                    ${data.contactInfo.email ? `<div style="font-size:12px;">✉️ Email: <strong>${data.contactInfo.email}</strong></div>` : ''}
+                    ${data.contactInfo.instagram ? `<div style="font-size:12px;">📷 Instagram: <strong>${data.contactInfo.instagram}</strong></div>` : ''}
+                </div>
+            `;
+        }
+
+        function initPreviewMap(lat, lng) {
+            if (previewMapInstance) previewMapInstance.remove();
+            previewMapInstance = L.map('userPreviewMap', { 
+                attributionControl: false, 
+                zoomControl: false, 
+                dragging: false, 
+                scrollWheelZoom: false, 
+                touchZoom: false 
+            }).setView([lat, lng], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(previewMapInstance);
+            L.marker([lat, lng]).addTo(previewMapInstance);
+        }
+
+        async function executeUpdatePost(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            if (!pendingPayload || !urlPostId || isPublishing || sessionStorage.getItem('delalaSubmitLock') === 'true') {
+                return;
+            }
+
+            isPublishing = true;
+            sessionStorage.setItem('delalaSubmitLock', 'true');
+
+            // Hard disable UI
+            const publishBtn = document.getElementById('confirmPublishBtn');
+            const editBtn = document.getElementById('cancelModalBtn');
+            const spinner = document.getElementById('updateSpinner');
+            const textSpan = document.getElementById('updateBtnText');
+            
+            if (publishBtn) {
+                publishBtn.disabled = true;
+                publishBtn.style.pointerEvents = 'none';
+                spinner.style.display = 'block';
+                textSpan.textContent = "Updating...";
+            }
+            if (editBtn) {
+                editBtn.disabled = true;
+                editBtn.style.pointerEvents = 'none';
+            }
+
+            try {
+                // Execute direct update to Firebase Database
+                const postRef = ref(activeDb, `posts/${urlPostId}`);
+                await update(postRef, pendingPayload);
+
+                // Clear ONLY the Edit Drafts from Session Storage (Leaving regular new post drafts unharmed)
+                sessionStorage.removeItem('delalaEditDraftPart1');
+                sessionStorage.removeItem('delalaEditDraftPart2');
+                sessionStorage.removeItem('delalaEditDraftPart4');
+                sessionStorage.removeItem('delalaEditPendingListing');
+                sessionStorage.removeItem('selectedGpsLocation');
+                
+                // Redirect back to profile page
+                window.location.replace("profile.html");
+
+            } catch (error) {
+                console.error("Failed to update post:", error);
+                alert("An error occurred while updating your post. Please try again.");
+                
+                isPublishing = false;
+                sessionStorage.removeItem('delalaSubmitLock');
+                
+                if (publishBtn) {
+                    publishBtn.disabled = false;
+                    publishBtn.style.pointerEvents = 'auto';
+                    spinner.style.display = 'none';
+                    textSpan.textContent = "Confirm & Update";
+                }
+                if (editBtn) {
+                    editBtn.disabled = false;
+                    editBtn.style.pointerEvents = 'auto';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

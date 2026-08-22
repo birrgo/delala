@@ -17,12 +17,14 @@
             --border-color: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
+            --danger-color: #EF4444;
+            --edit-color: #3B82F6;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
         body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 16px; }
 
-        .container { max-width: 650px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; }
         
         .header {
             display: flex;
@@ -67,72 +69,56 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 14px;
-            padding: 16px;
+            padding: 20px;
             margin-bottom: 16px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
-        .category-card {
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 16px;
+        .form-group {
             margin-bottom: 16px;
         }
 
-        .category-card:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-            margin-bottom: 0;
-        }
-
-        .cat-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .cat-title { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
-        .cat-id { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-
-        .durations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-        }
-
-        .duration-box {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            background: #F8FAFC;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .duration-label {
-            font-size: 10px;
+        .form-label {
+            display: block;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
+            margin-bottom: 6px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .price-input-wrapper { display: flex; align-items: center; gap: 4px; }
-        
-        .price-input {
+        .input-control, .select-input {
             width: 100%;
             background: #FFFFFF;
             border: 1px solid var(--border-color);
-            padding: 6px 8px;
-            border-radius: 6px;
-            font-size: 13px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 700;
+            color: var(--primary-dark);
             outline: none;
-            text-align: right;
         }
 
-        .price-input:focus { border-color: var(--primary-dark); }
-        .currency { font-size: 10px; font-weight: 700; color: var(--text-muted); }
+        .input-control:focus, .select-input:focus { border-color: var(--primary-dark); }
+
+        .duration-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 8px;
+        }
+
+        .price-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .currency-tag {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
 
         .btn-save {
             width: 100%;
@@ -146,9 +132,89 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
             transition: background 0.2s;
+            margin-top: 10px;
         }
 
         .btn-save:hover { background: #1E293B; }
+
+        /* Preview Cards & Table Styles */
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .preview-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .preview-cat {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .preview-details {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit { color: var(--edit-color); }
+        .btn-edit:hover { background: #EFF6FF; border-color: #BFDBFE; }
+
+        .btn-delete { color: var(--danger-color); }
+        .btn-delete:hover { background: #FEF2F2; border-color: #FECACA; }
+
+        .empty-preview {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 16px 0;
+            font-weight: 600;
+        }
 
         .toast {
             position: fixed;
@@ -164,6 +230,12 @@
             display: none;
             z-index: 100;
         }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -171,26 +243,89 @@
     <div class="container">
         <div class="header">
             <div class="header-title-container">
-                <a href="new.html" class="btn-back" title="Go to new.html">
+                <a href="new.html" class="btn-back" title="Go back">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
-                <h1>Admin Price Control</h1>
+                <h1>Category Price Setup</h1>
             </div>
             <span style="font-size: 11px; font-weight: 700; background: #E2E8F0; padding: 4px 8px; border-radius: 6px;">Admin Only</span>
         </div>
 
-        <div class="card" id="category-container">
-            <!-- Categories rendered dynamically via JavaScript -->
+        <!-- Configuration Entry Card -->
+        <div class="card">
+            <input type="hidden" id="editEntryId" value="">
+            
+            <div class="form-group">
+                <label class="form-label" for="categorySelect">Select Category</label>
+                <select id="categorySelect" class="select-input">
+                    <option value="" disabled selected>-- Select a Category --</option>
+                    <option value="cat_1">1. Residential & Homes</option>
+                    <option value="cat_2">2. Workplace & Commercial</option>
+                    <option value="cat_3">3. Vehicles & Automotive</option>
+                    <option value="cat_4">4. Event Equipment</option>
+                    <option value="cat_5">5. Clothing & Fashion</option>
+                    <option value="cat_6">6. Heavy Machinery</option>
+                    <option value="cat_7">7. Miscellaneous & Others</option>
+                </select>
+            </div>
+
+            <hr>
+
+            <!-- Duration Setup -->
+            <div class="form-group">
+                <label class="form-label" for="durationValue"><i class="fa-regular fa-clock"></i> Duration Limit</label>
+                <div class="duration-group">
+                    <input type="number" id="durationValue" class="input-control" placeholder="Enter number (e.g. 1, 6)" min="1">
+                    <select id="durationUnit" class="select-input">
+                        <option value="months">Months</option>
+                        <option value="years">Years</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="durationPrice"><i class="fa-solid fa-tag"></i> Duration Price</label>
+                <div class="price-wrapper">
+                    <input type="number" id="durationPrice" class="input-control" placeholder="0.00" min="0">
+                    <span class="currency-tag">ETB</span>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Photo Setup -->
+            <div class="form-group">
+                <label class="form-label" for="photoCount"><i class="fa-regular fa-image"></i> Photo Limit</label>
+                <input type="number" id="photoCount" class="input-control" placeholder="Enter max photo limit" min="1">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="photoPrice"><i class="fa-solid fa-tag"></i> Photo Price</label>
+                <div class="price-wrapper">
+                    <input type="number" id="photoPrice" class="input-control" placeholder="0.00" min="0">
+                    <span class="currency-tag">ETB</span>
+                </div>
+            </div>
+
+            <button class="btn-save" id="savePricesBtn">Save New Configuration</button>
         </div>
 
-        <button class="btn-save" id="savePricesBtn">Update Database Prices</button>
+        <!-- Saved Database Preview Section -->
+        <div class="card">
+            <div class="section-title">
+                <span><i class="fa-solid fa-database"></i> Saved Categories Preview</span>
+            </div>
+            <div id="previewList" class="preview-list">
+                <div class="empty-preview">Loading database contents...</div>
+            </div>
+        </div>
     </div>
 
-    <div class="toast" id="toastMsg">Category Prices Saved!</div>
+    <div class="toast" id="toastMsg">Action completed successfully!</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -207,105 +342,167 @@
         const db = getDatabase(app);
         const pricesRef = ref(db, 'settings/category_prices');
 
-        const categories = [
-            { id: 1, title: "1. Residential & Homes" },
-            { id: 2, title: "2. Workplace & Commercial" },
-            { id: 3, title: "3. Vehicles & Automotive" },
-            { id: 4, title: "4. Event Equipment" },
-            { id: 5, title: "5. Clothing & Fashion" },
-            { id: 6, title: "6. Heavy Machinery" },
-            { id: 7, title: "7. Miscellaneous & Others" }
-        ];
-
-        const durationKeys = [
-            { key: "1m", label: "1 Month" },
-            { key: "3m", label: "3 Months" },
-            { key: "6m", label: "6 Months" },
-            { key: "1y", label: "1 Year" },
-            { key: "2y", label: "2 Years" }
-        ];
-
-        // Standard default prices per period (Multiplier base defaults)
-        const baseDefaults = {
-            "1m": 100,
-            "3m": 270,
-            "6m": 500,
-            "1y": 900,
-            "2y": 1600
+        const categoryNames = {
+            "cat_1": "1. Residential & Homes",
+            "cat_2": "2. Workplace & Commercial",
+            "cat_3": "3. Vehicles & Automotive",
+            "cat_4": "4. Event Equipment",
+            "cat_5": "5. Clothing & Fashion",
+            "cat_6": "6. Heavy Machinery",
+            "cat_7": "7. Miscellaneous & Others"
         };
 
-        // Render UI Elements Dynamically
-        const container = document.getElementById('category-container');
-        categories.forEach(cat => {
-            const card = document.createElement('div');
-            card.className = 'category-card';
-            
-            let durationFields = durationKeys.map(d => `
-                <div class="duration-box">
-                    <span class="duration-label">${d.label}</span>
-                    <div class="price-input-wrapper">
-                        <input type="number" id="cat_${cat.id}_${d.key}" class="price-input" placeholder="0">
-                        <span class="currency">ETB</span>
-                    </div>
-                </div>
-            `).join('');
+        let dbData = {};
 
-            card.innerHTML = `
-                <div class="cat-info">
-                    <span class="cat-title">${cat.title}</span>
-                    <span class="cat-id">Category #${cat.id}</span>
-                </div>
-                <div class="durations-grid">
-                    ${durationFields}
-                </div>
-            `;
-            container.appendChild(card);
+        // Realtime sync from Firebase
+        onValue(pricesRef, (snapshot) => {
+            dbData = snapshot.exists() ? snapshot.val() : {};
+            renderPreviewList();
         });
 
-        // Load existing prices from Realtime Database
-        onValue(pricesRef, (snapshot) => {
-            const data = snapshot.exists() ? snapshot.val() : {};
-            
-            categories.forEach(cat => {
-                const catKey = `cat_${cat.id}`;
-                durationKeys.forEach(d => {
-                    const fieldId = `cat_${cat.id}_${d.key}`;
-                    const input = document.getElementById(fieldId);
+        const categorySelect = document.getElementById('categorySelect');
+        const editEntryIdInput = document.getElementById('editEntryId');
+
+        // Clear top input fields for adding brand new data
+        function resetForm() {
+            editEntryIdInput.value = "";
+            categorySelect.value = "";
+            document.getElementById('durationValue').value = "";
+            document.getElementById('durationUnit').value = "months";
+            document.getElementById('durationPrice').value = "";
+            document.getElementById('photoCount').value = "";
+            document.getElementById('photoPrice').value = "";
+            document.getElementById('savePricesBtn').textContent = "Save New Configuration";
+        }
+
+        // Render Database Records Preview
+        function renderPreviewList() {
+            const previewContainer = document.getElementById('previewList');
+            previewContainer.innerHTML = '';
+
+            const keys = Object.keys(dbData);
+            if (keys.length === 0) {
+                previewContainer.innerHTML = '<div class="empty-preview">No saved entries found in database.</div>';
+                return;
+            }
+
+            keys.forEach(uniqueId => {
+                const item = dbData[uniqueId];
+                if (!item || item.duration_value === undefined) return;
+
+                const name = categoryNames[item.category_key] || item.category_key || "Unknown Category";
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <div class="preview-info">
+                        <span class="preview-cat">${name}</span>
+                        <span class="preview-details">
+                            <i class="fa-regular fa-clock"></i> ${item.duration_value} ${item.duration_unit} (<strong>${item.duration_price || 0} ETB</strong>)
+                        </span>
+                        <span class="preview-details">
+                            <i class="fa-regular fa-image"></i> ${item.photo_count} Photos (<strong>${item.photo_price || 0} ETB</strong>)
+                        </span>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn-action btn-edit" title="Edit Entry" data-id="${uniqueId}">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="btn-action btn-delete" title="Delete Entry" data-id="${uniqueId}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                previewContainer.appendChild(div);
+            });
+
+            // Bind Edit Buttons
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const uniqueId = e.currentTarget.getAttribute('data-id');
+                    const catData = dbData[uniqueId] || {};
                     
-                    if (data[catKey] && data[catKey][d.key] !== undefined) {
-                        input.value = data[catKey][d.key];
-                    } else {
-                        // Fallback logic for legacy single-value entries or missing data
-                        const baseVal = (typeof data[catKey] === 'number') ? data[catKey] : baseDefaults[d.key];
-                        input.value = baseVal;
+                    editEntryIdInput.value = uniqueId;
+                    categorySelect.value = catData.category_key || "";
+                    
+                    document.getElementById('durationValue').value = catData.duration_value !== undefined ? catData.duration_value : '';
+                    document.getElementById('durationUnit').value = catData.duration_unit || 'months';
+                    document.getElementById('durationPrice').value = catData.duration_price !== undefined ? catData.duration_price : '';
+                    
+                    document.getElementById('photoCount').value = catData.photo_count !== undefined ? catData.photo_count : '';
+                    document.getElementById('photoPrice').value = catData.photo_price !== undefined ? catData.photo_price : '';
+                    
+                    document.getElementById('savePricesBtn').textContent = "Update Existing Configuration";
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+
+            // Bind Delete Buttons
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const uniqueId = e.currentTarget.getAttribute('data-id');
+                    if (confirm("Are you sure you want to delete this configuration?")) {
+                        remove(ref(db, `settings/category_prices/${uniqueId}`))
+                            .then(() => {
+                                showToast("Configuration deleted successfully!");
+                                if (editEntryIdInput.value === uniqueId) resetForm();
+                            })
+                            .catch(err => alert("Error deleting: " + err.message));
                     }
                 });
             });
-        });
+        }
 
-        // Save updated prices back to Realtime Database
+        // Save new entry (or update if editing an existing ID) without overwriting others
         document.getElementById('savePricesBtn').addEventListener('click', () => {
-            const updatedPrices = {};
+            const selectedCat = categorySelect.value;
+            
+            if (!selectedCat) {
+                alert("Please select a category first!");
+                return;
+            }
 
-            categories.forEach(cat => {
-                const catKey = `cat_${cat.id}`;
-                updatedPrices[catKey] = {};
+            const durationValue = parseFloat(document.getElementById('durationValue').value) || 0;
+            const durationUnit = document.getElementById('durationUnit').value;
+            const durationPrice = parseFloat(document.getElementById('durationPrice').value) || 0;
+            
+            const photoCount = parseInt(document.getElementById('photoCount').value, 10) || 0;
+            const photoPrice = parseFloat(document.getElementById('photoPrice').value) || 0;
+            
+            const editingId = editEntryIdInput.value;
 
-                durationKeys.forEach(d => {
-                    const fieldId = `cat_${cat.id}_${d.key}`;
-                    const val = parseFloat(document.getElementById(fieldId).value);
-                    updatedPrices[catKey][d.key] = isNaN(val) ? baseDefaults[d.key] : val;
-                });
-            });
+            const payload = {
+                category_key: selectedCat,
+                duration_value: durationValue,
+                duration_unit: durationUnit,
+                duration_price: durationPrice,
+                photo_count: photoCount,
+                photo_price: photoPrice
+            };
 
-            set(pricesRef, updatedPrices).then(() => {
-                const toast = document.getElementById('toastMsg');
-                toast.style.display = 'block';
-                setTimeout(() => { toast.style.display = 'none'; }, 2500);
+            let savePromise;
+            if (editingId) {
+                // Update existing record if editing
+                savePromise = set(ref(db, `settings/category_prices/${editingId}`), payload);
+            } else {
+                // Push a completely new unique record node so previous entries are kept
+                const newRef = push(pricesRef);
+                savePromise = set(newRef, payload);
+            }
+
+            savePromise.then(() => {
+                showToast(editingId ? "Configuration updated successfully!" : "New configuration added successfully!");
+                resetForm();
             }).catch(err => {
                 alert("Failed to update database: " + err.message);
             });
         });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
     </script>
 </body>
 </html>

@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Select Location</title>
+    <title>Delala - Edit Map Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- MapLibre GL CSS -->
     <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
-    <link rel="stylesheet" href="news.css">
     
     <style>
         :root {
@@ -193,7 +192,6 @@
         .map-gps-btn:active { transform: scale(0.92); }
         .map-gps-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
-        /* Custom User Marker Style */
         .user-location-dot {
             width: 18px;
             height: 18px;
@@ -364,7 +362,7 @@
         </div>
 
         <div class="top-right-controls">
-            <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rentalpost1.html'" title="Close Map">✕</button>
+            <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" title="Close Map">✕</button>
             <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
                 Done
             </button>
@@ -413,7 +411,52 @@
 
     <!-- MapLibre GL JS Library -->
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    
     <script>
+        // Extract URL Parameters for dynamic redirection back to the edit flow
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl') || 'editrentalpost1.html';
+        const urlPostId = urlParams.get('postId') || '';
+        const urlDbSource = urlParams.get('db') || '';
+
+        function getReturnPath() {
+            let path = returnUrl;
+            if (urlPostId) {
+                const separator = path.includes('?') ? '&' : '?';
+                path += `${separator}postId=${urlPostId}&db=${urlDbSource}`;
+            }
+            return path;
+        }
+
+        // --- Custom Geohash Function ---
+        function generateGeohash(latitude, longitude, precision = 10) {
+            const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+            let isEven = true;
+            let lat = [-90.0, 90.0];
+            let lon = [-180.0, 180.0];
+            let bit = 0;
+            let ch = 0;
+            let geohash = "";
+
+            while (geohash.length < precision) {
+                let mid;
+                if (isEven) {
+                    mid = (lon[0] + lon[1]) / 2;
+                    if (longitude > mid) { ch |= (1 << (4 - bit)); lon[0] = mid; }
+                    else { lon[1] = mid; }
+                } else {
+                    mid = (lat[0] + lat[1]) / 2;
+                    if (latitude > mid) { ch |= (1 << (4 - bit)); lat[0] = mid; }
+                    else { lat[1] = mid; }
+                }
+                isEven = !isEven;
+                if (bit < 4) { bit++; }
+                else { geohash += BASE32[ch]; bit = 0; ch = 0; }
+            }
+            return geohash;
+        }
+        // -------------------------------------------------------------------
+
         let map, mapMarker;
         let watchPositionId = null;
         let isLocationTracked = false;
@@ -430,6 +473,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             initMapLibreMap();
             startRealtimeTracking();
+
+            // Set dynamic exit path for the close button
+            document.getElementById('closeMapFullscreenBtn').addEventListener('click', () => {
+                window.location.href = getReturnPath();
+            });
 
             document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
             document.getElementById('mapGpsBtn').addEventListener('click', toggleRealtimeTracking);
@@ -631,47 +679,16 @@
             document.getElementById('mapGpsBtn').classList.remove('tracking-active');
         }
 
-        /* GEOHASH ENCODER FUNCTION */
-        function encodeGeohash(latitude, longitude, precision = 9) {
-            const B32 = '0123456789bcdefghjkmnpqrstuvwxyz';
-            let isEven = true;
-            let lat = [-90.0, 90.0];
-            let lon = [-180.0, 180.0];
-            let bit = 0;
-            let ch = 0;
-            let geohash = '';
-
-            while (geohash.length < precision) {
-                let mid;
-                if (isEven) {
-                    mid = (lon[0] + lon[1]) / 2;
-                    if (longitude > mid) { ch |= (1 << (4 - bit)); lon[0] = mid; }
-                    else { lon[1] = mid; }
-                } else {
-                    mid = (lat[0] + lat[1]) / 2;
-                    if (latitude > mid) { ch |= (1 << (4 - bit)); lat[0] = mid; }
-                    else { lat[1] = mid; }
-                }
-                isEven = !isEven;
-                if (bit < 4) {
-                    bit++;
-                } else {
-                    geohash += B32[ch];
-                    bit = 0;
-                    ch = 0;
-                }
-            }
-            return geohash;
-        }
-
+        // --- UPDATED CONFIRMATION FUNCTION ---
         function promptLocationConfirmation() {
             if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
                 showErrorModal("Selection Required", "Please click on the map or wait for GPS location.");
                 return;
             }
 
-            // Generate geohash for preview
-            const previewGeohash = encodeGeohash(currentTrackedLat, currentTrackedLng, 9);
+            // Generate the Geohash so we can preview it in the popup
+            const previewGeohash = generateGeohash(currentTrackedLat, currentTrackedLng);
+
             const modalBody = document.getElementById('locationConfirmBody');
             const accuracyText = isManualSelection ? "Manual Pin Drop" : (currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Live Sensor Fix");
             const city = currentAddressInfo?.city || 'Addis Ababa';
@@ -680,10 +697,13 @@
 
             modalBody.innerHTML = `
                 <div class="preview-section">
-                    <div class="preview-section-title">SELECTED COORDINATES & GEOHASH</div>
+                    <div class="preview-section-title">SELECTED COORDINATES</div>
                     <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
                     <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
-                    <div style="font-size:12px; font-weight:800; color:var(--primary-accent); margin-top:4px;">Geohash: ${previewGeohash}</div>
+                    
+                    <!-- NEW: Display the generated Geohash right here in the popup -->
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:4px;">Geohash: ${previewGeohash}</div>
+                    
                     <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Selection Mode: <strong>${accuracyText}</strong></div>
                 </div>
                 <div class="preview-section">
@@ -701,20 +721,20 @@
             document.getElementById('confirmLocationModalOverlay').style.display = 'none';
             stopRealtimeTracking();
 
-            // Generate a 9-character geohash based on the coordinates
-            const geohashValue = encodeGeohash(currentTrackedLat, currentTrackedLng, 9);
+            const calculatedGeohash = generateGeohash(currentTrackedLat, currentTrackedLng);
 
             const locationData = {
                 lat: currentTrackedLat,
                 lng: currentTrackedLng,
-                geohash: geohashValue, // Inject the generated geohash here
+                geohash: calculatedGeohash,
                 address: currentAddressInfo || {},
                 isManual: isManualSelection
             };
             
-            // Save to session storage so rentalpost1.html can read the exact structure required by Firebase rules
             sessionStorage.setItem('selectedGpsLocation', JSON.stringify(locationData));
-            window.location.href = "rentalpost1.html";
+            
+            // Redirect using dynamic parameters to retain state
+            window.location.href = getReturnPath();
         }
 
         function reverseGeocodeOSM(lat, lng) {

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Edit Clothing Rental</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+
+    <script>
+        if (window.self !== window.top) {
+            window.top.location.href = window.self.location.href;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 10px; }
+        .header-title-text { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F1F5F9; padding: 4px 8px; border-radius: 6px; }
+
+        .post-form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin: 12px 16px 24px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 2;
+            background: #F1F5F9;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .step-node.active {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+        }
+
+        .form-step-page { display: block; }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .form-group { 
+            margin-bottom: 16px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            min-height: 15px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #F8FAFC;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary-dark);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+        }
+
+        .form-textarea { 
+            resize: vertical; 
+            min-height: 100px; 
+            height: auto; 
+            padding: 12px 14px;
+        }
+
+        .form-row { 
+            display: flex; 
+            gap: 12px; 
+            align-items: flex-start;
+        }
+
+        .form-row .form-group { 
+            flex: 1; 
+            margin-bottom: 16px;
+        }
+
+        .step-actions { display: flex; margin-top: 22px; }
+
+        .btn-next {
+            width: 100%;
+            height: 46px;
+            padding: 0 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--primary-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #FFFFFF;
+            padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #0F172A; }
+        .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .nav-item-post-center {
+            position: relative;
+            top: -14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1010;
+        }
+
+        .post-fab-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 5px #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-fab-btn svg { width: 22px; height: 22px; stroke: #ffffff; stroke-width: 2.8; }
+        .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        .verified-footer-shield { text-align: center; padding: 16px 0 80px; }
+        .footer-shield-text { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+        .metal-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 12, 16, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .metal-modal-card {
+            width: 88%;
+            max-width: 350px;
+            background: linear-gradient(145deg, #3a3f47, #1e2228, #121418);
+            border-radius: 18px;
+            padding: 24px 20px 20px;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            transform: scale(0.85) translateY(10px);
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .metal-modal-overlay.active .metal-modal-card { transform: scale(1) translateY(0); }
+
+        .metal-icon-wrapper {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e62e2e, #800f0f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #501010;
+        }
+
+        .metal-icon-wrapper svg { width: 28px; height: 28px; stroke: #ffffff; }
+
+        .metal-modal-title {
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #e2e8f0;
+            margin: 0 0 8px;
+        }
+
+        .metal-modal-message {
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .metal-modal-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(180deg, #525966 0%, #2a2e37 50%, #1a1d23 100%);
+            color: #f1f5f9;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        #dynamicCategoryFieldsContainer {
+            margin-top: 14px;
+            margin-bottom: 14px;
+            animation: fadeIn3D 0.35s ease-out forwards;
+        }
+
+        @keyframes fadeIn3D {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .nested-box {
+            background: linear-gradient(145deg, #2b303a, #1a1d24);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 12px;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            position: relative;
+        }
+
+        #dynamicCategoryFieldsContainer .form-label,
+        .nested-box .form-label {
+            color: #CBD5E1 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        #dynamicCategoryFieldsContainer .form-input,
+        #dynamicCategoryFieldsContainer .form-select,
+        .nested-box .form-input,
+        .nested-box .form-select {
+            background-color: #1a1d24 !important;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 16px !important;
+            color: #F8FAFC !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.6),
+                0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            border-radius: 10px;
+            height: 44px;
+        }
+
+        #dynamicCategoryFieldsContainer .form-input::placeholder,
+        .nested-box .form-input::placeholder { color: #64748B !important; }
+
+        #dynamicCategoryFieldsContainer .form-input:focus,
+        #dynamicCategoryFieldsContainer .form-select:focus,
+        .nested-box .form-input:focus,
+        .nested-box .form-select:focus {
+            border-color: #38BDF8 !important;
+            background-color: #111318 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+        }
+
+        #dynamicCategoryFieldsContainer option,
+        .nested-box option,
+        select option {
+            background-color: #1e2228 !important;
+            color: #f1f5f9 !important;
+            padding: 12px;
+        }
+
+        .custom-select-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(8, 10, 14, 0.82);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .custom-select-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .custom-select-modal-card {
+            width: 90%;
+            max-width: 380px;
+            background: linear-gradient(145deg, #2a2e37, #1c1f26, #121419);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-select-modal-overlay.active .custom-select-modal-card { transform: scale(1); }
+
+        .custom-select-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 14px;
+        }
+
+        .custom-select-modal-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #E2E8F0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .custom-select-modal-close {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94A3B8;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .custom-select-modal-close:hover { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; }
+
+        .custom-select-options-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 60vh;
+            padding-right: 2px;
+        }
+
+        .custom-select-option-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: linear-gradient(145deg, #1f232b, #15181e);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #CBD5E1;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-select-option-item:hover { border-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; }
+
+        .custom-select-option-item.selected {
+            border-color: #0D9488;
+            background: linear-gradient(145deg, #0f2d2a, #0b1f1d);
+            color: #2DD4BF;
+            box-shadow: 0 0 12px rgba(13, 148, 136, 0.25);
+        }
+
+        .custom-select-radio-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: #0F172A;
+        }
+
+        .custom-select-option-item.selected .custom-select-radio-dot { border-color: #2DD4BF; background: #0F172A; }
+        .custom-select-option-item.selected .custom-select-radio-dot::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #2DD4BF;
+            border-radius: 50%;
+            display: block;
+            box-shadow: 0 0 6px #2DD4BF;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Edit Post Clothing</h1>
+            </div>
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+        </header>
+
+        <main class="app-content">
+            <div class="post-form-card" id="step2Form">
+                <div class="step-indicator">
+                    <div class="step-node" id="node-1">1</div>
+                    <div class="step-node active" id="node-2">2</div>
+                    <div class="step-node" id="node-3">3</div>
+                    <div class="step-node" id="node-4">4</div>
+                </div>
+
+                <div class="form-step-page" id="stepPage2">
+                    <div class="step-title">Step 2: Edit Clothing Details</div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="postTitle">Title / Headline *</label>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Traditional / Cultural Clothing" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 500" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
+                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                <option value="Day">Per Day</option>
+                                <option value="1 Month">1 Month</option>
+                                <option value="3 Months">3 Months</option>
+                                <option value="6 Months">6 Months</option>
+                                <option value="1 Year">1 Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="dynamicCategoryFieldsContainer"></div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
+                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or rules (optional)..."></textarea>
+                    </div>
+
+                    <div class="step-actions">
+                        <button type="button" class="btn-next" id="btnNext2">
+                            Next: Location 
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="verified-footer-shield">
+                <span class="footer-shield-text">Delala Marketplace Verified</span>
+            </footer>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="rental.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                <span>Rental</span>
+            </a>
+            <a href="selling.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+                <span>Selling</span>
+            </a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="vacancy.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+                <span>Vacancy</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Error Modal Overlay -->
+    <div class="metal-modal-overlay" id="errorModalOverlay">
+        <div class="metal-modal-card">
+            <div class="metal-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h3 class="metal-modal-title" id="errorModalTitle">Attention Required</h3>
+            <p class="metal-modal-message" id="errorModalMessage">An error has occurred.</p>
+            <button type="button" class="metal-modal-btn" onclick="closeErrorModal()">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Custom Select Modal Overlay -->
+    <div class="custom-select-modal-overlay" id="customSelectModalOverlay">
+        <div class="custom-select-modal-card">
+            <div class="custom-select-modal-header">
+                <span class="custom-select-modal-title" id="customSelectModalTitle">Select Option</span>
+                <button class="custom-select-modal-close" onclick="closeCustomSelectModal()">&times;</button>
+            </div>
+            <div class="custom-select-options-list" id="customSelectOptionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPostId = urlParams.get('postId');
+        const urlDbSource = urlParams.get('db') || 'primary';
+
+        const PAGE_CATEGORY = "Clothing";
+
+        window.showErrorModal = function(message, title = "Validation Error") {
+            document.getElementById('errorModalTitle').innerText = title;
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModalOverlay').classList.add('active');
+        };
+
+        window.closeErrorModal = function() {
+            document.getElementById('errorModalOverlay').classList.remove('active');
+        };
+
+        let activeSelectElement = null;
+
+        function openCustomSelectModal(selectElem) {
+            activeSelectElement = selectElem;
+            const titleLabel = selectElem.parentElement.querySelector('.form-label')?.innerText || "Select Option";
+            document.getElementById('customSelectModalTitle').innerText = titleLabel;
+
+            const optionsList = document.getElementById('customSelectOptionsList');
+            optionsList.innerHTML = '';
+
+            Array.from(selectElem.options).forEach(opt => {
+                const item = document.createElement('div');
+                item.className = `custom-select-option-item ${opt.selected ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <span>${opt.text}</span>
+                    <div class="custom-select-radio-dot"></div>
+                `;
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    selectElem.value = opt.value;
+                    selectElem.dispatchEvent(new Event('change'));
+                    closeCustomSelectModal();
+                };
+                optionsList.appendChild(item);
+            });
+
+            document.getElementById('customSelectModalOverlay').classList.add('active');
+        }
+
+        function closeCustomSelectModal() {
+            document.getElementById('customSelectModalOverlay').classList.remove('active');
+            activeSelectElement = null;
+        }
+
+        function bindCustomSelectHandlers() {
+            document.querySelectorAll('select.custom-styled-select').forEach(select => {
+                select.removeEventListener('mousedown', handleSelectClick);
+                select.removeEventListener('touchstart', handleSelectClick);
+                
+                select.addEventListener('mousedown', handleSelectClick);
+                select.addEventListener('touchstart', handleSelectClick);
+            });
+        }
+
+        function handleSelectClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.blur();
+            openCustomSelectModal(this);
+        }
+
+        function getAuthenticatedUser() {
+            const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
+            const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
+            
+            if (!userPhone) {
+                showErrorModal("You must be logged in to edit a post. Redirecting to login...", "Account Required");
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return null;
+            }
+            return { phone: userPhone, id: userId || userPhone };
+        }
+
+        function refreshFormState() {
+            const currentUser = getAuthenticatedUser();
+            if (!currentUser) return;
+
+            renderCategorySpecificFields();
+            restoreSavedDraft();
+            bindCustomSelectHandlers();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            refreshFormState();
+
+            document.getElementById('btnNext2').addEventListener('click', () => {
+                if (!getAuthenticatedUser()) return;
+
+                const title = document.getElementById('postTitle').value.trim();
+                const price = document.getElementById('rentalPrice').value;
+
+                if (!title || !price) {
+                    showErrorModal("Please fill in both the listing title and rental price.");
+                    return;
+                }
+
+                saveDraftToSession();
+                window.location.href = `editrentalpost1.html?postId=${urlPostId}&db=${urlDbSource}`;
+            });
+        });
+
+        window.addEventListener('pageshow', () => {
+            refreshFormState();
+        });
+
+        function saveDraftToSession() {
+            let draftData = {};
+            const rawDraft = sessionStorage.getItem('delalaEditDraftPart1');
+            if (rawDraft) {
+                try { draftData = JSON.parse(rawDraft); } catch (e) {}
+            }
+
+            const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
+            const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
+
+            draftData.rentalType = PAGE_CATEGORY;
+            draftData.postedByPhone = userPhone;
+            draftData.userId = userId;
+            draftData.title = document.getElementById('postTitle').value.trim();
+            draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
+            draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
+            draftData.body = document.getElementById('postContent').value.trim();
+            
+            const catDetails = {
+                clothingType: document.getElementById('clothingType')?.value || "",
+                clothingSize: document.getElementById('clothingSize')?.value || ""
+            };
+            draftData.categorySpecificDetails = catDetails;
+            Object.assign(draftData, catDetails); // Merge flatly for compatibility
+
+            draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
+
+            sessionStorage.setItem('delalaEditDraftPart1', JSON.stringify(draftData));
+        }
+
+        function restoreSavedDraft() {
+            const rawDraft = sessionStorage.getItem('delalaEditDraftPart1');
+            if (!rawDraft) {
+                autoFillPlaceholders();
+                return;
+            }
+
+            try {
+                let draft = JSON.parse(rawDraft);
+                document.getElementById('postTitle').value = draft.title || '';
+                
+                if (document.getElementById('rentalPrice')) {
+                    document.getElementById('rentalPrice').value = draft.price || '';
+                }
+                if (draft.paymentPeriod && document.getElementById('paymentPeriod')) {
+                    document.getElementById('paymentPeriod').value = draft.paymentPeriod;
+                }
+                
+                document.getElementById('postContent').value = draft.body || draft.description || '';
+
+                const c = draft.categorySpecificDetails || draft;
+                if (c.clothingType && document.getElementById('clothingType')) {
+                    document.getElementById('clothingType').value = c.clothingType;
+                }
+                if (c.clothingSize && document.getElementById('clothingSize')) {
+                    document.getElementById('clothingSize').value = c.clothingSize;
+                }
+
+                autoFillPlaceholders();
+            } catch (err) {
+                console.error("Failed to restore draft", err);
+            }
+        }
+
+        function autoFillPlaceholders() {
+            const postTitle = document.getElementById('postTitle');
+            const postContent = document.getElementById('postContent');
+
+            if (!postTitle.value) {
+                postTitle.value = 'Traditional / Cultural Clothing';
+            }
+
+            if (!postContent.value) {
+                postContent.value = `[Clothing Overview]: Clean and high quality outfit for rent.\n\n[Terms]: Clean condition, return after event.`;
+            }
+        }
+
+        function renderCategorySpecificFields() {
+            const container = document.getElementById('dynamicCategoryFieldsContainer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="nested-box">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="clothingType">Attire Type *</label>
+                            <input type="text" class="form-input" id="clothingType" placeholder="e.g. Cultural Dress, Suit, Wedding Dress" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="clothingSize">Size *</label>
+                            <select class="form-select custom-styled-select" id="clothingSize" required>
+                                <option value="Small (S)">Small (S)</option>
+                                <option value="Medium (M)">Medium (M)</option>
+                                <option value="Large (L)">Large (L)</option>
+                                <option value="Extra Large (XL)">Extra Large (XL)</option>
+                                <option value="Free Size">Free Size</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>`;
+            bindCustomSelectHandlers();
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

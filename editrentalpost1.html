@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Post Rental Item (Part 2)</title>
+    <title>Delala - Edit Rental Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -154,6 +154,16 @@
             color: #475569;
             cursor: not-allowed;
             border-color: #CBD5E1;
+        }
+
+        /* Styling specifically for the Geohash preview to make it stand out subtly */
+        .geohash-input {
+            background-color: #EFF6FF !important;
+            color: var(--primary-accent) !important;
+            border-color: #BFDBFE !important;
+            font-weight: 700 !important;
+            letter-spacing: 1px;
+            font-family: monospace;
         }
 
         .form-row { display: flex; gap: 12px; }
@@ -362,7 +372,7 @@
     <div class="app-view">
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Delala - Post Rental</h1>
+                <h1 class="header-title-text">Edit Post Location</h1>
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
         </header>
@@ -380,10 +390,10 @@
 
                 <!-- PAGE 3 -->
                 <div class="form-step-page active" id="stepPage3">
-                    <div class="step-title">Step 3: Location Details</div>
+                    <div class="step-title">Step 3: Edit Location Details</div>
 
-                    <a href="map.html?returnUrl=rentalpost1.html" class="detect-loc-btn" id="gpsDetectBtn">
-                        📡 Detect Real-Time GPS Location
+                    <a href="#" class="detect-loc-btn" id="gpsDetectBtn">
+                        📡 Map & GPS Location
                     </a>
 
                     <div class="form-row">
@@ -418,11 +428,13 @@
                             <input type="text" class="form-input" id="locUniqueName" placeholder="Enter landmark manually" required>
                         </div>
                     </div>
-
-                    <!-- Geohash Preview Box -->
-                    <div class="form-group">
-                        <label class="form-label" for="locGeohash">Map Geohash (Auto-Generated)</label>
-                        <input type="text" class="form-input" id="locGeohash" readonly placeholder="Generated after GPS detection..." required>
+                    
+                    <!-- NEW: Geohash Preview Box -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="locGeohash">Generated Geohash (Auto GPS)</label>
+                            <input type="text" class="form-input geohash-input" id="locGeohash" readonly placeholder="Requires GPS / Map detection...">
+                        </div>
                     </div>
 
                     <input type="hidden" id="rentalLat">
@@ -443,11 +455,28 @@
         </main>
 
         <nav class="bottom-nav">
-            <a href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
-            <a href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
-            <a href="rentalpost.html" class="nav-item-post-center active"><div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="post-fab-label">Post</span></a>
-            <a href="service.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></div><span>Service</span></a>
-            <a href="profile.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+            <a href="rental.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                <span>Rental</span>
+            </a>
+            <a href="selling.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+                <span>Selling</span>
+            </a>
+            <a href="rentalpost.html" class="nav-item-post-center active">
+                <div class="post-fab-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+                <span class="post-fab-label">Post</span>
+            </a>
+            <a href="vacancy.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+                <span>Vacancy</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <span>Profile</span>
+            </a>
         </nav>
     </div>
 
@@ -476,22 +505,37 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const firebaseConfig = {
+        // Primary DB Config
+        const primaryConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
             authDomain: "delala-1b582.firebaseapp.com",
             databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
             projectId: "delala-1b582",
             storageBucket: "delala-1b582.firebasestorage.app",
             messagingSenderId: "1073041850834",
-            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
-            measurementId: "G-2XW8F8FKBT"
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
         };
-
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(primaryConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // Service DB Config
+        const serviceDbConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive"
+        };
+        const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
+        const serviceDb = getDatabase(serviceApp);
+
+        // URL Parameters Extraction
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPostId = urlParams.get('postId');
+        const urlDbSource = urlParams.get('db') || 'primary';
+        const activeDb = (urlDbSource === 'service') ? serviceDb : db;
 
         let currentUser = null;
         let isLocationTracked = false;
@@ -504,66 +548,56 @@
             const phone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             let id = currentUser ? currentUser.uid : (localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId'));
             
-            if (!id && phone) {
-                id = sanitizePath(phone);
-            } else if (!id) {
-                id = "anonymous";
-            } else {
-                id = sanitizePath(id);
-            }
+            if (!id && phone) id = sanitizePath(phone);
+            else if (!id) id = "anonymous";
+            else id = sanitizePath(id);
 
             return { phone, id };
         }
 
-        function checkCompletionAndToggleState() {
-            const country = document.getElementById('locCountry').value.trim();
-            const region = document.getElementById('locRegion').value.trim();
-            const zone = document.getElementById('locZone').value.trim();
-            const city = document.getElementById('locCity').value.trim();
-            const subcity = document.getElementById('locSubcity').value.trim();
-            const uniqueName = document.getElementById('locUniqueName').value.trim();
+        // --- Geohash Generator (Used as a fallback if missing) ---
+        function generateGeohash(latitude, longitude, precision = 10) {
+            const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+            let isEven = true;
+            let lat = [-90.0, 90.0];
+            let lon = [-180.0, 180.0];
+            let bit = 0;
+            let ch = 0;
+            let geohash = "";
 
-            const isAllFilled = country && region && zone && city && subcity && uniqueName && isLocationTracked;
-            const detectBtn = document.getElementById('gpsDetectBtn');
-            const node1Link = document.getElementById('node-1-link');
-
-            if (isAllFilled) {
-                if (detectBtn) detectBtn.style.display = 'none';
-                if (node1Link) node1Link.href = 'pub.html';
-            } else {
-                if (detectBtn) detectBtn.style.display = 'flex';
-                if (node1Link) node1Link.href = 'javascript:void(0)';
+            while (geohash.length < precision) {
+                let mid;
+                if (isEven) {
+                    mid = (lon[0] + lon[1]) / 2;
+                    if (longitude > mid) { ch |= (1 << (4 - bit)); lon[0] = mid; }
+                    else { lon[1] = mid; }
+                } else {
+                    mid = (lat[0] + lat[1]) / 2;
+                    if (latitude > mid) { ch |= (1 << (4 - bit)); lat[0] = mid; }
+                    else { lat[1] = mid; }
+                }
+                isEven = !isEven;
+                if (bit < 4) { bit++; }
+                else { geohash += BASE32[ch]; bit = 0; ch = 0; }
             }
+            return geohash;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
-            loadSavedFormData();
-            checkCompletionAndToggleState();
+            
+            // Set dynamic return URL for Map
+            const mapReturnParams = `?postId=${urlPostId}&db=${urlDbSource}`;
+            document.getElementById('gpsDetectBtn').href = `editmap1.html?returnUrl=editrentalpost1.html${mapReturnParams.replace('?', '&')}`;
 
+            loadSavedFormData();
+            
             onAuthStateChanged(auth, (user) => { 
                 currentUser = user; 
-                loadSavedFormData();
-                checkCompletionAndToggleState();
             });
 
             document.getElementById('gpsDetectBtn').addEventListener('click', () => {
                 savePart2FormData();
-            });
-
-            document.getElementById('node-1-link').addEventListener('click', (e) => {
-                const country = document.getElementById('locCountry').value.trim();
-                const region = document.getElementById('locRegion').value.trim();
-                const zone = document.getElementById('locZone').value.trim();
-                const city = document.getElementById('locCity').value.trim();
-                const subcity = document.getElementById('locSubcity').value.trim();
-                const uniqueName = document.getElementById('locUniqueName').value.trim();
-
-                const isAllFilled = country && region && zone && city && subcity && uniqueName && isLocationTracked;
-                if (!isAllFilled) {
-                    e.preventDefault();
-                    showErrorModal("Incomplete Form", "Please fill out all required location details and detect your GPS location first before proceeding to pub.html.");
-                }
             });
 
             document.getElementById('btnNext3').addEventListener('click', () => {
@@ -575,7 +609,7 @@
                 const uniqueName = document.getElementById('locUniqueName').value.trim();
 
                 if (!country || !region || !zone || !city || !isLocationTracked) {
-                    showErrorModal("Real-Time GPS Required", "Please tap 'Detect Real-Time GPS Location' to acquire your real-time position automatically.");
+                    showErrorModal("Location Required", "Please use the map to set your exact location.");
                     return;
                 }
 
@@ -585,7 +619,8 @@
                 }
 
                 savePart2FormData();
-                window.location.href = 'rentalpost3.html';
+                // Direct to the final Edit Contact/Publish Review page
+                window.location.href = `editpub.html?postId=${urlPostId}&db=${urlDbSource}`;
             });
 
             document.getElementById('dismissErrorBtn').addEventListener('click', closeErrorModal);
@@ -594,14 +629,13 @@
             formInputs.forEach(input => {
                 input.addEventListener('input', () => {
                     savePart2FormData();
-                    checkCompletionAndToggleState();
                 });
             });
         });
 
         function savePart2FormData() {
             const acc = getAccountDetails();
-            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
+            const rawPart2 = sessionStorage.getItem('delalaEditDraftPart2');
             let existingData = {};
             if (rawPart2) {
                 try { existingData = JSON.parse(rawPart2); } catch(e) {}
@@ -617,32 +651,31 @@
                 city: document.getElementById('locCity').value,
                 subcity: document.getElementById('locSubcity').value,
                 uniqueName: document.getElementById('locUniqueName').value,
+                geohash: document.getElementById('locGeohash').value, // Save the geohash
                 lat: document.getElementById('rentalLat').value,
-                lng: document.getElementById('rentalLng').value,
-                geohash: document.getElementById('locGeohash').value // Captured & stored for final save
+                lng: document.getElementById('rentalLng').value
             };
-            sessionStorage.setItem('delalaDraftPart2', JSON.stringify(formData));
+            sessionStorage.setItem('delalaEditDraftPart2', JSON.stringify(formData));
         }
 
-        function loadSavedFormData() {
-            // 1. Load data from map detection
+        async function loadSavedFormData() {
+            // Priority 1: Map GPS Return Payload
             const rawGps = sessionStorage.getItem('selectedGpsLocation');
+            let mappedFromGps = false;
+
             if (rawGps) {
                 try {
                     const parsed = JSON.parse(rawGps);
                     if (parsed.lat && parsed.lng) {
-                        const latNum = Number(parsed.lat);
-                        const lngNum = Number(parsed.lng);
-                        
-                        document.getElementById('rentalLat').value = latNum.toFixed(6);
-                        document.getElementById('rentalLng').value = lngNum.toFixed(6);
-                        
-                        // Read geohash directly from the map's returned data
-                        if (parsed.geohash) {
-                            document.getElementById('locGeohash').value = parsed.geohash; 
-                        }
-                        
+                        document.getElementById('rentalLat').value = Number(parsed.lat).toFixed(6);
+                        document.getElementById('rentalLng').value = Number(parsed.lng).toFixed(6);
                         isLocationTracked = true;
+                        mappedFromGps = true;
+                        
+                        // Populate Geohash directly if generated from the map page
+                        if (parsed.geohash) {
+                            document.getElementById('locGeohash').value = parsed.geohash;
+                        }
                     }
                     if (parsed.address) {
                         const addr = parsed.address;
@@ -650,35 +683,72 @@
                         document.getElementById('locRegion').value = addr.region || '';
                         document.getElementById('locZone').value = addr.zone || '';
                         document.getElementById('locCity').value = addr.city || '';
-                        if (addr.subcity) {
-                            document.getElementById('locSubcity').value = addr.subcity;
-                        }
+                        if (addr.subcity) document.getElementById('locSubcity').value = addr.subcity;
                     }
                 } catch(e) { console.error(e); }
             }
 
-            // 2. Load draft if returning from a later step
-            const rawPart2 = sessionStorage.getItem('delalaDraftPart2');
-            if (rawPart2) {
+            // Priority 2: Session Draft
+            const rawPart2 = sessionStorage.getItem('delalaEditDraftPart2');
+            if (rawPart2 && !mappedFromGps) {
                 try {
                     const p2 = JSON.parse(rawPart2);
                     if (p2.subcity && !document.getElementById('locSubcity').value) document.getElementById('locSubcity').value = p2.subcity;
                     if (p2.uniqueName) document.getElementById('locUniqueName').value = p2.uniqueName;
+                    if (p2.geohash) document.getElementById('locGeohash').value = p2.geohash; // Load drafted Geohash
+                    
                     if (p2.lat && p2.lng) {
                         document.getElementById('rentalLat').value = p2.lat;
                         document.getElementById('rentalLng').value = p2.lng;
-                        
-                        // Reinstate geohash from draft data
-                        if (p2.geohash) {
-                            document.getElementById('locGeohash').value = p2.geohash;
-                        }
-                        
                         isLocationTracked = true;
                     }
                 } catch(e) { console.error(e); }
             }
 
-            checkCompletionAndToggleState();
+            // Priority 3: Fetch directly from Firebase if no existing Session Storage exists
+            if (urlPostId && !rawPart2 && !mappedFromGps) {
+                try {
+                    const postRef = ref(activeDb, `posts/${urlPostId}`);
+                    const snapshot = await get(postRef);
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        const loc = data.locationDetails || data.location || {};
+                        
+                        document.getElementById('locCountry').value = loc.country || '';
+                        document.getElementById('locRegion').value = loc.region || '';
+                        document.getElementById('locZone').value = loc.zone || '';
+                        document.getElementById('locCity').value = loc.city || '';
+                        document.getElementById('locSubcity').value = loc.subcity || '';
+                        document.getElementById('locUniqueName').value = loc.uniqueName || data.uniqueName || '';
+                        
+                        // Load Geohash from Firebase if it exists
+                        if (data.geohash) {
+                            document.getElementById('locGeohash').value = data.geohash;
+                        }
+
+                        if (data.location && data.location.latitude) {
+                            document.getElementById('rentalLat').value = data.location.latitude;
+                            document.getElementById('rentalLng').value = data.location.longitude;
+                            isLocationTracked = true;
+                        }
+
+                        // Immediately establish session state so edits aren't wiped
+                        savePart2FormData();
+                    }
+                } catch (error) {
+                    console.error("Failed to load existing location data from Firebase", error);
+                }
+            }
+            
+            // Fallback: If we have coordinates but still no geohash, generate it on the fly
+            const finalLat = document.getElementById('rentalLat').value;
+            const finalLng = document.getElementById('rentalLng').value;
+            const geohashInput = document.getElementById('locGeohash');
+            
+            if (finalLat && finalLng && !geohashInput.value) {
+                geohashInput.value = generateGeohash(parseFloat(finalLat), parseFloat(finalLng));
+                savePart2FormData(); // resave it to draft
+            }
         }
 
         function showErrorModal(title, message) {
