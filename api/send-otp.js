@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // 1. Set CORS Headers to allow requests from your frontend app
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  // FIX: 'Access-Control-Allow-Credentials' removed to prevent CORS conflict with '*'
   res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
