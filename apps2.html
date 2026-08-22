@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>App Viewer</title>
+  
+  <link rel="stylesheet" href="Apps.css">
+  <link rel="stylesheet" href="wallet.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Updated burgundy header gradient to dark blue */
+    .app-header-bar {
+      height: 54px;
+      background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 60%, #415a77 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      position: relative;
+      z-index: 10;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .back-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .app-title-display {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0 12px;
+    }
+
+    .app-frame-container {
+      width: 100%;
+      height: calc(100% - 54px);
+      position: relative;
+      background: #ffffff;
+    }
+
+    .app-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* PURE WHITE FULLSCREEN OVERLAY */
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ffffff;
+      color: #121212;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+
+    /* HEADER LOADING STATUS ABOVE PHONE */
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 10px 24px;
+      border-radius: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .loader-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #0d1b2a;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    /* REALISTIC IPHONE 17 PRO MAX CONTAINER */
+    .phone-scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* CLEAN REALISTIC METALLIC TITANIUM FRAME (SHADOW REMOVED) */
+    .iphone-frame {
+      position: relative;
+      width: 320px;
+      height: 580px;
+      background: #000000;
+      border: 8px solid #3b3734; /* Desert Titanium Tone */
+      border-radius: 50px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2); /* Clean inner bezel line, no outer drop shadow */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* REALISTIC DYNAMIC ISLAND */
+    .dynamic-island {
+      position: absolute;
+      top: 10px;
+      width: 85px;
+      height: 22px;
+      background-color: #000000;
+      border-radius: 20px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+
+    .camera-lens {
+      width: 10px;
+      height: 10px;
+      background-color: #0b101d;
+      border-radius: 50%;
+      border: 1px solid #1a233a;
+    }
+
+    /* SCREEN INNER CONTENT AREA */
+    .iphone-screen {
+      width: 100%;
+      height: 100%;
+      background: #0f0f11;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 40px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* AD SLOTS INSIDE THE PHONE */
+    .ad-slot {
+      width: 300px;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #18181c;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .ad-slot iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: none !important;
+    }
+
+    /* HOME INDICATOR BAR */
+    .home-indicator {
+      position: absolute;
+      bottom: 6px;
+      width: 110px;
+      height: 4px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      opacity: 0.7;
+      z-index: 20;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-header-bar">
+    <button class="back-btn" onclick="goBackToStore()">&#8592; Back</button>
+    <div class="app-title-display" id="appTitle">Loading App...</div>
+    <div style="width: 60px;"></div>
+  </div>
+
+  <div class="app-frame-container">
+    <!-- WHITE OVERLAY BACKGROUND -->
+    <div class="loading-overlay" id="frameLoader">
+      
+      <!-- TOP STATUS INDICATOR -->
+      <div class="preview-header">
+        <div class="loader-spinner"></div>
+        <div id="loaderStatus" style="font-size: 14px; font-weight: 600; color: #1a1a1a;">Opening Application...</div>
+      </div>
+
+      <!-- IPHONE SCENE WRAPPER -->
+      <div class="phone-scene">
+        <!-- REALISTIC TITANIUM IPHONE CONTAINER -->
+        <div class="iphone-frame">
+          
+          <!-- DYNAMIC ISLAND WITH CAMERA -->
+          <div class="dynamic-island">
+            <div class="camera-lens"></div>
+          </div>
+
+          <!-- PHONE DISPLAY SCREEN -->
+          <div class="iphone-screen">
+            
+            <!-- TOP AD CONTAINER -->
+            <div class="ad-slot">
+              <script>
+                atOptions = {
+                  'key' : 'd2f535e8108b02e972de2d20b1d66e98',
+                  'format' : 'iframe',
+                  'height' : 250,
+                  'width' : 300,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/d2f535e8108b02e972de2d20b1d66e98/invoke.js"></script>
+            </div>
+
+            <!-- BOTTOM DUPLICATE AD CONTAINER -->
+            <div class="ad-slot">
+              <script>
+                atOptions = {
+                  'key' : 'd2f535e8108b02e972de2d20b1d66e98',
+                  'format' : 'iframe',
+                  'height' : 250,
+                  'width' : 300,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/d2f535e8108b02e972de2d20b1d66e98/invoke.js"></script>
+            </div>
+
+          </div>
+
+          <!-- HOME INDICATOR -->
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+
+    </div>
+    
+    <iframe id="appIframe" class="app-iframe" src="" allowfullscreen></iframe>
+  </div>
+
+  <script>
+    // Updated Firebase Configuration (hulum-e358c)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
+      authDomain: "hulum-e358c.firebaseapp.com",
+      databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
+      projectId: "hulum-e358c",
+      storageBucket: "hulum-e358c.firebasestorage.app",
+      messagingSenderId: "678316597629",
+      appId: "1:678316597629:web:dc6af499b8054a424aac14",
+      measurementId: "G-097P51SP2B"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    function goBackToStore() {
+      window.location.replace('apps.html');
+    }
+
+    // Force refresh if re-opened via Back/Forward Cache
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
+
+    function initAppView(appKey) {
+      const loader = document.getElementById('frameLoader');
+      
+      if (loader) loader.style.display = 'flex';
+
+      db.ref('pwa_apps/' + appKey).once('value').then((snapshot) => {
+        if (!snapshot.exists()) {
+          alert("App data not found.");
+          goBackToStore();
+          return;
+        }
+
+        const appData = snapshot.val();
+        const appName = appData.name || 'Application';
+        const sourceType = appData.sourceType || 'website';
+        let targetUrl = (appData.url || '').trim();
+
+        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+          targetUrl = 'https://' + targetUrl;
+        }
+
+        const category = appData.category;
+        const canIframe = appData.canIframe;
+
+        if (sourceType === 'playstore' || sourceType === 'appstore' || category === 'invalid' || canIframe === false) {
+          window.location.replace(targetUrl);
+          return;
+        }
+
+        document.getElementById('appTitle').textContent = appName;
+        const iframe = document.getElementById('appIframe');
+
+        // Silent 5-second minimum wait timer
+        const minimumWaitTime = new Promise((resolve) => setTimeout(resolve, 5000));
+        const iframeLoadEvent = new Promise((resolve) => {
+          iframe.onload = resolve;
+        });
+
+        // Hide overlay ONLY after 5 full seconds pass AND iframe completes loading
+        Promise.all([minimumWaitTime, iframeLoadEvent]).then(() => {
+          if (loader) loader.style.display = 'none';
+        });
+
+        iframe.src = targetUrl;
+
+      }).catch((err) => {
+        console.error("Failed to fetch app info:", err);
+        alert("Error loading app details.");
+        goBackToStore();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const appKey = urlParams.get('key');
+
+      if (!appKey) {
+        alert("Invalid app key specified.");
+        goBackToStore();
+        return;
+      }
+
+      initAppView(appKey);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>App Details - Hulum Store</title>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset & Base Layout */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0b0b0e;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    .bg-wave-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 180px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .full-screen-app-page {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .details-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+
+    .close-x-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .close-x-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .details-page-content {
+      padding: 12px 16px;
+    }
+
+    .details-header-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .details-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .details-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Smooth Image Load Transition */
+    .details-app-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 16px;
+      object-fit: cover;
+      background-color: #1b263b;
+      border: 2px solid #000000;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      filter: blur(8px);
+      transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+    }
+
+    .details-app-icon.img-loaded {
+      opacity: 1;
+      filter: blur(0);
+    }
+
+    .details-app-meta h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .details-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .details-header-btn {
+      background: linear-gradient(180deg, #1b263b 0%, #0d1b2a 100%);
+      color: #ffffff;
+      border: 1px solid #415a77;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(13, 27, 42, 0.4);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .details-header-btn:active {
+      transform: scale(0.95);
+    }
+
+    .details-header-btn.is-open {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+
+    .details-header-btn.is-progress {
+      background: rgba(27, 38, 59, 0.6);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-subtext {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .app-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .meta-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .meta-box-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .meta-box-label {
+      font-size: 10px;
+      color: #888888;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .details-article-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 18px;
+      line-height: 1.6;
+    }
+
+    .details-article-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .details-article-body {
+      font-size: 14px;
+      color: #cccccc;
+      white-space: pre-line;
+    }
+
+    .ad-container-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 16px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .security-modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .security-modal-card {
+      background: #1e1e24;
+      border-radius: 22px;
+      padding: 24px 20px;
+      width: 88%;
+      max-width: 320px;
+      text-align: center;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .security-modal-title {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .security-modal-desc {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .modal-error-banner {
+      display: none;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .security-password-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 12px;
+      color: #ffffff;
+      font-size: 18px;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .security-password-input:focus {
+      border-color: #415a77;
+    }
+
+    .security-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-modal-submit {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(180deg, #1b263b 0%, #0d1b2a 100%);
+      color: #ffffff;
+    }
+
+    .btn-modal-cancel {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <script src="loader.js"></script>
+
+  <svg class="bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
+    <defs>
+      <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0d1b2a"/>
+        <stop offset="1" stop-color="#1b263b"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="full-screen-app-page" id="appDetailsPage">
+    <div class="details-top-bar">
+      <div class="header-title" id="pageBarTitle">App Details</div>
+      <button class="close-x-btn" onclick="goBackToStore()" title="Close">&#10005;</button>
+    </div>
+
+    <div class="details-page-content">
+      <div class="details-header-card">
+        <div class="details-header-top">
+          <div class="details-header-left">
+            <img id="pageAppIcon" src="" class="details-app-icon" alt="App Icon" onload="handleImageLoaded(this)">
+            <div class="details-app-meta">
+              <h2 id="pageAppName">Loading App...</h2>
+            </div>
+          </div>
+          <div class="details-header-right">
+            <button class="details-header-btn" id="pageInstallBtn">Install App</button>
+            <span id="pageInstallSubtext" class="btn-subtext"></span>
+          </div>
+        </div>
+
+        <div class="app-meta-grid">
+          <div class="meta-box">
+            <span class="meta-box-value" id="pageUserRating">--</span>
+            <span class="meta-box-label">User Rating</span>
+          </div>
+          <div class="meta-box">
+            <span class="meta-box-value" id="pageSystemRating">--</span>
+            <span class="meta-box-label">System Rate</span>
+          </div>
+          <div class="meta-box">
+            <span class="meta-box-value" id="pageAppSize">--</span>
+            <span class="meta-box-label">Size</span>
+          </div>
+          <div class="meta-box">
+            <span class="meta-box-value" id="pageDownloadCount">--</span>
+            <span class="meta-box-label">Downloads</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-article-card">
+        <div class="details-article-title">About this App</div>
+        <div class="details-article-body" id="pageAppDescription">
+          Loading article description...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATABASE SINGLE-USE PIN POPUP -->
+  <div class="security-modal-backdrop" id="appPinModal">
+    <div class="security-modal-card">
+      <h3 class="security-modal-title">Enter Access PIN</h3>
+      <p class="security-modal-desc">
+        Enter your 6-digit single-use PIN to unlock and install this app.
+      </p>
+      
+      <div class="modal-error-banner" id="appPinError"></div>
+
+      <input type="password" maxlength="6" inputmode="numeric" class="security-password-input" id="appPinInput" placeholder="••••••">
+
+      <div class="security-modal-actions">
+        <button class="btn-modal-submit" id="btnVerifyPin" onclick="verifyDatabaseAppPin()">Unlock & Install</button>
+        <button class="btn-modal-cancel" onclick="closeAppPinModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
+      authDomain: "hulum-e358c.firebaseapp.com",
+      databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
+      projectId: "hulum-e358c",
+      storageBucket: "hulum-e358c.firebasestorage.app",
+      messagingSenderId: "678316597629",
+      appId: "1:678316597629:web:dc6af499b8054a424aac14",
+      measurementId: "G-097P51SP2B"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const activeUserPhone = localStorage.getItem('auth_session_phone');
+    const urlParams = new URLSearchParams(window.location.search);
+    const appKey = urlParams.get('key');
+
+    let currentAppData = null;
+    const AD_KEY = 'd2f535e8108b02e972de2d20b1d66e98';
+
+    function handleImageLoaded(imgElem) {
+      if (imgElem.complete) {
+        imgElem.classList.add('img-loaded');
+      }
+    }
+
+    function showGlobalLoader(msg = "Loading...") {
+      if (window.AppLoader && typeof window.AppLoader.show === 'function') {
+        window.AppLoader.show(msg);
+      }
+    }
+
+    function hideGlobalLoader() {
+      if (window.AppLoader && typeof window.AppLoader.hide === 'function') {
+        window.AppLoader.hide();
+      }
+    }
+
+    function goBackToStore() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "Apps.html";
+      }
+    }
+
+    function getDomain(url) {
+      try {
+        const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+        return u.hostname;
+      } catch(e) { return url; }
+    }
+
+    function getAdminSize(app) {
+      if (app.size || app.appSize) {
+        let raw = app.size || app.appSize;
+        return raw.toString().includes('MB') ? raw : raw + ' MB';
+      }
+      return '12.5 MB';
+    }
+
+    function getAdminUserRating(app) {
+      if (app.userRating || app.rating) {
+        let val = app.userRating || app.rating;
+        return val.toString().includes('★') ? val : val + ' ★';
+      }
+      return '4.8 ★';
+    }
+
+    function getAdminSystemRating(app) {
+      return app.systemRating || app.pegi || 'PEGI 3';
+    }
+
+    function getAdminDownloadCount(app) {
+      if (app.downloads || app.downloadCount) {
+        let val = app.downloads || app.downloadCount;
+        return val.toString().includes('+') ? val : val + '+';
+      }
+      return '50K+';
+    }
+
+    function isAppPaid(app) {
+      return app.pricingType === 'paid' && parseFloat(app.price) > 0;
+    }
+
+    function renderDescriptionWithAds(descriptionText) {
+      const container = document.getElementById('pageAppDescription');
+      container.innerHTML = '';
+
+      if (!descriptionText) {
+        container.textContent = 'No detailed article provided for this application.';
+        return;
+      }
+
+      let currentIndex = 0;
+
+      while (currentIndex < descriptionText.length) {
+        let nextIndex = currentIndex + 200;
+
+        if (nextIndex < descriptionText.length) {
+          const spacePos = descriptionText.indexOf(' ', nextIndex);
+          if (spacePos !== -1 && spacePos - nextIndex < 50) {
+            nextIndex = spacePos;
+          }
+        } else {
+          nextIndex = descriptionText.length;
+        }
+
+        const textSegment = descriptionText.substring(currentIndex, nextIndex);
+        const spanElem = document.createElement('span');
+        spanElem.textContent = textSegment;
+        container.appendChild(spanElem);
+
+        if (nextIndex < descriptionText.length) {
+          const adBox = document.createElement('div');
+          adBox.className = 'ad-container-wrapper';
+
+          const iframe = document.createElement('iframe');
+          iframe.style.width = '300px';
+          iframe.style.height = '250px';
+          iframe.style.border = 'none';
+          iframe.style.overflow = 'hidden';
+          iframe.scrolling = 'no';
+
+          adBox.appendChild(iframe);
+          container.appendChild(adBox);
+
+          const iframeDoc = iframe.contentWindow || iframe.contentDocument.document || iframe.contentDocument;
+          iframeDoc.document.open();
+          iframeDoc.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; }</style>
+            </head>
+            <body>
+              <script type="text/javascript">
+                atOptions = {
+                  'key' : '${AD_KEY}',
+                  'format' : 'iframe',
+                  'height' : 250,
+                  'width' : 300,
+                  'params' : {}
+                };
+              <\/script>
+              <script type="text/javascript" src="https://www.highperformanceformat.com/${AD_KEY}/invoke.js"><\/script>
+            </body>
+            </html>
+          `);
+          iframeDoc.document.close();
+        }
+
+        currentIndex = nextIndex;
+      }
+    }
+
+    function loadAppDetails() {
+      if (!appKey) {
+        alert("Invalid app key specified.");
+        goBackToStore();
+        return;
+      }
+
+      showGlobalLoader("Loading App...");
+
+      db.ref(`pwa_apps/${appKey}`).on('value', (snapshot) => {
+        hideGlobalLoader();
+        if (!snapshot.exists()) {
+          document.getElementById('pageAppName').textContent = 'App Not Found';
+          document.getElementById('pageAppDescription').textContent = 'The requested app could not be found.';
+          return;
+        }
+
+        const app = snapshot.val();
+        currentAppData = app;
+
+        const name = app.name || 'App';
+        const description = app.description || 'No detailed article provided for this application.';
+        const targetUrl = app.url || '#';
+        const icon = app.icon || app.customIcon || `https://icon.horse/icon/${getDomain(targetUrl)}`;
+        const isStore = app.sourceType === 'playstore' || app.sourceType === 'appstore' || app.category === 'store';
+
+        document.getElementById('pageBarTitle').textContent = name;
+        document.getElementById('pageAppName').textContent = name;
+        
+        const iconElem = document.getElementById('pageAppIcon');
+        iconElem.classList.remove('img-loaded');
+        iconElem.src = icon;
+
+        renderDescriptionWithAds(description);
+
+        document.getElementById('pageUserRating').textContent = getAdminUserRating(app);
+        document.getElementById('pageSystemRating').textContent = getAdminSystemRating(app);
+        document.getElementById('pageAppSize').textContent = getAdminSize(app);
+        document.getElementById('pageDownloadCount').textContent = getAdminDownloadCount(app);
+
+        setupInstallButtonState(appKey, app, targetUrl, isStore);
+      });
+    }
+
+    function setupInstallButtonState(key, app, targetUrl, isStore) {
+      const installBtn = document.getElementById('pageInstallBtn');
+      const subtextElem = document.getElementById('pageInstallSubtext');
+      
+      const isInstalled = localStorage.getItem('site_installed_' + key);
+      const isPaid = isAppPaid(app);
+      const isPurchased = localStorage.getItem('site_purchased_' + key);
+
+      if (isPaid && !isPurchased && !isInstalled) {
+        subtextElem.textContent = `Paid (${app.price} ETB)`;
+      } else {
+        subtextElem.textContent = '';
+      }
+
+      if (isInstalled) {
+        installBtn.textContent = 'Open App';
+        installBtn.className = 'details-header-btn is-open';
+        installBtn.onclick = function() {
+          openApp(key);
+        };
+      } else if (isPaid && !isPurchased) {
+        installBtn.textContent = 'Install App';
+        installBtn.className = 'details-header-btn';
+        installBtn.onclick = function() {
+          promptAppPinModal();
+        };
+      } else {
+        installBtn.textContent = isStore ? 'Get App' : 'Install App';
+        installBtn.className = 'details-header-btn';
+        installBtn.onclick = function() {
+          if (isStore) {
+            window.location.href = targetUrl;
+          } else {
+            startDownloadCount(key, targetUrl, isStore, installBtn);
+          }
+        };
+      }
+    }
+
+    function promptAppPinModal() {
+      const modal = document.getElementById('appPinModal');
+      document.getElementById('appPinError').style.display = 'none';
+      document.getElementById('appPinInput').value = '';
+      modal.style.display = 'flex';
+      setTimeout(() => document.getElementById('appPinInput').focus(), 100);
+    }
+
+    function closeAppPinModal() {
+      document.getElementById('appPinModal').style.display = 'none';
+    }
+
+    /* VERIFY SINGLE-USE DATABASE PIN ONLY */
+    async function verifyDatabaseAppPin() {
+      const enteredPin = document.getElementById('appPinInput').value.trim();
+      const errBanner = document.getElementById('appPinError');
+      const verifyBtn = document.getElementById('btnVerifyPin');
+
+      if (!enteredPin || enteredPin.length !== 6) {
+        errBanner.textContent = "Please enter a valid 6-digit PIN.";
+        errBanner.style.display = 'block';
+        return;
+      }
+
+      if (!appKey) return;
+
+      try {
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = "Verifying PIN...";
+
+        // Query single-use PIN path: pwa_apps/{appKey}/pins/{enteredPin}
+        const pinRef = db.ref(`pwa_apps/${appKey}/pins/${enteredPin}`);
+        const snapshot = await pinRef.once('value');
+
+        if (!snapshot.exists()) {
+          errBanner.textContent = "Invalid PIN code for this app.";
+          errBanner.style.display = 'block';
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "Unlock & Install";
+          return;
+        }
+
+        const pinData = snapshot.val();
+
+        // Check if single-use PIN is consumed
+        if (pinData.used === true || (pinData.usedCount && pinData.usedCount >= (pinData.maxUses || 1))) {
+          errBanner.textContent = "This single-use PIN has already been used.";
+          errBanner.style.display = 'block';
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "Unlock & Install";
+          return;
+        }
+
+        // Mark single-use PIN as used in Firebase
+        await pinRef.update({
+          used: true,
+          usedCount: 1,
+          usedByPhone: activeUserPhone || 'anonymous',
+          usedAt: Date.now()
+        });
+
+        // Mark local access unlocked
+        localStorage.setItem('site_purchased_' + appKey, 'true');
+
+        closeAppPinModal();
+
+        const app = currentAppData || {};
+        const targetUrl = app.url || '#';
+        const isStore = app.sourceType === 'playstore' || app.sourceType === 'appstore' || app.category === 'store';
+
+        document.getElementById('pageInstallSubtext').textContent = '';
+        const installBtn = document.getElementById('pageInstallBtn');
+        startDownloadCount(appKey, targetUrl, isStore, installBtn);
+
+      } catch (err) {
+        console.error("PIN verification error:", err);
+        errBanner.textContent = "Database verification error. Try again.";
+        errBanner.style.display = 'block';
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "Unlock & Install";
+      }
+    }
+
+    function startDownloadCount(key, targetUrl, isStore, buttonElem) {
+      let progress = 0;
+      buttonElem.disabled = true;
+      buttonElem.className = 'details-header-btn is-progress';
+
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 10;
+        if (progress > 100) progress = 100;
+
+        buttonElem.textContent = `${progress}%`;
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          localStorage.setItem('site_installed_' + key, 'true');
+          
+          buttonElem.disabled = false;
+          buttonElem.textContent = 'Open App';
+          buttonElem.className = 'details-header-btn is-open';
+
+          buttonElem.onclick = function() {
+            openApp(key);
+          };
+        }
+      }, 200);
+    }
+
+    function openApp(key) {
+      window.location.href = 'apps2.html?key=' + encodeURIComponent(key);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAppDetails);
+  </script>
+
+</body>
+</html>
