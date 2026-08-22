@@ -510,8 +510,11 @@
                 const resendBtn = document.getElementById('resendCodeBtn');
                 if (resendBtn) resendBtn.innerText = "Sending code...";
 
-                // Generate 6-digit numeric OTP
-                const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+                // Cryptographically secure 6-digit numeric OTP
+                const array = new Uint32Array(1);
+                crypto.getRandomValues(array);
+                const generatedOtp = String((array[0] % 900000) + 100000);
+                
                 const sanitizedEmailKey = sanitizeEmail(email);
 
                 const otpRecord = {
@@ -531,30 +534,51 @@
                 // Store OTP record in Firebase for verification
                 await set(ref(db, `otps/${sanitizedEmailKey}`), otpRecord);
 
-                // Send email via Brevo via custom domain endpoint
+                // Send email via Vercel/Brevo custom endpoint with explicit CORS mode and timeout handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second network timeout
+
                 const response = await fetch("https://hulum.online/api/send-otp", {
                     method: "POST",
+                    mode: "cors",
                     headers: {
+                        "Accept": "application/json",
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         email: email,
                         otp: generatedOtp,
                         name: firstName
-                    })
+                    }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Server status ${response.status}`);
+                }
 
                 const resData = await response.json();
 
-                if (!response.ok || !resData.success) {
+                if (!resData.success) {
                     throw new Error(resData.error || "Failed to deliver email");
                 }
 
                 showNotification(`Verification code sent to ${email}`, true);
                 startCountdown();
+
             } catch (error) {
                 console.error("OTP Delivery Failure:", error);
-                showNotification(`Delivery Error: ${error.message || 'Unable to send OTP email'}`);
+                
+                let errorMessage = "Unable to send OTP email";
+                if (error.name === 'AbortError') {
+                    errorMessage = "Network timeout. Please check your connection.";
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                showNotification(`Delivery Error: ${errorMessage}`);
             }
         }
 
@@ -577,7 +601,14 @@
 
         document.getElementById('resendCodeBtn').addEventListener('click', function() {
             if (!this.classList.contains('disabled')) {
-                sendVerificationOtp(signupPayload.email, signupPayload.cleanPhone, signupPayload.fullName, signupPayload.pin, signupPayload.formatGlobalPhone, signupPayload.firstNameOnly);
+                sendVerificationOtp(
+                    signupPayload.email, 
+                    signupPayload.cleanPhone, 
+                    signupPayload.fullName, 
+                    signupPayload.pin, 
+                    signupPayload.formatGlobalPhone, 
+                    signupPayload.firstNameOnly
+                );
             }
         });
 
@@ -712,7 +743,12 @@
                         Continue in Browser
                     </button>
                 `;
-                document.querySelector('.app-content-wrapper') ? document.querySelector('.app-content-wrapper').appendChild(pwaView) : document.body.appendChild(pwaView);
+                const wrapper = document.querySelector('.app-content-wrapper');
+                if (wrapper) {
+                    wrapper.appendChild(pwaView);
+                } else {
+                    document.body.appendChild(pwaView);
+                }
             } else {
                 pwaView.style.display = 'flex';
             }
