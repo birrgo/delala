@@ -1,4 +1,4 @@
-const CACHE_NAME = 'delala-cache-v1';
+const CACHE_NAME = 'delala-cache-v2'; // Updated cache version
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -36,16 +36,24 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event: Serve cached content offline, fallback to network
+// Fetch Event: Bypass non-GET & API requests, serve cached static assets offline
 self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  const url = new URL(request.url);
+
+  // 1. Bypass Service Worker entirely for POST/PUT requests or backend API routes
+  if (request.method !== 'GET' || url.pathname.startsWith('/api/')) {
+    return; // Direct browser network call
+  }
+
+  // 2. Handle static GET assets caching
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        // Fallback response when completely offline
-        if (event.request.mode === 'navigate') {
+      return fetch(request).catch(() => {
+        if (request.mode === 'navigate') {
           return caches.match('/index.html');
         }
       });
