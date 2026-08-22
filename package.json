@@ -1,0 +1,10 @@
+{
+  "name": "delala-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
