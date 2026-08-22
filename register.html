@@ -536,7 +536,8 @@
 
                 // Send email via Vercel/Brevo custom endpoint with explicit CORS mode and timeout handling
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second network timeout
+                // FIX: Changed timeout from 12000 to 25000 to prevent AbortError during cold start
+                const timeoutId = setTimeout(() => controller.abort(), 25000); 
 
                 const response = await fetch("https://hulum.online/api/send-otp", {
                     method: "POST",
