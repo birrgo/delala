@@ -1,66 +1,59 @@
-// api/send-otp.js
 export default async function handler(req, res) {
-  // Allow CORS headers if calling from frontend
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  // 1. Set CORS Headers to allow requests from your frontend app
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
+  // 2. Handle HTTP OPTIONS preflight request
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: 'Email address is required' });
-  }
-
-  // Generate a 6-digit random OTP
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const { email, otp, name } = req.body;
 
   try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
+    const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
       headers: {
-        "accept": "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-        "content-type": "application/json"
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY, // Stored in Vercel Environment Variables
+        'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { 
-          name: "Hulum App", 
-          email: "support@hulum.online" 
+        sender: {
+          name: 'Delala App',
+          email: 'support@hulum.online' // Must match authenticated domain
         },
-        to: [{ email: email }],
-        subject: "Your OTP Verification Code",
+        to: [{ email: email, name: name || 'User' }],
+        subject: `${otp} is your Delala Verification Code`,
         htmlContent: `
-          <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <h2 style="color: #333333;">Verification Code</h2>
-            <p style="color: #666666; font-size: 15px;">Your one-time password (OTP) for Hulum App is:</p>
-            <div style="background-color: #f4f4f7; padding: 15px; text-align: center; border-radius: 6px; margin: 20px 0;">
-              <span style="font-size: 32px; font-weight: bold; color: #4F46E5; letter-spacing: 6px;">${otpCode}</span>
-            </div>
-            <p style="color: #888888; font-size: 13px;">This code is valid for 10 minutes. If you did not request this code, please ignore this email.</p>
+          <div style="font-family: Arial, sans-serif; padding: 20px;">
+            <h2>Verification Code</h2>
+            <p>Your OTP code for Delala registration is:</p>
+            <h1 style="color: #10b981; letter-spacing: 4px;">${otp}</h1>
+            <p>This code expires in 15 minutes.</p>
           </div>
         `
       })
     });
 
-    const data = await response.json();
+    const data = await brevoResponse.json();
 
-    if (response.ok) {
-      return res.status(200).json({ 
-        success: true, 
-        message: 'OTP sent successfully!'
-      });
-    } else {
-      return res.status(400).json({ success: false, error: data });
+    if (!brevoResponse.ok) {
+      return res.status(400).json({ success: false, error: data.message || 'Brevo API error' });
     }
-  } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+
+    return res.status(200).json({ success: true, messageId: data.messageId });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
   }
 }
