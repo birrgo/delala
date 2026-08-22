@@ -539,7 +539,8 @@
                 // FIX: Changed timeout from 12000 to 25000 to prevent AbortError during cold start
                 const timeoutId = setTimeout(() => controller.abort(), 25000); 
 
-                const response = await fetch("https://hulum.online/api/send-otp", {
+                // FIX: Added 'www.' to avoid Vercel 308 Redirect blocking the POST request
+                const response = await fetch("https://www.hulum.online/api/send-otp", {
                     method: "POST",
                     mode: "cors",
                     headers: {
