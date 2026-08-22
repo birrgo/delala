@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BirrGo - User Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --success-color: #10B981;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .profile-header {
+            background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+            padding: 24px 20px 30px;
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-pic-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .profile-pic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #E2E8F0;
+            object-fit: cover;
+            border: 3px solid #2563EB;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .online-status {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            background: var(--success-color);
+            border: 3px solid #1E293B;
+            border-radius: 50%;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .user-handle {
+            font-size: 13px;
+            color: #94A3B8;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 24px;
+            margin: 14px 0 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 16px;
+            color: #FFFFFF;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.5;
+            fill: none;
+            stroke: currentColor;
+        }
+
+        .btn-follow {
+            background: var(--primary-accent);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-follow.following {
+            background: rgba(255, 255, 255, 0.15);
+            color: #F8FAFC;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .feed-container {
+            flex: 1;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .feed-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: -8px;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .post-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .post-author-pic {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .post-meta h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .post-meta p {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 380px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-caption {
+            padding: 12px 16px 8px;
+            font-size: 14px;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .post-actions {
+            padding: 12px 16px 16px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .btn-post-act {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-post-act svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+            fill: none;
+            stroke: currentColor;
+        }
+
+        .btn-post-message {
+            background: #EFF6FF;
+            color: var(--primary-accent);
+        }
+
+        .btn-post-follow {
+            background: #F8FAFC;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .loading-state, .empty-state {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="profile-header">
+        <div class="user-card">
+            <div class="profile-pic-container">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Profile Picture" class="profile-pic" id="userPic">
+                <div class="online-status"></div>
+            </div>
+
+            <h1 class="user-name" id="userName">Loading...</h1>
+            <p class="user-handle" id="userHandle">@...</p>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-value" id="postCount">0</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="followerCount">0</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="followingCount">0</span>
+                    <span class="stat-label">Following</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-action btn-message" onclick="openChat()">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Message
+                </button>
+                <button class="btn-action btn-follow" id="btnHeaderFollow" onclick="toggleFollow()">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Follow</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="feed-container" id="feedContainer">
+        <h3 class="feed-title">Posts</h3>
+        <div class="loading-state" id="postsLoading">Loading user posts...</div>
+    </main>
+
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+          authDomain: "delala-1b582.firebaseapp.com",
+          databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+          projectId: "delala-1b582",
+          storageBucket: "delala-1b582.firebasestorage.app",
+          messagingSenderId: "1073041850834",
+          appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+          measurementId: "G-2XW8F8FKBT"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 2. Extract User ID from URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId') || 'default_user';
+
+        document.getElementById('userHandle').innerText = '@' + userId;
+
+        // 3. Load User Details
+        function loadUserProfile() {
+            db.ref(`users/${userId}`).on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('userName').innerText = data.fullName || 'User Profile';
+                } else {
+                    document.getElementById('userName').innerText = 'User Not Found';
+                }
+            });
+        }
+
+        // 4. Load User Posts
+        function loadUserPosts() {
+            const feedContainer = document.getElementById('feedContainer');
+            const loadingElem = document.getElementById('postsLoading');
+
+            db.ref('posts').orderByChild('userId').equalTo(userId).on('value', (snapshot) => {
+                // Clear existing feed except title
+                feedContainer.innerHTML = '<h3 class="feed-title">Posts</h3>';
+
+                if (!snapshot.exists()) {
+                    feedContainer.innerHTML += '<div class="empty-state">No published posts found.</div>';
+                    document.getElementById('postCount').innerText = '0';
+                    return;
+                }
+
+                let count = 0;
+                snapshot.forEach((childSnapshot) => {
+                    count++;
+                    const post = childSnapshot.val();
+                    const postCard = createPostCard(post);
+                    feedContainer.appendChild(postCard);
+                });
+
+                document.getElementById('postCount').innerText = count;
+            });
+        }
+
+        // Helper: Format Timestamp
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Recently';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Helper: Create Post Card DOM Element
+        function createPostCard(post) {
+            const article = document.createElement('article');
+            article.className = 'post-card';
+
+            const imageUrl = post.imageUrl || (post.images ? Object.values(post.images)[0] : '');
+
+            article.innerHTML = `
+                <div class="post-header">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="post-author-pic" alt="Author">
+                    <div class="post-meta">
+                        <h4>${post.authorName || document.getElementById('userName').innerText}</h4>
+                        <p>${formatDate(post.createdAt)}</p>
+                    </div>
+                </div>
+                ${imageUrl ? `<img src="${imageUrl}" class="post-image" alt="Post photo">` : ''}
+                <p class="post-caption"><strong>${post.title || ''}</strong><br>${post.body || ''}</p>
+                <div class="post-actions">
+                    <button class="btn-post-act btn-post-message" onclick="openChat()">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Message
+                    </button>
+                    <button class="btn-post-act btn-post-follow card-follow-btn" onclick="toggleFollow()">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Follow</span>
+                    </button>
+                </div>
+            `;
+            return article;
+        }
+
+        // Interaction state
+        let isFollowing = false;
+
+        function toggleFollow() {
+            isFollowing = !isFollowing;
+            const headerBtn = document.getElementById('btnHeaderFollow');
+            const cardBtns = document.querySelectorAll('.card-follow-btn');
+
+            if (isFollowing) {
+                headerBtn.classList.add('following');
+                headerBtn.querySelector('span').innerText = 'Following';
+                headerBtn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                cardBtns.forEach(btn => {
+                    btn.querySelector('span').innerText = 'Following';
+                    btn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                });
+            } else {
+                headerBtn.classList.remove('following');
+                headerBtn.querySelector('span').innerText = 'Follow';
+                headerBtn.querySelector('svg').innerHTML = '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>';
+                cardBtns.forEach(btn => {
+                    btn.querySelector('span').innerText = 'Follow';
+                    btn.querySelector('svg').innerHTML = '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>';
+                });
+            }
+        }
+
+        function openChat() {
+            const currentName = document.getElementById('userName').innerText;
+            window.location.href = `chat.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(currentName)}`;
+        }
+
+        // Initial Execution
+        loadUserProfile();
+        loadUserPosts();
+    </script>
+</body>
+</html>
