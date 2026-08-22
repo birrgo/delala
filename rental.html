@@ -154,13 +154,13 @@
 
                 <div class="category-dropdown-menu" id="categoryDropdownMenu">
                     <button class="category-dropdown-item active" data-category="all">All Categories</button>
-                    <button class="category-dropdown-item" data-category="residence">Residence</button>
-                    <button class="category-dropdown-item" data-category="work">Work</button>
-                    <button class="category-dropdown-item" data-category="vehicle">Vehicle</button>
-                    <button class="category-dropdown-item" data-category="machine">Machine</button>
-                    <button class="category-dropdown-item" data-category="cloth">Cloth</button>
-                    <button class="category-dropdown-item" data-category="event">Event</button>
-                    <button class="category-dropdown-item" data-category="other">Other</button>
+                    <button class="category-dropdown-item" data-category="residential">1 Residential Property</button>
+                    <button class="category-dropdown-item" data-category="work">2 Work</button>
+                    <button class="category-dropdown-item" data-category="vehicle">3 Vehicle</button>
+                    <button class="category-dropdown-item" data-category="machine">4 Machine</button>
+                    <button class="category-dropdown-item" data-category="cloth">5 Cloth</button>
+                    <button class="category-dropdown-item" data-category="event">6 Event</button>
+                    <button class="category-dropdown-item" data-category="miscellaneous">7 Miscellaneous</button>
                 </div>
 
                 <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
@@ -615,8 +615,16 @@
 
         function itemMatchesCategory(item) {
             if (activeCategoryFilter === 'all') return true;
-            const itemCat = String(item.rentalSubCategory || item.subCategory || item.category || item.rentalType || '').trim().toLowerCase();
-            return itemCat.includes(activeCategoryFilter);
+            
+            const searchStr = [
+                item.rentalSubCategory,
+                item.subCategory,
+                item.category,
+                item.rentalType,
+                item.title
+            ].join(' ').toLowerCase();
+            
+            return searchStr.includes(activeCategoryFilter.toLowerCase());
         }
 
         function renderFilteredListings() {
@@ -687,12 +695,11 @@
             return null;
         }
 
-        // Ultra-Fast Optimized Geohash Database Bounding Range Search
         async function fetchNearbyItemsFromDB() {
             if (!currentUserCoordinates) return;
             isLoading = true;
 
-            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 4); 
+            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
             const nodePaths = ['posts', 'delala_new'];
             const matchingItems = [];
             const seenIds = new Set(); 
@@ -744,6 +751,9 @@
                 
             } catch (error) {
                 console.error("Error fetching nearby posts via Geohash:", error);
+                if(error.message.includes("Index not defined")) {
+                    triggerSystemAlert("Database Error", "Missing '.indexOn': ['geohash'] in Firebase Rules.", "⚠️");
+                }
             } finally {
                 isLoading = false;
             }
