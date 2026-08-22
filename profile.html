@@ -10,21 +10,79 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
-        .profile-info-section { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; padding: 16px 16px 8px; text-align: center; }
-        .avatar-container { position: relative; margin-bottom: 8px; cursor: pointer; }
-        .profile-avatar-img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2.5px solid #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.12); background: #252830; }
-        .avatar-badge { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #0052FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; border: 2px solid #FFF; font-weight: 800; font-size: 12px; }
-        .profile-display-name { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; color: var(--text-dark, #0F172A); min-height: 24px; }
-        .profile-username { font-size: 12px; color: var(--text-muted, #64748B); font-weight: 600; margin-bottom: 8px; min-height: 18px; }
-        
-        .edit-profile-pill-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #0F172A; font-size: 11px; font-weight: 700; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
-        .edit-profile-pill-btn:active { background: #E2E8F0; }
-        .edit-profile-pill-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        /* Compact Header Adjustment */
+        .nav-header {
+            padding: 6px 16px !important;
+            height: 46px !important;
+            min-height: 46px !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-title-text {
+            font-size: 16px !important;
+            margin: 0 !important;
+        }
 
-        .stats-metrics-row { display: flex; align-items: center; justify-content: center; gap: 28px; margin-bottom: 2px; width: 100%; }
-        .metric-block { display: flex; flex-direction: column; align-items: center; }
-        .metric-num { font-size: 15px; font-weight: 800; color: var(--text-dark, #0F172A); }
-        .metric-label { font-size: 11px; color: var(--text-muted, #64748B); font-weight: 500; }
+        /* Profile Left-Aligned Layout */
+        .profile-info-section { 
+            position: relative; 
+            z-index: 5; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: flex-start; 
+            gap: 14px; 
+            padding: 12px 16px 8px; 
+            text-align: left; 
+        }
+
+        .profile-left-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 72px;
+        }
+
+        .profile-right-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+            padding-top: 2px;
+        }
+
+        .avatar-container { position: relative; margin-bottom: 6px; cursor: pointer; }
+        .profile-avatar-img { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2.5px solid #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.12); background: #252830; }
+        .avatar-badge { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #0052FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; border: 2px solid #FFF; font-weight: 800; font-size: 12px; }
+        
+        .profile-display-name { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; color: var(--text-dark, #0F172A); min-height: 22px; }
+        .profile-username { font-size: 12px; color: var(--text-muted, #64748B); font-weight: 600; margin-bottom: 8px; min-height: 16px; }
+        
+        .edit-profile-pill-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+            padding: 5px 0; 
+            width: 100%; 
+            border-radius: 16px; 
+            background: #F1F5F9; 
+            border: 1px solid #CBD5E1; 
+            color: #0F172A; 
+            font-size: 10px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: background 0.2s; 
+        }
+        .edit-profile-pill-btn:active { background: #E2E8F0; }
+        .edit-profile-pill-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+        .stats-metrics-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px; width: 100%; }
+        .metric-block { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .metric-num { font-size: 13px; font-weight: 800; color: var(--text-dark, #0F172A); }
+        .metric-label { font-size: 10px; color: var(--text-muted, #64748B); font-weight: 500; }
         
         .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); animation: slideDown 0.3s ease; }
         .upload-progress-card.active { display: block; }
@@ -35,13 +93,31 @@
         .upload-progress-bar-bg { width: 100%; height: 8px; background: #F1F5F9; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0; }
         .upload-progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563EB, #1D4ED8); border-radius: 10px; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .category-tabs-bar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .category-pill-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 12px; border-radius: 16px; background: #F1F5F9; border: 1px solid var(--border-light, #E2E8F0); color: #475569; font-size: 11px; font-weight: 700; text-decoration: none; transition: all 0.2s ease; cursor: pointer; white-space: nowrap; }
+        /* Category Bar */
+        .category-tabs-bar { display: flex; align-items: center; justify-content: space-around; gap: 4px; padding: 8px 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border-light, #E2E8F0); }
+        .category-pill-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 10px; border-radius: 12px; background: #F1F5F9; border: 1px solid var(--border-light, #E2E8F0); color: #475569; font-size: 10px; font-weight: 700; text-decoration: none; transition: all 0.2s ease; cursor: pointer; flex: 1; min-width: 52px; }
         .category-pill-btn:active { transform: scale(0.95); }
         .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
-        .category-pill-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+        .category-pill-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
         
-        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; border-top: 1px solid var(--border-light, #E2E8F0); }
+        /* Embedded iFrame View Container */
+        .iframe-preview-wrapper { 
+            width: 100%; 
+            height: calc(100vh - 185px); 
+            background: #F8FAFC; 
+            position: relative; 
+            border: none; 
+            overflow: hidden; 
+        }
+        .embedded-preview-frame { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: block; 
+            background: #FFF; 
+        }
+
+        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; }
         .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark, #0F172A); overflow: hidden; cursor: pointer; }
         .post-grid-item img, .post-grid-item video { width: 100%; height: 100%; object-fit: cover; }
         .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
@@ -51,7 +127,7 @@
         .menu-wrapper { position: relative; display: inline-block; }
         .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
         .menu-action-btn:active { background-color: #F1F5F9; }
-        .menu-action-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+        .menu-action-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
         .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 160px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
         .profile-menu-dropdown.show { display: flex; }
         .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; }
@@ -125,7 +201,7 @@
     <div class="app-view">
         <header class="nav-header">
             <h1 class="header-title-text">Profile</h1>
-            <div class="header-left-group" style="justify-content: flex-end;">
+            <div class="header-left-group" style="justify-content: flex-end; display: flex; align-items: center; gap: 8px;">
                 <div class="header-live-clock-badge" id="topCornerLiveClock">--:--:--</div>
                 <div class="menu-wrapper">
                     <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu">
@@ -154,33 +230,62 @@
                 <div class="upload-progress-bar-bg"><div class="upload-progress-bar-fill" id="uploadProgressFill"></div></div>
             </div>
 
+            <!-- Profile Info Section -->
             <section class="profile-info-section">
-                <div class="avatar-container" id="avatarClickGroup">
-                    <img src="s.png" alt="Profile" class="profile-avatar-img" id="userAvatarImg">
-                    <div class="avatar-badge">+</div>
+                <div class="profile-left-col">
+                    <div class="avatar-container" id="avatarClickGroup">
+                        <img src="s.png" alt="Profile" class="profile-avatar-img" id="userAvatarImg">
+                        <div class="avatar-badge">+</div>
+                    </div>
+                    <button type="button" class="edit-profile-pill-btn" id="openEditProfileBtn">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Edit</span>
+                    </button>
                 </div>
-                <h1 class="profile-display-name" id="userDisplayName">User</h1>
-                <p class="profile-username" id="userHandle">@user</p>
 
-                <button type="button" class="edit-profile-pill-btn" id="openEditProfileBtn">
-                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span>Edit Profile</span>
-                </button>
+                <div class="profile-right-col">
+                    <h1 class="profile-display-name" id="userDisplayName">User</h1>
+                    <p class="profile-username" id="userHandle">@user</p>
 
-                <div class="stats-metrics-row">
-                    <div class="metric-block"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
-                    <div class="metric-block"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
-                    <div class="metric-block"><span class="metric-num" id="likesCount">0</span><span class="metric-label">Likes</span></div>
+                    <div class="stats-metrics-row">
+                        <div class="metric-block"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
+                        <div class="metric-block"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
+                        <div class="metric-block"><span class="metric-num" id="likesCount">0</span><span class="metric-label">Likes</span></div>
+                        <div class="metric-block"><span class="metric-num" id="ratingCount">4.9 ★</span><span class="metric-label">Rating</span></div>
+                    </div>
                 </div>
             </section>
 
-            <nav class="category-tabs-bar" aria-label="Profile Categories Filter">
-                <button type="button" class="category-pill-btn active" data-category="all"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg><span>All</span></button>
-                <button type="button" class="category-pill-btn" data-category="Rental"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Rental</span></button>
-                <button type="button" class="category-pill-btn" data-category="Selling"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Selling</span></button>
-                <button type="button" class="category-pill-btn" data-category="Vacancy"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg><span>Vacancy</span></button>
+            <!-- Navigation Tabs Bar with Targets -->
+            <nav class="category-tabs-bar" aria-label="Profile Navigation Filter">
+                <button type="button" class="category-pill-btn active" data-category="all" data-target="grid">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+                    <span>All</span>
+                </button>
+                <button type="button" class="category-pill-btn" data-category="activity" data-src="active.html">
+                    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Activity</span>
+                </button>
+                <button type="button" class="category-pill-btn" data-category="chat" data-src="chat.html">
+                    <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    <span>Chat</span>
+                </button>
+                <button type="button" class="category-pill-btn" data-category="app" data-src="app.html">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
+                    <span>App</span>
+                </button>
+                <button type="button" class="category-pill-btn" data-category="installed" data-src="camp.html">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Installed</span>
+                </button>
             </nav>
 
+            <!-- Embedded Frame Area (Loads pages below header area) -->
+            <div class="iframe-preview-wrapper" id="iframePreviewContainer" style="display: none;">
+                <iframe src="about:blank" class="embedded-preview-frame" id="embeddedCategoryFrame" title="Category View"></iframe>
+            </div>
+
+            <!-- Native Posts Grid -->
             <main class="posts-grid" id="postsGridContainer"></main>
         </div>
 
@@ -188,12 +293,12 @@
             <a id="nav-rental" href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
             <a id="nav-selling" href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
             <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item"><div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="post-fab-label">Post</span></a>
-            <a id="nav-vacancy" href="vacancy.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Vacancy</span></a>
+            <a id="nav-service" href="service.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Service</span></a>
             <a id="nav-profile" href="profile.html" class="nav-item active"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
         </nav>
     </div>
 
-    <!-- EDIT PROFILE MODAL -->
+    <!-- MODALS -->
     <div class="modal-overlay" id="editProfileModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -225,7 +330,6 @@
         </div>
     </div>
 
-    <!-- LOGIN / REGISTER PROMPT MODAL -->
     <div class="modal-overlay" id="authPromptModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -270,17 +374,62 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, query, orderByChild, equalTo, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, get, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", authDomain: "delala-1b582.firebaseapp.com", databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", projectId: "delala-1b582", storageBucket: "delala-1b582.firebasestorage.app", messagingSenderId: "1073041850834", appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b", measurementId: "G-2XW8F8FKBT" };
-        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getDatabase(app), storage = getStorage(app);
+        // --- 1. PRIMARY FIREBASE CONFIG (Delala) ---
+        const primaryConfig = { 
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
+            authDomain: "delala-1b582.firebaseapp.com", 
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", 
+            projectId: "delala-1b582", 
+            storageBucket: "delala-1b582.firebasestorage.app", 
+            messagingSenderId: "1073041850834", 
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b", 
+            measurementId: "G-2XW8F8FKBT" 
+        };
+        const app = initializeApp(primaryConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
 
-        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, postsUnsubscribe = null, isUploadingActive = false, pendingPostToDelete = null, isLoggedInUser = false, selectedAvatarFile = null;
+        // --- 2. SECONDARY FIREBASE CONFIG (Service Management) ---
+        const serviceDbConfig = {
+            apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
+            authDomain: "tsestlive.firebaseapp.com",
+            databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
+            projectId: "tsestlive",
+            storageBucket: "tsestlive.firebasestorage.app",
+            messagingSenderId: "271877452740",
+            appId: "1:271877452740:web:2982ecec515f245ea32a91",
+            measurementId: "G-KCFDH1TV5S"
+        };
+        const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
+        const serviceDb = getDatabase(serviceApp);
+
+        async function logToServiceManagement(actionType, dataDetails) {
+            try {
+                const logRef = push(ref(serviceDb, 'managementLogs'));
+                await set(logRef, {
+                    action: actionType,
+                    timestamp: new Date().toISOString(),
+                    user: currentActiveUserId || 'Unknown User',
+                    details: dataDetails
+                });
+            } catch (err) {
+                console.error("Failed to log to Management DB:", err);
+            }
+        }
+
+        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, 
+            postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
+            pendingPostToDelete = null, isLoggedInUser = false, selectedAvatarFile = null;
+            
+        let primaryPosts = [];
+        let servicePosts = [];
 
         async function hashPin(pin) {
             const data = new TextEncoder().encode(pin);
@@ -288,7 +437,6 @@
             return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // Fast Local Cache Reader
         function hydrateCachedProfile() {
             const cachedUser = localStorage.getItem('delala_cached_profile');
             if (!cachedUser || localStorage.getItem('user_logged_out') === 'true') return false;
@@ -296,6 +444,21 @@
                 const data = JSON.parse(cachedUser);
                 applyProfileToDOM(data);
                 isLoggedInUser = true;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function hydrateCachedPosts() {
+            const cachedPosts = localStorage.getItem('delala_cached_posts');
+            if (!cachedPosts || localStorage.getItem('user_logged_out') === 'true') return false;
+            try {
+                allUserPosts = JSON.parse(cachedPosts);
+                let totalLikes = 0;
+                allUserPosts.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
+                document.getElementById('likesCount').innerText = formatCount(totalLikes);
+                renderFilteredGrid(true);
                 return true;
             } catch (e) {
                 return false;
@@ -315,10 +478,13 @@
 
             document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
             document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
+            if (document.getElementById('ratingCount')) {
+                document.getElementById('ratingCount').innerText = (userData.rating || "4.9") + " ★";
+            }
         }
 
-        // Synchronously run fast cache rendering
         hydrateCachedProfile();
+        hydrateCachedPosts();
 
         document.addEventListener('DOMContentLoaded', () => {
             setupAuthListener(); 
@@ -347,27 +513,19 @@
 
             const openEdit = () => {
                 if (!isLoggedInUser) { showAuthModal(); return; }
-                const cachedUser = localStorage.getItem('delala_cached_profile');
-                let currentData = {};
-                try { currentData = cachedUser ? JSON.parse(cachedUser) : {}; } catch(e){}
-
                 document.getElementById('editNameInput').value = document.getElementById('userDisplayName').innerText || "";
                 document.getElementById('editHandleInput').value = (document.getElementById('userHandle').innerText || "").replace(/^@/, '');
                 avatarPreview.src = document.getElementById('userAvatarImg').src;
                 selectedAvatarFile = null;
-
                 editModal.classList.add('active'); editModal.style.display = 'flex';
             };
 
             const closeEdit = () => { editModal.classList.remove('active'); editModal.style.display = 'none'; };
 
             openBtn?.addEventListener('click', openEdit);
-            document.getElementById('avatarClickGroup')?.addEventListener('click', () => {
-                if (isLoggedInUser) openEdit();
-            });
+            document.getElementById('avatarClickGroup')?.addEventListener('click', () => { if (isLoggedInUser) openEdit(); });
             closeBtn?.addEventListener('click', closeEdit);
             cancelBtn?.addEventListener('click', closeEdit);
-
             triggerBtn?.addEventListener('click', () => fileInput.click());
             avatarPreview?.addEventListener('click', () => fileInput.click());
 
@@ -392,7 +550,6 @@
 
                 try {
                     let photoURL = document.getElementById('userAvatarImg').src;
-
                     if (selectedAvatarFile) {
                         const avatarRef = storageRef(storage, `avatars/${currentActiveUserId}_${Date.now()}`);
                         await uploadBytes(avatarRef, selectedAvatarFile);
@@ -400,23 +557,11 @@
                     }
 
                     const nameParts = newName.split(/\s+/);
-                    const firstName = nameParts[0] || "";
-                    const middleName = nameParts.slice(1).join(" ") || "";
+                    const firstName = nameParts[0] || "", middleName = nameParts.slice(1).join(" ") || "";
 
-                    const profileUpdate = {
-                        displayName: newName,
-                        firstName: firstName,
-                        middleName: middleName,
-                        username: newHandle,
-                        photoURL: photoURL,
-                        profilePicture: photoURL
-                    };
-
+                    const profileUpdate = { displayName: newName, firstName: firstName, middleName: middleName, username: newHandle, photoURL: photoURL, profilePicture: photoURL };
                     await update(ref(db, `users/${currentActiveUserId}`), profileUpdate);
-
-                    if (auth.currentUser) {
-                        await updateProfile(auth.currentUser, { displayName: newName, photoURL: photoURL });
-                    }
+                    if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: newName, photoURL: photoURL });
 
                     const cached = localStorage.getItem('delala_cached_profile');
                     let currentObj = cached ? JSON.parse(cached) : {};
@@ -424,6 +569,7 @@
 
                     localStorage.setItem('delala_cached_profile', JSON.stringify(updatedProfile));
                     applyProfileToDOM(updatedProfile);
+                    logToServiceManagement('PROFILE_UPDATE', { updatedName: newName, updatedHandle: newHandle });
 
                     closeEdit();
                     showToast("Profile updated successfully!");
@@ -447,12 +593,8 @@
 
         function setupAuthPromptEvents() {
             document.getElementById('closeAuthModalBtn')?.addEventListener('click', closeAuthModal);
-            document.getElementById('authPromptModal')?.addEventListener('click', (e) => {
-                if (e.target.id === 'authPromptModal') closeAuthModal();
-            });
-            document.getElementById('nav-post')?.addEventListener('click', (e) => {
-                if (!isLoggedInUser) { e.preventDefault(); showAuthModal(); }
-            });
+            document.getElementById('authPromptModal')?.addEventListener('click', (e) => { if (e.target.id === 'authPromptModal') closeAuthModal(); });
+            document.getElementById('nav-post')?.addEventListener('click', (e) => { if (!isLoggedInUser) { e.preventDefault(); showAuthModal(); } });
         }
 
         function showToast(message) {
@@ -489,8 +631,13 @@
                     hasUploaded = true;
                     fill.style.width = '100%'; percent.innerText = '100%';
                     try {
-                        const newPostRef = push(ref(db, 'posts'));
-                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: uploadTask.payload.rentalType || uploadTask.payload.category || "Rental" });
+                        const postCategory = uploadTask.payload.rentalType || uploadTask.payload.category || "Rental";
+                        const targetDbRef = (postCategory.toLowerCase() === 'service') ? serviceDb : db;
+                        const newPostRef = push(ref(targetDbRef, 'posts'));
+                        
+                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: postCategory });
+                        logToServiceManagement('NEW_POST_PUBLISHED', { postId: newPostRef.key, title: uploadTask.payload.title, dbSource: (postCategory.toLowerCase() === 'service') ? 'serviceDb' : 'primaryDb' });
+
                         title.innerText = "Published Successfully!";
                         showToast("Listing published successfully!");
                         setTimeout(() => { card.classList.remove('active'); isUploadingActive = false; }, 1200);
@@ -505,14 +652,31 @@
         }
 
         function setupCategoryFilterButtons() {
+            const gridContainer = document.getElementById('postsGridContainer');
+            const iframeWrapper = document.getElementById('iframePreviewContainer');
+            const iframeElement = document.getElementById('embeddedCategoryFrame');
+
             document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (!isLoggedInUser) { showAuthModal(); return; }
+                    
                     document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    
                     currentSelectedCategory = btn.getAttribute('data-category');
-                    renderFilteredGrid();
+                    const targetSrc = btn.getAttribute('data-src');
+
+                    if (targetSrc) {
+                        gridContainer.style.display = 'none';
+                        iframeWrapper.style.display = 'block';
+                        iframeElement.src = targetSrc;
+                    } else {
+                        iframeWrapper.style.display = 'none';
+                        iframeElement.src = 'about:blank';
+                        gridContainer.style.display = 'grid';
+                        renderFilteredGrid();
+                    }
                 });
             });
         }
@@ -580,7 +744,10 @@
                 }
 
                 confirmBtn.innerText = "Deleting...";
-                await remove(ref(db, `posts/${pendingPostToDelete.id}`));
+                const targetDatabase = pendingPostToDelete._dbSource === 'service' ? serviceDb : db;
+                await remove(ref(targetDatabase, `posts/${pendingPostToDelete.id}`));
+                logToServiceManagement('POST_DELETED', { deletedPostId: pendingPostToDelete.id, postTitle: pendingPostToDelete.title });
+
                 closeVerifyModal(); closePreviewModal(); showToast("Post deleted successfully!");
             } catch (err) {
                 errorMsg.innerText = "Failed to delete post: " + (err.message || "Network error"); errorMsg.style.display = 'block';
@@ -605,6 +772,7 @@
                     localStorage.setItem('user_logged_out', 'true'); 
                     localStorage.removeItem('auth_session_phone'); 
                     localStorage.removeItem('delala_cached_profile');
+                    localStorage.removeItem('delala_cached_posts');
                     sessionStorage.clear(); 
                     await signOut(auth);
                 } catch (error) {} finally { window.location.href = 'rental.html'; }
@@ -621,12 +789,15 @@
         function renderLoggedOutGuestState() {
             isLoggedInUser = false;
             localStorage.removeItem('delala_cached_profile');
+            localStorage.removeItem('delala_cached_posts');
+            
             if (document.getElementById('userDisplayName')) document.getElementById('userDisplayName').innerText = 'Guest User';
             document.getElementById('userHandle').innerText = "@guest";
             document.getElementById('userAvatarImg').src = 's.png';
             document.getElementById('followingCount').innerText = '0';
             document.getElementById('followersCount').innerText = '0';
             document.getElementById('likesCount').innerText = '0';
+            if (document.getElementById('ratingCount')) document.getElementById('ratingCount').innerText = '0.0 ★';
             
             const gridContainer = document.getElementById('postsGridContainer');
             gridContainer.innerHTML = `<div class="empty-grid-msg" id="loginGridBtn">Please login or create an account to view profile posts.</div>`;
@@ -654,11 +825,20 @@
             try {
                 const snapshot = await get(ref(db, `users/${cleanPhone}`));
                 if (snapshot.exists()) { renderUserProfile(snapshot.val(), cleanPhone); return; }
-                const querySnap = await get(query(ref(db, 'users'), orderByChild('cleanPhone'), equalTo(cleanPhone)));
+                const querySnap = await get(ref(db, 'users'));
                 if (querySnap.exists()) {
-                    const data = querySnap.val(), key = Object.keys(data)[0];
-                    renderUserProfile(data[key], key);
-                } else renderLoggedOutGuestState();
+                    const data = querySnap.val();
+                    const matchedKey = Object.keys(data).find(k => {
+                        const u = data[k];
+                        const uPhone = String(u.cleanPhone || u.phone || u.phoneNumber || '').replace(/\D/g, '').replace(/^0+/, '');
+                        return uPhone === cleanPhone || k === cleanPhone;
+                    });
+                    if (matchedKey) {
+                        renderUserProfile(data[matchedKey], matchedKey);
+                        return;
+                    }
+                }
+                renderLoggedOutGuestState();
             } catch (err) { renderLoggedOutGuestState(); }
         }
 
@@ -673,7 +853,6 @@
         function fetchUserDataAndPosts(userId, authUser) {
             isLoggedInUser = true;
             currentActiveUserId = userId;
-            
             get(ref(db, `users/${userId}`)).then((snapshot) => {
                 if (snapshot.exists()) { 
                     renderUserProfile(snapshot.val(), userId); 
@@ -687,25 +866,72 @@
             }).catch(() => fetchPostsForUser(userId));
         }
 
+        // Fetch all previous posted items from both primaryDb and serviceDb
         function fetchPostsForUser(userId) {
             if (postsUnsubscribe) postsUnsubscribe();
+            if (servicePostsUnsubscribe) servicePostsUnsubscribe();
+
+            const sessionPhone = localStorage.getItem('auth_session_phone') || '';
+            const cleanPhone = String(sessionPhone).replace(/\D/g, '').replace(/^0+/, '');
+            const targetIds = new Set([String(userId), cleanPhone, sessionPhone].filter(Boolean));
+
+            const isPostBelongingToUser = (post) => {
+                if (!post) return false;
+                const pUserId = String(post.userId || post.uid || post.user_id || '');
+                const pPhone = String(post.postedByPhone || post.phone || post.userPhone || post.cleanPhone || '').replace(/\D/g, '').replace(/^0+/, '');
+                return targetIds.has(pUserId) || (pPhone && targetIds.has(pPhone));
+            };
+
+            const parseTimestamp = (p) => {
+                const val = p.timestamp || p.createdAt || p.dateCreated || p.time || 0;
+                if (!val) return 0;
+                const num = Number(val);
+                if (!isNaN(num) && num > 0) return num;
+                const parsedDate = new Date(val).getTime();
+                return isNaN(parsedDate) ? 0 : parsedDate;
+            };
+
+            const updateGrid = () => {
+                allUserPosts = [...primaryPosts, ...servicePosts];
+                
+                // Sort all combined items by latest timestamp
+                allUserPosts.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
+                
+                let totalLikes = 0;
+                allUserPosts.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
+                document.getElementById('likesCount').innerText = formatCount(totalLikes);
+                
+                renderFilteredGrid(false);
+            };
+            
+            // Listen to Primary Database Posts (Rental, Selling, etc.)
             postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
-                allUserPosts = [];
+                primaryPosts = [];
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    let totalLikes = 0;
                     Object.keys(data).forEach(key => {
                         const item = data[key];
-                        if (typeof item === 'object' && item !== null && (item.userId === userId || item.authorId === userId || item.postedByPhone === userId || item.phone === userId)) {
-                            allUserPosts.push({ id: key, ...item });
-                            totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0);
+                        if (isPostBelongingToUser(item)) {
+                            primaryPosts.push({ id: key, _dbSource: 'primary', ...item });
                         }
                     });
-                    document.getElementById('likesCount').innerText = formatCount(totalLikes);
-                    allUserPosts.reverse(); renderFilteredGrid();
-                } else {
-                    document.getElementById('postsGridContainer').innerHTML = '<div class="empty-grid-msg">No posts available.</div>';
                 }
+                updateGrid();
+            });
+
+            // Listen to Service Management Database Posts
+            servicePostsUnsubscribe = onValue(ref(serviceDb, 'posts'), (snapshot) => {
+                servicePosts = [];
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        if (isPostBelongingToUser(item)) {
+                            servicePosts.push({ id: key, _dbSource: 'service', ...item });
+                        }
+                    });
+                }
+                updateGrid();
             });
         }
 
@@ -713,16 +939,16 @@
             if (targetCategory === 'all') return true;
             const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim(),
                   titleVal = String(post.title || '').toLowerCase(),
-                  descVal = String(post.body || post.description || '').toLowerCase(),
                   target = targetCategory.toLowerCase().trim();
 
-            if (target === 'rental') return categoryVal === 'rental' || categoryVal === 'rent' || titleVal.includes('rent') || descVal.includes('rent');
-            if (target === 'selling') return ['selling', 'sell', 'sale'].includes(categoryVal) || titleVal.includes('sell') || titleVal.includes('sale') || descVal.includes('sell');
-            if (target === 'vacancy') return ['vacancy', 'job', 'job vacancy'].includes(categoryVal) || titleVal.includes('job') || titleVal.includes('vacancy') || descVal.includes('job');
+            if (target === 'activity') return categoryVal === 'activity' || post.isActivity || titleVal.includes('activity');
+            if (target === 'chat') return categoryVal === 'chat' || titleVal.includes('chat');
+            if (target === 'app') return categoryVal === 'app' || categoryVal === 'apps';
+            if (target === 'installed') return categoryVal === 'installed' || post.isInstalled;
             return categoryVal === target;
         }
 
-        function renderFilteredGrid() {
+        function renderFilteredGrid(isFromCache = false) {
             const container = document.getElementById('postsGridContainer');
             container.innerHTML = '';
             const filteredPosts = allUserPosts.filter(post => isPostInCategory(post, currentSelectedCategory));
@@ -731,8 +957,11 @@
                 const fragment = document.createDocumentFragment();
                 filteredPosts.forEach(post => {
                     const views = post.views || post.viewCount || 0,
-                          mediaSrc = (post.images && post.images.length > 0) ? post.images[0] : (post.imageUrl || post.image || post.mediaUrl || '40789.png'),
+                          mediaSrc = (post.images && post.images.length > 0) 
+                              ? post.images[0] 
+                              : (post.imageUrl || post.image || post.mediaUrl || post.photo || '40789.png'),
                           gridCell = document.createElement('div');
+                          
                     gridCell.className = 'post-grid-item';
                     gridCell.innerHTML = `<img src="${mediaSrc}" alt="Post" loading="lazy"><div class="post-views-count"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>${formatCount(views)}</span></div>`;
                     gridCell.addEventListener('click', () => openPreviewModal(post));
@@ -740,7 +969,12 @@
                 });
                 container.appendChild(fragment);
             } else {
-                container.innerHTML = `<div class="empty-grid-msg">No ${currentSelectedCategory === 'all' ? '' : currentSelectedCategory} posts found.</div>`;
+                const label = currentSelectedCategory.charAt(0).toUpperCase() + currentSelectedCategory.slice(1);
+                container.innerHTML = `<div class="empty-grid-msg">No ${currentSelectedCategory === 'all' ? '' : label} items found.</div>`;
+            }
+
+            if (!isFromCache && allUserPosts.length > 0) {
+                localStorage.setItem('delala_cached_posts', JSON.stringify(allUserPosts));
             }
         }
 

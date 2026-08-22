@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Activity Tracking Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --border-light: #E2E8F0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; padding-bottom: 30px; }
+
+        /* Header */
+        .track-header {
+            padding: 14px 16px;
+            background: #FFF;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .track-header h1 { font-size: 16px; font-weight: 800; }
+
+        /* Activity Feed Section */
+        .activity-feed-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .activity-card {
+            background: #FFF;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .activity-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-title { font-size: 13px; font-weight: 800; color: var(--text-dark); }
+        .item-category { font-size: 10px; font-weight: 700; background: #F1F5F9; color: var(--text-muted); padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
+
+        .activity-stats-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #F8FAFC;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-group { display: flex; flex-direction: column; align-items: center; }
+        .stat-num { font-size: 12px; font-weight: 800; color: var(--text-dark); }
+        .stat-label { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="track-header">
+        <h1>Activity Tracking</h1>
+    </header>
+
+    <!-- Individual Item Activity Feed -->
+    <main class="activity-feed-list" id="activityFeed"></main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
+            authDomain: "delala-1b582.firebaseapp.com", 
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", 
+            projectId: "delala-1b582", 
+            storageBucket: "delala-1b582.firebasestorage.app", 
+            messagingSenderId: "1073041850834", 
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const TARGET_AUTHOR_ID = "author_789";
+
+        function formatCount(num) {
+            const val = parseInt(num) || 0;
+            if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+            if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+            return val;
+        }
+
+        function listenActivityMetrics() {
+            const postsRef = ref(db, 'posts');
+            onValue(postsRef, (snapshot) => {
+                const itemsList = [];
+
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        if (String(item.userId || item.uid) === TARGET_AUTHOR_ID) {
+                            itemsList.push({ id: key, ...item });
+                        }
+                    });
+                }
+
+                renderActivityFeed(itemsList);
+            });
+        }
+
+        function renderActivityFeed(items) {
+            const container = document.getElementById('activityFeed');
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:#64748B; font-size:12px;">No activity tracked yet.</div>`;
+                return;
+            }
+
+            items.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                card.innerHTML = `
+                    <div class="activity-card-header">
+                        <span class="item-title">${item.title || 'Untitled Listing'}</span>
+                        <span class="item-category">${item.category || item.rentalType || 'General'}</span>
+                    </div>
+                    <div class="activity-stats-row">
+                        <div class="stat-group">
+                            <span class="stat-num">${formatCount(item.views || 0)}</span>
+                            <span class="stat-label">Views</span>
+                        </div>
+                        <div class="stat-group">
+                            <span class="stat-num">${formatCount(item.likes || 0)}</span>
+                            <span class="stat-label">Likes</span>
+                        </div>
+                        <div class="stat-group">
+                            <span class="stat-num">${formatCount(item.copyLinkCount || 0)}</span>
+                            <span class="stat-label">Shares</span>
+                        </div>
+                        <div class="stat-group">
+                            <span class="stat-num">${item.averageRating ? item.averageRating.toFixed(1) : '0.0'} ★</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', listenActivityMetrics);
+    </script>
+</body>
+</html>

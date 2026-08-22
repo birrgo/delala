@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BirrGo - Live Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+            --offline-color: #94A3B8;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        /* --- Chat Header --- */
+        .chat-header {
+            background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #1E293B;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: transparent; border: none; color: #F8FAFC; cursor: pointer; display: flex; align-items: center; }
+        .back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: #E2E8F0;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary-dark);
+            position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .online-dot {
+            position: absolute; bottom: 0; right: 0; width: 12px; height: 12px;
+            background: var(--success-color); border: 2px solid #1E293B; border-radius: 50%;
+        }
+        .online-dot.offline { background: var(--offline-color); }
+
+        .user-details h2 { font-size: 16px; font-weight: 700; margin-bottom: 2px; color: #FFFFFF; }
+        .user-details p { font-size: 11px; color: #CBD5E1; font-weight: 600; }
+
+        /* Chat Messages Container */
+        .chat-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .message { max-width: 75%; display: flex; flex-direction: column; }
+        .message.received { align-self: flex-start; }
+        .message.sent { align-self: flex-end; }
+        
+        .msg-bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; position: relative; }
+        .message.received .msg-bubble { background: var(--card-bg); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+        .message.sent .msg-bubble { background: var(--primary-accent); color: #FFF; border-bottom-right-radius: 4px; }
+        .msg-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; align-self: flex-end; }
+
+        /* Location Card Inside Chat */
+        .location-card {
+            background: var(--card-bg); border: 2px solid var(--primary-accent); border-radius: 12px;
+            padding: 12px; margin-top: 4px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: transform 0.2s;
+        }
+        .location-card:active { transform: scale(0.97); }
+        .location-card-icon {
+            width: 40px; height: 40px; background: #EFF6FF; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; color: var(--primary-accent); flex-shrink: 0;
+        }
+        .location-card-icon svg { width: 22px; height: 22px; fill: currentColor; }
+        .location-card-text h4 { font-size: 14px; font-weight: 800; color: var(--primary-dark); }
+        .location-card-text p { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+        /* Input Area */
+        .chat-input-area {
+            background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #1E293B; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-attach, .btn-copy {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15);
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #F8FAFC; cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+        }
+        .btn-attach:active, .btn-copy:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
+
+        .input-wrapper {
+            flex: 1; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; padding: 0 16px; display: flex; align-items: center;
+        }
+        .chat-input { width: 100%; background: transparent; border: none; padding: 14px 0; font-size: 14px; outline: none; color: var(--primary-dark); }
+        .chat-input::placeholder { color: var(--text-muted); }
+
+        .btn-send {
+            background: var(--primary-accent); border: none; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: #FFF; cursor: pointer; flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .btn-send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Map Overlay */
+        .map-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #FFF; z-index: 2000;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .map-overlay.active { transform: translateY(0); }
+        #chatMap { width: 100%; height: 100%; }
+
+        .map-header-controls { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 2010; }
+        .map-btn {
+            background: #FFF; border: none; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer; color: var(--primary-dark); font-weight: 800; font-size: 18px;
+        }
+        .distance-badge {
+            background: rgba(15, 23, 42, 0.9); color: #FFF; padding: 10px 20px; border-radius: 30px;
+            font-size: 13px; font-weight: 700; backdrop-filter: blur(8px); display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .distance-badge span { color: #38BDF8; font-weight: 800; font-size: 15px; }
+
+        .user-gps-dot {
+            width: 18px; height: 18px; background-color: #2563EB; border: 3px solid #FFFFFF;
+            border-radius: 50%; box-shadow: 0 0 10px rgba(37, 99, 235, 0.6);
+        }
+
+        /* Permission Modal */
+        .permission-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .permission-card { background: #FFF; border-radius: 20px; padding: 24px; width: 100%; max-width: 340px; text-align: center; }
+        .perm-icon {
+            width: 60px; height: 60px; background: #EFF6FF; color: var(--primary-accent);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;
+        }
+        .perm-icon svg { width: 30px; height: 30px; fill: currentColor; }
+        .permission-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+        .permission-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+        .perm-actions { display: flex; gap: 12px; }
+        .btn-perm { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
+        .btn-allow { background: var(--primary-accent); color: #FFF; }
+        .btn-deny { background: #F1F5F9; color: var(--primary-dark); }
+
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: rgba(15, 23, 42, 0.9); color: white; padding: 10px 20px; border-radius: 24px;
+            font-size: 13px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;
+        }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div id="chatRoomScreen" class="screen">
+        <header class="chat-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="returnToInbox()">
+                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="user-info">
+                    <div class="user-avatar" id="activeAvatar">
+                        U
+                        <div class="online-dot offline" id="chatPartnerDot"></div>
+                    </div>
+                    <div class="user-details">
+                        <h2 id="chatPartnerName">Loading...</h2>
+                        <p id="chatPartnerStatus">Offline</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="chat-container" id="chatBox"></div>
+
+        <div class="chat-input-area">
+            <button class="btn-attach" id="btnShareLoc" title="Share Live Location">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </button>
+            <div class="input-wrapper">
+                <input type="text" class="chat-input" id="messageInput" placeholder="Type a message...">
+            </div>
+            <button class="btn-send" id="btnSend">
+                <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+            <button class="btn-copy" id="btnCopyLink" title="Copy Session Link">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Map Tracker Overlay -->
+    <div class="map-overlay" id="mapOverlay">
+        <div class="map-header-controls">
+            <button class="map-btn" onclick="closeMapTracker()">✕</button>
+            <div class="distance-badge" id="distanceBadge">Distance: <span id="routeDistance">Calculating...</span></div>
+        </div>
+        <div id="chatMap"></div>
+    </div>
+
+    <!-- Permission Modal -->
+    <div class="permission-modal" id="permModal">
+        <div class="permission-card">
+            <div class="perm-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+            </div>
+            <h3>Share Current Location?</h3>
+            <p>This will send your real-time GPS coordinates inside chat so the other party can view driving routes and distance to you.</p>
+            <div class="perm-actions">
+                <button class="btn-perm btn-deny" onclick="denyLocation()">Decline</button>
+                <button class="btn-perm btn-allow" onclick="allowLocation()">Allow</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastMessage" class="toast">Link copied!</div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- MapLibre Library -->
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+    <script>
+        // Force frame break to open full-screen at top window level
+        if (window.top !== window.self) {
+            try {
+                window.top.location.href = window.location.href;
+            } catch (e) {
+                console.warn("Frame navigation handled:", e);
+            }
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const myUsername = localStorage.getItem('myAppUsername') || 'User_' + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem('myAppUsername', myUsername);
+
+        // Extract user parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentUserId = urlParams.get('userId');
+        const currentUserName = urlParams.get('userName') || currentUserId || 'User';
+
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const chatPartnerName = document.getElementById('chatPartnerName');
+        const chatPartnerStatus = document.getElementById('chatPartnerStatus');
+        const chatPartnerDot = document.getElementById('chatPartnerDot');
+        const activeAvatar = document.getElementById('activeAvatar');
+        const permModal = document.getElementById('permModal');
+
+        let map = null, myMarker = null, targetMarker = null, watchId = null;
+        let targetLat = null, targetLng = null;
+        let activePresenceListener = null;
+
+        function returnToInbox() {
+            if (window.top !== window.self) {
+                try {
+                    window.top.location.href = 'chat.html';
+                    return;
+                } catch(e) {}
+            }
+            window.location.href = 'chat.html';
+        }
+
+        function setupRealtimePresence() {
+            const myPresenceRef = db.ref(`users/${myUsername}/presence`);
+            const connectedRef = db.ref('.info/connected');
+
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    myPresenceRef.onDisconnect().set({
+                        isOnline: false,
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    myPresenceRef.set({
+                        isOnline: true,
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            });
+        }
+
+        function initChatRoom() {
+            if(!currentUserId) {
+                alert("No user specified.");
+                returnToInbox();
+                return;
+            }
+
+            chatPartnerName.innerText = currentUserName;
+            activeAvatar.innerText = currentUserName.charAt(0).toUpperCase();
+
+            activePresenceListener = db.ref(`users/${currentUserId}/presence`);
+            activePresenceListener.on('value', (pSnap) => {
+                const p = pSnap.val();
+                if(p && p.isOnline) {
+                    chatPartnerStatus.innerText = 'Online • Active now';
+                    chatPartnerDot.classList.remove('offline');
+                } else {
+                    const lastActive = p && p.lastSeen ? formatTime(p.lastSeen) : '';
+                    chatPartnerStatus.innerText = lastActive ? `Offline • Last seen ${lastActive}` : 'Offline';
+                    chatPartnerDot.classList.add('offline');
+                }
+            });
+
+            fetchMessages();
+        }
+
+        function fetchMessages() {
+            db.ref(`chats/${currentUserId}/messages`).on('value', (snapshot) => {
+                chatBox.innerHTML = '';
+                const data = snapshot.val();
+                if (!data) return;
+
+                Object.values(data).forEach(msg => {
+                    const isSent = msg.sender === 'me';
+                    if(msg.type === 'location') {
+                        const lat = msg.latitude || 9.0034;
+                        const lng = msg.longitude || 38.7881;
+                        chatBox.insertAdjacentHTML('beforeend', `
+                            <div class="message ${isSent ? 'sent' : 'received'}">
+                                <div class="location-card" onclick="openMapTracker(${lat}, ${lng})">
+                                    <div class="location-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg></div>
+                                    <div class="location-card-text">
+                                        <h4>Shared Location</h4>
+                                        <p>Tap to view map & driving route</p>
+                                    </div>
+                                </div>
+                                <div class="msg-time">${formatTime(msg.timestamp)}</div>
+                            </div>
+                        `);
+                    } else {
+                        chatBox.insertAdjacentHTML('beforeend', `
+                            <div class="message ${isSent ? 'sent' : 'received'}">
+                                <div class="msg-bubble">${msg.text}</div>
+                                <div class="msg-time">${formatTime(msg.timestamp)}</div>
+                            </div>
+                        `);
+                    }
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        document.getElementById('btnSend').onclick = sendMessage;
+        messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if(!text || !currentUserId) return;
+
+            db.ref(`chats/${currentUserId}/messages`).push({
+                sender: 'me',
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                isRead: true
+            });
+            messageInput.value = '';
+        }
+
+        document.getElementById('btnShareLoc').onclick = () => { permModal.style.display = 'flex'; };
+        function denyLocation() { permModal.style.display = 'none'; }
+        
+        function allowLocation() {
+            permModal.style.display = 'none';
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const myLat = pos.coords.latitude;
+                    const myLng = pos.coords.longitude;
+
+                    db.ref(`chats/${currentUserId}/messages`).push({
+                        sender: 'me',
+                        type: 'location',
+                        latitude: myLat,
+                        longitude: myLng,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        isRead: true
+                    });
+                    
+                    openMapTracker(myLat, myLng);
+                },
+                (err) => {
+                    alert("Unable to fetch GPS position. Please ensure location services are allowed.");
+                },
+                { enableHighAccuracy: true, timeout: 15000 }
+            );
+        }
+
+        function openMapTracker(destLat, destLng) {
+            targetLat = destLat;
+            targetLng = destLng;
+            document.getElementById('mapOverlay').classList.add('active');
+            
+            if(!map) {
+                initMap();
+            } else {
+                updateTargetMarker();
+            }
+
+            startLiveTracking();
+        }
+
+        function closeMapTracker() {
+            document.getElementById('mapOverlay').classList.remove('active');
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+        }
+
+        function initMap() {
+            map = new maplibregl.Map({
+                container: 'chatMap',
+                style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+                center: [targetLng || 38.7881, targetLat || 9.0034],
+                zoom: 14,
+                attributionControl: false
+            });
+
+            targetMarker = new maplibregl.Marker({ color: '#EF4444' })
+                .setLngLat([targetLng || 38.7881, targetLat || 9.0034])
+                .addTo(map);
+
+            const userDot = document.createElement('div');
+            userDot.className = 'user-gps-dot';
+
+            myMarker = new maplibregl.Marker({ element: userDot })
+                .setLngLat([targetLng || 38.7881, targetLat || 9.0034])
+                .addTo(map);
+        }
+
+        function updateTargetMarker() {
+            if (targetMarker && targetLat && targetLng) {
+                targetMarker.setLngLat([targetLng, targetLat]);
+            }
+        }
+
+        function startLiveTracking() {
+            if (!navigator.geolocation) return;
+
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+
+            watchId = navigator.geolocation.watchPosition((pos) => {
+                const myLat = pos.coords.latitude;
+                const myLng = pos.coords.longitude;
+
+                if(myMarker) myMarker.setLngLat([myLng, myLat]);
+                
+                if (targetLat && targetLng) {
+                    drawRoute(myLat, myLng, targetLat, targetLng);
+                }
+            }, (err) => console.warn("Watch position warning:", err), { enableHighAccuracy: true, timeout: 20000 });
+        }
+
+        function drawRoute(lat1, lng1, lat2, lng2) {
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=geojson`;
+
+            fetch(osrmUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.routes && data.routes.length > 0) {
+                        const route = data.routes[0];
+                        const distKm = (route.distance / 1000).toFixed(2);
+                        
+                        document.getElementById('distanceBadge').style.display = 'block';
+                        document.getElementById('routeDistance').innerText = `${distKm} km`;
+
+                        const geojson = {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': route.geometry
+                        };
+
+                        if (map.getSource('route')) {
+                            map.getSource('route').setData(geojson);
+                        } else {
+                            map.addSource('route', { 'type': 'geojson', 'data': geojson });
+                            map.addLayer({
+                                'id': 'route',
+                                'type': 'line',
+                                'source': 'route',
+                                'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                                'paint': { 'line-color': '#2563EB', 'line-width': 5, 'line-opacity': 0.85 }
+                            });
+                        }
+
+                        const bounds = new maplibregl.LngLatBounds()
+                            .extend([lng1, lat1])
+                            .extend([lng2, lat2]);
+                            
+                        map.fitBounds(bounds, { padding: 80 });
+                    }
+                })
+                .catch(err => console.error("OSRM Route Error:", err));
+        }
+
+        document.getElementById('btnCopyLink').onclick = () => {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const t = document.getElementById('toastMessage');
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 2000);
+            });
+        };
+
+        function formatTime(ts) {
+            if(!ts) return '';
+            return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        setupRealtimePresence();
+        initChatRoom();
+    </script>
+</body>
+</html>

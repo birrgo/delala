@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Apps Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="news.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f5f7;
+        }
+
+        .category-menu-wrapper {
+            padding: 12px 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: transparent;
+            -webkit-overflow-scrolling: touch;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .category-menu {
+            display: inline-flex;
+            gap: 8px;
+        }
+
+        /* Top Menu Tab - Default Dark Blue Text */
+        .menu-tab {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #0d1b2a !important;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Active / Selected Tab - Dark Blue Background with White Text */
+        .menu-tab.active,
+        .menu-tab:active {
+            background: #0d1b2a !important;
+            color: #ffffff !important;
+            border-color: #1b263b !important;
+            box-shadow: none !important;
+            text-shadow: none;
+        }
+
+        /* 5x6 Grid Layout for Installed Section */
+        .installed-grid {
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            grid-template-rows: repeat(6, 1fr) !important;
+            gap: 12px !important;
+            padding: 12px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            justify-items: center !important;
+            align-items: center !important;
+        }
+
+        .installed-app-item {
+            position: relative !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            cursor: pointer !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .installed-app-icon {
+            width: 85% !important;
+            height: 85% !important;
+            max-width: 58px !important;
+            max-height: 58px !important;
+            border-radius: 14px !important;
+            object-fit: cover !important;
+            background-color: #ffffff !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+            transition: transform 0.2s ease !important;
+            box-sizing: border-box !important;
+        }
+
+        .installed-app-item:active .installed-app-icon {
+            transform: scale(0.92) !important;
+        }
+
+        /* Pin badge updated to solid dark blue */
+        .pin-badge {
+            position: absolute !important;
+            top: -2px !important;
+            right: -2px !important;
+            font-size: 9px !important;
+            background: #0d1b2a !important;
+            color: #fff !important;
+            border-radius: 50% !important;
+            width: 16px !important;
+            height: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: none !important;
+            z-index: 2 !important;
+        }
+
+        /* App Action Modal */
+        .app-action-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .app-action-card {
+            background: #1e1e24;
+            border-radius: 22px;
+            padding: 24px 20px;
+            width: 88%;
+            max-width: 320px;
+            text-align: center;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+
+        .app-action-card img {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+
+        .app-action-card h3 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .app-action-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 6px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Solid Dark Blue Modal Button */
+        .btn-darkblue {
+            background: #0d1b2a;
+            color: #ffffff;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        .app-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .app-details h2 {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: #0d1b2a; /* Dark blue text */
+        }
+
+        .app-size-badge {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Main action button changed to solid dark blue */
+        .main-install-btn {
+            background: #0d1b2a;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .main-install-btn.is-open {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .web-preview-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #000000;
+            z-index: 20000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+
+        .preview-back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .preview-title {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .preview-iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-view">
+        <!-- Search Drawer Overlay -->
+        <div class="search-modal-overlay" id="searchModalOverlay">
+            <div class="search-box-header">
+                <div class="search-input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" class="search-news-field" id="appSearchInput" placeholder="Enter App Name..." autocomplete="off">
+                </div>
+                <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
+            </div>
+            <div class="search-results-area" id="searchResultsArea">
+                <div class="search-empty-state">
+                    Type an app name above to search across all store categories.
+                </div>
+            </div>
+        </div>
+
+        <!-- Standalone Category Menu Bar -->
+        <div class="category-menu-wrapper">
+            <div class="category-menu">
+                <button class="menu-tab active" data-category="installed">Installed</button>
+                <button class="menu-tab" data-category="birrgo">Hulum Apps</button>
+                <button class="menu-tab" data-category="universal">Universal</button>
+                <button class="menu-tab" data-category="stores">Stores</button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="app-content" id="appList">
+            <div class="loading-state">Loading store applications...</div>
+        </main>
+
+        <!-- Context Action Modal -->
+        <div class="app-action-modal" id="appActionModal">
+            <div class="app-action-card">
+                <img id="actionIcon" src="" alt="App Icon">
+                <h3 id="actionAppName">App Options</h3>
+                <button class="app-action-btn btn-darkblue" id="actionPinBtn">Pin to Top</button>
+                <button class="app-action-btn btn-darkblue" id="actionUninstallBtn">Uninstall App</button>
+                <button class="app-action-btn btn-cancel" id="actionCancelBtn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Web View Preview Overlay -->
+        <div id="webPreviewModal" class="web-preview-modal">
+            <div class="preview-header">
+                <button class="preview-back-btn" id="closePreviewBtn">&#8592; Back</button>
+                <div class="preview-title" id="previewTitle">App View</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <iframe id="previewIframe" class="preview-iframe" src="" allowfullscreen></iframe>
+        </div>
+
+        <footer class="verified-footer-shield">
+            <span class="footer-shield-text">Hulum Secure Matrix Verified</span>
+        </footer>
+    </div>
+
+    <!-- Firebase Modular Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
+            authDomain: "hulum-e358c.firebaseapp.com",
+            databaseURL: "https://hulum-e358c-default-rtdb.firebaseio.com",
+            projectId: "hulum-e358c",
+            storageBucket: "hulum-e358c.firebasestorage.app",
+            messagingSenderId: "678316597629",
+            appId: "1:678316597629:web:dc6af499b8054a424aac14",
+            measurementId: "G-097P51SP2B"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let allAppsData = [];
+        let activeCategory = 'installed';
+        let selectedAppKey = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSearchControls();
+            initCategoryTabs();
+            initModalControls();
+            streamAppsData();
+        });
+
+        function getDomain(url) {
+            try {
+                const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+                return u.hostname;
+            } catch(e) { return url; }
+        }
+
+        function getAdminSize(app) {
+            if (app.size || app.appSize) {
+                let raw = app.size || app.appSize;
+                return raw.toString().includes('MB') ? raw : raw + ' MB';
+            }
+            return '12.5 MB';
+        }
+
+        function streamAppsData() {
+            const pwaAppsRef = ref(db, 'pwa_apps');
+            onValue(pwaAppsRef, (snapshot) => {
+                allAppsData = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        allAppsData.push({
+                            key: childSnapshot.key,
+                            app: childSnapshot.val()
+                        });
+                    });
+                    localStorage.setItem('birrgo_cached_apps', JSON.stringify(allAppsData));
+                }
+                renderAppList();
+            }, (error) => {
+                console.error("Database read error:", error);
+                const container = document.getElementById('appList');
+                if (container) container.innerHTML = '<div class="loading-state" style="color:#ef4444;">Failed to sync apps. Check network connection.</div>';
+            });
+        }
+
+        function initCategoryTabs() {
+            const tabs = document.querySelectorAll('.menu-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    activeCategory = tab.getAttribute('data-category');
+                    renderAppList();
+                });
+            });
+        }
+
+        function renderAppList() {
+            const appList = document.getElementById('appList');
+            if (!appList) return;
+
+            appList.innerHTML = '';
+
+            const categoryApps = allAppsData.filter(item => {
+                const { key, app } = item;
+                const isSystem = app.isSystem === true || app.isSystemApp === true;
+                const isInstalled = localStorage.getItem('site_installed_' + key) || isSystem;
+                const isStore = app.sourceType === 'playstore' || app.sourceType === 'appstore' || app.category === 'store';
+
+                if (activeCategory === 'installed') return isInstalled && !isStore;
+                if (activeCategory === 'birrgo') return !isInstalled && (app.canIframe === true || app.category === 'valid') && !isStore;
+                if (activeCategory === 'universal') return !isInstalled && app.canIframe !== true && app.category !== 'valid' && !isStore;
+                if (activeCategory === 'stores') return isStore;
+                return false;
+            });
+
+            if (categoryApps.length === 0) {
+                appList.innerHTML = '<div class="loading-state">No apps available in this section.</div>';
+                return;
+            }
+
+            if (activeCategory === 'installed') {
+                const sortedApps = categoryApps.sort((a, b) => {
+                    const aSystem = a.app.isSystem === true || a.app.isSystemApp === true;
+                    const bSystem = b.app.isSystem === true || b.app.isSystemApp === true;
+                    if (aSystem !== bSystem) return bSystem - aSystem;
+
+                    const aPinned = localStorage.getItem('site_pinned_' + a.key) === 'true';
+                    const bPinned = localStorage.getItem('site_pinned_' + b.key) === 'true';
+                    if (aPinned !== bPinned) return bPinned - aPinned;
+
+                    const aTime = parseInt(localStorage.getItem('site_installed_time_' + a.key) || '0');
+                    const bTime = parseInt(localStorage.getItem('site_installed_time_' + b.key) || '0');
+                    return bTime - aTime;
+                });
+
+                const pageApps = sortedApps.slice(0, 30);
+                let gridHTML = '<div class="installed-grid">';
+
+                pageApps.forEach(({ key, app }) => {
+                    const name = app.name || 'App';
+                    const targetUrl = app.url || '#';
+                    const icon = app.icon || `https://icon.horse/icon/${getDomain(targetUrl)}`;
+                    const isSystem = app.isSystem === true || app.isSystemApp === true;
+                    const isPinned = localStorage.getItem('site_pinned_' + key) === 'true';
+                    const pinBadgeHtml = isPinned ? `<span class="pin-badge">📌</span>` : '';
+
+                    gridHTML += `
+                        <div class="installed-app-item" data-key="${key}" data-url="${targetUrl}" data-name="${name}" data-system="${isSystem}" data-icon="${icon}">
+                            ${pinBadgeHtml}
+                            <img src="${icon}" class="installed-app-icon" alt="${name}">
+                        </div>
+                    `;
+                });
+
+                gridHTML += '</div>';
+                appList.innerHTML = gridHTML;
+
+                document.querySelectorAll('.installed-app-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        launchApp(item.getAttribute('data-key'), item.getAttribute('data-url'));
+                    });
+                    item.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (item.getAttribute('data-system') !== 'true') {
+                            openAppActions(item.getAttribute('data-key'), item.getAttribute('data-name'), item.getAttribute('data-icon'));
+                        }
+                    });
+                });
+                return;
+            }
+
+            categoryApps.forEach(({ key, app }) => {
+                const name = app.name || 'App';
+                const targetUrl = app.url || '#';
+                const icon = app.icon || `https://icon.horse/icon/${getDomain(targetUrl)}`;
+                const appSize = getAdminSize(app);
+                const isInstalled = localStorage.getItem('site_installed_' + key);
+                const isStore = app.sourceType === 'playstore' || app.sourceType === 'appstore' || app.category === 'store';
+                
+                let btnLabel = isInstalled ? 'Open' : (isStore ? 'Get' : 'Install');
+                let btnClass = isInstalled ? 'main-install-btn is-open' : 'main-install-btn';
+
+                const cardHTML = `
+                    <div class="app-card" data-key="${key}">
+                        <div class="app-info">
+                            <img src="${icon}" alt="${name}" class="app-icon">
+                            <div class="app-details">
+                                <h2>${name}</h2>
+                                <span class="app-size-badge">${appSize}</span>
+                            </div>
+                        </div>
+                        <button class="${btnClass}">${btnLabel}</button>
+                    </div>
+                `;
+                appList.insertAdjacentHTML('beforeend', cardHTML);
+            });
+
+            document.querySelectorAll('.app-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const key = card.getAttribute('data-key');
+                    window.location.href = `Fullap.html?key=${encodeURIComponent(key)}`;
+                });
+            });
+        }
+
+        function launchApp(key, url) {
+            const systemApps = ['news.html', 'sp.html', 'wo.html', 'bu.html'];
+            const targetUrl = (url || '').trim().toLowerCase();
+            const matchedSystemApp = systemApps.find(sysApp => targetUrl.endsWith(sysApp));
+
+            if (matchedSystemApp) {
+                window.location.href = matchedSystemApp;
+            } else {
+                window.location.href = `apps2.html?key=${encodeURIComponent(key)}`;
+            }
+        }
+
+        function openAppActions(key, appName, iconUrl) {
+            selectedAppKey = key;
+            document.getElementById('actionAppName').textContent = appName;
+            document.getElementById('actionIcon').src = iconUrl;
+
+            const isPinned = localStorage.getItem('site_pinned_' + key) === 'true';
+            document.getElementById('actionPinBtn').textContent = isPinned ? 'Unpin App' : 'Pin to Top';
+
+            document.getElementById('appActionModal').style.display = 'flex';
+        }
+
+        function initModalControls() {
+            const modal = document.getElementById('appActionModal');
+            const pinBtn = document.getElementById('actionPinBtn');
+            const uninstallBtn = document.getElementById('actionUninstallBtn');
+            const cancelBtn = document.getElementById('actionCancelBtn');
+            const closePreviewBtn = document.getElementById('closePreviewBtn');
+
+            cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+
+            pinBtn.addEventListener('click', () => {
+                if (!selectedAppKey) return;
+                const isPinned = localStorage.getItem('site_pinned_' + selectedAppKey) === 'true';
+                if (isPinned) {
+                    localStorage.removeItem('site_pinned_' + selectedAppKey);
+                } else {
+                    localStorage.setItem('site_pinned_' + selectedAppKey, 'true');
+                }
+                modal.style.display = 'none';
+                renderAppList();
+            });
+
+            uninstallBtn.addEventListener('click', () => {
+                if (selectedAppKey) {
+                    localStorage.removeItem('site_installed_' + selectedAppKey);
+                    localStorage.removeItem('site_pinned_' + selectedAppKey);
+                    modal.style.display = 'none';
+                    renderAppList();
+                }
+            });
+
+            if (closePreviewBtn) {
+                closePreviewBtn.addEventListener('click', () => {
+                    document.getElementById('webPreviewModal').style.display = 'none';
+                    document.getElementById('previewIframe').src = '';
+                });
+            }
+        }
+
+        function initSearchControls() {
+            const openBtn = document.getElementById('openSearchBtn');
+            const closeBtn = document.getElementById('closeSearchDrawerBtn');
+            const overlay = document.getElementById('searchModalOverlay');
+            const input = document.getElementById('appSearchInput');
+
+            if (openBtn) {
+                openBtn.addEventListener('click', () => {
+                    overlay.classList.add('active-search');
+                    input.value = '';
+                    input.focus();
+                    executeAppSearch('');
+                });
+            }
+
+            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active-search'));
+
+            if (input) input.addEventListener('input', (e) => executeAppSearch(e.target.value));
+        }
+
+        function executeAppSearch(query) {
+            const container = document.getElementById('searchResultsArea');
+            if (!container) return;
+            const cleanQuery = query.trim().toLowerCase();
+
+            if (!cleanQuery) {
+                container.innerHTML = '<div class="search-empty-state">Type an app name above to search across all store categories.</div>';
+                return;
+            }
+
+            const matchedApps = allAppsData.filter(({ app }) => {
+                const name = (app.name || '').toLowerCase();
+                const desc = (app.description || '').toLowerCase();
+                return name.includes(cleanQuery) || desc.includes(cleanQuery);
+            });
+
+            if (matchedApps.length === 0) {
+                container.innerHTML = `<div class="search-empty-state">No apps found matching "<strong>${cleanQuery}</strong>".</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            matchedApps.forEach(({ key, app }) => {
+                const name = app.name || 'App';
+                const targetUrl = app.url || '#';
+                const icon = app.icon || `https://icon.horse/icon/${getDomain(targetUrl)}`;
+                const appSize = getAdminSize(app);
+
+                const cardHTML = `
+                    <div class="app-card" data-key="${key}">
+                        <div class="app-info">
+                            <img src="${icon}" alt="${name}" class="app-icon">
+                            <div class="app-details">
+                                <h2>${name}</h2>
+                                <span class="app-size-badge">${appSize}</span>
+                            </div>
+                        </div>
+                        <button class="main-install-btn">View</button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+
+            container.querySelectorAll('.app-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const key = card.getAttribute('data-key');
+                    window.location.href = `Fullap.html?key=${encodeURIComponent(key)}`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
