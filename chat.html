@@ -193,7 +193,7 @@
         /* Circular Profile Avatar */
         .chat-item-avatar {
             width: 50px; height: 50px;
-            border-radius: 50%; /* Perfect Circle */
+            border-radius: 50%; 
             background: var(--silver-grad);
             box-shadow: var(--silver-shadow);
             border: 2px solid #FFFFFF;
@@ -280,6 +280,9 @@
         .empty-icon svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2.5; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
         .empty-state h3 { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
         .empty-state p { font-size: 12px; font-weight: 600; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
+        
+        /* Auth Button inside empty state */
+        .auth-btn-primary { width: 100%; max-width: 240px; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
     </style>
 </head>
 <body>
@@ -305,6 +308,7 @@
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
@@ -319,9 +323,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        const myUsername = localStorage.getItem('myAppUsername') || 'User_' + Math.floor(1000 + Math.random() * 9000);
-        localStorage.setItem('myAppUsername', myUsername);
+        const auth = firebase.auth();
 
         const conversationsContainer = document.getElementById('conversationsContainer');
         const userSearchInput = document.getElementById('userSearchInput');
@@ -330,8 +332,53 @@
 
         btnSearchTrigger.onclick = () => { userSearchInput.focus(); };
 
-        function setupRealtimePresence() {
-            const myPresenceRef = db.ref(`users/${myUsername}/presence`);
+        // --- AUTHENTICATION SYNC FIX ---
+        // This makes the chat detect login EXACTLY like your profile.html does
+        function getActiveUserId(firebaseUser) {
+            if (firebaseUser) return firebaseUser.uid;
+            
+            // Check for custom login session (your phone login system)
+            const sessionPhone = localStorage.getItem('auth_session_phone');
+            if (sessionPhone && localStorage.getItem('user_logged_out') !== 'true') {
+                return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
+            }
+            
+            return null;
+        }
+
+        // Evaluate Auth State based on Firebase AND LocalStorage
+        function evaluateAuthState(user) {
+            const myUserId = getActiveUserId(user);
+
+            if (myUserId) {
+                setupRealtimePresence(myUserId);
+                loadConversations(myUserId);
+                setupSearch(myUserId);
+            } else {
+                conversationsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <h3>Not Logged In</h3>
+                        <p>Please log in to view your messages and chat with others.</p>
+                        <a href="login.html" class="auth-btn-primary">Sign in to Delala</a>
+                    </div>
+                `;
+            }
+        }
+
+        auth.onAuthStateChanged(evaluateAuthState);
+
+        // Also listen for changes to localStorage (in case they log in on another tab)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
+                evaluateAuthState(auth.currentUser);
+            }
+        });
+
+        function setupRealtimePresence(myUserId) {
+            const myPresenceRef = db.ref(`users/${myUserId}/presence`);
             const connectedRef = db.ref('.info/connected');
 
             connectedRef.on('value', (snap) => {
@@ -349,11 +396,8 @@
             });
         }
 
-        setupRealtimePresence();
-
-        function loadConversations() {
-            // Listen specifically to this user's inbox list, NOT the whole chat database
-            db.ref(`user_chats/${myUsername}`).on('value', (snapshot) => {
+        function loadConversations(myUserId) {
+            db.ref(`user_chats/${myUserId}`).on('value', (snapshot) => {
                 const myChats = snapshot.val();
                 conversationsContainer.innerHTML = '';
 
@@ -370,7 +414,6 @@
                     return;
                 }
 
-                // Sort chats by the most recent timestamp to show newest at the top
                 const sortedChats = Object.keys(myChats).map(otherUserId => {
                     return {
                         otherUserId: otherUserId,
@@ -416,54 +459,58 @@
             });
         }
 
-        userSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim().toLowerCase();
-            if(!query) { searchResultsDropdown.style.display = 'none'; return; }
+        function setupSearch(myUserId) {
+            userSearchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                if(!query) { searchResultsDropdown.style.display = 'none'; return; }
 
-            db.ref('users').once('value', (snapshot) => {
-                const users = snapshot.val();
-                searchResultsDropdown.innerHTML = '';
-                if(!users) { searchResultsDropdown.style.display = 'none'; return; }
+                db.ref('users').once('value', (snapshot) => {
+                    const users = snapshot.val();
+                    searchResultsDropdown.innerHTML = '';
+                    if(!users) { searchResultsDropdown.style.display = 'none'; return; }
 
-                let matches = 0;
-                Object.keys(users).forEach(userId => {
-                    const u = users[userId];
-                    const phone = (u.cleanPhone || u.phone || '').toLowerCase();
-                    const username = (u.username || '').toLowerCase();
+                    let matches = 0;
+                    Object.keys(users).forEach(userId => {
+                        // Skip the currently logged-in user so they can't search themselves
+                        if (userId === myUserId) return; 
 
-                    // Strict Search: Only matches Username or Phone Number
-                    if((phone && phone.includes(query)) || (username && username.includes(query))) {
-                        matches++;
-                        
-                        const displayName = u.displayName || u.fullName || userId;
-                        const displayUsername = username ? `@${u.username}` : '';
-                        const photoURL = u.photoURL || u.profilePicture || '';
-                        const avatarContent = photoURL 
-                            ? `<img src="${photoURL}" alt="${displayName}">` 
-                            : displayName.charAt(0).toUpperCase();
+                        const u = users[userId];
+                        const phone = (u.cleanPhone || u.phone || '').toLowerCase();
+                        const username = (u.username || '').toLowerCase();
 
-                        const resItem = document.createElement('div');
-                        resItem.className = 'search-result-item';
-                        resItem.onclick = () => {
-                            searchResultsDropdown.style.display = 'none';
-                            userSearchInput.value = '';
-                            openChatPage(userId, displayName);
-                        };
-                        resItem.innerHTML = `
-                            <div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">
-                                ${avatarContent}
-                            </div>
-                            <div class="search-result-info">
-                                <h4>${displayName}</h4>
-                                <p>${displayUsername || phone}</p>
-                            </div>
-                        `;
-                        searchResultsDropdown.appendChild(resItem);
-                    }
+                        if((phone && phone.includes(query)) || (username && username.includes(query))) {
+                            matches++;
+                            
+                            const displayName = u.displayName || u.fullName || userId;
+                            const displayUsername = username ? `@${u.username}` : '';
+                            const photoURL = u.photoURL || u.profilePicture || '';
+                            const avatarContent = photoURL 
+                                ? `<img src="${photoURL}" alt="${displayName}">` 
+                                : displayName.charAt(0).toUpperCase();
+
+                            const resItem = document.createElement('div');
+                            resItem.className = 'search-result-item';
+                            resItem.onclick = () => {
+                                searchResultsDropdown.style.display = 'none';
+                                userSearchInput.value = '';
+                                openChatPage(userId, displayName);
+                            };
+                            resItem.innerHTML = `
+                                <div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">
+                                    ${avatarContent}
+                                </div>
+                                <div class="search-result-info">
+                                    <h4>${displayName}</h4>
+                                    <p>${displayUsername || phone}</p>
+                                </div>
+                            `;
+                            searchResultsDropdown.appendChild(resItem);
+                        }
+                    });
+                    searchResultsDropdown.style.display = matches > 0 ? 'block' : 'none';
                 });
-                searchResultsDropdown.style.display = matches > 0 ? 'block' : 'none';
             });
-        });
+        }
 
         function formatTime(ts) {
             if(!ts) return '';
@@ -475,7 +522,6 @@
             window.location.href = targetUrl;
         }
 
-        loadConversations();
     </script>
 </body>
 </html>

@@ -43,7 +43,7 @@
             z-index: 1;
         }
 
-        /* Chat Header */
+        /* Humanized Chat Header */
         .chat-header {
             background: linear-gradient(145deg, #1E293B, #0F172A);
             padding: 12px 16px;
@@ -56,20 +56,32 @@
             border-bottom: 1px solid #334155;
         }
 
-        .btn-icon-3d {
+        /* User Profile Avatar */
+        .header-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
             background: var(--silver-grad);
-            border: 1px solid #475569;
-            width: 38px; height: 38px;
-            border-radius: 12px;
+            border: 2px solid #FFFFFF;
             display: flex; align-items: center; justify-content: center;
-            color: #FFFFFF; cursor: pointer; flex-shrink: 0;
-            box-shadow: var(--silver-shadow);
+            color: #FFFFFF; font-weight: 800; font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
-        .btn-icon-3d svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+        .header-avatar img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
 
         .chat-header-info { flex: 1; min-width: 0; }
-        .chat-header-info h2 { font-size: 15px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-header-info p { font-size: 11px; font-weight: 600; color: #94A3B8; margin-top: 1px; }
+        .chat-header-info h2 { font-size: 16px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.2px; }
+        .chat-header-info p { font-size: 11px; font-weight: 600; color: #94A3B8; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+        
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--offline-color);
+        }
+        .status-dot.online { background: var(--success-color); box-shadow: 0 0 6px rgba(52, 211, 153, 0.6); }
 
         /* Messages Area */
         .chat-messages {
@@ -78,26 +90,29 @@
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             background: #F8FAFC;
         }
 
         .message-bubble {
-            max-width: 75%;
+            max-width: 78%;
+            width: fit-content;
             padding: 12px 16px;
             border-radius: 18px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             line-height: 1.4;
             position: relative;
             word-break: break-word;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            display: inline-block;
         }
 
         .message-bubble.incoming {
             background: #FFFFFF;
             color: var(--text-main);
             align-self: flex-start;
+            margin-right: auto; /* Forces left alignment */
             border-bottom-left-radius: 4px;
             border: 1px solid var(--border-color);
         }
@@ -106,12 +121,21 @@
             background: linear-gradient(145deg, #1E293B, #0F172A);
             color: #FFFFFF;
             align-self: flex-end;
+            margin-left: auto; /* Forces right alignment */
             border-bottom-right-radius: 4px;
         }
 
-        .message-time {
-            font-size: 9px;
+        .message-bubble a {
+            color: inherit;
+            text-decoration: underline;
+            font-weight: 700;
+            display: inline-block;
             margin-top: 4px;
+        }
+
+        .message-time {
+            font-size: 10px;
+            margin-top: 6px;
             text-align: right;
             opacity: 0.7;
             font-weight: 600;
@@ -123,55 +147,88 @@
             padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             border-top: 1px solid var(--border-color);
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .action-btn:active { background: #F1F5F9; color: var(--primary-dark); transform: scale(0.95); }
+        .action-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
         .chat-input {
             flex: 1;
             height: 44px;
             background: #F1F5F9;
             border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 0 14px;
-            font-size: 13px;
+            border-radius: 22px;
+            padding: 0 16px;
+            font-size: 14px;
             font-weight: 500;
             color: var(--text-main);
             outline: none;
+            transition: all 0.3s;
         }
-        .chat-input:focus { border-color: #64748B; background: #FFFFFF; }
+        .chat-input:focus { border-color: #94A3B8; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(226,232,240,0.5); }
 
         .send-btn {
             background: var(--silver-grad);
             border: none;
             width: 44px; height: 44px;
-            border-radius: 14px;
+            border-radius: 50%;
             color: #FFFFFF;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             box-shadow: var(--silver-shadow);
             flex-shrink: 0;
+            transition: transform 0.2s;
         }
-        .send-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
+        .send-btn:active { transform: scale(0.92); }
+        .send-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px;}
+        
+        .btn-loc-highlight {
+            background: #F1F5F9;
+            color: #0F172A;
+        }
     </style>
 </head>
 <body>
 
     <div class="screen">
         <header class="chat-header">
-            <button class="btn-icon-3d" id="btnBack">
-                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
+            <div class="header-avatar" id="headerAvatar"></div>
             <div class="chat-header-info">
                 <h2 id="chatTitle">Loading...</h2>
-                <p id="chatStatus">Connecting...</p>
+                <p><span id="statusIndicator" class="status-dot"></span> <span id="chatStatus">Connecting...</span></p>
             </div>
         </header>
 
         <div class="chat-messages" id="chatMessages"></div>
 
         <div class="chat-input-area">
+            <button class="action-btn" id="btnCopyLocation" title="Copy My Location Link">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+            </button>
+            
             <input type="text" id="messageInput" class="chat-input" placeholder="Type a message...">
+            
+            <button class="action-btn btn-loc-highlight" id="btnLocation" title="Send Location to Chat">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </button>
+
             <button class="send-btn" id="btnSend">
                 <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
@@ -180,6 +237,7 @@
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
@@ -194,93 +252,214 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
 
         const urlParams = new URLSearchParams(window.location.search);
         const otherUserId = urlParams.get('userId');
-        const otherUserName = urlParams.get('userName') || otherUserId;
-        const myUsername = localStorage.getItem('myAppUsername');
-
-        document.getElementById('chatTitle').textContent = otherUserName;
-        document.getElementById('btnBack').onclick = () => { window.location.href = 'index.html'; };
-
-        // Generate consistent Chat ID between two users (alphabetically sorted)
-        const chatId = [myUsername, otherUserId].sort().join('_');
+        const fallbackName = urlParams.get('userName') || otherUserId;
 
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
         const btnSend = document.getElementById('btnSend');
+        const btnLocation = document.getElementById('btnLocation');
+        const btnCopyLocation = document.getElementById('btnCopyLocation');
         const chatStatus = document.getElementById('chatStatus');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const headerAvatar = document.getElementById('headerAvatar');
+        
+        document.getElementById('chatTitle').textContent = fallbackName;
 
-        // Track user presence and typing status
-        db.ref(`users/${otherUserId}/presence`).on('value', (snap) => {
-            const presence = snap.val();
-            if(!presence) {
-                chatStatus.textContent = 'Offline';
-                return;
-            }
-            if(presence.isOnline) {
-                chatStatus.textContent = 'Online';
+        let myUserId = null;
+        let chatId = null;
+        let unsubscribeMessages = null;
+
+        db.ref(`users/${otherUserId}`).once('value', (snap) => {
+            const uData = snap.val();
+            if(uData) {
+                const displayName = uData.displayName || uData.fullName || fallbackName;
+                document.getElementById('chatTitle').textContent = displayName;
+                
+                const photoURL = uData.photoURL || uData.profilePicture;
+                if(photoURL) {
+                    headerAvatar.innerHTML = `<img src="${photoURL}" alt="${displayName}">`;
+                } else {
+                    headerAvatar.textContent = displayName.charAt(0).toUpperCase();
+                }
             } else {
-                const lastSeenDate = new Date(presence.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                chatStatus.textContent = `Last seen ${lastSeenDate}`;
+                headerAvatar.textContent = fallbackName.charAt(0).toUpperCase();
             }
         });
 
-        // Load Messages
-        db.ref(`chat_messages/${chatId}`).on('value', (snapshot) => {
-            chatMessages.innerHTML = '';
-            const messages = snapshot.val();
-            if(!messages) return;
+        function getActiveUserId(firebaseUser) {
+            if (firebaseUser) return firebaseUser.uid;
+            
+            const sessionPhone = localStorage.getItem('auth_session_phone');
+            if (sessionPhone && localStorage.getItem('user_logged_out') !== 'true') {
+                return String(sessionPhone).replace(/\D/g, '').replace(/^0+/, '');
+            }
+            return null;
+        }
 
-            Object.keys(messages).forEach(msgKey => {
-                const msg = messages[msgKey];
-                const isOutgoing = msg.sender === myUsername;
+        function evaluateAuthState(user) {
+            myUserId = getActiveUserId(user);
 
-                const div = document.createElement('div');
-                div.className = `message-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
-                div.innerHTML = `
-                    <div>${escapeHtml(msg.text)}</div>
-                    <div class="message-time">${formatTime(msg.timestamp)}</div>
-                `;
-                chatMessages.appendChild(div);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (myUserId) {
+                chatId = [myUserId, otherUserId].sort().join('_');
+                trackPresence();
+                loadMessages();
+            } else {
+                chatMessages.innerHTML = `<div style="text-align:center; padding: 20px; color: #64748B;">Please log in to chat.</div>`;
+            }
+        }
+
+        auth.onAuthStateChanged(evaluateAuthState);
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
+                evaluateAuthState(auth.currentUser);
+            }
         });
 
-        // Send Message Handler
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if(!text) return;
+        function trackPresence() {
+            db.ref(`users/${otherUserId}/presence`).on('value', (snap) => {
+                const presence = snap.val();
+                if(!presence) {
+                    chatStatus.textContent = 'Offline';
+                    statusIndicator.className = 'status-dot';
+                    return;
+                }
+                if(presence.isOnline) {
+                    chatStatus.textContent = 'Online';
+                    statusIndicator.className = 'status-dot online';
+                } else {
+                    const lastSeenDate = new Date(presence.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    chatStatus.textContent = `Last seen ${lastSeenDate}`;
+                    statusIndicator.className = 'status-dot';
+                }
+            });
+        }
 
+        function loadMessages() {
+            if (unsubscribeMessages) db.ref(`chat_messages/${chatId}`).off('value', unsubscribeMessages);
+
+            unsubscribeMessages = db.ref(`chat_messages/${chatId}`).on('value', (snapshot) => {
+                chatMessages.innerHTML = '';
+                const messages = snapshot.val();
+                if(!messages) return;
+
+                Object.keys(messages).forEach(msgKey => {
+                    const msg = messages[msgKey];
+                    // STRICT STRING COMPARISON TO FIX ALIGNMENT ISSUE
+                    const isOutgoing = String(msg.sender) === String(myUserId);
+
+                    const div = document.createElement('div');
+                    div.className = `message-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
+                    
+                    const formattedText = formatMessage(msg.text);
+
+                    div.innerHTML = `
+                        <div>${formattedText}</div>
+                        <div class="message-time">${formatTime(msg.timestamp)}</div>
+                    `;
+                    chatMessages.appendChild(div);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        function sendRawMessage(text) {
+            if(!text || !myUserId || !chatId) return;
             const timestamp = Date.now();
             const msgRef = db.ref(`chat_messages/${chatId}`).push();
 
-            // 1. Push to chat messages log
-            msgRef.set({
-                sender: myUsername,
+            const msgData = {
+                sender: String(myUserId),
                 text: text,
                 timestamp: timestamp,
                 isRead: false
+            };
+
+            // IF THIS FAILS, IT ALERTS YOU ABOUT FIREBASE RULES
+            msgRef.set(msgData).catch((err) => {
+                alert("Message Failed to Send! Your Firebase Database rules are blocking it because you are not logged into Firebase Auth. See instructions.");
+                console.error("Firebase Rules Blocked Write:", err);
             });
 
-            // 2. Update Inbox previews for BOTH users instantly
             const chatPreviewData = {
                 chatId: chatId,
                 lastMessage: text,
                 timestamp: timestamp
             };
 
-            db.ref(`user_chats/${myUsername}/${otherUserId}`).set(chatPreviewData);
-            db.ref(`user_chats/${otherUserId}/${myUsername}`).set(chatPreviewData);
+            db.ref(`user_chats/${myUserId}/${otherUserId}`).set(chatPreviewData);
+            db.ref(`user_chats/${otherUserId}/${myUserId}`).set(chatPreviewData);
 
             messageInput.value = '';
         }
 
-        btnSend.onclick = sendMessage;
+        btnSend.onclick = () => {
+            const text = messageInput.value.trim();
+            sendRawMessage(text);
+        };
+
         messageInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') sendMessage();
+            if(e.key === 'Enter') {
+                const text = messageInput.value.trim();
+                sendRawMessage(text);
+            }
         });
 
+        btnLocation.onclick = () => {
+            if (!navigator.geolocation) {
+                alert("Location sharing is not supported by your browser.");
+                return;
+            }
+            btnLocation.style.opacity = '0.5';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const text = `📍 Shared Location\nhttps://www.google.com/maps?q=${lat},${lon}`;
+                    sendRawMessage(text);
+                    btnLocation.style.opacity = '1';
+                }, 
+                (error) => {
+                    alert("Could not get your location. Please check your device permissions.");
+                    btnLocation.style.opacity = '1';
+                },
+                { enableHighAccuracy: true }
+            );
+        };
+
+        btnCopyLocation.onclick = () => {
+            if (!navigator.geolocation) {
+                alert("Location sharing is not supported by your browser.");
+                return;
+            }
+            btnCopyLocation.style.opacity = '0.5';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const locLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    
+                    navigator.clipboard.writeText(locLink).then(() => {
+                        alert("📍 Location link copied to clipboard!\nYou can now paste it into other apps.");
+                    }).catch(() => {
+                        alert("Failed to copy link automatically. Here is your link:\n" + locLink);
+                    });
+                    
+                    btnCopyLocation.style.opacity = '1';
+                }, 
+                (error) => {
+                    alert("Could not get your location. Please check your device permissions.");
+                    btnCopyLocation.style.opacity = '1';
+                },
+                { enableHighAccuracy: true }
+            );
+        };
+
+        // --- Helper Functions ---
         function formatTime(ts) {
             if(!ts) return '';
             return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -289,6 +468,18 @@
         function escapeHtml(text) {
             const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function formatMessage(text) {
+            let escaped = escapeHtml(text);
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            
+            return escaped.replace(urlRegex, function(url) {
+                if(url.includes("maps.google.com") || url.includes("google.com/maps")) {
+                    return `<br><a href="${url}" target="_blank">🗺️ View on Map</a>`;
+                }
+                return `<a href="${url}" target="_blank">${url}</a>`;
+            }).replace(/\n/g, '<br>');
         }
     </script>
 </body>
