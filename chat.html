@@ -352,11 +352,12 @@
         setupRealtimePresence();
 
         function loadConversations() {
-            db.ref('chats').on('value', (snapshot) => {
-                const chatsData = snapshot.val();
+            // Listen specifically to this user's inbox list, NOT the whole chat database
+            db.ref(`user_chats/${myUsername}`).on('value', (snapshot) => {
+                const myChats = snapshot.val();
                 conversationsContainer.innerHTML = '';
 
-                if (!chatsData || Object.keys(chatsData).length === 0) {
+                if (!myChats || Object.keys(myChats).length === 0) {
                     conversationsContainer.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-icon">
@@ -369,12 +370,16 @@
                     return;
                 }
 
-                Object.keys(chatsData).forEach(userId => {
-                    const userMsgs = chatsData[userId].messages || {};
-                    const msgKeys = Object.keys(userMsgs);
-                    if(msgKeys.length === 0) return;
+                // Sort chats by the most recent timestamp to show newest at the top
+                const sortedChats = Object.keys(myChats).map(otherUserId => {
+                    return {
+                        otherUserId: otherUserId,
+                        ...myChats[otherUserId]
+                    };
+                }).sort((a, b) => b.timestamp - a.timestamp);
 
-                    const lastMsg = userMsgs[msgKeys[msgKeys.length - 1]];
+                sortedChats.forEach(chatInfo => {
+                    const userId = chatInfo.otherUserId;
 
                     db.ref(`users/${userId}`).once('value', (uSnap) => {
                         const userData = uSnap.val() || {};
@@ -400,9 +405,9 @@
                             <div class="chat-item-info">
                                 <div class="chat-item-top">
                                     <h3>${displayName} <span class="username-preview">${username}</span></h3>
-                                    <span>${formatTime(lastMsg.timestamp)}</span>
+                                    <span>${formatTime(chatInfo.timestamp)}</span>
                                 </div>
-                                <div class="chat-item-msg">${lastMsg.type === 'location' ? '📍 Shared Location' : (lastMsg.text || '')}</div>
+                                <div class="chat-item-msg">${(chatInfo.lastMessage && chatInfo.lastMessage.includes('location')) ? '📍 Shared Location' : (chatInfo.lastMessage || '')}</div>
                             </div>
                         `;
                         conversationsContainer.appendChild(item);
