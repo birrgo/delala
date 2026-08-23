@@ -15,51 +15,118 @@
     <link rel="stylesheet" href="rental.css">
 
     <style>
-        /* --- COMPACT CARD ADJUSTMENTS TO SHOW 1.5 CARDS PER SCREEN --- */
-        .featured-broadcast-card {
-            padding: 12px; /* Tighter padding */
-            margin-bottom: 12px; /* Tighter margin between cards */
-            border-radius: 14px;
-        }
-        .broadcast-title {
-            font-size: 15px; /* Slightly smaller */
-            line-height: 1.3;
-            margin: 4px 0;
-        }
-        .post-author-header { margin-bottom: 8px; }
-        .post-social-bar { margin-top: 8px; padding-top: 8px; }
-
-        .author-actions-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
-        
-        /* --- 16:9 IMAGE FRAME WITH CENTERED FIT --- */
-        .broadcast-image-frame {
+        /* --- HEADER LAYOUT RESTRUCTURE --- */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            position: fixed;
+            top: 0;
             width: 100%;
-            aspect-ratio: 16 / 9; /* Strict 16:9 ratio */
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #e2e8f0; 
-            margin-bottom: 8px;
-            position: relative;
+            z-index: 50;
+            box-sizing: border-box;
+            background: rgba(8, 27, 56, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .header-controls-left,
+        .header-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .header-controls-left .location-action-btn,
+        .header-controls-left .search-action-btn,
+        .header-controls-right .location-action-btn,
+        .header-controls-right .search-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
         }
-        .broadcast-image-frame img {
-            width: 100%;
-            height: 100%; /* Fill the 16:9 box */
-            object-fit: cover; /* Do not stretch, crop to fill */
-            object-position: center; /* Focus on the center of the image */
-            display: block;
-            filter: blur(20px); 
-            transform: scale(1.1); 
-            transition: filter 0.6s ease-out, transform 0.6s ease-out;
-            will-change: filter, transform;
+
+        .header-controls-left .location-action-btn svg,
+        .header-controls-left .search-action-btn svg,
+        .header-controls-right .location-action-btn svg,
+        .header-controls-right .search-action-btn svg {
+            width: 18px;
+            height: 18px;
         }
-        .broadcast-image-frame img.loaded {
-            filter: blur(0);
-            transform: scale(1);
+
+        .header-controls-left .location-action-btn:active,
+        .header-controls-left .search-action-btn:active,
+        .header-controls-right .location-action-btn:active,
+        .header-controls-right .search-action-btn:active {
+            transform: scale(0.92);
+            background: rgba(56, 189, 248, 0.25);
         }
-        /* --------------------------------- */
+
+        .header-title-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            pointer-events: none;
+            width: 45%;
+        }
+
+        .header-title-main {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .header-title-sub {
+            font-size: 11px;
+            font-weight: 700;
+            color: #38BDF8;
+            line-height: 1.1;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            text-transform: capitalize;
+        }
+
+        .image-overlay-subcat-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(6px);
+            color: #38BDF8;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 8px;
+            z-index: 5;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            letter-spacing: -0.01em;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            text-transform: capitalize;
+        }
 
         .animated-distance-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; color: #0284c7; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.25); white-space: nowrap; cursor: pointer; transition: all 0.3s ease; animation: distancePulse 2.5s infinite ease-in-out; }
         .animated-distance-chip.no-gps { color: #64748b; background: #f1f5f9; border-color: #e2e8f0; animation: none; }
@@ -70,15 +137,13 @@
         .btn-follow-author.following { background-color: #e2e8f0 !important; color: #334155 !important; border-color: #cbd5e1 !important; }
         .social-action-btn.liked svg { fill: #ef4444; stroke: #ef4444; animation: likeHeart 0.3s ease-in-out; }
         @keyframes likeHeart { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        .active-filter-indicator { background: rgba(56, 189, 248, 0.2) !important; color: #0284c7 !important; border: 1px solid rgba(2, 132, 199, 0.3); }
+        .active-filter-indicator { background: rgba(56, 189, 248, 0.3) !important; color: #38BDF8 !important; border-color: #38BDF8 !important; }
 
-        /* Comment User Previews */
         .comment-user-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
         .comment-user-initial { width: 22px; height: 22px; border-radius: 50%; background-color: #e2e8f0; color: #334155; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
         .comment-preview-wrapper { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
         .comment-text-content { font-size: 13px; line-height: 1.4; color: #334155; }
 
-        /* Icon Only Profile Button */
         .btn-view-author-profile-icon {
             width: 28px; height: 28px; border-radius: 50%; padding: 0;
             display: flex; align-items: center; justify-content: center;
@@ -113,16 +178,26 @@
 
         <!-- Header Bar -->
         <header class="nav-header">
-            <div class="header-left-group">
-                <h1 class="header-title-text" id="dynamicHeaderTitle">Rental Items</h1>
-            </div>
-
-            <div class="header-actions-group">
+            <div class="header-controls-left">
+                <a href="city.html" class="location-action-btn" id="locationMenuLink" aria-label="Filter by Country/City" title="Search by Location">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </a>
                 <a href="cat.html" class="location-action-btn" id="categoryMenuLink" aria-label="Filter Categories" title="Filter by category">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
                 </a>
+            </div>
+
+            <div class="header-title-container" id="headerTitleContainer">
+                <div class="header-title-main" id="headerTitleMain">Rental Items</div>
+                <div class="header-title-sub" id="headerTitleSub" style="display: none;"></div>
+            </div>
+
+            <div class="header-controls-right">
                 <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
@@ -130,19 +205,19 @@
                     </svg>
                 </button>
                 <a href="search.html" class="search-action-btn" aria-label="Search Items">
-                    <svg class="search-long-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="9.5" cy="9.5" r="5.5"></circle>
-                        <line x1="14" y1="14" x2="21" y2="21"></line>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </a>
             </div>
         </header>
 
-        <main class="app-content">
+        <main class="app-content" style="padding-top: 70px;">
             <div class="broadcasts-container" id="broadcastsContainer"></div>
 
             <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
-                ⏳ Loading Data from DB...
+                Loading...
             </div>
 
             <footer class="verified-footer-shield">
@@ -217,15 +292,15 @@
         let localCachedBroadcasts = [];
         let currentUserCoordinates = null;
         let isGpsActive = false;
+
         let activeCategoryFilter = 'all';
+        let activeLocationFilter = null;
         
-        // Comprehensive User Credentials Tracking
         let currentActiveUserId = null;
         let currentUserPhoto = '';
         let currentUserDisplayName = '';
         let userFollowingSet = new Set();
         
-        // Cache to prevent querying DB for the same author multiple times
         const userProfileCache = {};
 
         const DOM = {
@@ -238,7 +313,9 @@
             closePopupBtn: document.getElementById('closePopupBtn'),
             gpsBtn: document.getElementById('triggerGpsFilterBtn'),
             catLinkBtn: document.getElementById('categoryMenuLink'),
-            headerTitle: document.getElementById('dynamicHeaderTitle')
+            locLinkBtn: document.getElementById('locationMenuLink'),
+            headerTitleMain: document.getElementById('headerTitleMain'),
+            headerTitleSub: document.getElementById('headerTitleSub')
         };
 
         const BITS = [16, 8, 4, 2, 1];
@@ -266,12 +343,35 @@
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const requestedCategory = urlParams.get('category');
+            const requestedLocation = urlParams.get('location');
+
             if (requestedCategory && requestedCategory !== 'all') {
                 activeCategoryFilter = requestedCategory.toLowerCase();
-                DOM.catLinkBtn.classList.add('active-filter-indicator');
-                const formattedName = activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1);
-                DOM.headerTitle.innerHTML = `Rentals <span style="font-size:12px; color:#38bdf8;">• ${formattedName}</span>`;
+                if (DOM.catLinkBtn) DOM.catLinkBtn.classList.add('active-filter-indicator');
             }
+
+            if (requestedLocation) {
+                activeLocationFilter = requestedLocation.trim().toLowerCase();
+                if (DOM.locLinkBtn) DOM.locLinkBtn.classList.add('active-filter-indicator');
+            }
+
+            if (DOM.catLinkBtn) {
+                let catHref = 'cat.html';
+                if (requestedLocation) {
+                    catHref += `?location=${encodeURIComponent(requestedLocation)}`;
+                }
+                DOM.catLinkBtn.setAttribute('href', catHref);
+            }
+
+            if (DOM.locLinkBtn) {
+                let locHref = 'city.html';
+                if (requestedCategory && requestedCategory !== 'all') {
+                    locHref += `?category=${encodeURIComponent(requestedCategory)}`;
+                }
+                DOM.locLinkBtn.setAttribute('href', locHref);
+            }
+
+            updateHeaderTitleDisplay();
 
             if (DOM.closePopupBtn) {
                 DOM.closePopupBtn.addEventListener('click', () => DOM.popupModal.classList.remove('show-popup'));
@@ -284,6 +384,28 @@
             fetchItemsBatch();
         });
 
+        function updateHeaderTitleDisplay() {
+            const hasCat = activeCategoryFilter && activeCategoryFilter !== 'all';
+            const hasLoc = activeLocationFilter && activeLocationFilter.length > 0;
+            const formattedCat = hasCat ? (activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1)) : '';
+            const formattedLoc = hasLoc ? (activeLocationFilter.charAt(0).toUpperCase() + activeLocationFilter.slice(1)) : '';
+
+            if (hasCat && hasLoc) {
+                DOM.headerTitleMain.innerText = `📍 ${formattedLoc}`;
+                DOM.headerTitleSub.innerText = formattedCat;
+                DOM.headerTitleSub.style.display = 'block';
+            } else if (hasLoc) {
+                DOM.headerTitleMain.innerText = `📍 ${formattedLoc}`;
+                DOM.headerTitleSub.style.display = 'none';
+            } else if (hasCat) {
+                DOM.headerTitleMain.innerText = formattedCat;
+                DOM.headerTitleSub.style.display = 'none';
+            } else {
+                DOM.headerTitleMain.innerText = 'Rental Items';
+                DOM.headerTitleSub.style.display = 'none';
+            }
+        }
+
         function setupAuthListener() {
             onAuthStateChanged(auth, (user) => {
                 const sessionPhone = localStorage.getItem('auth_session_phone');
@@ -295,12 +417,6 @@
                     fetchUserByPhone(sessionPhone);
                 } else {
                     renderGuestState();
-                }
-            });
-
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
-                    setupAuthListener();
                 }
             });
         }
@@ -327,9 +443,7 @@
                     }
                 }
                 renderGuestState();
-            } catch (err) {
-                renderGuestState();
-            }
+            } catch (err) { renderGuestState(); }
         }
 
         async function fetchUserData(userId, authUser) {
@@ -344,9 +458,7 @@
                     const fallbackData = { displayName: authUser.displayName || firstName, firstName: firstName, photoURL: authUser.photoURL || '' };
                     applyUserDataToDOM(fallbackData, userId);
                 }
-            } catch (e) {
-                renderGuestState();
-            }
+            } catch (e) { renderGuestState(); }
         }
 
         function applyUserDataToDOM(userData, userId) {
@@ -420,19 +532,27 @@
             return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
         }
 
-        function itemMatchesCategory(item) {
-            if (activeCategoryFilter === 'all') return true;
-            const searchStr = [item.rentalSubCategory, item.subCategory, item.category, item.rentalType, item.title].join(' ').toLowerCase();
-            return searchStr.includes(activeCategoryFilter);
+        function itemMatchesFilters(item) {
+            if (activeCategoryFilter !== 'all') {
+                const catStr = [item.rentalSubCategory, item.subCategory, item.category, item.rentalType, item.title].join(' ').toLowerCase();
+                if (!catStr.includes(activeCategoryFilter)) return false;
+            }
+            if (activeLocationFilter) {
+                const locStr = [
+                    item.address, item.locationString, item.location, item.city, item.country,
+                    item.locationDetails?.city, item.locationDetails?.subcity, item.locationDetails?.country
+                ].filter(Boolean).join(' ').toLowerCase();
+                if (!locStr.includes(activeLocationFilter)) return false;
+            }
+            return true;
         }
 
         async function fetchItemsBatch() {
             if (isLoading || !hasMoreItems) return;
             isLoading = true;
-            if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading Database Items...`;
+            if (DOM.triggerEl) DOM.triggerEl.innerText = `Loading...`;
 
             const nodePaths = ['posts', 'delala_new'];
-
             try {
                 const fetchPromises = nodePaths.map(async (nodePath) => {
                     const baseRef = ref(db, nodePath);
@@ -470,7 +590,7 @@
                         lastLoadedKey = rawItem.id;
                     }
 
-                    if (isRentalCategory(rawItem) && itemMatchesCategory(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
+                    if (isRentalCategory(rawItem) && itemMatchesFilters(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
                         validItems.push(rawItem);
                     }
                 }
@@ -486,17 +606,13 @@
                 }
 
                 if (DOM.triggerEl) {
-                    DOM.triggerEl.innerText = hasMoreItems ? "⏳ Scroll for more..." : "All items loaded.";
+                    DOM.triggerEl.innerText = hasMoreItems ? "Loading..." : "All items loaded.";
                 }
 
-            } catch (error) {
-                console.error("Error loading posts:", error);
-            } finally {
-                isLoading = false;
-            }
+            } catch (error) { console.error("Error loading posts:", error); } 
+            finally { isLoading = false; }
         }
 
-        // --- FETCH REAL AUTHOR PROFILE FROM DATABASE ---
         async function hydrateAuthorProfile(authorId, itemId) {
             if (!authorId || authorId === 'unknown') return;
             try {
@@ -508,20 +624,17 @@
                         userProfileCache[authorId] = uData;
                     } else {
                         userProfileCache[authorId] = { notFound: true };
-                        return; // Prevent fetching missing profiles again
+                        return;
                     }
                 }
-                
                 if (uData.notFound) return;
 
-                // Extract Best Names
                 let fName = uData.firstName || uData.first_name || "";
                 if (!fName && uData.fullName) fName = uData.fullName.trim().split(/\s+/)[0];
                 const dName = uData.displayName || fName || uData.username || "User";
                 const shortName = dName.trim().split(' ')[0] || 'User';
                 const pPhoto = uData.photoURL || uData.profilePicture || "";
 
-                // Update DOM elements matching this specific post ID
                 const nameNode = document.getElementById(`author-name-${itemId}`);
                 const avatarNode = document.getElementById(`author-avatar-${itemId}`);
                 const clickNode = document.getElementById(`author-click-${itemId}`);
@@ -535,17 +648,13 @@
                     }
                 }
                 if (clickNode) {
-                    // Make sure clicking updates with real name properly escaped
                     clickNode.setAttribute('onclick', `navigateToAuthorProfile(event, '${authorId}', '${dName.replace(/'/g, "\\'")}')`);
                 }
-            } catch(e) {
-                console.error("Failed to hydrate author profile:", e);
-            }
+            } catch(e) { console.error("Failed to hydrate author profile:", e); }
         }
 
         function renderFilteredListings(itemsToAppend) {
             if (!DOM.container) return;
-
             const fragment = document.createDocumentFragment();
             itemsToAppend.forEach(item => {
                 const card = document.createElement('article');
@@ -557,12 +666,9 @@
             });
             DOM.container.appendChild(fragment);
 
-            // Hydrate REAL author data after adding placeholders into the DOM
             itemsToAppend.forEach(item => {
                 const authorId = item.userId || item.uid || item.postedBy || 'unknown';
-                if (authorId !== 'unknown') {
-                    hydrateAuthorProfile(authorId, item.id);
-                }
+                if (authorId !== 'unknown') hydrateAuthorProfile(authorId, item.id);
             });
 
             restoreScrollPosition();
@@ -574,7 +680,7 @@
                 <article class="featured-broadcast-card">
                     <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
                     <h2 class="broadcast-title" style="margin-top:8px;">No Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No active rental listings available for this category right now.</p>
+                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No active rental listings available matching your current location or category filters.</p>
                 </article>
             `;
         }
@@ -618,7 +724,7 @@
                     
                     snapshot.forEach((childSnap) => {
                         const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
-                        if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem) && itemMatchesCategory(rawItem)) {
+                        if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem) && itemMatchesFilters(rawItem)) {
                             const coords = extractItemCoordinates(rawItem);
                             if (coords) {
                                 const dist = calculateDistanceKm(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng);
@@ -835,43 +941,62 @@
             return list.slice(0, 3);
         }
 
+        // FULL LOCATION EXTRACTION LOGIC
         function extractFullLocationString(item) {
             let parts = [];
-            if (item.locationDetails) {
-                if (item.locationDetails.city) parts.push(item.locationDetails.city);
-                if (item.locationDetails.subcity) parts.push(item.locationDetails.subcity);
-                if (item.locationDetails.uniqueName) parts.push(`(${item.locationDetails.uniqueName})`);
+            const locDetails = item.locationDetails || item;
+
+            if (locDetails.country) parts.push(locDetails.country);
+            if (locDetails.region) parts.push(locDetails.region);
+            if (locDetails.zone) parts.push(locDetails.zone);
+            if (locDetails.city) parts.push(locDetails.city);
+            if (locDetails.subcity) parts.push(locDetails.subcity);
+            if (locDetails.landmark || locDetails.uniqueName) parts.push(locDetails.landmark || locDetails.uniqueName);
+            
+            // Fallbacks for standard string address
+            if (parts.length === 0) {
+                if (item.address) parts.push(item.address);
+                else if (item.location && typeof item.location === 'string') parts.push(item.location);
             }
-            return parts.length > 0 ? parts.join(', ') : (item.location || item.city || 'Location not specified');
+
+            // Clean duplicates and empty spaces
+            parts = [...new Set(parts.map(p => typeof p === 'string' ? p.trim() : p).filter(Boolean))];
+
+            return parts.length > 0 ? parts.join(', ') : 'Location not specified';
         }
 
         function buildCategorySpecsHTML(item) {
             const specsObj = item.categorySpecificDetails || item.specifications || item.specs || item.details;
             if (specsObj && typeof specsObj === 'object' && Object.keys(specsObj).length > 0) {
                 let html = `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div class="info-terms-list">`;
+                // Preview EXACTLY 3 properties
                 Object.keys(specsObj).slice(0, 3).forEach(key => {
                     const val = specsObj[key];
                     if (val !== undefined && val !== null && val !== '') {
-                        html += `<div class="info-term-item"><span class="info-term-label">${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span><span class="info-term-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span></div>`;
+                        let displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
+                        // Format key to space camelCase
+                        let displayKey = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+                        html += `<div class="info-term-item"><span class="info-term-label">${displayKey}</span><span class="info-term-value">${displayVal}</span></div>`;
                     }
                 });
                 return html + `</div></div>`;
             }
-            return `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div style="font-size:12px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div></div>`;
+            return `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div style="font-size:11px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div></div>`;
         }
 
         function buildSingleNewsCardHTML(item) {
             const headline = item.title || "Rental Item";
-            const category = item.rentalType || item.category || "Rental";
+            const subCategoryText = item.rentalSubCategory || item.subCategory || item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
             
-            // Extract Fallback/Placeholder Data
             const authorId = item.userId || item.uid || item.postedBy || 'unknown';
             const fallbackFullName = item.authorName || item.userName || item.displayName || item.fullName || item.firstName || 'User';
             const fallbackFirstName = fallbackFullName.trim().split(' ')[0] || 'User';
             const fallbackPhoto = item.userPhoto || item.photoURL || item.profilePicture || '';
             
+            // Uses updated full location logic
             const fullLocationStr = extractFullLocationString(item);
+            // Uses exactly 3 specs logic
             const categorySpecsHTML = buildCategorySpecsHTML(item);
             
             const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
@@ -885,7 +1010,7 @@
             const commentsList = item.comments ? Object.values(item.comments) : [];
             const commentCount = typeof item.commentsCount === 'number' ? item.commentsCount : commentsList.length;
 
-            let imageHTML = allImages.length > 0 ? `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>` : "";
+            let imageHTML = allImages.length > 0 ? `<div class="broadcast-image-frame"><div class="image-overlay-subcat-badge">${subCategoryText}</div><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>` : "";
 
             let distanceChipHTML = (isGpsActive && currentUserCoordinates && item._calculatedDistance !== undefined) 
                 ? `<span class="animated-distance-chip" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>${item._calculatedDistance < 1 ? `${Math.round(item._calculatedDistance * 1000)}m` : `${item._calculatedDistance.toFixed(1)}km`}</span></span>`
@@ -910,7 +1035,7 @@
                         </span>
                         <div class="author-name-box">
                             <span class="author-first-name" id="author-name-${item.id}">${fallbackFirstName}</span>
-                            <span class="author-sub-label">Posted item</span>
+                            <span class="author-sub-label">Rental Item</span>
                         </div>
                     </div>
                     <div class="author-actions-right">
@@ -922,16 +1047,12 @@
                         </button>
                     </div>
                 </div>
-                <div class="badge-meta-row" style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                    <span class="spotlight-pill">${category}</span>
-                    ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
-                </div>
                 
                 ${imageHTML}
                 
                 <div class="clickable-news-content">
                     <h2 class="broadcast-title">${headline}</h2>
-                    <div style="margin-top: 4px; font-size: 11.5px; color: #475569; font-weight: 600;">Location: <span class="location-text-val">${fullLocationStr}</span></div>
+                    <div class="full-location-preview-text">Location: <span>${fullLocationStr}</span></div>
                     ${categorySpecsHTML}
                 </div>
                 <div class="post-social-bar">
