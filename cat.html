@@ -14,14 +14,14 @@
 
     <style>
         .cat-page-container {
-            padding: 20px;
-            padding-bottom: 100px; /* space for bottom nav */
+            padding: 12px 16px;
+            padding-bottom: 90px; /* space for bottom nav */
         }
         .cat-list-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 8px; /* Reduced gap to fit all items */
+            margin-top: 10px;
         }
         .cat-item-card {
             display: flex;
@@ -29,12 +29,9 @@
             justify-content: space-between;
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 18px 20px;
+            border-radius: 12px;
+            padding: 10px 16px; /* Reduced padding to fit screen */
             text-decoration: none;
-            color: #0F172A;
-            font-weight: 700;
-            font-size: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             transition: all 0.2s ease;
         }
@@ -47,22 +44,39 @@
             align-items: center;
             gap: 12px;
         }
-        .cat-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(2, 132, 199, 0.1);
-            color: #0284c7;
+        
+        .cat-image {
+            width: 38px; /* Reduced image size */
+            height: 38px; /* Reduced image size */
             border-radius: 8px;
+            object-fit: cover;
+            background-color: #f1f5f9;
+            flex-shrink: 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .cat-text {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .cat-text-en {
+            font-size: 14px; /* Slightly smaller text */
+            font-weight: 700;
+            color: #0F172A;
+            line-height: 1.2;
+        }
+        .cat-text-am {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            line-height: 1.2;
         }
     </style>
 </head>
 <body>
     <div class="app-view">
-        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top:0; left:0; width:100%; height:110px; z-index:-1;">
+        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top:0; left:0; width:100%; height:90px; z-index:-1;">
             <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
             <defs>
                 <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
@@ -74,46 +88,108 @@
 
         <header class="nav-header">
             <div class="header-left-group">
-                <a href="rental.html" style="color: white; margin-right: 12px; display: flex; align-items: center; text-decoration: none;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </a>
+                <!-- Back button removed here -->
                 <h1 class="header-title-text">Select Category</h1>
             </div>
         </header>
 
         <main class="app-content cat-page-container">
             <div class="cat-list-wrapper">
+                
+                <!-- All Categories -->
                 <a href="rental.html?category=all" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">🌐</div> All Categories</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="al.jpg" alt="All" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">All Categories</span>
+                            <span class="cat-text-am">ሁሉም ምድቦች</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Residential Property -->
                 <a href="rental.html?category=residential" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">🏠</div> Residential Property</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="re.jpg" alt="Residential" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Residential Property</span>
+                            <span class="cat-text-am">የመኖሪያ ቤት</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Work -->
                 <a href="rental.html?category=work" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">💼</div> Work</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="wo.jpg" alt="Work" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Work</span>
+                            <span class="cat-text-am">የስራ ቦታ</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Vehicle -->
                 <a href="rental.html?category=vehicle" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">🚗</div> Vehicle</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="ca.jpg" alt="Vehicle" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Vehicle</span>
+                            <span class="cat-text-am">ተሽከርካሪ</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Machine -->
                 <a href="rental.html?category=machine" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">⚙️</div> Machine</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="me.jpg" alt="Machine" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Machine</span>
+                            <span class="cat-text-am">ማሽን</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Cloth -->
                 <a href="rental.html?category=cloth" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">👕</div> Cloth</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="cl.jpg" alt="Cloth" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Cloth</span>
+                            <span class="cat-text-am">ልብስ</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Event -->
                 <a href="rental.html?category=event" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">🎉</div> Event</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="ev.jpg" alt="Event" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Event</span>
+                            <span class="cat-text-am">ዝግጅት</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
+
+                <!-- Miscellaneous -->
                 <a href="rental.html?category=miscellaneous" class="cat-item-card">
-                    <div class="cat-icon-wrap"><div class="cat-icon">📦</div> Miscellaneous</div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="cat-icon-wrap">
+                        <img src="ot.jpg" alt="Miscellaneous" class="cat-image">
+                        <div class="cat-text">
+                            <span class="cat-text-en">Miscellaneous</span>
+                            <span class="cat-text-am">የተለያዩ / ሌሎች</span>
+                        </div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </a>
             </div>
         </main>
