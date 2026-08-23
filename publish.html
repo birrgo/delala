@@ -318,11 +318,22 @@
             ];
             const cleanImages = removeDuplicates(rawImages);
 
-            let country = part2Data.country || (gpsData.address && gpsData.address.country) || "";
-            let region = part2Data.region || (gpsData.address && gpsData.address.region) || "";
-            let city = part2Data.city || (gpsData.address && gpsData.address.city) || "";
-            let zone = part2Data.zone || (gpsData.address && gpsData.address.zone) || "";
-            let subcity = part2Data.subcity || "";
+            // Safely extract from nested structure from previous step
+            const locDetails = part2Data.locationDetails || {};
+            let country = locDetails.country || part2Data.country || (gpsData.address && gpsData.address.country) || "";
+            let region = locDetails.region || part2Data.region || (gpsData.address && gpsData.address.region) || "";
+            let city = locDetails.city || part2Data.city || (gpsData.address && gpsData.address.city) || "";
+            let zone = locDetails.zone || part2Data.zone || (gpsData.address && gpsData.address.zone) || "";
+            let subcity = locDetails.subcity || part2Data.subcity || "";
+            let uniqueName = locDetails.uniqueName || part2Data.uniqueName || "";
+
+            // Extract lat/lng from nested structure
+            const coords = part2Data.location || {};
+            let lat = coords.latitude || part2Data.lat || gpsData.lat || 0;
+            let lng = coords.longitude || part2Data.lng || gpsData.lng || 0;
+            
+            // Extract geohash
+            let geohash = part2Data.geohash || gpsData.geohash || "";
 
             if (region.toLowerCase() === city.toLowerCase()) region = "";
             if (zone.toLowerCase() === region.toLowerCase() || zone.toLowerCase() === city.toLowerCase()) zone = "";
@@ -337,6 +348,7 @@
                 price: part1Data.price || 0,
                 paymentPeriod: part1Data.paymentPeriod || "Month",
                 body: part1Data.body || "",
+                geohash: geohash, // Uploaded to Database here!
                 categorySpecificDetails: part1Data.categorySpecificDetails || {},
                 locationDetails: {
                     country,
@@ -344,11 +356,11 @@
                     zone,
                     city,
                     subcity,
-                    uniqueName: part2Data.uniqueName || ""
+                    uniqueName
                 },
                 location: {
-                    latitude: Number(part2Data.lat || gpsData.lat || 0),
-                    longitude: Number(part2Data.lng || gpsData.lng || 0)
+                    latitude: Number(lat),
+                    longitude: Number(lng)
                 },
                 contactInfo: {
                     phone: part2Data.phone || acc.phone || "",
@@ -368,10 +380,13 @@
             renderPublishContent(pendingPayload);
 
             setTimeout(() => {
-                initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
+                if(typeof initPreviewMap === 'function') {
+                    initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
+                }
             }, 200);
         }
 
+        // --- UPDATED renderPublishContent FUNCTION ---
         function renderPublishContent(data) {
             const container = document.getElementById('publishContainer');
 
@@ -404,6 +419,10 @@
                     ${locSubText ? `<div style="color:var(--text-muted); margin-top:2px; font-size:12px;">${locSubText}</div>` : ''}
                     ${data.locationDetails.uniqueName ? `<div style="color:var(--text-muted); font-style:italic; font-size:12px;">Landmark: ${data.locationDetails.uniqueName}</div>` : ''}
                     <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Coordinates: ${data.location.latitude}, ${data.location.longitude}</div>
+                    
+                    <!-- NEW LINE TO DISPLAY GEOHASH -->
+                    ${data.geohash ? `<div style="font-size:11px; color:var(--primary-accent); font-weight: 800; margin-top:4px;">Geohash: ${data.geohash}</div>` : ''}
+                    
                     <div id="userPreviewMap" class="preview-map-box"></div>
                 </div>
 
@@ -473,5 +492,3 @@
     </script>
 </body>
 </html>
-
-
