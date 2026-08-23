@@ -5,96 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Hulum - Rental Items</title>
     
-    <!-- Ultra-Fast Preconnections & Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://delala-1b582-default-rtdb.firebaseio.com">
     
-    <!-- Non-blocking Google Font Load -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    
-    <!-- Deferred news.css stylesheet -->
     <link rel="preload" href="news.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="news.css"></noscript>
-
-    <!-- Main Rental Stylesheet -->
     <link rel="stylesheet" href="rental.css">
 
     <style>
-        .author-actions-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: nowrap;
-        }
-
-        /* Animated GPS Distance Chip placed directly before Follow button */
-        .animated-distance-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
+        .author-actions-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+        
+        /* --- IMAGE BLUR LOADING EFFECT --- */
+        .broadcast-image-frame {
+            width: 100%;
             border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #0284c7;
-            background: rgba(2, 132, 199, 0.08);
-            border: 1px solid rgba(2, 132, 199, 0.25);
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: distancePulse 2.5s infinite ease-in-out;
+            overflow: hidden;
+            background-color: #e2e8f0; /* Light skeleton color */
+            margin-bottom: 12px;
+            position: relative;
         }
+        .broadcast-image-frame img {
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+            object-fit: cover;
+            display: block;
+            /* Start fully blurred and slightly zoomed to hide blurry edges */
+            filter: blur(20px); 
+            transform: scale(1.1); 
+            transition: filter 0.6s ease-out, transform 0.6s ease-out;
+            will-change: filter, transform;
+        }
+        .broadcast-image-frame img.loaded {
+            /* Smoothly transition to sharp image */
+            filter: blur(0);
+            transform: scale(1);
+        }
+        /* --------------------------------- */
 
-        .animated-distance-chip.no-gps {
-            color: #64748b;
-            background: #f1f5f9;
-            border-color: #e2e8f0;
-            animation: none;
-        }
-
-        .animated-distance-chip .gps-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #0284c7;
-            border-radius: 50%;
-            display: inline-block;
-            animation: dotGlow 1.5s infinite;
-        }
-
-        .animated-distance-chip.no-gps .gps-dot {
-            background-color: #94a3b8;
-            animation: none;
-        }
-
-        @keyframes distancePulse {
-            0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.25); }
-            50% { box-shadow: 0 0 0 5px rgba(2, 132, 199, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
-        }
-
-        @keyframes dotGlow {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.3); }
-        }
-
-        .btn-follow-author.following {
-            background-color: #e2e8f0 !important;
-            color: #334155 !important;
-            border-color: #cbd5e1 !important;
-        }
-
-        .social-action-btn.liked svg {
-            fill: #ef4444;
-            stroke: #ef4444;
-            animation: likeHeart 0.3s ease-in-out;
-        }
-
-        @keyframes likeHeart {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
+        .animated-distance-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; color: #0284c7; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.25); white-space: nowrap; cursor: pointer; transition: all 0.3s ease; animation: distancePulse 2.5s infinite ease-in-out; }
+        .animated-distance-chip.no-gps { color: #64748b; background: #f1f5f9; border-color: #e2e8f0; animation: none; }
+        .animated-distance-chip .gps-dot { width: 6px; height: 6px; background-color: #0284c7; border-radius: 50%; display: inline-block; animation: dotGlow 1.5s infinite; }
+        .animated-distance-chip.no-gps .gps-dot { background-color: #94a3b8; animation: none; }
+        @keyframes distancePulse { 0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.25); } 50% { box-shadow: 0 0 0 5px rgba(2, 132, 199, 0); } 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); } }
+        @keyframes dotGlow { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
+        .btn-follow-author.following { background-color: #e2e8f0 !important; color: #334155 !important; border-color: #cbd5e1 !important; }
+        .social-action-btn.liked svg { fill: #ef4444; stroke: #ef4444; animation: likeHeart 0.3s ease-in-out; }
+        @keyframes likeHeart { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .active-filter-indicator { background: rgba(56, 189, 248, 0.2) !important; color: #0284c7 !important; border: 1px solid rgba(2, 132, 199, 0.3); }
     </style>
 </head>
 <body>
@@ -120,49 +80,21 @@
             </div>
         </div>
 
-        <!-- Search Overlay Modal -->
-        <div class="search-modal-overlay" id="searchModalOverlay">
-            <div class="search-box-header">
-                <div class="search-input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                        <circle cx="9.5" cy="9.5" r="5.5"></circle>
-                        <line x1="14" y1="14" x2="21" y2="21"></line>
-                    </svg>
-                    <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Search Title, City, or Category..." autocomplete="off">
-                </div>
-                <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
-            </div>
-            <div class="search-results-area" id="searchResultsArea">
-                <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                    Type to search rental items...
-                </div>
-            </div>
-        </div>
-
         <!-- Header Bar -->
         <header class="nav-header">
             <div class="header-left-group">
-                <h1 class="header-title-text">Rental Items</h1>
+                <h1 class="header-title-text" id="dynamicHeaderTitle">Rental Items</h1>
             </div>
 
             <div class="header-actions-group">
-                <button class="location-action-btn" id="categoryMenuToggleBtn" aria-label="Filter Categories" title="Filter by category">
+                <!-- Anchor Link to the Dedicated Categories Page -->
+                <a href="cat.html" class="location-action-btn" id="categoryMenuLink" aria-label="Filter Categories" title="Filter by category">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
-                </button>
+                </a>
 
-                <div class="category-dropdown-menu" id="categoryDropdownMenu">
-                    <button class="category-dropdown-item active" data-category="all">All Categories</button>
-                    <button class="category-dropdown-item" data-category="residential">1 Residential Property</button>
-                    <button class="category-dropdown-item" data-category="work">2 Work</button>
-                    <button class="category-dropdown-item" data-category="vehicle">3 Vehicle</button>
-                    <button class="category-dropdown-item" data-category="machine">4 Machine</button>
-                    <button class="category-dropdown-item" data-category="cloth">5 Cloth</button>
-                    <button class="category-dropdown-item" data-category="event">6 Event</button>
-                    <button class="category-dropdown-item" data-category="miscellaneous">7 Miscellaneous</button>
-                </div>
-
+                <!-- GPS Location Filter -->
                 <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
@@ -170,12 +102,13 @@
                     </svg>
                 </button>
 
-                <button class="search-action-btn" id="openSearchBtn" aria-label="Search Items">
+                <!-- Anchor Link to Dedicated Search Page -->
+                <a href="search.html" class="search-action-btn" aria-label="Search Items">
                     <svg class="search-long-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <circle cx="9.5" cy="9.5" r="5.5"></circle>
                         <line x1="14" y1="14" x2="21" y2="21"></line>
                     </svg>
-                </button>
+                </a>
             </div>
         </header>
 
@@ -183,7 +116,7 @@
             <div class="broadcasts-container" id="broadcastsContainer"></div>
 
             <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
-                ⏳ Loading...
+                ⏳ Loading Data from DB...
             </div>
 
             <footer class="verified-footer-shield">
@@ -199,14 +132,12 @@
                 </div>
                 <span>Rental</span>
             </a>
-
             <a id="nav-selling" href="selling.html" class="nav-item" data-filter="Selling">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                 </div>
                 <span>Selling</span>
             </a>
-
             <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -216,14 +147,12 @@
                 </div>
                 <span class="post-fab-label">Post</span>
             </a>
-
             <a id="nav-service" href="service.html" class="nav-item" data-filter="Service">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                 </div>
                 <span>Service</span>
             </a>
-
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
                     <img id="navProfilePic" class="nav-profile-img" src="" alt="Profile" style="display:none;">
@@ -246,15 +175,14 @@
             projectId: "delala-1b582",
             storageBucket: "delala-1b582.firebasestorage.app",
             messagingSenderId: "1073041850834",
-            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
-            measurementId: "G-2XW8F8FKBT"
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        const BATCH_LIMIT = 3;
+        const BATCH_LIMIT = 8; 
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
@@ -267,244 +195,60 @@
         let currentUser = null;
         let userFollowingSet = new Set();
 
-        const DOM = {};
+        const DOM = {
+            container: document.getElementById('broadcastsContainer'),
+            triggerEl: document.getElementById('infiniteScrollTrigger'),
+            popupModal: document.getElementById('customPopupModule'),
+            popupTitleNode: document.getElementById('popupTitleNode'),
+            popupDescNode: document.getElementById('popupDescNode'),
+            popupIconNode: document.getElementById('popupIconNode'),
+            closePopupBtn: document.getElementById('closePopupBtn'),
+            gpsBtn: document.getElementById('triggerGpsFilterBtn'),
+            catLinkBtn: document.getElementById('categoryMenuLink'),
+            headerTitle: document.getElementById('dynamicHeaderTitle')
+        };
 
-        // --- Fast Native Inline Geohash & Distance Math (Zero-lag performance) ---
+        // --- Fast Native Inline Geohash & Distance Math ---
         const BITS = [16, 8, 4, 2, 1];
         const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
         function encodeFastGeohash(latitude, longitude, precision = 7) {
-            let isEven = true;
-            let lat = [-90.0, 90.0];
-            let lon = [-180.0, 180.0];
-            let bit = 0;
-            let ch = 0;
-            let geohash = "";
-
+            let isEven = true, lat = [-90.0, 90.0], lon = [-180.0, 180.0], bit = 0, ch = 0, geohash = "";
             while (geohash.length < precision) {
-                let mid;
-                if (isEven) {
-                    mid = (lon[0] + lon[1]) / 2;
-                    if (longitude > mid) {
-                        ch |= BITS[bit];
-                        lon[0] = mid;
-                    } else {
-                        lon[1] = mid;
-                    }
-                } else {
-                    mid = (lat[0] + lat[1]) / 2;
-                    if (latitude > mid) {
-                        ch |= BITS[bit];
-                        lat[0] = mid;
-                    } else {
-                        lat[1] = mid;
-                    }
-                }
+                let mid = isEven ? (lon[0] + lon[1]) / 2 : (lat[0] + lat[1]) / 2;
+                if (isEven) { if (longitude > mid) { ch |= BITS[bit]; lon[0] = mid; } else lon[1] = mid; }
+                else { if (latitude > mid) { ch |= BITS[bit]; lat[0] = mid; } else lat[1] = mid; }
                 isEven = !isEven;
-                if (bit < 4) {
-                    bit++;
-                } else {
-                    geohash += BASE32[ch];
-                    bit = 0;
-                    ch = 0;
-                }
+                if (bit < 4) bit++; else { geohash += BASE32[ch]; bit = 0; ch = 0; }
             }
             return geohash;
         }
 
-        // Lightweight Haversine Distance Calculator in KM
         function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Radius of the earth in km
-            const dLat = deg2rad(lat2 - lat1);
-            const dLon = deg2rad(lon2 - lon1);
-            const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
+            const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
-
-        function deg2rad(deg) {
-            return deg * (Math.PI / 180);
-        }
-
-        window.navigateToAuthorProfile = function(event, userId, userName) {
-            if (event) event.stopPropagation();
-            if (!userId || userId === 'unknown') return;
-            window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
-        };
-
-        window.toggleFollowUser = async function(event, authorId) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to follow this user.", "🔐");
-                return;
-            }
-            if (currentUser.uid === authorId) {
-                triggerSystemAlert("Action Restricted", "You cannot follow your own account.", "ℹ️");
-                return;
-            }
-
-            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
-            const isFollowing = userFollowingSet.has(authorId);
-
-            try {
-                if (isFollowing) {
-                    await remove(followRef);
-                    userFollowingSet.delete(authorId);
-                } else {
-                    await set(followRef, true);
-                    userFollowingSet.add(authorId);
-                }
-
-                updateFollowButtonsUI(authorId, !isFollowing);
-            } catch (err) {
-                console.error("Follow error:", err);
-            }
-        };
-
-        function updateFollowButtonsUI(authorId, isFollowing) {
-            document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
-                if (isFollowing) {
-                    btn.innerText = "Following";
-                    btn.classList.add('following');
-                } else {
-                    btn.innerText = "+ Follow";
-                    btn.classList.remove('following');
-                }
-            });
-        }
-
-        window.toggleLikePost = async function(event, itemId, path) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
-                return;
-            }
-
-            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${currentUser.uid}`);
-            const likesCountRef = ref(db, `${path}/${itemId}/likes`);
-
-            try {
-                const snap = await get(likedByRef);
-                const isLiked = snap.exists() && snap.val() === true;
-
-                if (isLiked) {
-                    await remove(likedByRef);
-                    await runTransaction(likesCountRef, (current) => Math.max(0, (current || 1) - 1));
-                } else {
-                    await set(likedByRef, true);
-                    await runTransaction(likesCountRef, (current) => (current || 0) + 1);
-                }
-
-                const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
-                if (cachedItem) {
-                    if (!cachedItem.likedBy) cachedItem.likedBy = {};
-                    if (isLiked) {
-                        delete cachedItem.likedBy[currentUser.uid];
-                        cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1);
-                    } else {
-                        cachedItem.likedBy[currentUser.uid] = true;
-                        cachedItem.likes = (cachedItem.likes || 0) + 1;
-                    }
-                }
-
-                const likeBtn = document.getElementById(`like-btn-${itemId}`);
-                const likeCountNode = document.getElementById(`like-count-${itemId}`);
-                if (likeBtn && likeCountNode) {
-                    let currentCount = parseInt(likeCountNode.innerText || '0', 10);
-                    if (isLiked) {
-                        likeBtn.classList.remove('liked');
-                        likeCountNode.innerText = Math.max(0, currentCount - 1);
-                    } else {
-                        likeBtn.classList.add('liked');
-                        likeCountNode.innerText = currentCount + 1;
-                    }
-                }
-            } catch (err) {
-                console.error("Like toggle failed:", err);
-            }
-        };
-
-        window.toggleCommentBox = function(event, itemId) {
-            if (event) event.stopPropagation();
-            const commentBox = document.getElementById(`comments-box-${itemId}`);
-            if (commentBox) {
-                commentBox.classList.toggle('show');
-            }
-        };
-
-        window.submitInlineComment = async function(event, itemId, path) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to post comments.", "💬");
-                return;
-            }
-
-            const inputEl = document.getElementById(`comment-input-${itemId}`);
-            if (!inputEl || !inputEl.value.trim()) return;
-
-            const commentText = inputEl.value.trim();
-            inputEl.value = '';
-
-            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
-            const newCommentRef = ref(db, `${path}/${itemId}/comments/${Date.now()}`);
-
-            try {
-                await set(newCommentRef, {
-                    userId: currentUser.uid,
-                    userName: userFirstName,
-                    text: commentText,
-                    timestamp: Date.now()
-                });
-
-                const listContainer = document.getElementById(`comments-list-${itemId}`);
-                if (listContainer) {
-                    const cItem = document.createElement('div');
-                    cItem.className = 'comment-item-preview';
-                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`;
-                    listContainer.appendChild(cItem);
-                }
-
-                const cCountNode = document.getElementById(`comment-count-${itemId}`);
-                if (cCountNode) {
-                    let currentVal = parseInt(cCountNode.innerText || '0', 10);
-                    cCountNode.innerText = currentVal + 1;
-                }
-            } catch (err) {
-                console.error("Comment submit error:", err);
-            }
-        };
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
 
         document.addEventListener('DOMContentLoaded', () => {
-            DOM.container = document.getElementById('broadcastsContainer');
-            DOM.triggerEl = document.getElementById('infiniteScrollTrigger');
-            DOM.popupModal = document.getElementById('customPopupModule');
-            DOM.popupTitleNode = document.getElementById('popupTitleNode');
-            DOM.popupDescNode = document.getElementById('popupDescNode');
-            DOM.popupIconNode = document.getElementById('popupIconNode');
-            DOM.closePopupBtn = document.getElementById('closePopupBtn');
-            DOM.toggleBtn = document.getElementById('categoryMenuToggleBtn');
-            DOM.dropdownMenu = document.getElementById('categoryDropdownMenu');
-            DOM.gpsBtn = document.getElementById('triggerGpsFilterBtn');
-            DOM.openSearchBtn = document.getElementById('openSearchBtn');
-            DOM.closeSearchBtn = document.getElementById('closeSearchDrawerBtn');
-            DOM.searchOverlay = document.getElementById('searchModalOverlay');
-            DOM.searchInput = document.getElementById('newsCodeSearchInput');
-            DOM.searchResultsArea = document.getElementById('searchResultsArea');
-
-            setupSearchEngineControls();
-            setupInfiniteScrollObserver();
-            setupGpsDetectionControl();
-            setupCategoryDropdownMenu();
-            initUserProfile();
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestedCategory = urlParams.get('category');
+            if (requestedCategory && requestedCategory !== 'all') {
+                activeCategoryFilter = requestedCategory.toLowerCase();
+                DOM.catLinkBtn.classList.add('active-filter-indicator');
+                
+                const formattedName = activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1);
+                DOM.headerTitle.innerHTML = `Rentals <span style="font-size:12px; color:#38bdf8;">• ${formattedName}</span>`;
+            }
 
             if (DOM.closePopupBtn) {
-                DOM.closePopupBtn.addEventListener('click', () => {
-                    DOM.popupModal.classList.remove('show-popup');
-                });
+                DOM.closePopupBtn.addEventListener('click', () => DOM.popupModal.classList.remove('show-popup'));
             }
+
+            setupInfiniteScrollObserver();
+            setupGpsDetectionControl();
+            initUserProfile();
             
             fetchItemsBatch();
         });
@@ -520,297 +264,24 @@
                 if (user) {
                     let photoURL = user.photoURL;
                     let displayName = user.displayName;
-
                     try {
                         const userSnap = await get(ref(db, `users/${user.uid}`));
                         if (userSnap.exists()) {
                             const uData = userSnap.val();
                             if (uData.photoURL) photoURL = uData.photoURL;
-                            if (uData.firstName || uData.displayName || uData.name) {
-                                displayName = uData.firstName || uData.displayName || uData.name;
-                            }
-                            if (uData.following && typeof uData.following === 'object') {
-                                userFollowingSet = new Set(Object.keys(uData.following));
-                            }
+                            if (uData.firstName || uData.displayName) displayName = uData.firstName || uData.displayName;
+                            if (uData.following && typeof uData.following === 'object') userFollowingSet = new Set(Object.keys(uData.following));
                         }
-                    } catch (e) {
-                        console.warn("Could not load user profile details:", e);
-                    }
+                    } catch (e) { console.warn("Could not load profile:", e); }
 
                     const firstName = displayName ? displayName.trim().split(' ')[0] : 'User';
-
-                    if (photoURL && imgEl) {
-                        imgEl.src = photoURL;
-                        imgEl.style.display = 'block';
-                        if (iconEl) iconEl.style.display = 'none';
-                    }
-
+                    if (photoURL && imgEl) { imgEl.src = photoURL; imgEl.style.display = 'block'; if (iconEl) iconEl.style.display = 'none'; }
                     if (nameEl) nameEl.innerText = firstName;
                     if (footerShieldEl) footerShieldEl.innerText = `${firstName} Verified`;
 
-                    renderFilteredListings();
                 } else {
                     userFollowingSet.clear();
                     if (footerShieldEl) footerShieldEl.innerText = "Guest Verified";
-                    renderFilteredListings();
-                }
-            });
-        }
-
-        function restoreScrollPosition() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetItemId = urlParams.get('returnId');
-            const savedPos = sessionStorage.getItem('rental_scroll_pos');
-
-            if (targetItemId) {
-                const targetCard = document.getElementById(`item-card-${targetItemId}`);
-                if (targetCard) {
-                    targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    targetCard.style.transition = 'outline 0.3s ease';
-                    targetCard.style.outline = '2px solid #38BDF8';
-                    setTimeout(() => { targetCard.style.outline = 'none'; }, 2000);
-                    return;
-                }
-            }
-
-            if (savedPos !== null) {
-                window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'smooth' });
-                sessionStorage.removeItem('rental_scroll_pos');
-            }
-        }
-
-        function setupCategoryDropdownMenu() {
-            if (!DOM.toggleBtn || !DOM.dropdownMenu) return;
-
-            DOM.toggleBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                DOM.dropdownMenu.classList.toggle('show');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!DOM.dropdownMenu.contains(e.target) && !DOM.toggleBtn.contains(e.target)) {
-                    DOM.dropdownMenu.classList.remove('show');
-                }
-            });
-
-            DOM.dropdownMenu.addEventListener('click', (e) => {
-                const item = e.target.closest('.category-dropdown-item');
-                if (!item) return;
-
-                DOM.dropdownMenu.querySelectorAll('.category-dropdown-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-
-                activeCategoryFilter = item.getAttribute('data-category') || 'all';
-                
-                if (activeCategoryFilter !== 'all') {
-                    DOM.toggleBtn.classList.add('active-category');
-                } else {
-                    DOM.toggleBtn.classList.remove('active-category');
-                }
-
-                DOM.dropdownMenu.classList.remove('show');
-                renderFilteredListings();
-            });
-        }
-
-        function itemMatchesCategory(item) {
-            if (activeCategoryFilter === 'all') return true;
-            
-            const searchStr = [
-                item.rentalSubCategory,
-                item.subCategory,
-                item.category,
-                item.rentalType,
-                item.title
-            ].join(' ').toLowerCase();
-            
-            return searchStr.includes(activeCategoryFilter.toLowerCase());
-        }
-
-        function renderFilteredListings() {
-            if (!DOM.container) return;
-
-            DOM.container.innerHTML = '';
-            
-            const filtered = localCachedBroadcasts.filter(item => itemMatchesCategory(item));
-
-            if (filtered.length === 0) {
-                DOM.container.innerHTML = `
-                    <article class="featured-broadcast-card">
-                        <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                        <h2 class="broadcast-title" style="margin-top:8px;">No Items Found</h2>
-                        <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No rental items found for the selected category.</p>
-                    </article>
-                `;
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            
-            const listToRender = (isGpsActive && currentUserCoordinates) 
-                ? [...filtered].sort((a, b) => a._calculatedDistance - b._calculatedDistance)
-                : filtered;
-
-            listToRender.forEach(item => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.id = `item-card-${item.id}`;
-                card.setAttribute('onclick', `openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')`);
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                fragment.appendChild(card);
-            });
-            DOM.container.appendChild(fragment);
-
-            restoreScrollPosition();
-        }
-
-        function triggerSystemAlert(title, message, icon = "ℹ️") {
-            if (!DOM.popupModal) return;
-            DOM.popupTitleNode.innerText = title;
-            DOM.popupDescNode.innerText = message;
-            DOM.popupIconNode.innerText = icon;
-            DOM.popupModal.classList.add('show-popup');
-        }
-
-        function extractItemCoordinates(item) {
-            if (item.location && typeof item.location === 'object') {
-                const lat = parseFloat(item.location.latitude);
-                const lng = parseFloat(item.location.longitude);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    return { lat, lng };
-                }
-            }
-
-            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
-            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
-
-            if (fallbackLat !== undefined && fallbackLng !== undefined) {
-                const parsedLat = parseFloat(fallbackLat);
-                const parsedLng = parseFloat(fallbackLng);
-                if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-                    return { lat: parsedLat, lng: parsedLng };
-                }
-            }
-
-            return null;
-        }
-
-        async function fetchNearbyItemsFromDB() {
-            if (!currentUserCoordinates) return;
-            isLoading = true;
-
-            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
-            const nodePaths = ['posts', 'delala_new'];
-            const matchingItems = [];
-            const seenIds = new Set(); 
-
-            try {
-                for (const nodePath of nodePaths) {
-                    const q = query(
-                        ref(db, nodePath),
-                        orderByChild('geohash'),
-                        startAt(userGeohash),
-                        endAt(userGeohash + '\uf8ff')
-                    );
-                    
-                    const snapshot = await get(q);
-                    
-                    snapshot.forEach((childSnap) => {
-                        const rawItem = {
-                            id: childSnap.key,
-                            _dbPath: nodePath,
-                            ...childSnap.val()
-                        };
-
-                        if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem)) {
-                            const coords = extractItemCoordinates(rawItem);
-                            if (coords) {
-                                const distanceInKm = calculateDistanceKm(
-                                    currentUserCoordinates.lat, 
-                                    currentUserCoordinates.lng, 
-                                    coords.lat, 
-                                    coords.lng
-                                );
-                                
-                                if (distanceInKm <= 50) { 
-                                    rawItem._calculatedDistance = distanceInKm;
-                                    matchingItems.push(rawItem);
-                                    seenIds.add(rawItem.id);
-                                }
-                            }
-                        }
-                    });
-                }
-
-                localCachedBroadcasts = matchingItems; 
-                renderFilteredListings();
-
-                if (DOM.triggerEl) {
-                    DOM.triggerEl.innerText = matchingItems.length > 0 ? "All nearby items loaded." : "No items found nearby.";
-                }
-                
-            } catch (error) {
-                console.error("Error fetching nearby posts via Geohash:", error);
-                if(error.message.includes("Index not defined")) {
-                    triggerSystemAlert("Database Error", "Missing '.indexOn': ['geohash'] in Firebase Rules.", "⚠️");
-                }
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        window.triggerGpsAcquisition = function(event) {
-            if (event) event.stopPropagation();
-            if (!DOM.gpsBtn) return;
-
-            if (!navigator.geolocation) {
-                triggerSystemAlert("GPS Unsupported", "Geolocation services are not supported by your browser.", "⚠️");
-                return;
-            }
-
-            DOM.gpsBtn.style.opacity = "0.5";
-
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    DOM.gpsBtn.style.opacity = "1";
-                    currentUserCoordinates = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    isGpsActive = true;
-                    DOM.gpsBtn.classList.add('active-gps');
-                    
-                    DOM.container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:600; color:#64748B;">Searching Database for items within 50km...</div>`;
-                    await fetchNearbyItemsFromDB();
-                },
-                (error) => {
-                    DOM.gpsBtn.style.opacity = "1";
-                    let errMsg = "Unable to retrieve position.";
-                    if (error.code === error.PERMISSION_DENIED) {
-                        errMsg = "Location permission request was denied.";
-                    }
-                    triggerSystemAlert("GPS Error", errMsg, "📍");
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        };
-
-        function setupGpsDetectionControl() {
-            if (!DOM.gpsBtn) return;
-
-            DOM.gpsBtn.addEventListener('click', () => {
-                if (isGpsActive) {
-                    isGpsActive = false;
-                    DOM.gpsBtn.classList.remove('active-gps');
-                    
-                    localCachedBroadcasts = [];
-                    lastLoadedTimestamp = null;
-                    lastLoadedKey = null;
-                    hasMoreItems = true;
-                    DOM.container.innerHTML = '';
-                    fetchItemsBatch();
-                } else {
-                    window.triggerGpsAcquisition();
                 }
             });
         }
@@ -822,66 +293,31 @@
             return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
         }
 
-        function extractAllImages(item) {
-            let list = [];
-            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
-                list.push(item.imageUrl.trim());
-            }
-            if (item.images) {
-                if (Array.isArray(item.images)) {
-                    item.images.forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
-                        }
-                    });
-                } else if (typeof item.images === 'object') {
-                    Object.values(item.images).forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
-                        }
-                    });
-                }
-            }
-            return list.slice(0, 3);
+        function itemMatchesCategory(item) {
+            if (activeCategoryFilter === 'all') return true;
+            const searchStr = [item.rentalSubCategory, item.subCategory, item.category, item.rentalType, item.title].join(' ').toLowerCase();
+            return searchStr.includes(activeCategoryFilter);
         }
 
         async function fetchItemsBatch() {
             if (isLoading || !hasMoreItems) return;
             isLoading = true;
-
-            if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
+            if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading Database Items...`;
 
             const nodePaths = ['posts', 'delala_new'];
 
             try {
                 const fetchPromises = nodePaths.map(async (nodePath) => {
                     const baseRef = ref(db, nodePath);
-                    let dbQuery;
-
-                    if (lastLoadedTimestamp !== null) {
-                        dbQuery = query(
-                            baseRef,
-                            orderByChild('createdAt'),
-                            endBefore(lastLoadedTimestamp, lastLoadedKey),
-                            limitToLast(BATCH_LIMIT)
-                        );
-                    } else {
-                        dbQuery = query(
-                            baseRef,
-                            orderByChild('createdAt'),
-                            limitToLast(BATCH_LIMIT)
-                        );
-                    }
+                    let dbQuery = lastLoadedTimestamp !== null 
+                        ? query(baseRef, orderByChild('createdAt'), endBefore(lastLoadedTimestamp, lastLoadedKey), limitToLast(BATCH_LIMIT))
+                        : query(baseRef, orderByChild('createdAt'), limitToLast(BATCH_LIMIT));
 
                     const snapshot = await get(dbQuery);
                     const results = [];
                     if (snapshot.exists()) {
                         snapshot.forEach((childSnap) => {
-                            results.push({
-                                id: childSnap.key,
-                                _dbPath: nodePath,
-                                ...childSnap.val()
-                            });
+                            results.push({ id: childSnap.key, _dbPath: nodePath, ...childSnap.val() });
                         });
                     }
                     return results;
@@ -892,12 +328,8 @@
 
                 if (fetchedListings.length === 0) {
                     hasMoreItems = false;
-                    if (DOM.triggerEl) {
-                        DOM.triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
-                    }
-                    if (localCachedBroadcasts.length === 0) {
-                        renderEmptyState();
-                    }
+                    if (DOM.triggerEl) DOM.triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
+                    if (localCachedBroadcasts.length === 0) renderEmptyState();
                     return;
                 }
 
@@ -911,15 +343,17 @@
                         lastLoadedKey = rawItem.id;
                     }
 
-                    if (isRentalCategory(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
+                    if (isRentalCategory(rawItem) && itemMatchesCategory(rawItem) && !localCachedBroadcasts.some(b => b.id === rawItem.id)) {
                         validItems.push(rawItem);
                     }
                 }
 
                 if (validItems.length > 0) {
                     localCachedBroadcasts.push(...validItems);
-                    renderFilteredListings();
-                } else if (hasMoreItems) {
+                    renderFilteredListings(validItems);
+                } 
+                
+                if (validItems.length === 0 && hasMoreItems) {
                     isLoading = false;
                     return fetchItemsBatch();
                 }
@@ -935,167 +369,318 @@
             }
         }
 
+        function renderFilteredListings(itemsToAppend) {
+            if (!DOM.container) return;
+
+            const fragment = document.createDocumentFragment();
+            itemsToAppend.forEach(item => {
+                const card = document.createElement('article');
+                card.className = "featured-broadcast-card";
+                card.id = `item-card-${item.id}`;
+                card.setAttribute('onclick', `openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')`);
+                card.innerHTML = buildSingleNewsCardHTML(item);
+                fragment.appendChild(card);
+            });
+            DOM.container.appendChild(fragment);
+            restoreScrollPosition();
+        }
+
+        function renderEmptyState() {
+            if (!DOM.container) return;
+            DOM.container.innerHTML = `
+                <article class="featured-broadcast-card">
+                    <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
+                    <h2 class="broadcast-title" style="margin-top:8px;">No Items Found</h2>
+                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No active rental listings available for this category right now.</p>
+                </article>
+            `;
+        }
+
         function setupInfiniteScrollObserver() {
             if (!DOM.triggerEl) return;
-
             const observer = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && !isLoading && hasMoreItems && !isGpsActive) {
                     fetchItemsBatch();
                 }
             }, { rootMargin: '200px', threshold: 0.1 });
-
             observer.observe(DOM.triggerEl);
         }
 
-        function renderEmptyState() {
-            if (!DOM.container) return;
-            
-            DOM.container.innerHTML = `
-                <article class="featured-broadcast-card">
-                    <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
-                    <h2 class="broadcast-title" style="margin-top:8px;">No Rental Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">There are currently no active rental listings available.</p>
-                </article>
-            `;
+        // ====== GPS LOGIC ======
+        function extractItemCoordinates(item) {
+            if (item.location && typeof item.location === 'object') {
+                const lat = parseFloat(item.location.latitude); const lng = parseFloat(item.location.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+            }
+            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
+            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
+            if (fallbackLat !== undefined && fallbackLng !== undefined) {
+                const pLat = parseFloat(fallbackLat); const pLng = parseFloat(fallbackLng);
+                if (!isNaN(pLat) && !isNaN(pLng)) return { lat: pLat, lng: pLng };
+            }
+            return null;
+        }
+
+        async function fetchNearbyItemsFromDB() {
+            if (!currentUserCoordinates) return;
+            isLoading = true;
+            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
+            const nodePaths = ['posts', 'delala_new'];
+            const matchingItems = [];
+            const seenIds = new Set(); 
+
+            try {
+                for (const nodePath of nodePaths) {
+                    const q = query(ref(db, nodePath), orderByChild('geohash'), startAt(userGeohash), endAt(userGeohash + '\uf8ff'));
+                    const snapshot = await get(q);
+                    
+                    snapshot.forEach((childSnap) => {
+                        const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
+                        if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem) && itemMatchesCategory(rawItem)) {
+                            const coords = extractItemCoordinates(rawItem);
+                            if (coords) {
+                                const dist = calculateDistanceKm(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng);
+                                if (dist <= 50) { rawItem._calculatedDistance = dist; matchingItems.push(rawItem); seenIds.add(rawItem.id); }
+                            }
+                        }
+                    });
+                }
+                
+                DOM.container.innerHTML = '';
+                matchingItems.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
+                localCachedBroadcasts = matchingItems; 
+                if(matchingItems.length > 0) renderFilteredListings(matchingItems);
+                else renderEmptyState();
+
+                if (DOM.triggerEl) DOM.triggerEl.innerText = matchingItems.length > 0 ? "All nearby items loaded." : "No items found nearby.";
+            } catch (error) { console.error("Error fetching nearby posts:", error); } 
+            finally { isLoading = false; }
+        }
+
+        window.triggerGpsAcquisition = function(event) {
+            if (event) event.stopPropagation();
+            if (!DOM.gpsBtn) return;
+            if (!navigator.geolocation) return triggerSystemAlert("GPS Unsupported", "Geolocation is not supported.", "⚠️");
+
+            DOM.gpsBtn.style.opacity = "0.5";
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    DOM.gpsBtn.style.opacity = "1";
+                    currentUserCoordinates = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    isGpsActive = true;
+                    DOM.gpsBtn.classList.add('active-gps');
+                    DOM.container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:600; color:#64748B;">Searching Database for items within 50km...</div>`;
+                    await fetchNearbyItemsFromDB();
+                },
+                (error) => {
+                    DOM.gpsBtn.style.opacity = "1";
+                    triggerSystemAlert("GPS Error", "Unable to retrieve position.", "📍");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        };
+
+        function setupGpsDetectionControl() {
+            if (!DOM.gpsBtn) return;
+            DOM.gpsBtn.addEventListener('click', () => {
+                if (isGpsActive) {
+                    isGpsActive = false;
+                    DOM.gpsBtn.classList.remove('active-gps');
+                    localCachedBroadcasts = []; lastLoadedTimestamp = null; lastLoadedKey = null; hasMoreItems = true;
+                    DOM.container.innerHTML = '';
+                    fetchItemsBatch();
+                } else { window.triggerGpsAcquisition(); }
+            });
+        }
+
+        // ====== INTERACTION / UI LOGIC ======
+        function restoreScrollPosition() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetItemId = urlParams.get('returnId');
+            const savedPos = sessionStorage.getItem('rental_scroll_pos');
+
+            if (targetItemId) {
+                const targetCard = document.getElementById(`item-card-${targetItemId}`);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    targetCard.style.outline = '2px solid #38BDF8';
+                    setTimeout(() => { targetCard.style.outline = 'none'; }, 2000);
+                    return;
+                }
+            }
+            if (savedPos !== null) {
+                window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'smooth' });
+                sessionStorage.removeItem('rental_scroll_pos');
+            }
+        }
+
+        window.openFullNewsReader = function(itemId, path) {
+            sessionStorage.setItem('rental_scroll_pos', window.scrollY.toString());
+            window.location.href = `rentalfull.html?id=${encodeURIComponent(itemId)}&path=${encodeURIComponent(path || 'posts')}`;
+        };
+
+        function triggerSystemAlert(title, message, icon = "ℹ️") {
+            DOM.popupTitleNode.innerText = title; DOM.popupDescNode.innerText = message; DOM.popupIconNode.innerText = icon;
+            DOM.popupModal.classList.add('show-popup');
+        }
+
+        window.navigateToAuthorProfile = function(event, userId, userName) {
+            if (event) event.stopPropagation();
+            if (userId && userId !== 'unknown') window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
+        };
+
+        window.toggleFollowUser = async function(event, authorId) {
+            if (event) event.stopPropagation();
+            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to follow.", "🔐");
+            if (currentUser.uid === authorId) return triggerSystemAlert("Action Restricted", "You cannot follow yourself.", "ℹ️");
+
+            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
+            const isFollowing = userFollowingSet.has(authorId);
+
+            try {
+                if (isFollowing) { await remove(followRef); userFollowingSet.delete(authorId); }
+                else { await set(followRef, true); userFollowingSet.add(authorId); }
+                document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
+                    btn.innerText = isFollowing ? "+ Follow" : "Following";
+                    isFollowing ? btn.classList.remove('following') : btn.classList.add('following');
+                });
+            } catch (err) { console.error("Follow error:", err); }
+        };
+
+        window.toggleLikePost = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
+            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${currentUser.uid}`);
+            const likesCountRef = ref(db, `${path}/${itemId}/likes`);
+
+            try {
+                const snap = await get(likedByRef);
+                const isLiked = snap.exists() && snap.val() === true;
+                if (isLiked) {
+                    await remove(likedByRef);
+                    await runTransaction(likesCountRef, (current) => Math.max(0, (current || 1) - 1));
+                } else {
+                    await set(likedByRef, true);
+                    await runTransaction(likesCountRef, (current) => (current || 0) + 1);
+                }
+
+                const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
+                if (cachedItem) {
+                    if (!cachedItem.likedBy) cachedItem.likedBy = {};
+                    if (isLiked) { delete cachedItem.likedBy[currentUser.uid]; cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1); } 
+                    else { cachedItem.likedBy[currentUser.uid] = true; cachedItem.likes = (cachedItem.likes || 0) + 1; }
+                }
+
+                const likeBtn = document.getElementById(`like-btn-${itemId}`);
+                const likeCountNode = document.getElementById(`like-count-${itemId}`);
+                if (likeBtn && likeCountNode) {
+                    let currentCount = parseInt(likeCountNode.innerText || '0', 10);
+                    likeBtn.classList.toggle('liked', !isLiked);
+                    likeCountNode.innerText = isLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
+                }
+            } catch (err) { console.error("Like error:", err); }
+        };
+
+        window.toggleCommentBox = function(event, itemId) {
+            if (event) event.stopPropagation();
+            const box = document.getElementById(`comments-box-${itemId}`);
+            if (box) box.classList.toggle('show');
+        };
+
+        window.submitInlineComment = async function(event, itemId, path) {
+            if (event) event.stopPropagation();
+            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to comment.", "💬");
+            const inputEl = document.getElementById(`comment-input-${itemId}`);
+            if (!inputEl || !inputEl.value.trim()) return;
+            const commentText = inputEl.value.trim(); inputEl.value = '';
+            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
+
+            try {
+                await set(ref(db, `${path}/${itemId}/comments/${Date.now()}`), {
+                    userId: currentUser.uid, userName: userFirstName, text: commentText, timestamp: Date.now()
+                });
+                const listContainer = document.getElementById(`comments-list-${itemId}`);
+                if (listContainer) {
+                    const cItem = document.createElement('div'); cItem.className = 'comment-item-preview';
+                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`; listContainer.appendChild(cItem);
+                }
+                const cCountNode = document.getElementById(`comment-count-${itemId}`);
+                if (cCountNode) cCountNode.innerText = parseInt(cCountNode.innerText || '0', 10) + 1;
+            } catch (err) { console.error("Comment error:", err); }
+        };
+
+        function extractAllImages(item) {
+            let list = [];
+            if (item.imageUrl && typeof item.imageUrl === 'string') list.push(item.imageUrl.trim());
+            if (item.images) {
+                if (Array.isArray(item.images)) item.images.forEach(img => { if (typeof img === 'string' && !list.includes(img)) list.push(img.trim()); });
+                else if (typeof item.images === 'object') Object.values(item.images).forEach(img => { if (typeof img === 'string' && !list.includes(img)) list.push(img.trim()); });
+            }
+            return list.slice(0, 3);
         }
 
         function extractFullLocationString(item) {
-            let locationParts = [];
+            let parts = [];
             if (item.locationDetails) {
-                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
-                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
-                if (item.locationDetails.zone) locationParts.push(item.locationDetails.zone);
-                if (item.locationDetails.city) locationParts.push(item.locationDetails.city);
-                if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
-                if (item.locationDetails.uniqueName) locationParts.push(`(${item.locationDetails.uniqueName})`);
+                if (item.locationDetails.city) parts.push(item.locationDetails.city);
+                if (item.locationDetails.subcity) parts.push(item.locationDetails.subcity);
+                if (item.locationDetails.uniqueName) parts.push(`(${item.locationDetails.uniqueName})`);
             }
-            
-            if (locationParts.length > 0) {
-                return locationParts.join(', ');
-            }
-            return item.location || item.city || 'Location not specified';
+            return parts.length > 0 ? parts.join(', ') : (item.location || item.city || 'Location not specified');
         }
 
         function buildCategorySpecsHTML(item) {
             const specsObj = item.categorySpecificDetails || item.specifications || item.specs || item.details;
-            
             if (specsObj && typeof specsObj === 'object' && Object.keys(specsObj).length > 0) {
-                let html = `
-                    <div class="category-specs-container">
-                        <div class="category-specs-title">Property Specifications</div>
-                        <div class="info-terms-list">
-                `;
-                const keys = Object.keys(specsObj).slice(0, 3);
-                keys.forEach(key => {
+                let html = `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div class="info-terms-list">`;
+                Object.keys(specsObj).slice(0, 3).forEach(key => {
                     const val = specsObj[key];
                     if (val !== undefined && val !== null && val !== '') {
-                        const formattedLabel = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-                        const formattedVal = typeof val === 'object' ? JSON.stringify(val) : val;
-                        html += `
-                            <div class="info-term-item">
-                                <span class="info-term-label">${formattedLabel}</span>
-                                <span class="info-term-value">${formattedVal}</span>
-                            </div>
-                        `;
+                        html += `<div class="info-term-item"><span class="info-term-label">${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span><span class="info-term-value">${typeof val === 'object' ? JSON.stringify(val) : val}</span></div>`;
                     }
                 });
-                html += `</div></div>`;
-                return html;
+                return html + `</div></div>`;
             }
-
-            return `
-                <div class="category-specs-container">
-                    <div class="category-specs-title">Property Specifications</div>
-                    <div style="font-size:12px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div>
-                </div>
-            `;
+            return `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div style="font-size:12px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div></div>`;
         }
 
         function buildSingleNewsCardHTML(item) {
             const headline = item.title || "Rental Item";
             const category = item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
-
-            const authorId = item.userId || item.uid || item.postedBy || item.authorId || item.postedById || 'unknown';
-            const fullAuthorName = item.userName || item.displayName || item.authorName || item.postedByName || item.username || 'User';
+            const authorId = item.userId || item.uid || item.postedBy || 'unknown';
+            const fullAuthorName = item.userName || item.displayName || 'User';
             const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
-            const authorPhoto = item.userPhoto || item.authorPhoto || item.userAvatar || item.photoURL || '';
-
+            const authorPhoto = item.userPhoto || item.photoURL || '';
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
-
             const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
-            const isLikedByMe = !!(currentUser && (
-                (item.likedBy && item.likedBy[currentUser.uid]) ||
-                (typeof item.likes === 'object' && item.likes && item.likes[currentUser.uid])
-            ));
-
+            const isLikedByMe = !!(currentUser && ((item.likedBy && item.likedBy[currentUser.uid]) || (typeof item.likes === 'object' && item.likes && item.likes[currentUser.uid])));
             const isFollowingAuthor = userFollowingSet.has(authorId);
-
             const commentsList = item.comments ? Object.values(item.comments) : [];
             const commentCount = item.commentsCount || commentsList.length;
 
-            let imageHTML = "";
-            if (allImages.length > 0) {
-                imageHTML = `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
-            }
+            /* --- THIS IS WHERE THE BLUR CSS IS TRIGGERED --- */
+            let imageHTML = allImages.length > 0 ? `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>` : "";
+            /* ----------------------------------------------- */
 
-            let distanceChipHTML = "";
-            let distVal = item._calculatedDistance; 
-
-            if (isGpsActive && currentUserCoordinates && distVal !== undefined && !isNaN(distVal)) {
-                const displayDist = distVal < 1 ? `${Math.round(distVal * 1000)}m` : `${distVal.toFixed(1)}km`;
-                distanceChipHTML = `
-                    <span class="animated-distance-chip" onclick="triggerGpsAcquisition(event)" title="Click to refresh distance">
-                        <span class="gps-dot"></span>
-                        <span>${displayDist}</span>
-                    </span>
-                `;
-            } else {
-                distanceChipHTML = `
-                    <span class="animated-distance-chip no-gps" onclick="triggerGpsAcquisition(event)" title="Click to calculate distance with GPS">
-                        <span class="gps-dot"></span>
-                        <span>GPS</span>
-                    </span>
-                `;
-            }
-
-            let commentsPreviewHTML = "";
-            if (commentsList.length > 0) {
-                const recentComments = commentsList.slice(-2);
-                recentComments.forEach(c => {
-                    commentsPreviewHTML += `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`;
-                });
-            }
+            let distanceChipHTML = (isGpsActive && currentUserCoordinates && item._calculatedDistance !== undefined) 
+                ? `<span class="animated-distance-chip" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>${item._calculatedDistance < 1 ? `${Math.round(item._calculatedDistance * 1000)}m` : `${item._calculatedDistance.toFixed(1)}km`}</span></span>`
+                : `<span class="animated-distance-chip no-gps" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>GPS</span></span>`;
+            let commentsPreviewHTML = commentsList.slice(-2).map(c => `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`).join('');
 
             return `
                 <div class="post-author-header">
                     <div class="author-info-left" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
-                        ${authorPhoto 
-                            ? `<img class="author-avatar" src="${authorPhoto}" alt="${firstName}">` 
-                            : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`
-                        }
-                        <div class="author-name-box">
-                            <span class="author-first-name">${firstName}</span>
-                            <span class="author-sub-label">Posted item</span>
-                        </div>
+                        ${authorPhoto ? `<img class="author-avatar" src="${authorPhoto}">` : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`}
+                        <div class="author-name-box"><span class="author-first-name">${firstName}</span><span class="author-sub-label">Posted item</span></div>
                     </div>
-                    
                     <div class="author-actions-right">
                         ${distanceChipHTML}
-
-                        ${authorId !== 'unknown' ? `
-                            <button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">
-                                ${isFollowingAuthor ? 'Following' : '+ Follow'}
-                            </button>
-                        ` : ''}
-                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <span>Profile</span>
-                        </button>
+                        ${authorId !== 'unknown' ? `<button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">${isFollowingAuthor ? 'Following' : '+ Follow'}</button>` : ''}
+                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Profile</span></button>
                     </div>
                 </div>
-
                 <div class="badge-meta-row" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
                     <span class="spotlight-pill">${category}</span>
                     ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
@@ -1105,117 +690,30 @@
                 
                 <div class="clickable-news-content">
                     <h2 class="broadcast-title">${headline}</h2>
-                    <div style="margin-top: 6px; font-size: 12.5px; color: #475569; font-weight: 600;">
-                         Location: <span class="location-text-val">${fullLocationStr}</span>
-                    </div>
-                    
+                    <div style="margin-top: 6px; font-size: 12.5px; color: #475569; font-weight: 600;">Location: <span class="location-text-val">${fullLocationStr}</span></div>
                     ${categorySpecsHTML}
                 </div>
-
                 <div class="post-social-bar">
                     <div style="display:flex; align-items:center; gap:4px;">
                         <button class="social-action-btn ${isLikedByMe ? 'liked' : ''}" id="like-btn-${item.id}" onclick="toggleLikePost(event, '${item.id}', '${item._dbPath || 'posts'}')">
                             <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             <span id="like-count-${item.id}">${likeCount}</span>
                         </button>
-
                         <button class="social-action-btn" onclick="toggleCommentBox(event, '${item.id}')">
                             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                             <span id="comment-count-${item.id}">${commentCount}</span>
                         </button>
                     </div>
-
-                    <button class="btn-details-dark-flat" onclick="openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')">
-                        Details &rarr;
-                    </button>
+                    <button class="btn-details-dark-flat" onclick="openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')">Details &rarr;</button>
                 </div>
-
                 <div class="quick-comments-preview" id="comments-box-${item.id}">
-                    <div id="comments-list-${item.id}">
-                        ${commentsPreviewHTML}
-                    </div>
+                    <div id="comments-list-${item.id}">${commentsPreviewHTML}</div>
                     <div class="comment-input-inline-box" onclick="event.stopPropagation()">
                         <input type="text" class="comment-input-field" id="comment-input-${item.id}" placeholder="Add a comment..." />
                         <button class="comment-submit-btn" onclick="submitInlineComment(event, '${item.id}', '${item._dbPath || 'posts'}')">Post</button>
                     </div>
                 </div>
             `;
-        }
-
-        window.openFullNewsReader = function(itemId, path) {
-            sessionStorage.setItem('rental_scroll_pos', window.scrollY.toString());
-            window.location.href = `rentalfull.html?id=${encodeURIComponent(itemId)}&path=${encodeURIComponent(path || 'posts')}`;
-        };
-
-        function setupSearchEngineControls() {
-            if (DOM.openSearchBtn && DOM.searchOverlay) {
-                DOM.openSearchBtn.addEventListener('click', () => {
-                    DOM.searchOverlay.classList.add('active-search');
-                    if (DOM.searchInput) {
-                        DOM.searchInput.value = '';
-                        DOM.searchInput.focus();
-                    }
-                    executeNewsSearchQuery('');
-                });
-            }
-
-            if (DOM.closeSearchBtn && DOM.searchOverlay) {
-                DOM.closeSearchBtn.addEventListener('click', () => {
-                    DOM.searchOverlay.classList.remove('active-search');
-                });
-            }
-
-            if (DOM.searchInput) {
-                DOM.searchInput.addEventListener('input', (e) => {
-                    executeNewsSearchQuery(e.target.value);
-                });
-            }
-        }
-
-        function executeNewsSearchQuery(query) {
-            if (!DOM.searchResultsArea) return;
-
-            const cleanQuery = query.trim().toLowerCase();
-
-            if (!cleanQuery) {
-                DOM.searchResultsArea.innerHTML = `
-                    <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        Type a keyword, city, or title above to find rental items.
-                    </div>
-                `;
-                return;
-            }
-
-            const matchedNews = localCachedBroadcasts.filter(item => {
-                const code = String(item.id || '').toLowerCase();
-                const title = String(item.title || '').toLowerCase();
-                const content = String(item.body || item.content || '').toLowerCase();
-                const locationFull = extractFullLocationString(item).toLowerCase();
-                const rentalType = String(item.rentalType || '').toLowerCase();
-
-                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || locationFull.includes(cleanQuery) || rentalType.includes(cleanQuery);
-            });
-
-            if (matchedNews.length === 0) {
-                DOM.searchResultsArea.innerHTML = `
-                    <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        No rental listings matching "<strong>${cleanQuery}</strong>" found.
-                    </div>
-                `;
-                return;
-            }
-
-            DOM.searchResultsArea.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            matchedNews.forEach((item) => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.id = `item-card-${item.id}`;
-                card.setAttribute('onclick', `openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')`);
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                fragment.appendChild(card);
-            });
-            DOM.searchResultsArea.appendChild(fragment);
         }
     </script>
 </body>
