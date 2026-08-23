@@ -197,6 +197,9 @@
         let currentUserPhoto = '';
         let currentUserDisplayName = '';
         let userFollowingSet = new Set();
+        
+        // Cache to prevent querying DB for the same author multiple times
+        const userProfileCache = {};
 
         const DOM = {
             container: document.getElementById('broadcastsContainer'),
@@ -254,7 +257,6 @@
             fetchItemsBatch();
         });
 
-        // Robust Session Synchronization matching Profile Page
         function setupAuthListener() {
             onAuthStateChanged(auth, (user) => {
                 const sessionPhone = localStorage.getItem('auth_session_phone');
@@ -376,7 +378,6 @@
             if (footerShieldEl) footerShieldEl.innerText = 'Guest Verified';
         }
 
-        // Global check utility to verify if user is fully logged in before actions
         function getActiveLoggedInUserId() {
             if (currentActiveUserId) return currentActiveUserId;
             if (auth.currentUser) return auth.currentUser.uid;
@@ -468,6 +469,53 @@
             }
         }
 
+        // --- FETCH REAL AUTHOR PROFILE FROM DATABASE ---
+        async function hydrateAuthorProfile(authorId, itemId) {
+            if (!authorId || authorId === 'unknown') return;
+            try {
+                let uData = userProfileCache[authorId];
+                if (!uData) {
+                    const snap = await get(ref(db, `users/${authorId}`));
+                    if (snap.exists()) {
+                        uData = snap.val();
+                        userProfileCache[authorId] = uData;
+                    } else {
+                        userProfileCache[authorId] = { notFound: true };
+                        return; // Prevent fetching missing profiles again
+                    }
+                }
+                
+                if (uData.notFound) return;
+
+                // Extract Best Names
+                let fName = uData.firstName || uData.first_name || "";
+                if (!fName && uData.fullName) fName = uData.fullName.trim().split(/\s+/)[0];
+                const dName = uData.displayName || fName || uData.username || "User";
+                const shortName = dName.trim().split(' ')[0] || 'User';
+                const pPhoto = uData.photoURL || uData.profilePicture || "";
+
+                // Update DOM elements matching this specific post ID
+                const nameNode = document.getElementById(`author-name-${itemId}`);
+                const avatarNode = document.getElementById(`author-avatar-${itemId}`);
+                const clickNode = document.getElementById(`author-click-${itemId}`);
+
+                if (nameNode) nameNode.innerText = shortName;
+                if (avatarNode) {
+                    if (pPhoto) {
+                        avatarNode.innerHTML = `<img class="author-avatar" src="${pPhoto}">`;
+                    } else {
+                        avatarNode.innerHTML = `<div class="author-avatar">${shortName.charAt(0).toUpperCase()}</div>`;
+                    }
+                }
+                if (clickNode) {
+                    // Make sure clicking updates with real name properly escaped
+                    clickNode.setAttribute('onclick', `navigateToAuthorProfile(event, '${authorId}', '${dName.replace(/'/g, "\\'")}')`);
+                }
+            } catch(e) {
+                console.error("Failed to hydrate author profile:", e);
+            }
+        }
+
         function renderFilteredListings(itemsToAppend) {
             if (!DOM.container) return;
 
@@ -481,6 +529,15 @@
                 fragment.appendChild(card);
             });
             DOM.container.appendChild(fragment);
+
+            // Hydrate REAL author data after adding placeholders into the DOM
+            itemsToAppend.forEach(item => {
+                const authorId = item.userId || item.uid || item.postedBy || 'unknown';
+                if (authorId !== 'unknown') {
+                    hydrateAuthorProfile(authorId, item.id);
+                }
+            });
+
             restoreScrollPosition();
         }
 
@@ -780,11 +837,13 @@
             const headline = item.title || "Rental Item";
             const category = item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
-            const authorId = item.userId || item.uid || item.postedBy || 'unknown';
             
-            const fullAuthorName = item.authorName || item.userName || item.displayName || item.fullName || item.firstName || 'User';
-            const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
-            const authorPhoto = item.userPhoto || item.photoURL || item.profilePicture || '';
+            // Extract Fallback/Placeholder Data
+            const authorId = item.userId || item.uid || item.postedBy || 'unknown';
+            const fallbackFullName = item.authorName || item.userName || item.displayName || item.fullName || item.firstName || 'User';
+            const fallbackFirstName = fallbackFullName.trim().split(' ')[0] || 'User';
+            const fallbackPhoto = item.userPhoto || item.photoURL || item.profilePicture || '';
+            
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
             
@@ -818,14 +877,19 @@
 
             return `
                 <div class="post-author-header">
-                    <div class="author-info-left" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
-                        ${authorPhoto ? `<img class="author-avatar" src="${authorPhoto}">` : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`}
-                        <div class="author-name-box"><span class="author-first-name">${firstName}</span><span class="author-sub-label">Posted item</span></div>
+                    <div class="author-info-left" id="author-click-${item.id}" onclick="navigateToAuthorProfile(event, '${authorId}', '${fallbackFullName.replace(/'/g, "\\'")}')">
+                        <span id="author-avatar-${item.id}">
+                            ${fallbackPhoto ? `<img class="author-avatar" src="${fallbackPhoto}">` : `<div class="author-avatar">${fallbackFirstName.charAt(0).toUpperCase()}</div>`}
+                        </span>
+                        <div class="author-name-box">
+                            <span class="author-first-name" id="author-name-${item.id}">${fallbackFirstName}</span>
+                            <span class="author-sub-label">Posted item</span>
+                        </div>
                     </div>
                     <div class="author-actions-right">
                         ${distanceChipHTML}
                         ${(!isOwner && authorId !== 'unknown') ? `<button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">${isFollowingAuthor ? 'Following' : '+ Follow'}</button>` : ''}
-                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Preview</span></button>
+                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fallbackFullName.replace(/'/g, "\\'")}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Preview</span></button>
                     </div>
                 </div>
                 <div class="badge-meta-row" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
