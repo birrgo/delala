@@ -6,7 +6,7 @@
     <title>Delala - Messages</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -17,293 +17,170 @@
             --border-color: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
-            --success-color: #34D399;
-            --offline-color: #94A3B8;
+            --success-color: #10B981; /* Vibrant Green */
+            --danger-color: #EF4444;
 
-            /* Premium Silver Dark 3D Variables */
             --silver-grad: linear-gradient(145deg, #64748B, #334155, #0F172A);
             --silver-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.25), inset 0px -2px 4px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(15, 23, 42, 0.25);
         }
 
         * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
         
-        html, body {
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            overflow: hidden;
-        }
+        html, body { width: 100%; height: 100%; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); display: flex; flex-direction: column; z-index: 1; }
 
-        .screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body);
-            display: flex;
-            flex-direction: column;
-            z-index: 1;
-        }
-
-        /* --- Premium 3D Metallic Header --- */
+        /* --- Refined Header & Unique White Search Box --- */
         .inbox-header {
-            background: linear-gradient(145deg, #1E293B, #0F172A);
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            position: relative;
-            z-index: 20;
-            box-shadow: 0 4px 15px rgba(15,23,42,0.25);
-            border-bottom: 1px solid #334155;
+            background: #0F172A;
+            padding: 16px; display: flex; align-items: center; width: 100%; position: relative; z-index: 20;
+            box-shadow: 0 4px 15px rgba(15,23,42,0.15); border-bottom: 1px solid #1E293B;
         }
 
-        /* 3D Inset Search Input Bar */
         .search-input-wrapper-3d {
-            width: 100%;
-            height: 50px;
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 16px;
-            padding: 0 6px 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 
-                inset 0 2px 6px rgba(0, 0, 0, 0.6),
-                0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            width: 100%; height: 48px;
+            background: #FFFFFF; /* White Background */
+            border-radius: 12px; /* Reduced Curve */
+            padding: 0 6px 0 16px; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 2px 0px rgba(255,255,255,1);
+            border: 1px solid #E2E8F0; transition: all 0.3s ease;
         }
 
         .search-input-wrapper-3d:focus-within {
-            border-color: #64748B;
-            background: rgba(15, 23, 42, 0.8);
-            box-shadow: 
-                inset 0 2px 8px rgba(0, 0, 0, 0.8),
-                0 0 0 2px rgba(100, 116, 139, 0.3);
+            border-color: #3B82F6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2), 0 0 0 3px rgba(59,130,246,0.1);
         }
 
-        .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-            font-weight: 500;
-            color: #FFFFFF;
-            outline: none;
-        }
-        .search-input::placeholder { color: #94A3B8; font-weight: 500; letter-spacing: 0.3px; }
+        .search-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #0F172A; outline: none; }
+        .search-input::placeholder { color: #94A3B8; font-weight: 500; }
 
-        /* Modern 3D Silver Dark Button */
         .btn-icon-3d {
-            background: var(--silver-grad);
-            border: 1px solid #475569;
-            width: 38px; 
-            height: 38px;
-            border-radius: 12px;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            flex-shrink: 0;
-            box-shadow: var(--silver-shadow);
+            background: var(--silver-grad); border: 1px solid #475569; width: 36px; height: 36px;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #FFFFFF;
+            cursor: pointer; transition: all 0.2s; flex-shrink: 0; box-shadow: var(--silver-shadow);
         }
-
-        .btn-icon-3d:active {
-            transform: translateY(2px) scale(0.95);
-            box-shadow: 
-                inset 0px 2px 4px rgba(0, 0, 0, 0.6), 
-                0 1px 2px rgba(15, 23, 42, 0.2);
-        }
-
-        .btn-icon-3d svg { 
-            width: 18px; 
-            height: 18px; 
-            stroke: currentColor; 
-            stroke-width: 2.5; 
-            fill: none; 
-            stroke-linecap: round;
-            filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.4));
-        }
+        .btn-icon-3d:active { transform: scale(0.95); }
+        .btn-icon-3d svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
 
         /* Search Dropdown */
         .search-results-dropdown {
-            position: absolute;
-            top: 76px; left: 16px; right: 16px;
-            background: #FFF;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            max-height: 280px;
-            overflow-y: auto;
-            display: none;
-            box-shadow: 0 12px 30px rgba(15,23,42,0.15);
-            z-index: 25;
-            overflow: hidden;
+            position: absolute; top: 72px; left: 16px; right: 16px; background: #FFF; border: 1px solid var(--border-color);
+            border-radius: 12px; max-height: 280px; overflow-y: auto; display: none; box-shadow: 0 12px 30px rgba(15,23,42,0.15); z-index: 25;
         }
-        .search-result-item {
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            border-bottom: 1px solid #F1F5F9;
-            transition: background 0.2s;
-        }
-        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item { padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; border-bottom: 1px solid #F1F5F9; }
         .search-result-item:active { background: #F8FAFC; }
         .search-result-info h4 { font-size: 14px; font-weight: 800; color: var(--primary-dark); }
         .search-result-info p { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
 
         /* Conversations List */
-        .conversations-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .conversations-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
         /* Premium Chat Cards */
         .chat-item {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 6px 16px rgba(15,23,42,0.03);
-            position: relative;
-            overflow: hidden;
+            background: var(--card-bg); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-color); position: relative; overflow: hidden;
+            user-select: none; -webkit-user-select: none; /* Prevents text selection on hold */
         }
+        .chat-item:active { background: #F8FAFC; transform: scale(0.98); }
         
-        /* Left Metallic Edge Accent */
-        .chat-item::before {
-            content: '';
-            position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-            background: linear-gradient(180deg, #94A3B8, #334155);
-        }
+        .chat-item.pinned { border-left: 4px solid #3B82F6; } /* Highlight for pinned chats */
 
-        .chat-item:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(15,23,42,0.02); }
-
-        /* Circular Profile Avatar */
         .chat-item-avatar {
-            width: 50px; height: 50px;
-            border-radius: 50%; 
-            background: var(--silver-grad);
-            box-shadow: var(--silver-shadow);
-            border: 2px solid #FFFFFF;
-            color: #FFFFFF;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px;
-            flex-shrink: 0;
-            position: relative;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            width: 50px; height: 50px; border-radius: 50%; background: var(--silver-grad); box-shadow: var(--silver-shadow);
+            border: 2px solid #FFFFFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px; flex-shrink: 0; position: relative; box-sizing: border-box;
         }
+        .chat-item-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        .chat-item-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        /* Glowing Online Indicator */
+        /* --- Updated Online/Offline Indicator --- */
         .online-dot {
             position: absolute; bottom: 0px; right: 0px; width: 14px; height: 14px;
             background: var(--success-color); border: 2px solid #FFFFFF; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.4);
-            z-index: 2;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4); z-index: 2;
         }
         .online-dot.offline { 
-            background: var(--offline-color); 
+            background: rgba(255, 255, 255, 0.4); /* Transparent White */
+            border: 2px solid rgba(255, 255, 255, 0.9);
             box-shadow: none; 
+            backdrop-filter: blur(2px);
         }
 
         .chat-item-info { flex: 1; min-width: 0; }
         .chat-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .chat-item-top h3 { 
-            font-size: 15px; 
-            font-weight: 800; 
-            color: var(--primary-dark); 
-            letter-spacing: -0.2px; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .username-preview { 
-            font-size: 12px; 
-            font-weight: 600; 
-            color: var(--text-muted); 
-            text-transform: lowercase; 
-        }
+        .chat-item-top h3 { font-size: 15px; font-weight: 800; color: var(--primary-dark); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .username-preview { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: lowercase; }
         .chat-item-top span { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
-        
-        .chat-item-msg { 
-            font-size: 13px; 
-            font-weight: 500;
-            color: #475569; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            opacity: 0.9;
-        }
+        .chat-item-msg { font-size: 13px; font-weight: 500; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
+        .pin-icon { width: 12px; height: 12px; fill: #3B82F6; margin-left: 4px; display: none; }
+        .chat-item.pinned .pin-icon { display: inline-block; }
 
-        /* Premium Empty State */
-        .empty-state {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-        .empty-icon {
-            width: 64px; height: 64px; 
-            background: var(--silver-grad); 
-            color: #FFFFFF;
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            margin-bottom: 16px;
-            box-shadow: var(--silver-shadow);
-            border: 2px solid #FFFFFF;
-        }
+        /* Empty State */
+        .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .empty-icon { width: 64px; height: 64px; background: var(--silver-grad); color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--silver-shadow); border: 2px solid #FFFFFF; }
         .empty-icon svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2.5; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
         .empty-state h3 { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
         .empty-state p { font-size: 12px; font-weight: 600; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
-        
-        /* Auth Button inside empty state */
         .auth-btn-primary { width: 100%; max-width: 240px; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
+
+        /* Bottom Sheet Context Menu */
+        .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(2px); }
+        .bottom-sheet { background: #FFF; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 20px 16px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        .bottom-sheet-overlay.show { display: flex; }
+        .bottom-sheet-overlay.show .bottom-sheet { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 5px; background: #E2E8F0; border-radius: 5px; margin: 0 auto 16px; }
+        .sheet-menu { display: flex; flex-direction: column; gap: 6px; }
+        .sheet-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: none; background: #F8FAFC; color: var(--primary-dark); font-size: 15px; font-weight: 700; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .sheet-btn:active { background: #E2E8F0; }
+        .sheet-btn.danger { color: var(--danger-color); background: #FEF2F2; }
+        .sheet-btn.danger:active { background: #FEE2E2; }
+        .sheet-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+        /* Custom Alert */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: #FFF; border-radius: 20px; width: 100%; max-width: 320px; padding: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-overlay.show { display: flex; }
+        .modal-title { font-size: 18px; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+        .modal-text { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+        .modal-btn-group { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; }
+        .modal-btn-cancel { background: #F1F5F9; color: var(--text-main); }
+        .modal-btn-danger { background: var(--danger-color); color: #FFF; }
+        .modal-btn-primary { background: var(--primary-dark); color: #FFF; }
     </style>
 </head>
 <body>
 
     <div id="inboxScreen" class="screen">
-        <!-- Always-On Top Full Header Search Bar -->
         <header class="inbox-header">
             <div class="search-input-wrapper-3d">
                 <input type="text" id="userSearchInput" class="search-input" placeholder="Search by username or phone...">
                 <button class="btn-icon-3d" id="btnSearchTrigger" title="Search">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="7"></circle>
-                        <line x1="21" y1="21" x2="16.55" y2="16.55"></line>
-                    </svg>
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.55" y2="16.55"></line></svg>
                 </button>
             </div>
         </header>
 
         <div id="searchResultsDropdown" class="search-results-dropdown"></div>
-
         <div id="conversationsContainer" class="conversations-list"></div>
+    </div>
+
+    <!-- Hold Action Menu -->
+    <div class="bottom-sheet-overlay" id="holdMenuOverlay">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-menu">
+                <button class="sheet-btn" id="btnPinUser" onclick="pinUser()"><svg viewBox="0 0 24 24"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg> Pin / Unpin User</button>
+                <button class="sheet-btn danger" onclick="confirmDeleteChat()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete Chat</button>
+                <button class="sheet-btn danger" onclick="confirmBlockUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Delete and Block</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-card">
+            <div class="modal-title" id="alertTitle">Alert</div>
+            <div class="modal-text" id="alertText">Message</div>
+            <div class="modal-btn-group" id="alertBtnGroup"></div>
+        </div>
     </div>
 
     <!-- Firebase SDKs -->
@@ -327,29 +204,20 @@
 
         const conversationsContainer = document.getElementById('conversationsContainer');
         const userSearchInput = document.getElementById('userSearchInput');
-        const btnSearchTrigger = document.getElementById('btnSearchTrigger');
         const searchResultsDropdown = document.getElementById('searchResultsDropdown');
+        
+        let myUserId = null;
+        let selectedInboxUserId = null; // Used for hold actions
 
-        btnSearchTrigger.onclick = () => { userSearchInput.focus(); };
-
-        // --- AUTHENTICATION SYNC FIX ---
-        // This makes the chat detect login EXACTLY like your profile.html does
         function getActiveUserId(firebaseUser) {
             if (firebaseUser) return firebaseUser.uid;
-            
-            // Check for custom login session (your phone login system)
             const sessionPhone = localStorage.getItem('auth_session_phone');
-            if (sessionPhone && localStorage.getItem('user_logged_out') !== 'true') {
-                return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
-            }
-            
+            if (sessionPhone && localStorage.getItem('user_logged_out') !== 'true') return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
             return null;
         }
 
-        // Evaluate Auth State based on Firebase AND LocalStorage
         function evaluateAuthState(user) {
-            const myUserId = getActiveUserId(user);
-
+            myUserId = getActiveUserId(user);
             if (myUserId) {
                 setupRealtimePresence(myUserId);
                 loadConversations(myUserId);
@@ -357,109 +225,150 @@
             } else {
                 conversationsContainer.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">
-                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        </div>
+                        <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                         <h3>Not Logged In</h3>
                         <p>Please log in to view your messages and chat with others.</p>
                         <a href="login.html" class="auth-btn-primary">Sign in to Delala</a>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
         auth.onAuthStateChanged(evaluateAuthState);
+        window.addEventListener('storage', (e) => { if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') evaluateAuthState(auth.currentUser); });
 
-        // Also listen for changes to localStorage (in case they log in on another tab)
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
-                evaluateAuthState(auth.currentUser);
-            }
-        });
-
-        function setupRealtimePresence(myUserId) {
-            const myPresenceRef = db.ref(`users/${myUserId}/presence`);
-            const connectedRef = db.ref('.info/connected');
-
-            connectedRef.on('value', (snap) => {
+        function setupRealtimePresence(userId) {
+            const myPresenceRef = db.ref(`users/${userId}/presence`);
+            db.ref('.info/connected').on('value', (snap) => {
                 if (snap.val() === true) {
-                    myPresenceRef.onDisconnect().set({
-                        isOnline: false,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
-
-                    myPresenceRef.set({
-                        isOnline: true,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
+                    myPresenceRef.onDisconnect().set({ isOnline: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                    myPresenceRef.set({ isOnline: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
                 }
             });
         }
 
-        function loadConversations(myUserId) {
-            db.ref(`user_chats/${myUserId}`).on('value', (snapshot) => {
+        function loadConversations(userId) {
+            db.ref(`user_chats/${userId}`).on('value', (snapshot) => {
                 const myChats = snapshot.val();
                 conversationsContainer.innerHTML = '';
 
                 if (!myChats || Object.keys(myChats).length === 0) {
-                    conversationsContainer.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            </div>
-                            <h3>No Conversations</h3>
-                            <p>Search by username or phone number above to start messaging.</p>
-                        </div>
-                    `;
+                    conversationsContainer.innerHTML = `<div class="empty-state"><h3>No Conversations</h3><p>Search by username or phone number above to start messaging.</p></div>`;
                     return;
                 }
 
-                const sortedChats = Object.keys(myChats).map(otherUserId => {
-                    return {
-                        otherUserId: otherUserId,
-                        ...myChats[otherUserId]
-                    };
-                }).sort((a, b) => b.timestamp - a.timestamp);
+                const sortedChats = Object.keys(myChats).map(uid => ({ otherUserId: uid, ...myChats[uid] })).sort((a, b) => {
+                    // Pinned chats float to the top
+                    if(a.isPinned && !b.isPinned) return -1;
+                    if(!a.isPinned && b.isPinned) return 1;
+                    return b.timestamp - a.timestamp;
+                });
 
                 sortedChats.forEach(chatInfo => {
-                    const userId = chatInfo.otherUserId;
-
-                    db.ref(`users/${userId}`).once('value', (uSnap) => {
-                        const userData = uSnap.val() || {};
-                        const displayName = userData.displayName || userData.fullName || userId;
-                        const username = userData.username ? `@${userData.username}` : '';
-                        const photoURL = userData.photoURL || userData.profilePicture || '';
+                    const uid = chatInfo.otherUserId;
+                    db.ref(`users/${uid}`).once('value', (uSnap) => {
+                        const uData = uSnap.val() || {};
+                        const displayName = uData.displayName || uData.fullName || uid;
+                        const username = uData.username ? `@${uData.username}` : '';
+                        const photoURL = uData.photoURL || uData.profilePicture || '';
+                        const isOnline = uData.presence ? uData.presence.isOnline : false;
                         
-                        const initial = displayName.charAt(0).toUpperCase();
-                        const isOnline = userData.presence ? userData.presence.isOnline : false;
-
-                        const avatarContent = photoURL 
-                            ? `<img src="${photoURL}" alt="${displayName}">` 
-                            : initial;
-
                         const item = document.createElement('div');
-                        item.className = 'chat-item';
-                        item.onclick = () => openChatPage(userId, displayName);
+                        item.className = `chat-item ${chatInfo.isPinned ? 'pinned' : ''}`;
+                        
                         item.innerHTML = `
                             <div class="chat-item-avatar">
-                                ${avatarContent}
+                                ${photoURL ? `<img src="${photoURL}">` : displayName.charAt(0).toUpperCase()}
                                 <div class="online-dot ${isOnline ? '' : 'offline'}"></div>
                             </div>
                             <div class="chat-item-info">
                                 <div class="chat-item-top">
-                                    <h3>${displayName} <span class="username-preview">${username}</span></h3>
+                                    <h3>${displayName} <svg class="pin-icon" viewBox="0 0 24 24"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg></h3>
                                     <span>${formatTime(chatInfo.timestamp)}</span>
                                 </div>
-                                <div class="chat-item-msg">${(chatInfo.lastMessage && chatInfo.lastMessage.includes('location')) ? '📍 Shared Location' : (chatInfo.lastMessage || '')}</div>
+                                <div class="chat-item-msg">${(chatInfo.lastMessage && chatInfo.lastMessage.includes('maploc.html')) ? '📍 Shared Location' : escapeHtml(chatInfo.lastMessage || '')}</div>
                             </div>
                         `;
+
+                        // LONG PRESS LOGIC
+                        let holdTimer;
+                        let isHolding = false;
+                        const startHold = (e) => { isHolding = false; holdTimer = setTimeout(() => { isHolding = true; openHoldMenu(uid, chatInfo.isPinned); }, 600); };
+                        const endHold = () => { clearTimeout(holdTimer); };
+                        
+                        item.addEventListener('touchstart', startHold);
+                        item.addEventListener('touchend', endHold);
+                        item.addEventListener('touchmove', endHold);
+                        item.addEventListener('mousedown', startHold);
+                        item.addEventListener('mouseup', endHold);
+                        item.addEventListener('mouseleave', endHold);
+                        item.addEventListener('contextmenu', (e) => { e.preventDefault(); openHoldMenu(uid, chatInfo.isPinned); });
+
+                        item.onclick = (e) => {
+                            if(isHolding) { e.preventDefault(); return; }
+                            window.location.href = `chat1.html?userId=${encodeURIComponent(uid)}&userName=${encodeURIComponent(displayName)}`;
+                        };
+
                         conversationsContainer.appendChild(item);
                     });
                 });
             });
         }
 
-        function setupSearch(myUserId) {
+        // --- Custom Alert Modals ---
+        function showAlert(title, text, isConfirm, onConfirm) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertText').textContent = text;
+            const btnGroup = document.getElementById('alertBtnGroup');
+            if(isConfirm) {
+                btnGroup.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeAlert()">Cancel</button><button class="modal-btn modal-btn-danger" id="confirmBtn">Confirm</button>`;
+                document.getElementById('confirmBtn').onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            } else {
+                btnGroup.innerHTML = `<button class="modal-btn modal-btn-primary" onclick="closeAlert()">OK</button>`;
+            }
+            document.getElementById('alertModal').classList.add('show');
+        }
+        function closeAlert() { document.getElementById('alertModal').classList.remove('show'); }
+
+        // --- Hold Menu Logic ---
+        const holdMenu = document.getElementById('holdMenuOverlay');
+        holdMenu.onclick = (e) => { if(e.target === holdMenu) closeHoldMenu(); };
+        
+        let currentlyPinned = false;
+        function openHoldMenu(uid, isPinned) {
+            selectedInboxUserId = uid; currentlyPinned = isPinned;
+            document.getElementById('btnPinUser').innerHTML = isPinned 
+                ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Unpin User` 
+                : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg> Pin User`;
+            holdMenu.classList.add('show');
+        }
+        function closeHoldMenu() { holdMenu.classList.remove('show'); }
+
+        function pinUser() {
+            closeHoldMenu();
+            db.ref(`user_chats/${myUserId}/${selectedInboxUserId}`).update({ isPinned: !currentlyPinned });
+        }
+
+        function confirmDeleteChat() {
+            closeHoldMenu();
+            showAlert("Delete Chat", "Are you sure you want to delete this conversation? This removes it from your inbox.", true, () => {
+                db.ref(`user_chats/${myUserId}/${selectedInboxUserId}`).remove();
+                const chatId = [myUserId, selectedInboxUserId].sort().join('_');
+                db.ref(`chat_messages/${chatId}`).remove(); // Optional: clears actual messages too
+            });
+        }
+
+        function confirmBlockUser() {
+            closeHoldMenu();
+            showAlert("Block & Delete", "This will delete the chat and block the user. Proceed?", true, () => {
+                db.ref(`user_chats/${myUserId}/${selectedInboxUserId}`).remove();
+                // To implement full block, you'd save to a blocklist node here:
+                db.ref(`users/${myUserId}/blocked/${selectedInboxUserId}`).set(true);
+                showAlert("Blocked", "User has been blocked and chat deleted.", false);
+            });
+        }
+
+        // Search Logic
+        function setupSearch(userId) {
             userSearchInput.addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
                 if(!query) { searchResultsDropdown.style.display = 'none'; return; }
@@ -470,40 +379,22 @@
                     if(!users) { searchResultsDropdown.style.display = 'none'; return; }
 
                     let matches = 0;
-                    Object.keys(users).forEach(userId => {
-                        // Skip the currently logged-in user so they can't search themselves
-                        if (userId === myUserId) return; 
-
-                        const u = users[userId];
+                    Object.keys(users).forEach(uid => {
+                        if (uid === userId) return; 
+                        const u = users[uid];
                         const phone = (u.cleanPhone || u.phone || '').toLowerCase();
                         const username = (u.username || '').toLowerCase();
 
                         if((phone && phone.includes(query)) || (username && username.includes(query))) {
                             matches++;
-                            
-                            const displayName = u.displayName || u.fullName || userId;
-                            const displayUsername = username ? `@${u.username}` : '';
+                            const displayName = u.displayName || u.fullName || uid;
                             const photoURL = u.photoURL || u.profilePicture || '';
-                            const avatarContent = photoURL 
-                                ? `<img src="${photoURL}" alt="${displayName}">` 
-                                : displayName.charAt(0).toUpperCase();
+                            const avatar = photoURL ? `<img src="${photoURL}">` : displayName.charAt(0).toUpperCase();
 
                             const resItem = document.createElement('div');
                             resItem.className = 'search-result-item';
-                            resItem.onclick = () => {
-                                searchResultsDropdown.style.display = 'none';
-                                userSearchInput.value = '';
-                                openChatPage(userId, displayName);
-                            };
-                            resItem.innerHTML = `
-                                <div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">
-                                    ${avatarContent}
-                                </div>
-                                <div class="search-result-info">
-                                    <h4>${displayName}</h4>
-                                    <p>${displayUsername || phone}</p>
-                                </div>
-                            `;
+                            resItem.onclick = () => { searchResultsDropdown.style.display = 'none'; userSearchInput.value = ''; window.location.href = `chat1.html?userId=${encodeURIComponent(uid)}&userName=${encodeURIComponent(displayName)}`; };
+                            resItem.innerHTML = `<div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">${avatar}</div><div class="search-result-info"><h4>${displayName}</h4><p>${username ? `@${u.username}` : phone}</p></div>`;
                             searchResultsDropdown.appendChild(resItem);
                         }
                     });
@@ -512,16 +403,9 @@
             });
         }
 
-        function formatTime(ts) {
-            if(!ts) return '';
-            return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function openChatPage(userId, userName) {
-            const targetUrl = `chat1.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName)}`;
-            window.location.href = targetUrl;
-        }
-
+        // Helpers
+        function formatTime(ts) { if(!ts) return ''; return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+        function escapeHtml(text) { const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return text.replace(/[&<>"']/g, function(m) { return map[m]; }); }
     </script>
 </body>
 </html>
