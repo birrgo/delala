@@ -22,7 +22,7 @@
             width: 100%;
             border-radius: 12px;
             overflow: hidden;
-            background-color: #e2e8f0; /* Light skeleton color */
+            background-color: #e2e8f0; 
             margin-bottom: 12px;
             position: relative;
         }
@@ -32,14 +32,12 @@
             max-height: 350px;
             object-fit: cover;
             display: block;
-            /* Start fully blurred and slightly zoomed to hide blurry edges */
             filter: blur(20px); 
             transform: scale(1.1); 
             transition: filter 0.6s ease-out, transform 0.6s ease-out;
             will-change: filter, transform;
         }
         .broadcast-image-frame img.loaded {
-            /* Smoothly transition to sharp image */
             filter: blur(0);
             transform: scale(1);
         }
@@ -55,6 +53,12 @@
         .social-action-btn.liked svg { fill: #ef4444; stroke: #ef4444; animation: likeHeart 0.3s ease-in-out; }
         @keyframes likeHeart { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .active-filter-indicator { background: rgba(56, 189, 248, 0.2) !important; color: #0284c7 !important; border: 1px solid rgba(2, 132, 199, 0.3); }
+
+        /* Comment User Previews */
+        .comment-user-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+        .comment-user-initial { width: 22px; height: 22px; border-radius: 50%; background-color: #e2e8f0; color: #334155; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+        .comment-preview-wrapper { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+        .comment-text-content { font-size: 13px; line-height: 1.4; color: #334155; }
     </style>
 </head>
 <body>
@@ -87,22 +91,17 @@
             </div>
 
             <div class="header-actions-group">
-                <!-- Anchor Link to the Dedicated Categories Page -->
                 <a href="cat.html" class="location-action-btn" id="categoryMenuLink" aria-label="Filter Categories" title="Filter by category">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
                 </a>
-
-                <!-- GPS Location Filter -->
                 <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                 </button>
-
-                <!-- Anchor Link to Dedicated Search Page -->
                 <a href="search.html" class="search-action-btn" aria-label="Search Items">
                     <svg class="search-long-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <circle cx="9.5" cy="9.5" r="5.5"></circle>
@@ -138,7 +137,7 @@
                 </div>
                 <span>Selling</span>
             </a>
-            <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
+            <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -192,7 +191,11 @@
         let currentUserCoordinates = null;
         let isGpsActive = false;
         let activeCategoryFilter = 'all';
-        let currentUser = null;
+        
+        // Comprehensive User Credentials Tracking
+        let currentActiveUserId = null;
+        let currentUserPhoto = '';
+        let currentUserDisplayName = '';
         let userFollowingSet = new Set();
 
         const DOM = {
@@ -208,7 +211,6 @@
             headerTitle: document.getElementById('dynamicHeaderTitle')
         };
 
-        // --- Fast Native Inline Geohash & Distance Math ---
         const BITS = [16, 8, 4, 2, 1];
         const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
@@ -237,7 +239,6 @@
             if (requestedCategory && requestedCategory !== 'all') {
                 activeCategoryFilter = requestedCategory.toLowerCase();
                 DOM.catLinkBtn.classList.add('active-filter-indicator');
-                
                 const formattedName = activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1);
                 DOM.headerTitle.innerHTML = `Rentals <span style="font-size:12px; color:#38bdf8;">• ${formattedName}</span>`;
             }
@@ -248,42 +249,140 @@
 
             setupInfiniteScrollObserver();
             setupGpsDetectionControl();
-            initUserProfile();
+            setupAuthListener();
             
             fetchItemsBatch();
         });
 
-        function initUserProfile() {
-            onAuthStateChanged(auth, async (user) => {
-                currentUser = user;
-                const imgEl = document.getElementById('navProfilePic');
-                const iconEl = document.getElementById('navProfileIcon');
-                const nameEl = document.getElementById('navProfileName');
-                const footerShieldEl = document.getElementById('footerShieldText');
-
+        // Robust Session Synchronization matching Profile Page
+        function setupAuthListener() {
+            onAuthStateChanged(auth, (user) => {
+                const sessionPhone = localStorage.getItem('auth_session_phone');
                 if (user) {
-                    let photoURL = user.photoURL;
-                    let displayName = user.displayName;
-                    try {
-                        const userSnap = await get(ref(db, `users/${user.uid}`));
-                        if (userSnap.exists()) {
-                            const uData = userSnap.val();
-                            if (uData.photoURL) photoURL = uData.photoURL;
-                            if (uData.firstName || uData.displayName) displayName = uData.firstName || uData.displayName;
-                            if (uData.following && typeof uData.following === 'object') userFollowingSet = new Set(Object.keys(uData.following));
-                        }
-                    } catch (e) { console.warn("Could not load profile:", e); }
-
-                    const firstName = displayName ? displayName.trim().split(' ')[0] : 'User';
-                    if (photoURL && imgEl) { imgEl.src = photoURL; imgEl.style.display = 'block'; if (iconEl) iconEl.style.display = 'none'; }
-                    if (nameEl) nameEl.innerText = firstName;
-                    if (footerShieldEl) footerShieldEl.innerText = `${firstName} Verified`;
-
+                    localStorage.removeItem('user_logged_out');
+                    fetchUserData(user.uid, user);
+                } else if (sessionPhone) {
+                    localStorage.removeItem('user_logged_out');
+                    fetchUserByPhone(sessionPhone);
                 } else {
-                    userFollowingSet.clear();
-                    if (footerShieldEl) footerShieldEl.innerText = "Guest Verified";
+                    renderGuestState();
                 }
             });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'auth_session_phone' || e.key === 'user_logged_out') {
+                    setupAuthListener();
+                }
+            });
+        }
+
+        async function fetchUserByPhone(phone) {
+            const cleanPhone = phone.replace(/^0+/, '');
+            try {
+                const snapshot = await get(ref(db, `users/${cleanPhone}`));
+                if (snapshot.exists()) {
+                    applyUserDataToDOM(snapshot.val(), cleanPhone);
+                    return;
+                }
+                const querySnap = await get(ref(db, 'users'));
+                if (querySnap.exists()) {
+                    const data = querySnap.val();
+                    const matchedKey = Object.keys(data).find(k => {
+                        const u = data[k];
+                        const uPhone = String(u.cleanPhone || u.phone || u.phoneNumber || '').replace(/\D/g, '').replace(/^0+/, '');
+                        return uPhone === cleanPhone || k === cleanPhone;
+                    });
+                    if (matchedKey) {
+                        applyUserDataToDOM(data[matchedKey], matchedKey);
+                        return;
+                    }
+                }
+                renderGuestState();
+            } catch (err) {
+                renderGuestState();
+            }
+        }
+
+        async function fetchUserData(userId, authUser) {
+            currentActiveUserId = userId;
+            try {
+                const snapshot = await get(ref(db, `users/${userId}`));
+                if (snapshot.exists()) {
+                    applyUserDataToDOM(snapshot.val(), userId);
+                } else {
+                    const parts = authUser.displayName ? authUser.displayName.split(' ') : [];
+                    const firstName = parts[0] || "User";
+                    const fallbackData = { displayName: authUser.displayName || firstName, firstName: firstName, photoURL: authUser.photoURL || '' };
+                    applyUserDataToDOM(fallbackData, userId);
+                }
+            } catch (e) {
+                renderGuestState();
+            }
+        }
+
+        function applyUserDataToDOM(userData, userId) {
+            currentActiveUserId = userId;
+            let firstName = userData.firstName || userData.first_name || "";
+            let middleName = userData.middleName || userData.middle_name || userData.fatherName || "";
+            if (!firstName && userData.fullName) { 
+                const parts = userData.fullName.trim().split(/\s+/); 
+                firstName = parts[0] || ""; 
+                middleName = parts[1] || ""; 
+            }
+
+            currentUserDisplayName = userData.displayName || `${firstName} ${middleName}`.trim() || userData.username || "User";
+            currentUserPhoto = userData.profilePicture || userData.photoURL || '';
+
+            if (userData.following_list && typeof userData.following_list === 'object') {
+                userFollowingSet = new Set(Object.keys(userData.following_list));
+            } else if (userData.following && typeof userData.following === 'object') {
+                userFollowingSet = new Set(Object.keys(userData.following));
+            }
+
+            const shortFirstName = currentUserDisplayName.trim().split(' ')[0] || 'User';
+            const imgEl = document.getElementById('navProfilePic');
+            const iconEl = document.getElementById('navProfileIcon');
+            const nameEl = document.getElementById('navProfileName');
+            const footerShieldEl = document.getElementById('footerShieldText');
+
+            if (currentUserPhoto && imgEl) { 
+                imgEl.src = currentUserPhoto; 
+                imgEl.style.display = 'block'; 
+                if (iconEl) iconEl.style.display = 'none'; 
+            }
+            if (nameEl) nameEl.innerText = shortFirstName;
+            if (footerShieldEl) footerShieldEl.innerText = `${shortFirstName} Verified`;
+
+            if (localCachedBroadcasts.length > 0) {
+                DOM.container.innerHTML = '';
+                renderFilteredListings(localCachedBroadcasts);
+            }
+        }
+
+        function renderGuestState() {
+            currentActiveUserId = null;
+            currentUserPhoto = '';
+            currentUserDisplayName = '';
+            userFollowingSet.clear();
+            
+            const imgEl = document.getElementById('navProfilePic');
+            const iconEl = document.getElementById('navProfileIcon');
+            const nameEl = document.getElementById('navProfileName');
+            const footerShieldEl = document.getElementById('footerShieldText');
+
+            if (imgEl) imgEl.style.display = 'none';
+            if (iconEl) iconEl.style.display = 'block';
+            if (nameEl) nameEl.innerText = 'Profile';
+            if (footerShieldEl) footerShieldEl.innerText = 'Guest Verified';
+        }
+
+        // Global check utility to verify if user is fully logged in before actions
+        function getActiveLoggedInUserId() {
+            if (currentActiveUserId) return currentActiveUserId;
+            if (auth.currentUser) return auth.currentUser.uid;
+            const sessionPhone = localStorage.getItem('auth_session_phone');
+            if (sessionPhone) return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
+            return null;
         }
 
         function isRentalCategory(item) {
@@ -406,7 +505,6 @@
             observer.observe(DOM.triggerEl);
         }
 
-        // ====== GPS LOGIC ======
         function extractItemCoordinates(item) {
             if (item.location && typeof item.location === 'object') {
                 const lat = parseFloat(item.location.latitude); const lng = parseFloat(item.location.longitude);
@@ -493,7 +591,6 @@
             });
         }
 
-        // ====== INTERACTION / UI LOGIC ======
         function restoreScrollPosition() {
             const urlParams = new URLSearchParams(window.location.search);
             const targetItemId = urlParams.get('returnId');
@@ -531,15 +628,29 @@
 
         window.toggleFollowUser = async function(event, authorId) {
             if (event) event.stopPropagation();
-            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to follow.", "🔐");
-            if (currentUser.uid === authorId) return triggerSystemAlert("Action Restricted", "You cannot follow yourself.", "ℹ️");
+            const activeUserId = getActiveLoggedInUserId();
+            if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to follow.", "🔐");
+            if (activeUserId === authorId) return triggerSystemAlert("Action Restricted", "You cannot follow yourself.", "ℹ️");
 
-            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
+            const followRef = ref(db, `users/${activeUserId}/following_list/${authorId}`);
+            const followingCountRef = ref(db, `users/${activeUserId}/following`);
+            const followerCountRef = ref(db, `users/${authorId}/followers`);
+            
             const isFollowing = userFollowingSet.has(authorId);
 
             try {
-                if (isFollowing) { await remove(followRef); userFollowingSet.delete(authorId); }
-                else { await set(followRef, true); userFollowingSet.add(authorId); }
+                if (isFollowing) { 
+                    await remove(followRef); 
+                    userFollowingSet.delete(authorId); 
+                    runTransaction(followingCountRef, current => Math.max(0, (current || 1) - 1));
+                    runTransaction(followerCountRef, current => Math.max(0, (current || 1) - 1));
+                } else { 
+                    await set(followRef, true); 
+                    userFollowingSet.add(authorId); 
+                    runTransaction(followingCountRef, current => (current || 0) + 1);
+                    runTransaction(followerCountRef, current => (current || 0) + 1);
+                }
+                
                 document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
                     btn.innerText = isFollowing ? "+ Follow" : "Following";
                     isFollowing ? btn.classList.remove('following') : btn.classList.add('following');
@@ -549,8 +660,10 @@
 
         window.toggleLikePost = async function(event, itemId, path) {
             if (event) event.stopPropagation();
-            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
-            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${currentUser.uid}`);
+            const activeUserId = getActiveLoggedInUserId();
+            if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
+            
+            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${activeUserId}`);
             const likesCountRef = ref(db, `${path}/${itemId}/likes`);
 
             try {
@@ -567,8 +680,8 @@
                 const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
                 if (cachedItem) {
                     if (!cachedItem.likedBy) cachedItem.likedBy = {};
-                    if (isLiked) { delete cachedItem.likedBy[currentUser.uid]; cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1); } 
-                    else { cachedItem.likedBy[currentUser.uid] = true; cachedItem.likes = (cachedItem.likes || 0) + 1; }
+                    if (isLiked) { delete cachedItem.likedBy[activeUserId]; cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1); } 
+                    else { cachedItem.likedBy[activeUserId] = true; cachedItem.likes = (cachedItem.likes || 0) + 1; }
                 }
 
                 const likeBtn = document.getElementById(`like-btn-${itemId}`);
@@ -589,20 +702,39 @@
 
         window.submitInlineComment = async function(event, itemId, path) {
             if (event) event.stopPropagation();
-            if (!currentUser) return triggerSystemAlert("Sign In Required", "Please sign in to comment.", "💬");
+            const activeUserId = getActiveLoggedInUserId();
+            if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to comment.", "💬");
+            
             const inputEl = document.getElementById(`comment-input-${itemId}`);
             if (!inputEl || !inputEl.value.trim()) return;
             const commentText = inputEl.value.trim(); inputEl.value = '';
-            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
+            
+            const userFirstName = currentUserDisplayName.trim().split(' ')[0] || 'User';
 
             try {
-                await set(ref(db, `${path}/${itemId}/comments/${Date.now()}`), {
-                    userId: currentUser.uid, userName: userFirstName, text: commentText, timestamp: Date.now()
+                const commentId = Date.now().toString();
+                await set(ref(db, `${path}/${itemId}/comments/${commentId}`), {
+                    userId: activeUserId, 
+                    userName: userFirstName, 
+                    text: commentText, 
+                    timestamp: Date.now(),
+                    userPhoto: currentUserPhoto
                 });
+
+                const commentsCountRef = ref(db, `${path}/${itemId}/commentsCount`);
+                await runTransaction(commentsCountRef, current => (current || 0) + 1);
+
                 const listContainer = document.getElementById(`comments-list-${itemId}`);
                 if (listContainer) {
-                    const cItem = document.createElement('div'); cItem.className = 'comment-item-preview';
-                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`; listContainer.appendChild(cItem);
+                    const cItem = document.createElement('div'); 
+                    cItem.className = 'comment-preview-wrapper';
+                    
+                    const avatarHTML = currentUserPhoto 
+                        ? `<img src="${currentUserPhoto}" class="comment-user-avatar">` 
+                        : `<div class="comment-user-initial">${userFirstName.charAt(0)}</div>`;
+
+                    cItem.innerHTML = `${avatarHTML} <div class="comment-text-content"><strong>${userFirstName}:</strong> ${commentText}</div>`;
+                    listContainer.appendChild(cItem);
                 }
                 const cCountNode = document.getElementById(`comment-count-${itemId}`);
                 if (cCountNode) cCountNode.innerText = parseInt(cCountNode.innerText || '0', 10) + 1;
@@ -649,25 +781,40 @@
             const category = item.rentalType || item.category || "Rental";
             const allImages = extractAllImages(item);
             const authorId = item.userId || item.uid || item.postedBy || 'unknown';
-            const fullAuthorName = item.userName || item.displayName || 'User';
+            
+            const fullAuthorName = item.authorName || item.userName || item.displayName || item.fullName || item.firstName || 'User';
             const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
-            const authorPhoto = item.userPhoto || item.photoURL || '';
+            const authorPhoto = item.userPhoto || item.photoURL || item.profilePicture || '';
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
+            
             const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
-            const isLikedByMe = !!(currentUser && ((item.likedBy && item.likedBy[currentUser.uid]) || (typeof item.likes === 'object' && item.likes && item.likes[currentUser.uid])));
+            
+            const activeUserId = getActiveLoggedInUserId();
+            const isLikedByMe = !!(activeUserId && ((item.likedBy && item.likedBy[activeUserId]) || (typeof item.likes === 'object' && item.likes && item.likes[activeUserId])));
+            
+            const isOwner = activeUserId && (activeUserId === authorId || String(activeUserId).replace(/\D/g, '') === String(authorId).replace(/\D/g, ''));
             const isFollowingAuthor = userFollowingSet.has(authorId);
+            
             const commentsList = item.comments ? Object.values(item.comments) : [];
-            const commentCount = item.commentsCount || commentsList.length;
+            const commentCount = typeof item.commentsCount === 'number' ? item.commentsCount : commentsList.length;
 
-            /* --- THIS IS WHERE THE BLUR CSS IS TRIGGERED --- */
             let imageHTML = allImages.length > 0 ? `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>` : "";
-            /* ----------------------------------------------- */
 
             let distanceChipHTML = (isGpsActive && currentUserCoordinates && item._calculatedDistance !== undefined) 
                 ? `<span class="animated-distance-chip" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>${item._calculatedDistance < 1 ? `${Math.round(item._calculatedDistance * 1000)}m` : `${item._calculatedDistance.toFixed(1)}km`}</span></span>`
                 : `<span class="animated-distance-chip no-gps" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>GPS</span></span>`;
-            let commentsPreviewHTML = commentsList.slice(-2).map(c => `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`).join('');
+            
+            let commentsPreviewHTML = commentsList.slice(-2).map(c => {
+                const avatarHTML = c.userPhoto 
+                    ? `<img src="${c.userPhoto}" class="comment-user-avatar">` 
+                    : `<div class="comment-user-initial">${(c.userName || 'U').charAt(0)}</div>`;
+                return `
+                    <div class="comment-preview-wrapper">
+                        ${avatarHTML}
+                        <div class="comment-text-content"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>
+                    </div>`;
+            }).join('');
 
             return `
                 <div class="post-author-header">
@@ -677,8 +824,8 @@
                     </div>
                     <div class="author-actions-right">
                         ${distanceChipHTML}
-                        ${authorId !== 'unknown' ? `<button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">${isFollowingAuthor ? 'Following' : '+ Follow'}</button>` : ''}
-                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Profile</span></button>
+                        ${(!isOwner && authorId !== 'unknown') ? `<button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">${isFollowingAuthor ? 'Following' : '+ Follow'}</button>` : ''}
+                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Preview</span></button>
                     </div>
                 </div>
                 <div class="badge-meta-row" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">

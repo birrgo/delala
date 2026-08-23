@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BirrGo - Messages</title>
+    <title>Delala - Messages</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,23 +12,24 @@
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --primary-dark: #0F172A;
-            --primary-accent: #2563EB;
-            --bg-body: #F8FAFC;
+            --bg-body: #F4F7F9;
             --card-bg: #FFFFFF;
             --border-color: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
-            --success-color: #10B981;
+            --success-color: #34D399;
             --offline-color: #94A3B8;
+
+            /* Premium Silver Dark 3D Variables */
+            --silver-grad: linear-gradient(145deg, #64748B, #334155, #0F172A);
+            --silver-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.25), inset 0px -2px 4px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(15, 23, 42, 0.25);
         }
 
-        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; }
+        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
         
         html, body {
             width: 100%;
             height: 100%;
-            margin: 0;
-            padding: 0;
             background-color: var(--bg-body);
             color: var(--text-main);
             overflow: hidden;
@@ -43,41 +44,42 @@
             z-index: 1;
         }
 
-        /* --- Always-On Top Full Search Header --- */
+        /* --- Premium 3D Metallic Header --- */
         .inbox-header {
-            background: transparent;
-            padding: 12px 16px;
+            background: linear-gradient(145deg, #1E293B, #0F172A);
+            padding: 16px;
             display: flex;
             align-items: center;
             width: 100%;
             position: relative;
             z-index: 20;
+            box-shadow: 0 4px 15px rgba(15,23,42,0.25);
+            border-bottom: 1px solid #334155;
         }
 
-        /* 3D Full-Width Search Input Bar Container */
+        /* 3D Inset Search Input Bar */
         .search-input-wrapper-3d {
             width: 100%;
-            height: 48px;
-            background: #FFFFFF;
+            height: 50px;
+            background: rgba(15, 23, 42, 0.5);
             border-radius: 16px;
             padding: 0 6px 0 16px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 
-                0 4px 12px rgba(15, 23, 42, 0.05),
-                inset 0 2px 2px rgba(255, 255, 255, 0.8),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.03);
-            transition: all 0.25s ease;
+                inset 0 2px 6px rgba(0, 0, 0, 0.6),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
 
         .search-input-wrapper-3d:focus-within {
-            border-color: var(--primary-accent);
+            border-color: #64748B;
+            background: rgba(15, 23, 42, 0.8);
             box-shadow: 
-                0 6px 18px rgba(37, 99, 235, 0.15),
-                inset 0 2px 2px rgba(255, 255, 255, 0.9),
-                inset 0 -1px 2px rgba(37, 99, 235, 0.1);
+                inset 0 2px 8px rgba(0, 0, 0, 0.8),
+                0 0 0 2px rgba(100, 116, 139, 0.3);
         }
 
         .search-input {
@@ -86,15 +88,15 @@
             background: transparent;
             font-size: 14px;
             font-weight: 500;
-            color: var(--primary-dark);
+            color: #FFFFFF;
             outline: none;
         }
-        .search-input::placeholder { color: var(--text-muted); font-weight: 400; }
+        .search-input::placeholder { color: #94A3B8; font-weight: 500; letter-spacing: 0.3px; }
 
-        /* Modern 3D Search Button on the Right Corner */
+        /* Modern 3D Silver Dark Button */
         .btn-icon-3d {
-            background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: var(--silver-grad);
+            border: 1px solid #475569;
             width: 38px; 
             height: 38px;
             border-radius: 12px;
@@ -103,19 +105,16 @@
             justify-content: center;
             color: #FFFFFF;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             flex-shrink: 0;
-            box-shadow: 
-                0 4px 10px rgba(37, 99, 235, 0.35),
-                inset 0 2px 2px rgba(255, 255, 255, 0.4),
-                inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--silver-shadow);
         }
 
         .btn-icon-3d:active {
-            transform: translateY(1px) scale(0.96);
+            transform: translateY(2px) scale(0.95);
             box-shadow: 
-                0 2px 4px rgba(37, 99, 235, 0.3),
-                inset 0 1px 2px rgba(0, 0, 0, 0.4);
+                inset 0px 2px 4px rgba(0, 0, 0, 0.6), 
+                0 1px 2px rgba(15, 23, 42, 0.2);
         }
 
         .btn-icon-3d svg { 
@@ -125,88 +124,140 @@
             stroke-width: 2.5; 
             fill: none; 
             stroke-linecap: round;
-            filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));
+            filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.4));
         }
 
+        /* Search Dropdown */
         .search-results-dropdown {
             position: absolute;
-            top: 64px; left: 16px; right: 16px;
+            top: 76px; left: 16px; right: 16px;
             background: #FFF;
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 16px;
             max-height: 280px;
             overflow-y: auto;
             display: none;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 30px rgba(15,23,42,0.15);
             z-index: 25;
+            overflow: hidden;
         }
         .search-result-item {
-            padding: 12px 16px;
+            padding: 14px 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             cursor: pointer;
             border-bottom: 1px solid #F1F5F9;
+            transition: background 0.2s;
         }
         .search-result-item:last-child { border-bottom: none; }
         .search-result-item:active { background: #F8FAFC; }
-        .search-result-info h4 { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
-        .search-result-info p { font-size: 11px; color: var(--text-muted); }
+        .search-result-info h4 { font-size: 14px; font-weight: 800; color: var(--primary-dark); }
+        .search-result-info p { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
 
+        /* Conversations List */
         .conversations-list {
             flex: 1;
             overflow-y: auto;
-            padding: 4px 16px 16px 16px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
         }
 
+        /* Premium Chat Cards */
         .chat-item {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px;
+            border-radius: 20px;
+            padding: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 6px 16px rgba(15,23,42,0.03);
+            position: relative;
+            overflow: hidden;
         }
-        .chat-item:active { transform: scale(0.98); background: #F1F5F9; }
+        
+        /* Left Metallic Edge Accent */
+        .chat-item::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: linear-gradient(180deg, #94A3B8, #334155);
+        }
 
+        .chat-item:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(15,23,42,0.02); }
+
+        /* Circular Profile Avatar */
         .chat-item-avatar {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            background: #EFF6FF;
-            color: var(--primary-accent);
+            width: 50px; height: 50px;
+            border-radius: 50%; /* Perfect Circle */
+            background: var(--silver-grad);
+            box-shadow: var(--silver-shadow);
+            border: 2px solid #FFFFFF;
+            color: #FFFFFF;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 15px;
+            font-weight: 800; font-size: 18px;
             flex-shrink: 0;
             position: relative;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
 
-        .online-dot {
-            position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
-            background: var(--success-color); border: 2px solid #FFFFFF; border-radius: 50%;
+        .chat-item-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
-        .online-dot.offline { background: var(--offline-color); }
+
+        /* Glowing Online Indicator */
+        .online-dot {
+            position: absolute; bottom: 0px; right: 0px; width: 14px; height: 14px;
+            background: var(--success-color); border: 2px solid #FFFFFF; border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.4);
+            z-index: 2;
+        }
+        .online-dot.offline { 
+            background: var(--offline-color); 
+            box-shadow: none; 
+        }
 
         .chat-item-info { flex: 1; min-width: 0; }
-        .chat-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-        .chat-item-top h3 { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
-        .chat-item-top span { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-        
-        .chat-item-msg { 
-            font-size: 12px; 
-            color: var(--text-muted); 
+        .chat-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .chat-item-top h3 { 
+            font-size: 15px; 
+            font-weight: 800; 
+            color: var(--primary-dark); 
+            letter-spacing: -0.2px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
-            opacity: 0.85;
+        }
+        .username-preview { 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            text-transform: lowercase; 
+        }
+        .chat-item-top span { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+        
+        .chat-item-msg { 
+            font-size: 13px; 
+            font-weight: 500;
+            color: #475569; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            opacity: 0.9;
         }
 
+        /* Premium Empty State */
         .empty-state {
             flex: 1;
             display: flex;
@@ -217,12 +268,18 @@
             text-align: center;
         }
         .empty-icon {
-            width: 56px; height: 56px; background: #EFF6FF; color: var(--primary-accent);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+            width: 64px; height: 64px; 
+            background: var(--silver-grad); 
+            color: #FFFFFF;
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin-bottom: 16px;
+            box-shadow: var(--silver-shadow);
+            border: 2px solid #FFFFFF;
         }
-        .empty-icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
-        .empty-state h3 { font-size: 15px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; }
-        .empty-state p { font-size: 11px; color: var(--text-muted); line-height: 1.4; max-width: 220px; }
+        .empty-icon svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2.5; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
+        .empty-state h3 { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
+        .empty-state p { font-size: 12px; font-weight: 600; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
     </style>
 </head>
 <body>
@@ -231,7 +288,7 @@
         <!-- Always-On Top Full Header Search Bar -->
         <header class="inbox-header">
             <div class="search-input-wrapper-3d">
-                <input type="text" id="userSearchInput" class="search-input" placeholder="Search phone, name or email...">
+                <input type="text" id="userSearchInput" class="search-input" placeholder="Search by username or phone...">
                 <button class="btn-icon-3d" id="btnSearchTrigger" title="Search">
                     <svg viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="7"></circle>
@@ -306,7 +363,7 @@
                                 <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                             </div>
                             <h3>No Conversations</h3>
-                            <p>Search users in the bar above to start messaging.</p>
+                            <p>Search by username or phone number above to start messaging.</p>
                         </div>
                     `;
                     return;
@@ -321,21 +378,28 @@
 
                     db.ref(`users/${userId}`).once('value', (uSnap) => {
                         const userData = uSnap.val() || {};
-                        const displayName = userData.fullName || userId;
+                        const displayName = userData.displayName || userData.fullName || userId;
+                        const username = userData.username ? `@${userData.username}` : '';
+                        const photoURL = userData.photoURL || userData.profilePicture || '';
+                        
                         const initial = displayName.charAt(0).toUpperCase();
                         const isOnline = userData.presence ? userData.presence.isOnline : false;
+
+                        const avatarContent = photoURL 
+                            ? `<img src="${photoURL}" alt="${displayName}">` 
+                            : initial;
 
                         const item = document.createElement('div');
                         item.className = 'chat-item';
                         item.onclick = () => openChatPage(userId, displayName);
                         item.innerHTML = `
                             <div class="chat-item-avatar">
-                                ${initial}
+                                ${avatarContent}
                                 <div class="online-dot ${isOnline ? '' : 'offline'}"></div>
                             </div>
                             <div class="chat-item-info">
                                 <div class="chat-item-top">
-                                    <h3>${displayName}</h3>
+                                    <h3>${displayName} <span class="username-preview">${username}</span></h3>
                                     <span>${formatTime(lastMsg.timestamp)}</span>
                                 </div>
                                 <div class="chat-item-msg">${lastMsg.type === 'location' ? '📍 Shared Location' : (lastMsg.text || '')}</div>
@@ -359,14 +423,19 @@
                 let matches = 0;
                 Object.keys(users).forEach(userId => {
                     const u = users[userId];
-                    const phone = (u.cleanPhone || '').toLowerCase();
-                    const email = (u.emailAddress || '').toLowerCase();
-                    const name = (u.fullName || '').toLowerCase();
+                    const phone = (u.cleanPhone || u.phone || '').toLowerCase();
+                    const username = (u.username || '').toLowerCase();
 
-                    if(phone.includes(query) || email.includes(query) || name.includes(query) || userId.toLowerCase().includes(query)) {
+                    // Strict Search: Only matches Username or Phone Number
+                    if((phone && phone.includes(query)) || (username && username.includes(query))) {
                         matches++;
-                        const displayName = u.fullName || userId;
-                        const displayDetail = u.cleanPhone || u.emailAddress || userId;
+                        
+                        const displayName = u.displayName || u.fullName || userId;
+                        const displayUsername = username ? `@${u.username}` : '';
+                        const photoURL = u.photoURL || u.profilePicture || '';
+                        const avatarContent = photoURL 
+                            ? `<img src="${photoURL}" alt="${displayName}">` 
+                            : displayName.charAt(0).toUpperCase();
 
                         const resItem = document.createElement('div');
                         resItem.className = 'search-result-item';
@@ -376,10 +445,12 @@
                             openChatPage(userId, displayName);
                         };
                         resItem.innerHTML = `
-                            <div class="chat-item-avatar" style="width:34px;height:34px;font-size:12px;">${displayName.charAt(0).toUpperCase()}</div>
+                            <div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">
+                                ${avatarContent}
+                            </div>
                             <div class="search-result-info">
                                 <h4>${displayName}</h4>
-                                <p>${displayDetail}</p>
+                                <p>${displayUsername || phone}</p>
                             </div>
                         `;
                         searchResultsDropdown.appendChild(resItem);
@@ -394,7 +465,6 @@
             return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        /* Navigates inside the iframe container without breaking iframe constraints */
         function openChatPage(userId, userName) {
             const targetUrl = `chat1.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName)}`;
             window.location.href = targetUrl;

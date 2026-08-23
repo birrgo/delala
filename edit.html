@@ -122,6 +122,11 @@
             background: #FFF;
             box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
+        .form-input:disabled {
+            background: #F1F5F9;
+            color: #94A3B8;
+            cursor: not-allowed;
+        }
         
         textarea.form-input {
             resize: vertical;
@@ -152,6 +157,7 @@
             background: #0F172A; color: #FFF; padding: 12px 24px; border-radius: 30px;
             font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 2000;
+            max-width: 90%; text-align: center; line-height: 1.4;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
@@ -172,12 +178,12 @@
         <div class="avatar-section">
             <div class="avatar-preview-wrapper" id="avatarTrigger">
                 <img src="s.png" id="avatarPreview" class="avatar-preview" alt="Profile Picture">
-                <div class="avatar-edit-badge">
+                <div class="avatar-edit-badge" id="avatarBadge">
                     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                 </div>
             </div>
             <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-            <div style="font-size:12px; color:#64748B; font-weight:600;">Tap to change photo</div>
+            <div style="font-size:12px; color:#64748B; font-weight:600;" id="avatarLabel">Tap to change photo</div>
         </div>
 
         <div class="form-card">
@@ -241,6 +247,8 @@
             avatarPreview: document.getElementById('avatarPreview'),
             avatarInput: document.getElementById('avatarInput'),
             avatarTrigger: document.getElementById('avatarTrigger'),
+            avatarBadge: document.getElementById('avatarBadge'),
+            avatarLabel: document.getElementById('avatarLabel'),
             inputName: document.getElementById('inputName'),
             inputUsername: document.getElementById('inputUsername'),
             inputPhone: document.getElementById('inputPhone'),
@@ -253,11 +261,15 @@
         function showToast(msg) {
             ui.toast.innerText = msg;
             ui.toast.classList.add('show');
-            setTimeout(() => ui.toast.classList.remove('show'), 3000);
+            setTimeout(() => ui.toast.classList.remove('show'), 3500);
         }
 
         // Handle Avatar File Selection
-        ui.avatarTrigger.addEventListener('click', () => ui.avatarInput.click());
+        ui.avatarTrigger.addEventListener('click', () => {
+            if (ui.saveBtn.disabled) return; 
+            ui.avatarInput.click();
+        });
+        
         ui.avatarInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -275,27 +287,56 @@
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     
-                    let firstName = data.firstName || data.first_name || "";
-                    let middleName = data.middleName || data.middle_name || data.fatherName || "";
-                    if (!firstName && data.fullName) { 
-                        const parts = data.fullName.trim().split(/\s+/); 
-                        firstName = parts[0] || ""; 
-                        middleName = parts.slice(1).join(" ") || ""; 
+                    // --- 1-Month Edit Cooldown Check ---
+                    const lastEdit = data.lastProfileEdit || 0;
+                    const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
+                    
+                    if (Date.now() - lastEdit < oneMonthMs) {
+                        const remainingMs = oneMonthMs - (Date.now() - lastEdit);
+                        const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+                        
+                        showToast(`Cooldown active: You can edit your profile again in ${days} day(s).`);
+                        
+                        // Disable the form
+                        ui.inputName.disabled = true;
+                        ui.inputUsername.disabled = true;
+                        ui.inputEmail.disabled = true;
+                        ui.inputBio.disabled = true;
+                        ui.saveBtn.disabled = true;
+                        ui.avatarTrigger.style.cursor = 'not-allowed';
+                        ui.avatarBadge.style.display = 'none';
+                        ui.avatarLabel.innerText = 'Profile edits locked for 1 month';
+                        
+                        populateFields(data, userId);
+                        setTimeout(() => window.location.href = 'profile.html', 3500);
+                        return;
                     }
 
-                    ui.inputName.value = `${firstName} ${middleName}`.trim() || data.displayName || "";
-                    ui.inputUsername.value = (data.username || data.handle || "").replace(/^@/, '');
-                    ui.inputPhone.value = data.phone || data.cleanPhone || userId || "";
-                    ui.inputEmail.value = data.email || "";
-                    ui.inputBio.value = data.bio || data.about || "";
-                    
-                    if (data.photoURL || data.profilePicture) {
-                        ui.avatarPreview.src = data.photoURL || data.profilePicture;
-                    }
+                    populateFields(data, userId);
                 }
             } catch (err) {
                 console.error("Error fetching user data:", err);
                 showToast("Failed to load user data.");
+            }
+        }
+        
+        function populateFields(data, userId) {
+            let firstName = data.firstName || data.first_name || "";
+            let middleName = data.middleName || data.middle_name || data.fatherName || "";
+            if (!firstName && data.fullName) { 
+                const parts = data.fullName.trim().split(/\s+/); 
+                firstName = parts[0] || ""; 
+                middleName = parts.slice(1).join(" ") || ""; 
+            }
+
+            ui.inputName.value = `${firstName} ${middleName}`.trim() || data.displayName || "";
+            ui.inputUsername.value = (data.username || data.handle || "").replace(/^@/, '');
+            ui.inputPhone.value = data.phone || data.cleanPhone || userId || "";
+            ui.inputEmail.value = data.email || "";
+            ui.inputBio.value = data.bio || data.about || "";
+            
+            if (data.photoURL || data.profilePicture) {
+                ui.avatarPreview.src = data.photoURL || data.profilePicture;
             }
         }
 
@@ -309,7 +350,7 @@
                 currentActiveUserId = sessionPhone.replace(/^0+/, '');
                 loadUserData(currentActiveUserId);
             } else {
-                window.location.href = 'profile.html'; // Kick out if not logged in
+                window.location.href = 'profile.html';
             }
         });
 
@@ -328,7 +369,7 @@
             }
 
             ui.saveBtn.disabled = true;
-            ui.saveBtn.innerText = "Saving Profiles...";
+            ui.saveBtn.innerText = "Saving Profile...";
 
             try {
                 let finalPhotoURL = ui.avatarPreview.src;
@@ -354,21 +395,29 @@
                     email: newEmail,
                     bio: newBio,
                     photoURL: finalPhotoURL,
-                    profilePicture: finalPhotoURL
+                    profilePicture: finalPhotoURL,
+                    lastProfileEdit: Date.now() 
                 };
 
                 // 4. Update Database
                 await update(ref(db, `users/${currentActiveUserId}`), profileUpdate);
 
-                // 5. Update Firebase Auth (if using Email/Password/Google auth)
+                // 5. Safely attempt to update Firebase Auth
+                // (Wrapped in try/catch to prevent failure if using custom phone auth or local file paths)
                 if (auth.currentUser) {
-                    await updateProfile(auth.currentUser, { 
-                        displayName: newName, 
-                        photoURL: finalPhotoURL 
-                    });
+                    try {
+                        const authUpdates = { displayName: newName };
+                        // Auth strictly requires valid HTTP/HTTPS URLs. Avoid breaking if using local "s.png"
+                        if (finalPhotoURL && finalPhotoURL.startsWith('http')) {
+                            authUpdates.photoURL = finalPhotoURL;
+                        }
+                        await updateProfile(auth.currentUser, authUpdates);
+                    } catch (authErr) {
+                        console.warn("Auth update bypassed:", authErr);
+                    }
                 }
 
-                // 6. Update local cache so profile.html loads fast
+                // 6. Update local cache
                 const cached = localStorage.getItem('delala_cached_profile');
                 let currentObj = cached ? JSON.parse(cached) : {};
                 const updatedProfile = { ...currentObj, ...profileUpdate };
@@ -379,7 +428,8 @@
 
             } catch (err) {
                 console.error("Save error:", err);
-                showToast("Failed to save changes. Please try again.");
+                // Now displays the exact Firebase error message for easier debugging
+                showToast(err.message || "Failed to save changes. Please try again.");
                 ui.saveBtn.disabled = false;
                 ui.saveBtn.innerText = "Save Changes";
             }

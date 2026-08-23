@@ -177,13 +177,6 @@
         .btn-secondary:active { background: #E2E8F0; }
         .btn-danger { flex: 1; background: #DC2626; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(220,38,38,0.2); transition: background 0.15s; }
         .btn-danger:active { background: #991B1B; }
-
-        .form-field-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
-        .form-field-label { font-size: 11px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-field-input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #CBD5E1; font-family: inherit; font-size: 13px; font-weight: 600; color: #0F172A; outline: none; box-sizing: border-box; background: #FFF; }
-        .form-field-input:focus { border-color: #0F172A; }
-        
-        .avatar-edit-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #E2E8F0; margin: 0 auto; display: block; cursor: pointer; }
         
         .auth-prompt-card { text-align: center; padding: 8px; }
         .auth-prompt-icon { width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
@@ -258,7 +251,7 @@
 
             <!-- Navigation Tabs Bar with Targets -->
             <nav class="category-tabs-bar" aria-label="Profile Navigation Filter">
-                <button type="button" class="category-pill-btn active" data-category="all" data-target="grid">
+                <button type="button" class="category-pill-btn active" data-category="all">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
                     <span>All</span>
                 </button>
@@ -274,16 +267,11 @@
                     <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
                     <span>App</span>
                 </button>
-                <button type="button" class="category-pill-btn" data-category="installed" data-src="camp.html">
-                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <span>Installed</span>
+                <button type="button" class="category-pill-btn" data-category="hidden">
+                    <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    <span>Hidden</span>
                 </button>
             </nav>
-
-            <!-- Embedded Frame Area (Loads pages below header area) -->
-            <div class="iframe-preview-wrapper" id="iframePreviewContainer" style="display: none;">
-                <iframe src="about:blank" class="embedded-preview-frame" id="embeddedCategoryFrame" title="Category View"></iframe>
-            </div>
 
             <!-- Native Posts Grid -->
             <main class="posts-grid" id="postsGridContainer"></main>
@@ -298,8 +286,6 @@
         </nav>
     </div>
 
-    <!-- MODALS -->
-    
     <!-- Auth Prompt Modal -->
     <div class="modal-overlay" id="authPromptModal">
         <div class="modal-card">
@@ -349,11 +335,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // --- 1. PRIMARY FIREBASE CONFIG (Delala) ---
+        // Primary Firebase Setup
         const primaryConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
             authDomain: "delala-1b582.firebaseapp.com", 
@@ -367,35 +352,16 @@
         const app = initializeApp(primaryConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const storage = getStorage(app);
 
-        // --- 2. SECONDARY FIREBASE CONFIG (Service Management) ---
+        // Secondary Firebase Setup
         const serviceDbConfig = {
             apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
             authDomain: "tsestlive.firebaseapp.com",
             databaseURL: "https://tsestlive-default-rtdb.firebaseio.com",
-            projectId: "tsestlive",
-            storageBucket: "tsestlive.firebasestorage.app",
-            messagingSenderId: "271877452740",
-            appId: "1:271877452740:web:2982ecec515f245ea32a91",
-            measurementId: "G-KCFDH1TV5S"
+            projectId: "tsestlive"
         };
         const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
         const serviceDb = getDatabase(serviceApp);
-
-        async function logToServiceManagement(actionType, dataDetails) {
-            try {
-                const logRef = push(ref(serviceDb, 'managementLogs'));
-                await set(logRef, {
-                    action: actionType,
-                    timestamp: new Date().toISOString(),
-                    user: currentActiveUserId || 'Unknown User',
-                    details: dataDetails
-                });
-            } catch (err) {
-                console.error("Failed to log to Management DB:", err);
-            }
-        }
 
         let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, 
             postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
@@ -428,9 +394,6 @@
             if (!cachedPosts || localStorage.getItem('user_logged_out') === 'true') return false;
             try {
                 allUserPosts = JSON.parse(cachedPosts);
-                let totalLikes = 0;
-                allUserPosts.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
-                document.getElementById('likesCount').innerText = formatCount(totalLikes);
                 renderFilteredGrid(true);
                 return true;
             } catch (e) {
@@ -451,9 +414,7 @@
 
             document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
             document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
-            if (document.getElementById('ratingCount')) {
-                document.getElementById('ratingCount').innerText = (userData.rating || "4.9") + " ★";
-            }
+            document.getElementById('ratingCount').innerText = (userData.rating || "0.0") + " ★";
         }
 
         hydrateCachedProfile();
@@ -479,18 +440,28 @@
             const avatarGroup = document.getElementById('avatarClickGroup');
 
             const openEdit = () => {
-                if (!isLoggedInUser) { 
-                    showAuthModal(); 
-                    return; 
+                if (!isLoggedInUser) { showAuthModal(); return; }
+                
+                // 3-Day Cooldown Logic
+                const cached = localStorage.getItem('delala_cached_profile');
+                if (cached) {
+                    const userData = JSON.parse(cached);
+                    const lastEdit = userData.lastProfileEdit || 0;
+                    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+                    
+                    if (Date.now() - lastEdit < threeDaysMs) {
+                        const remainingMs = threeDaysMs - (Date.now() - lastEdit);
+                        const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+                        showToast(`You can edit your profile again in ${days} day(s).`);
+                        return;
+                    }
                 }
-                // Redirect directly to the dedicated edit page
+
                 window.location.href = 'edit.html';
             };
 
             openBtn?.addEventListener('click', openEdit);
-            avatarGroup?.addEventListener('click', () => { 
-                if (isLoggedInUser) openEdit(); 
-            });
+            avatarGroup?.addEventListener('click', openEdit);
         }
 
         function showAuthModal() {
@@ -547,9 +518,8 @@
                         const targetDbRef = (postCategory.toLowerCase() === 'service') ? serviceDb : db;
                         const newPostRef = push(ref(targetDbRef, 'posts'));
                         
-                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: postCategory });
-                        logToServiceManagement('NEW_POST_PUBLISHED', { postId: newPostRef.key, title: uploadTask.payload.title, dbSource: (postCategory.toLowerCase() === 'service') ? 'serviceDb' : 'primaryDb' });
-
+                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: postCategory, isHidden: false });
+                        
                         title.innerText = "Published Successfully!";
                         showToast("Listing published successfully!");
                         setTimeout(() => { card.classList.remove('active'); isUploadingActive = false; }, 1200);
@@ -564,31 +534,25 @@
         }
 
         function setupCategoryFilterButtons() {
-            const gridContainer = document.getElementById('postsGridContainer');
-            const iframeWrapper = document.getElementById('iframePreviewContainer');
-            const iframeElement = document.getElementById('embeddedCategoryFrame');
-
             document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (!isLoggedInUser) { showAuthModal(); return; }
                     
+                    const category = btn.getAttribute('data-category');
+                    const targetSrc = btn.getAttribute('data-src');
+
+                    // Redirect directly for Chat, App, Activity
+                    if (['chat', 'app', 'activity'].includes(category) && targetSrc) {
+                        window.location.href = targetSrc;
+                        return;
+                    }
+
                     document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    currentSelectedCategory = btn.getAttribute('data-category');
-                    const targetSrc = btn.getAttribute('data-src');
-
-                    if (targetSrc) {
-                        gridContainer.style.display = 'none';
-                        iframeWrapper.style.display = 'block';
-                        iframeElement.src = targetSrc;
-                    } else {
-                        iframeWrapper.style.display = 'none';
-                        iframeElement.src = 'about:blank';
-                        gridContainer.style.display = 'grid';
-                        renderFilteredGrid();
-                    }
+                    currentSelectedCategory = category;
+                    renderFilteredGrid();
                 });
             });
         }
@@ -658,7 +622,6 @@
                 confirmBtn.innerText = "Deleting...";
                 const targetDatabase = pendingPostToDelete._dbSource === 'service' ? serviceDb : db;
                 await remove(ref(targetDatabase, `posts/${pendingPostToDelete.id}`));
-                logToServiceManagement('POST_DELETED', { deletedPostId: pendingPostToDelete.id, postTitle: pendingPostToDelete.title });
 
                 closeVerifyModal(); closePreviewModal(); showToast("Post deleted successfully!");
             } catch (err) {
@@ -709,7 +672,7 @@
             document.getElementById('followingCount').innerText = '0';
             document.getElementById('followersCount').innerText = '0';
             document.getElementById('likesCount').innerText = '0';
-            if (document.getElementById('ratingCount')) document.getElementById('ratingCount').innerText = '0.0 ★';
+            document.getElementById('ratingCount').innerText = '0.0 ★';
             
             const gridContainer = document.getElementById('postsGridContainer');
             gridContainer.innerHTML = `<div class="empty-grid-msg" id="loginGridBtn">Please login or create an account to view profile posts.</div>`;
@@ -778,7 +741,6 @@
             }).catch(() => fetchPostsForUser(userId));
         }
 
-        // Fetch all previous posted items from both primaryDb and serviceDb
         function fetchPostsForUser(userId) {
             if (postsUnsubscribe) postsUnsubscribe();
             if (servicePostsUnsubscribe) servicePostsUnsubscribe();
@@ -806,7 +768,6 @@
             const updateGrid = () => {
                 allUserPosts = [...primaryPosts, ...servicePosts];
                 
-                // Sort all combined items by latest timestamp
                 allUserPosts.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
                 
                 let totalLikes = 0;
@@ -816,7 +777,6 @@
                 renderFilteredGrid(false);
             };
             
-            // Listen to Primary Database Posts (Rental, Selling, etc.)
             postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
                 primaryPosts = [];
                 if (snapshot.exists()) {
@@ -831,7 +791,6 @@
                 updateGrid();
             });
 
-            // Listen to Service Management Database Posts
             servicePostsUnsubscribe = onValue(ref(serviceDb, 'posts'), (snapshot) => {
                 servicePosts = [];
                 if (snapshot.exists()) {
@@ -848,15 +807,20 @@
         }
 
         function isPostInCategory(post, targetCategory) {
+            // Check for hidden tab explicitly
+            if (targetCategory === 'hidden') {
+                return post.isHidden === true;
+            }
+            
+            // If it's not the hidden tab, filter out hidden posts
+            if (post.isHidden) {
+                return false; 
+            }
+
             if (targetCategory === 'all') return true;
             const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim(),
-                  titleVal = String(post.title || '').toLowerCase(),
                   target = targetCategory.toLowerCase().trim();
 
-            if (target === 'activity') return categoryVal === 'activity' || post.isActivity || titleVal.includes('activity');
-            if (target === 'chat') return categoryVal === 'chat' || titleVal.includes('chat');
-            if (target === 'app') return categoryVal === 'app' || categoryVal === 'apps';
-            if (target === 'installed') return categoryVal === 'installed' || post.isInstalled;
             return categoryVal === target;
         }
 
@@ -896,6 +860,12 @@
                   imagesHTML = images.length > 0 ? `<div class="preview-section"><div class="preview-section-title">ATTACHED IMAGES</div><div style="display:flex; gap:8px; overflow-x:auto; padding-top:4px;">${images.map(img => `<img src="${img}" style="width:72px; height:72px; border-radius:10px; object-fit:cover; border:1px solid #E2E8F0;">`).join('')}</div></div>` : '',
                   loc = post.locationDetails || {}, contact = post.contactInfo || {};
 
+            const isHidden = post.isHidden === true;
+            const hideBtnText = isHidden ? 'Unhide Post' : 'Hide Post';
+            const hideBtnIcon = isHidden ? 
+                `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>` : 
+                `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
             modalBody.innerHTML = `
                 ${imagesHTML}
                 <div class="preview-section">
@@ -914,10 +884,14 @@
                     ${contact.instagram ? `<div>📷 Instagram: <strong>${contact.instagram}</strong></div>` : ''}
                 </div>
                 
-                <div class="preview-section" style="border-color: #CBD5E1; background: #F8FAFC; margin-bottom: 8px;">
+                <div class="preview-section" style="border-color: #CBD5E1; background: #F8FAFC; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px;">
                     <button type="button" class="btn-secondary" id="editPostBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; color: #0F172A; border: 1px solid #CBD5E1;">
                         <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>Edit Post</span>
+                    </button>
+                    <button type="button" class="btn-secondary" id="hidePostBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; color: #0F172A; border: 1px solid #CBD5E1;">
+                        ${hideBtnIcon}
+                        <span>${hideBtnText}</span>
                     </button>
                 </div>
 
@@ -934,9 +908,20 @@
             document.getElementById('deletePostBtn')?.addEventListener('click', () => openVerifyModal(post));
             
             document.getElementById('editPostBtn')?.addEventListener('click', () => {
-                // Pass postId and database source as URL parameters to the new Edit Page flow
                 const sourceDb = post._dbSource || 'primary';
                 window.location.href = `edit1.html?postId=${post.id}&db=${sourceDb}`;
+            });
+
+            document.getElementById('hidePostBtn')?.addEventListener('click', async () => {
+                const targetDatabase = post._dbSource === 'service' ? serviceDb : db;
+                try {
+                    const postRef = ref(targetDatabase, `posts/${post.id}`);
+                    await update(postRef, { isHidden: !isHidden });
+                    showToast(isHidden ? "Post unhidden successfully!" : "Post hidden successfully!");
+                    closePreviewModal();
+                } catch (err) {
+                    showToast("Failed to update post status.");
+                }
             });
 
             if (post.location && post.location.latitude && post.location.longitude) {

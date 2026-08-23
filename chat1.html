@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BirrGo - Live Chat</title>
+    <title>Delala - Live Chat</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,9 +16,8 @@
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --primary-dark: #0F172A;
             --primary-accent: #2563EB;
-            --bg-body: #F8FAFC;
+            --bg-body: #F1F5F9;
             --card-bg: #FFFFFF;
-            --border-color: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
             --success-color: #10B981;
@@ -26,21 +25,14 @@
             --offline-color: #94A3B8;
         }
 
-        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; }
+        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
         
         html, body {
             width: 100%;
             height: 100%;
-            margin: 0;
-            padding: 0;
             background-color: var(--bg-body);
             color: var(--text-main);
             overflow: hidden;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
         }
 
         .screen {
@@ -52,139 +44,217 @@
             z-index: 1;
         }
 
-        /* --- Chat Header --- */
+        /* --- Modern Minimal Header --- */
         .chat-header {
-            background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
-            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px calc(12px + env(safe-area-inset-top, 0px));
             display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid #1E293B;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 15px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
             z-index: 10;
         }
         .header-left { display: flex; align-items: center; gap: 12px; }
-        .back-btn { background: transparent; border: none; color: #F8FAFC; cursor: pointer; display: flex; align-items: center; }
-        .back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+        .back-btn { background: transparent; border: none; color: var(--primary-dark); cursor: pointer; display: flex; align-items: center; padding: 4px; }
+        .back-btn svg { width: 26px; height: 26px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
-            width: 40px; height: 40px; border-radius: 50%; background: #E2E8F0;
-            display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary-dark);
-            position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 42px; height: 42px; border-radius: 50%; background: #E2E8F0;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary-dark); font-size: 16px;
+            position: relative;
         }
+        .user-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         
         .online-dot {
-            position: absolute; bottom: 0; right: 0; width: 12px; height: 12px;
-            background: var(--success-color); border: 2px solid #1E293B; border-radius: 50%;
+            position: absolute; bottom: 2px; right: 0; width: 12px; height: 12px;
+            background: var(--success-color); border: 2px solid #FFF; border-radius: 50%;
         }
         .online-dot.offline { background: var(--offline-color); }
 
-        .user-details h2 { font-size: 16px; font-weight: 700; margin-bottom: 2px; color: #FFFFFF; }
-        .user-details p { font-size: 11px; color: #CBD5E1; font-weight: 600; }
+        .user-details h2 { font-size: 16px; font-weight: 800; margin-bottom: 2px; color: var(--primary-dark); letter-spacing: -0.2px; }
+        .user-details p { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 
-        /* Chat Messages Container */
-        .chat-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-        .message { max-width: 75%; display: flex; flex-direction: column; }
+        /* --- Chat Messages Container --- */
+        .chat-container { 
+            flex: 1; 
+            padding: 20px 16px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        .message { max-width: 78%; display: flex; flex-direction: column; }
         .message.received { align-self: flex-start; }
         .message.sent { align-self: flex-end; }
         
-        .msg-bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; position: relative; }
-        .message.received .msg-bubble { background: var(--card-bg); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
-        .message.sent .msg-bubble { background: var(--primary-accent); color: #FFF; border-bottom-right-radius: 4px; }
-        .msg-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; align-self: flex-end; }
-
-        /* Location Card Inside Chat */
-        .location-card {
-            background: var(--card-bg); border: 2px solid var(--primary-accent); border-radius: 12px;
-            padding: 12px; margin-top: 4px; display: flex; align-items: center; gap: 12px; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: transform 0.2s;
+        .msg-bubble { 
+            padding: 12px 16px; 
+            border-radius: 20px; 
+            font-size: 14.5px; 
+            line-height: 1.4; 
+            position: relative; 
+            word-wrap: break-word;
         }
-        .location-card:active { transform: scale(0.97); }
-        .location-card-icon {
-            width: 40px; height: 40px; background: #EFF6FF; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center; color: var(--primary-accent); flex-shrink: 0;
+        .message.received .msg-bubble { 
+            background: #FFFFFF; 
+            color: var(--text-main);
+            border-bottom-left-radius: 4px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .location-card-icon svg { width: 22px; height: 22px; fill: currentColor; }
-        .location-card-text h4 { font-size: 14px; font-weight: 800; color: var(--primary-dark); }
-        .location-card-text p { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        .message.sent .msg-bubble { 
+            background: var(--primary-accent); 
+            color: #FFF; 
+            border-bottom-right-radius: 4px; 
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        }
+        .msg-time { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
+        .message.sent .msg-time { align-self: flex-end; }
 
-        /* Input Area */
+        /* --- Live Location Tracking Link Card (DARK SILVER) --- */
+        .tracking-link-card {
+            background: linear-gradient(145deg, #64748B, #334155, #0F172A); /* Dark Silver Gradient */
+            border: 1px solid #475569; 
+            border-radius: 18px;
+            padding: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer;
+            box-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(15, 23, 42, 0.2); 
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            width: 240px;
+            color: #FFFFFF; /* Ensure text is visible */
+        }
+        .tracking-link-card:active { 
+            transform: scale(0.96); 
+            box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(15, 23, 42, 0.1); 
+        }
+        .tracking-icon {
+            width: 42px; height: 42px; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; 
+            color: #60A5FA; /* Glowing blue icon on silver */
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .tracking-icon svg { width: 20px; height: 20px; fill: currentColor; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+        .tracking-text h4 { font-size: 14px; font-weight: 800; margin-bottom: 2px; color: #FFFFFF; }
+        .tracking-text p { font-size: 11px; font-weight: 600; color: #CBD5E1; }
+
+        /* Active Sharing Banner */
+        .sharing-banner {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            display: none; /* Hidden by default */
+        }
+        .btn-stop-sharing {
+            background: #10B981;
+            color: #FFF;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* --- Modern Input Area --- */
         .chat-input-area {
-            background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
-            padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid #1E293B; display: flex; align-items: center; gap: 8px;
+            background: #FFFFFF;
+            padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+            display: flex; align-items: flex-end; gap: 10px;
+            border-top: 1px solid #E2E8F0;
         }
-        .btn-attach, .btn-copy {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15);
-            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: #F8FAFC; cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+        .btn-action {
+            background: #F1F5F9; border: none;
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); cursor: pointer; flex-shrink: 0; transition: background 0.2s;
         }
-        .btn-attach:active, .btn-copy:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
+        .btn-action:active { background: #E2E8F0; }
+        .btn-action svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        
+        .btn-action.active-sharing { background: #FEE2E2; color: var(--danger-color); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         .input-wrapper {
-            flex: 1; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; padding: 0 16px; display: flex; align-items: center;
+            flex: 1; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 0 16px; display: flex; align-items: center; min-height: 40px;
         }
-        .chat-input { width: 100%; background: transparent; border: none; padding: 14px 0; font-size: 14px; outline: none; color: var(--primary-dark); }
-        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-input { width: 100%; background: transparent; border: none; padding: 10px 0; font-size: 14px; outline: none; color: var(--primary-dark); resize: none; max-height: 100px; font-family: inherit; }
+        .chat-input::placeholder { color: #94A3B8; }
 
         .btn-send {
-            background: var(--primary-accent); border: none; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--primary-accent); border: none; width: 40px; height: 40px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; color: #FFF; cursor: pointer; flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25); transition: transform 0.15s;
         }
-        .btn-send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .btn-send:active { transform: scale(0.92); }
+        .btn-send svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px; }
 
-        /* Map Overlay */
+        /* --- Map Overlay --- */
         .map-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #FFF; z-index: 2000;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .map-overlay.active { transform: translateY(0); }
         #chatMap { width: 100%; height: 100%; }
 
-        .map-header-controls { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 2010; }
-        .map-btn {
-            background: #FFF; border: none; width: 44px; height: 44px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            cursor: pointer; color: var(--primary-dark); font-weight: 800; font-size: 18px;
+        .map-header-controls { position: absolute; top: env(safe-area-inset-top, 20px); left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2010; }
+        .map-btn-close {
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); border: none; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer; color: var(--primary-dark);
         }
+        .map-btn-close svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+        
         .distance-badge {
-            background: rgba(15, 23, 42, 0.9); color: #FFF; padding: 10px 20px; border-radius: 30px;
-            font-size: 13px; font-weight: 700; backdrop-filter: blur(8px); display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95); color: var(--primary-dark); padding: 12px 16px; border-radius: 16px;
+            font-size: 13px; font-weight: 700; backdrop-filter: blur(8px); display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: right;
         }
-        .distance-badge span { color: #38BDF8; font-weight: 800; font-size: 15px; }
+        .distance-badge span { color: var(--primary-accent); font-weight: 800; font-size: 16px; display: block; margin-top: 2px; }
 
-        .user-gps-dot {
-            width: 18px; height: 18px; background-color: #2563EB; border: 3px solid #FFFFFF;
-            border-radius: 50%; box-shadow: 0 0 10px rgba(37, 99, 235, 0.6);
-        }
+        .user-gps-dot { width: 18px; height: 18px; background-color: #3B82F6; border: 3px solid #FFFFFF; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+        .target-gps-dot { width: 22px; height: 22px; background-color: #EF4444; border: 3px solid #FFFFFF; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
 
-        /* Permission Modal */
+        /* --- Permission Modal --- */
         .permission-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(4px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; transition: opacity 0.2s;
         }
-        .permission-card { background: #FFF; border-radius: 20px; padding: 24px; width: 100%; max-width: 340px; text-align: center; }
-        .perm-icon {
-            width: 60px; height: 60px; background: #EFF6FF; color: var(--primary-accent);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;
-        }
-        .perm-icon svg { width: 30px; height: 30px; fill: currentColor; }
-        .permission-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-        .permission-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
-        .perm-actions { display: flex; gap: 12px; }
-        .btn-perm { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
+        .permission-modal.show { display: flex; opacity: 1; }
+        .permission-card { background: #FFF; border-radius: 24px; padding: 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .perm-icon { width: 56px; height: 56px; background: #EFF6FF; color: var(--primary-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; }
+        .perm-icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .permission-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--primary-dark); }
+        .permission-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; font-weight: 500; }
+        .perm-actions { display: flex; gap: 10px; }
+        .btn-perm { flex: 1; padding: 14px; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: background 0.2s; }
         .btn-allow { background: var(--primary-accent); color: #FFF; }
+        .btn-allow:active { background: #1D4ED8; }
         .btn-deny { background: #F1F5F9; color: var(--primary-dark); }
+        .btn-deny:active { background: #E2E8F0; }
 
         .toast {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: rgba(15, 23, 42, 0.9); color: white; padding: 10px 20px; border-radius: 24px;
-            font-size: 13px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: var(--primary-dark); color: white; padding: 12px 24px; border-radius: 30px;
+            font-size: 13px; font-weight: 700; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 4000;
         }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
+
+    <div id="toastMessage" class="toast">Action completed!</div>
 
     <div id="chatRoomScreen" class="screen">
         <header class="chat-header">
@@ -199,29 +269,29 @@
                     </div>
                     <div class="user-details">
                         <h2 id="chatPartnerName">Loading...</h2>
-                        <p id="chatPartnerStatus">Offline</p>
+                        <p id="chatPartnerStatus">Connecting...</p>
                     </div>
                 </div>
             </div>
         </header>
 
+        <!-- Banner shown only when you are actively sharing your location -->
+        <div class="sharing-banner" id="sharingBanner">
+            <span>📡 Sharing your live location</span>
+            <button class="btn-stop-sharing" onclick="stopLocationSharing()">Stop</button>
+        </div>
+
         <div class="chat-container" id="chatBox"></div>
 
         <div class="chat-input-area">
-            <button class="btn-attach" id="btnShareLoc" title="Share Live Location">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <button class="btn-action" id="btnShareLoc" title="Share Live Tracking Link">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </button>
             <div class="input-wrapper">
-                <input type="text" class="chat-input" id="messageInput" placeholder="Type a message...">
+                <input type="text" class="chat-input" id="messageInput" placeholder="Message..." autocomplete="off">
             </div>
             <button class="btn-send" id="btnSend">
                 <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-            <button class="btn-copy" id="btnCopyLink" title="Copy Session Link">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
             </button>
         </div>
     </div>
@@ -229,8 +299,13 @@
     <!-- Map Tracker Overlay -->
     <div class="map-overlay" id="mapOverlay">
         <div class="map-header-controls">
-            <button class="map-btn" onclick="closeMapTracker()">✕</button>
-            <div class="distance-badge" id="distanceBadge">Distance: <span id="routeDistance">Calculating...</span></div>
+            <button class="map-btn-close" onclick="closeMapTracker()">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="distance-badge" id="distanceBadge">
+                Live Distance
+                <span id="routeDistance">Tracking...</span>
+            </div>
         </div>
         <div id="chatMap"></div>
     </div>
@@ -239,18 +314,16 @@
     <div class="permission-modal" id="permModal">
         <div class="permission-card">
             <div class="perm-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </div>
-            <h3>Share Current Location?</h3>
-            <p>This will send your real-time GPS coordinates inside chat so the other party can view driving routes and distance to you.</p>
+            <h3>Share Live Tracking Link?</h3>
+            <p>We will send a tracking link to the chat. The other person can tap it to see your live movement on the map.</p>
             <div class="perm-actions">
-                <button class="btn-perm btn-deny" onclick="denyLocation()">Decline</button>
-                <button class="btn-perm btn-allow" onclick="allowLocation()">Allow</button>
+                <button class="btn-perm btn-deny" onclick="denyLocation()">Cancel</button>
+                <button class="btn-perm btn-allow" onclick="allowLocation()">Start Sharing</button>
             </div>
         </div>
     </div>
-
-    <div id="toastMessage" class="toast">Link copied!</div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -259,13 +332,9 @@
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 
     <script>
-        // Force frame break to open full-screen at top window level
+        // Frame breaker for full-screen PWA feel
         if (window.top !== window.self) {
-            try {
-                window.top.location.href = window.location.href;
-            } catch (e) {
-                console.warn("Frame navigation handled:", e);
-            }
+            try { window.top.location.href = window.location.href; } catch (e) {}
         }
 
         const firebaseConfig = {
@@ -283,72 +352,69 @@
         const myUsername = localStorage.getItem('myAppUsername') || 'User_' + Math.floor(1000 + Math.random() * 9000);
         localStorage.setItem('myAppUsername', myUsername);
 
-        // Extract user parameters from URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentUserId = urlParams.get('userId');
         const currentUserName = urlParams.get('userName') || currentUserId || 'User';
 
         const chatBox = document.getElementById('chatBox');
         const messageInput = document.getElementById('messageInput');
-        const chatPartnerName = document.getElementById('chatPartnerName');
-        const chatPartnerStatus = document.getElementById('chatPartnerStatus');
-        const chatPartnerDot = document.getElementById('chatPartnerDot');
-        const activeAvatar = document.getElementById('activeAvatar');
         const permModal = document.getElementById('permModal');
 
-        let map = null, myMarker = null, targetMarker = null, watchId = null;
-        let targetLat = null, targetLng = null;
-        let activePresenceListener = null;
+        // Location Tracking Variables
+        let map = null, myMarker = null, targetMarker = null;
+        let myLocationWatcher = null;
+        let isSharingLocation = false;
+        let trackingUserListener = null;
+
+        function showToast(msg) {
+            const t = document.getElementById('toastMessage');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
 
         function returnToInbox() {
-            if (window.top !== window.self) {
-                try {
-                    window.top.location.href = 'chat.html';
-                    return;
-                } catch(e) {}
-            }
             window.location.href = 'chat.html';
         }
 
         function setupRealtimePresence() {
             const myPresenceRef = db.ref(`users/${myUsername}/presence`);
-            const connectedRef = db.ref('.info/connected');
-
-            connectedRef.on('value', (snap) => {
+            db.ref('.info/connected').on('value', (snap) => {
                 if (snap.val() === true) {
-                    myPresenceRef.onDisconnect().set({
-                        isOnline: false,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
-
-                    myPresenceRef.set({
-                        isOnline: true,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
+                    myPresenceRef.onDisconnect().set({ isOnline: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                    myPresenceRef.set({ isOnline: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
                 }
             });
         }
 
         function initChatRoom() {
-            if(!currentUserId) {
-                alert("No user specified.");
-                returnToInbox();
-                return;
-            }
+            if(!currentUserId) { returnToInbox(); return; }
 
-            chatPartnerName.innerText = currentUserName;
-            activeAvatar.innerText = currentUserName.charAt(0).toUpperCase();
+            document.getElementById('chatPartnerName').innerText = currentUserName;
+            
+            // Load partner details (Avatar)
+            db.ref(`users/${currentUserId}`).once('value', snap => {
+                const u = snap.val();
+                const photoURL = u && (u.photoURL || u.profilePicture);
+                if (photoURL) {
+                    document.getElementById('activeAvatar').innerHTML = `<img src="${photoURL}" alt="avatar"><div class="online-dot offline" id="chatPartnerDot"></div>`;
+                } else {
+                    document.getElementById('activeAvatar').innerHTML = `${currentUserName.charAt(0).toUpperCase()}<div class="online-dot offline" id="chatPartnerDot"></div>`;
+                }
+            });
 
-            activePresenceListener = db.ref(`users/${currentUserId}/presence`);
-            activePresenceListener.on('value', (pSnap) => {
+            // Listen to partner presence
+            db.ref(`users/${currentUserId}/presence`).on('value', (pSnap) => {
                 const p = pSnap.val();
+                const dot = document.getElementById('chatPartnerDot');
+                const status = document.getElementById('chatPartnerStatus');
                 if(p && p.isOnline) {
-                    chatPartnerStatus.innerText = 'Online • Active now';
-                    chatPartnerDot.classList.remove('offline');
+                    status.innerText = 'Online';
+                    if(dot) dot.classList.remove('offline');
                 } else {
                     const lastActive = p && p.lastSeen ? formatTime(p.lastSeen) : '';
-                    chatPartnerStatus.innerText = lastActive ? `Offline • Last seen ${lastActive}` : 'Offline';
-                    chatPartnerDot.classList.add('offline');
+                    status.innerText = lastActive ? `Last seen ${lastActive}` : 'Offline';
+                    if(dot) dot.classList.add('offline');
                 }
             });
 
@@ -363,16 +429,20 @@
 
                 Object.values(data).forEach(msg => {
                     const isSent = msg.sender === 'me';
-                    if(msg.type === 'location') {
-                        const lat = msg.latitude || 9.0034;
-                        const lng = msg.longitude || 38.7881;
+                    
+                    if(msg.type === 'live_tracking') {
+                        // Determine who we should track if clicked. 
+                        const trackedUserId = isSent ? myUsername : currentUserId;
+                        
                         chatBox.insertAdjacentHTML('beforeend', `
                             <div class="message ${isSent ? 'sent' : 'received'}">
-                                <div class="location-card" onclick="openMapTracker(${lat}, ${lng})">
-                                    <div class="location-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg></div>
-                                    <div class="location-card-text">
-                                        <h4>Shared Location</h4>
-                                        <p>Tap to view map & driving route</p>
+                                <div class="tracking-link-card" onclick="startTrackingUser('${trackedUserId}')">
+                                    <div class="tracking-icon">
+                                        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                                    </div>
+                                    <div class="tracking-text">
+                                        <h4>Live Tracking</h4>
+                                        <p>Tap to view live map</p>
                                     </div>
                                 </div>
                                 <div class="msg-time">${formatTime(msg.timestamp)}</div>
@@ -407,156 +477,180 @@
             messageInput.value = '';
         }
 
-        document.getElementById('btnShareLoc').onclick = () => { permModal.style.display = 'flex'; };
-        function denyLocation() { permModal.style.display = 'none'; }
+        /* --- Live Location Sharing Logic --- */
+        document.getElementById('btnShareLoc').onclick = () => { 
+            if (isSharingLocation) {
+                stopLocationSharing();
+            } else {
+                permModal.classList.add('show'); 
+            }
+        };
+        
+        function denyLocation() { permModal.classList.remove('show'); }
         
         function allowLocation() {
-            permModal.style.display = 'none';
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser.");
-                return;
-            }
+            permModal.classList.remove('show');
+            if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
 
-            navigator.geolocation.getCurrentPosition(
+            // Send Chat Message indicating tracking has started
+            db.ref(`chats/${currentUserId}/messages`).push({
+                sender: 'me',
+                type: 'live_tracking',
+                text: 'Live Tracking Link',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                isRead: true
+            });
+
+            isSharingLocation = true;
+            document.getElementById('btnShareLoc').classList.add('active-sharing');
+            document.getElementById('sharingBanner').style.display = 'flex';
+            showToast("You are now sharing your live location.");
+
+            // Start pushing live coordinates to Firebase
+            myLocationWatcher = navigator.geolocation.watchPosition(
                 (pos) => {
-                    const myLat = pos.coords.latitude;
-                    const myLng = pos.coords.longitude;
-
-                    db.ref(`chats/${currentUserId}/messages`).push({
-                        sender: 'me',
-                        type: 'location',
-                        latitude: myLat,
-                        longitude: myLng,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP,
-                        isRead: true
+                    db.ref(`users/${myUsername}/liveLocation`).set({
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
                     });
-                    
-                    openMapTracker(myLat, myLng);
                 },
-                (err) => {
-                    alert("Unable to fetch GPS position. Please ensure location services are allowed.");
-                },
+                (err) => { console.warn("GPS error:", err); },
                 { enableHighAccuracy: true, timeout: 15000 }
             );
         }
 
-        function openMapTracker(destLat, destLng) {
-            targetLat = destLat;
-            targetLng = destLng;
+        function stopLocationSharing() {
+            if (myLocationWatcher !== null) {
+                navigator.geolocation.clearWatch(myLocationWatcher);
+                myLocationWatcher = null;
+            }
+            isSharingLocation = false;
+            document.getElementById('btnShareLoc').classList.remove('active-sharing');
+            document.getElementById('sharingBanner').style.display = 'none';
+            db.ref(`users/${myUsername}/liveLocation`).remove(); // Clean up DB
+            showToast("Live location sharing stopped.");
+        }
+
+        /* --- Map Overlay Tracking Logic --- */
+        let localWatcherForRoute = null;
+
+        function startTrackingUser(targetUserId) {
             document.getElementById('mapOverlay').classList.add('active');
             
-            if(!map) {
-                initMap();
-            } else {
-                updateTargetMarker();
-            }
+            if(!map) initMap();
 
-            startLiveTracking();
+            // Stop previous listener
+            if(trackingUserListener) trackingUserListener.off();
+
+            document.getElementById('routeDistance').innerText = "Connecting...";
+
+            trackingUserListener = db.ref(`users/${targetUserId}/liveLocation`);
+            trackingUserListener.on('value', (snap) => {
+                const loc = snap.val();
+                if (loc && loc.lat && loc.lng) {
+                    
+                    if (!targetMarker) {
+                        const dot = document.createElement('div');
+                        dot.className = 'target-gps-dot';
+                        targetMarker = new maplibregl.Marker({ element: dot }).setLngLat([loc.lng, loc.lat]).addTo(map);
+                    } else {
+                        targetMarker.setLngLat([loc.lng, loc.lat]);
+                    }
+
+                    // Fly to target on first load
+                    if (!map.hasCentered) {
+                        map.flyTo({ center: [loc.lng, loc.lat], zoom: 15 });
+                        map.hasCentered = true;
+                    }
+
+                    // If tracking someone else, get MY location to draw a route
+                    if (targetUserId !== myUsername) {
+                        startLocalWatcherToDrawRoute(loc.lat, loc.lng);
+                    } else {
+                        document.getElementById('distanceBadge').style.display = 'none';
+                    }
+
+                } else {
+                    document.getElementById('routeDistance').innerText = "Offline/Stopped";
+                }
+            });
         }
 
         function closeMapTracker() {
             document.getElementById('mapOverlay').classList.remove('active');
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
+            if (trackingUserListener) trackingUserListener.off();
+            if (localWatcherForRoute) {
+                navigator.geolocation.clearWatch(localWatcherForRoute);
+                localWatcherForRoute = null;
             }
+            if (map) map.hasCentered = false;
         }
 
         function initMap() {
             map = new maplibregl.Map({
                 container: 'chatMap',
                 style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-                center: [targetLng || 38.7881, targetLat || 9.0034],
+                center: [38.7881, 9.0034],
                 zoom: 14,
                 attributionControl: false
             });
-
-            targetMarker = new maplibregl.Marker({ color: '#EF4444' })
-                .setLngLat([targetLng || 38.7881, targetLat || 9.0034])
-                .addTo(map);
-
-            const userDot = document.createElement('div');
-            userDot.className = 'user-gps-dot';
-
-            myMarker = new maplibregl.Marker({ element: userDot })
-                .setLngLat([targetLng || 38.7881, targetLat || 9.0034])
-                .addTo(map);
         }
 
-        function updateTargetMarker() {
-            if (targetMarker && targetLat && targetLng) {
-                targetMarker.setLngLat([targetLng, targetLat]);
-            }
-        }
-
-        function startLiveTracking() {
+        function startLocalWatcherToDrawRoute(tLat, tLng) {
             if (!navigator.geolocation) return;
 
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-            }
+            if (!localWatcherForRoute) {
+                localWatcherForRoute = navigator.geolocation.watchPosition((pos) => {
+                    const myLat = pos.coords.latitude;
+                    const myLng = pos.coords.longitude;
 
-            watchId = navigator.geolocation.watchPosition((pos) => {
-                const myLat = pos.coords.latitude;
-                const myLng = pos.coords.longitude;
+                    if (!myMarker) {
+                        const dot = document.createElement('div');
+                        dot.className = 'user-gps-dot';
+                        myMarker = new maplibregl.Marker({ element: dot }).setLngLat([myLng, myLat]).addTo(map);
+                    } else {
+                        myMarker.setLngLat([myLng, myLat]);
+                    }
+                    
+                    drawRoute(myLat, myLng, tLat, tLng);
 
-                if(myMarker) myMarker.setLngLat([myLng, myLat]);
-                
-                if (targetLat && targetLng) {
-                    drawRoute(myLat, myLng, targetLat, targetLng);
+                }, (err) => {}, { enableHighAccuracy: true, timeout: 20000 });
+            } else {
+                // If watcher is already running, just trigger drawRoute with current myMarker pos if available
+                if (myMarker) {
+                    const pos = myMarker.getLngLat();
+                    drawRoute(pos.lat, pos.lng, tLat, tLng);
                 }
-            }, (err) => console.warn("Watch position warning:", err), { enableHighAccuracy: true, timeout: 20000 });
+            }
         }
 
         function drawRoute(lat1, lng1, lat2, lng2) {
             const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=geojson`;
 
-            fetch(osrmUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.routes && data.routes.length > 0) {
-                        const route = data.routes[0];
-                        const distKm = (route.distance / 1000).toFixed(2);
-                        
-                        document.getElementById('distanceBadge').style.display = 'block';
-                        document.getElementById('routeDistance').innerText = `${distKm} km`;
+            fetch(osrmUrl).then(res => res.json()).then(data => {
+                if (data && data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distKm = (route.distance / 1000).toFixed(2);
+                    
+                    document.getElementById('distanceBadge').style.display = 'block';
+                    document.getElementById('routeDistance').innerText = `${distKm} km`;
 
-                        const geojson = {
-                            'type': 'Feature',
-                            'properties': {},
-                            'geometry': route.geometry
-                        };
+                    const geojson = { 'type': 'Feature', 'properties': {}, 'geometry': route.geometry };
 
-                        if (map.getSource('route')) {
-                            map.getSource('route').setData(geojson);
-                        } else {
-                            map.addSource('route', { 'type': 'geojson', 'data': geojson });
-                            map.addLayer({
-                                'id': 'route',
-                                'type': 'line',
-                                'source': 'route',
-                                'layout': { 'line-join': 'round', 'line-cap': 'round' },
-                                'paint': { 'line-color': '#2563EB', 'line-width': 5, 'line-opacity': 0.85 }
-                            });
-                        }
-
-                        const bounds = new maplibregl.LngLatBounds()
-                            .extend([lng1, lat1])
-                            .extend([lng2, lat2]);
-                            
-                        map.fitBounds(bounds, { padding: 80 });
+                    if (map.getSource('route')) {
+                        map.getSource('route').setData(geojson);
+                    } else {
+                        map.addSource('route', { 'type': 'geojson', 'data': geojson });
+                        map.addLayer({
+                            'id': 'route', 'type': 'line', 'source': 'route',
+                            'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                            'paint': { 'line-color': '#3B82F6', 'line-width': 5, 'line-opacity': 0.8 }
+                        });
                     }
-                })
-                .catch(err => console.error("OSRM Route Error:", err));
+                }
+            }).catch(e => console.error("Route error", e));
         }
-
-        document.getElementById('btnCopyLink').onclick = () => {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                const t = document.getElementById('toastMessage');
-                t.classList.add('show');
-                setTimeout(() => t.classList.remove('show'), 2000);
-            });
-        };
 
         function formatTime(ts) {
             if(!ts) return '';
