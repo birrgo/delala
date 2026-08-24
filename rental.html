@@ -718,15 +718,16 @@
         async function fetchNearbyItemsFromDB() {
             if (!currentUserCoordinates) return;
             isLoading = true;
-            // Increased precision to 4 (approx 39km box) for better accuracy
-            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 4); 
+            // Changed precision to 3 (approx 156km x 156km box) for better accuracy 
+            // Ensures points within 50km are found even if they cross a level-4 geohash boundary.
+            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
             const nodePaths = ['posts', 'delala_new'];
             const matchingItems = [];
             const seenIds = new Set(); 
 
             try {
                 for (const nodePath of nodePaths) {
-                    // Try geohash query first
+                    // Query Realtime Database using the 'geohash' index as defined in your rules
                     const q = query(ref(db, nodePath), orderByChild('geohash'), startAt(userGeohash), endAt(userGeohash + '\uf8ff'));
                     const snapshot = await get(q);
                     
