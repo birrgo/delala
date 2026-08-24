@@ -6,7 +6,7 @@
     <title>Delala - Profile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
@@ -79,10 +79,13 @@
         .edit-profile-pill-btn:active { background: #E2E8F0; }
         .edit-profile-pill-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 
+        /* Bolder Stats Row */
         .stats-metrics-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px; width: 100%; }
-        .metric-block { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .metric-num { font-size: 13px; font-weight: 800; color: var(--text-dark, #0F172A); }
-        .metric-label { font-size: 10px; color: var(--text-muted, #64748B); font-weight: 500; }
+        .metric-block { display: flex; flex-direction: column; align-items: center; flex: 1; transition: opacity 0.15s; }
+        .metric-block.clickable { cursor: pointer; }
+        .metric-block.clickable:active { opacity: 0.6; }
+        .metric-num { font-size: 15px; font-weight: 900; color: #0F172A; } /* Made bolder */
+        .metric-label { font-size: 10px; color: #334155; font-weight: 700; } /* Made bolder */
         
         .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); animation: slideDown 0.3s ease; }
         .upload-progress-card.active { display: block; }
@@ -100,23 +103,6 @@
         .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
         .category-pill-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
         
-        /* Embedded iFrame View Container */
-        .iframe-preview-wrapper { 
-            width: 100%; 
-            height: calc(100vh - 185px); 
-            background: #F8FAFC; 
-            position: relative; 
-            border: none; 
-            overflow: hidden; 
-        }
-        .embedded-preview-frame { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            display: block; 
-            background: #FFF; 
-        }
-
         .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; }
         .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark, #0F172A); overflow: hidden; cursor: pointer; }
         .post-grid-item img, .post-grid-item video { width: 100%; height: 100%; object-fit: cover; }
@@ -124,19 +110,26 @@
         .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
         .empty-grid-msg { grid-column: span 3; text-align: center; padding: 30px 16px; color: var(--text-muted, #64748B); font-size: 13px; font-weight: 600; cursor: pointer; }
         
+        /* 3-Dot Menu Dropdown */
         .menu-wrapper { position: relative; display: inline-block; }
         .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
         .menu-action-btn:active { background-color: #F1F5F9; }
         .menu-action-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-        .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 160px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
+        
+        .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 190px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
         .profile-menu-dropdown.show { display: flex; }
-        .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; }
-        .dropdown-menu-item.payment-item { color: #0F172A; }
-        .dropdown-menu-item.payment-item:active { background: #F1F5F9; }
+        .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; color: #0F172A; }
+        .dropdown-menu-item:active { background: #F1F5F9; }
         .dropdown-menu-item.logout-item { color: #DC2626; }
         .dropdown-menu-item.logout-item:active { background: #FEF2F2; }
         .dropdown-menu-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
         
+        /* Toggle Switch CSS */
+        .toggle-switch { width: 34px; height: 20px; background: #CBD5E1; border-radius: 20px; position: relative; transition: background 0.3s; flex-shrink: 0; pointer-events: none; }
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .toggle-switch.on { background: #10B981; }
+        .toggle-switch.on::after { transform: translateX(14px); }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #E2E8F0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
         .nav-item.active { color: #0F172A; }
@@ -200,11 +193,31 @@
                     <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu">
                         <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
                     </button>
+                    <!-- 3-Dot Dropdown -->
                     <div class="profile-menu-dropdown" id="profileMenuDropdown">
+                        
+                        <!-- Privacy Toggle -->
+                        <div class="dropdown-menu-item" id="togglePrivacyBtn" style="justify-content: space-between;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <span>Public Network</span>
+                            </div>
+                            <div class="toggle-switch on" id="privacySwitch"></div>
+                        </div>
+
+                        <hr style="border:none; border-top:1px solid #E2E8F0; margin:2px 0;">
+                        
+                        <!-- Broker Portal Link -->
+                        <a href="broker.html" class="dropdown-menu-item" id="brokerMenuBtn">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                            <span>Broker Portal</span>
+                        </a>
+
                         <a href="usera.html" class="dropdown-menu-item payment-item">
                             <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                             <span>Payment</span>
                         </a>
+
                         <button class="dropdown-menu-item logout-item" id="logoutBtn">
                             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                             <span>Logout</span>
@@ -230,6 +243,7 @@
                         <img src="s.png" alt="Profile" class="profile-avatar-img" id="userAvatarImg">
                         <div class="avatar-badge">+</div>
                     </div>
+                    <!-- Open edit profile button -->
                     <button type="button" class="edit-profile-pill-btn" id="openEditProfileBtn">
                         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>Edit</span>
@@ -240,9 +254,10 @@
                     <h1 class="profile-display-name" id="userDisplayName">User</h1>
                     <p class="profile-username" id="userHandle">@user</p>
 
+                    <!-- Bolder Stats with Click Listeners for Network Popup -->
                     <div class="stats-metrics-row">
-                        <div class="metric-block"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
-                        <div class="metric-block"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
+                        <div class="metric-block clickable" id="followingBlock"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
+                        <div class="metric-block clickable" id="followersBlock"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
                         <div class="metric-block"><span class="metric-num" id="likesCount">0</span><span class="metric-label">Likes</span></div>
                         <div class="metric-block"><span class="metric-num" id="ratingCount">4.9 ★</span><span class="metric-label">Rating</span></div>
                     </div>
@@ -301,6 +316,19 @@
                 <p style="color:#64748B; font-size:12px; margin:0 0 18px; line-height:1.4;">Please log in or create a new account to view profile posts, manage listings, and upload content.</p>
                 <a href="login.html" class="auth-btn-primary">Log In</a>
                 <a href="register.html" class="auth-btn-secondary">Create Account</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network (Followers/Following) Modal -->
+    <div class="modal-overlay" id="networkModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="networkModalTitle">Network</h3>
+                <button type="button" class="modal-close-btn" id="closeNetworkModalBtn">✕</button>
+            </div>
+            <div class="modal-body" id="networkModalBody" style="min-height: 250px; padding: 0;">
+                <div class="empty-state" style="margin-top: 40px; padding: 20px;">Loading users...</div>
             </div>
         </div>
     </div>
@@ -415,6 +443,15 @@
             document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
             document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
             document.getElementById('ratingCount').innerText = (userData.rating || "0.0") + " ★";
+            
+            // Apply network privacy toggle state
+            const privacySwitch = document.getElementById('privacySwitch');
+            if (userData.hasOwnProperty('isNetworkPublic')) {
+                if (userData.isNetworkPublic) privacySwitch.classList.add('on');
+                else privacySwitch.classList.remove('on');
+            } else {
+                privacySwitch.classList.add('on'); // Default Public
+            }
         }
 
         hydrateCachedProfile();
@@ -435,29 +472,14 @@
             });
         });
 
+        // Edit profile box (Opens without cooldown)
         function setupEditProfileHandlers() {
             const openBtn = document.getElementById('openEditProfileBtn');
             const avatarGroup = document.getElementById('avatarClickGroup');
 
             const openEdit = () => {
                 if (!isLoggedInUser) { showAuthModal(); return; }
-                
-                // 3-Day Cooldown Logic
-                const cached = localStorage.getItem('delala_cached_profile');
-                if (cached) {
-                    const userData = JSON.parse(cached);
-                    const lastEdit = userData.lastProfileEdit || 0;
-                    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-                    
-                    if (Date.now() - lastEdit < threeDaysMs) {
-                        const remainingMs = threeDaysMs - (Date.now() - lastEdit);
-                        const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
-                        showToast(`You can edit your profile again in ${days} day(s).`);
-                        return;
-                    }
-                }
-
-                window.location.href = 'edit.html';
+                window.location.href = 'edit.html'; // Removed 3-day restriction
             };
 
             openBtn?.addEventListener('click', openEdit);
@@ -542,7 +564,6 @@
                     const category = btn.getAttribute('data-category');
                     const targetSrc = btn.getAttribute('data-src');
 
-                    // Redirect directly for Chat, App, Activity
                     if (['chat', 'app', 'activity'].includes(category) && targetSrc) {
                         window.location.href = targetSrc;
                         return;
@@ -557,10 +578,41 @@
             });
         }
 
+        // --- Modals Setup ---
         function setupModalHandlers() {
-            const overlay = document.getElementById('postPreviewModal');
+            // Preview Post Modal
+            const previewOverlay = document.getElementById('postPreviewModal');
             document.getElementById('closePreviewModalBtn').addEventListener('click', closePreviewModal);
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) closePreviewModal(); });
+            previewOverlay.addEventListener('click', (e) => { if (e.target === previewOverlay) closePreviewModal(); });
+            
+            // Network Popup (Followers/Following) Modal
+            const networkOverlay = document.getElementById('networkModal');
+            document.getElementById('closeNetworkModalBtn').addEventListener('click', () => {
+                networkOverlay.classList.remove('active'); networkOverlay.style.display = 'none';
+            });
+            networkOverlay.addEventListener('click', (e) => { 
+                if (e.target === networkOverlay) { networkOverlay.classList.remove('active'); networkOverlay.style.display = 'none'; }
+            });
+            
+            document.getElementById('followingBlock').addEventListener('click', () => openNetworkModal('Following'));
+            document.getElementById('followersBlock').addEventListener('click', () => openNetworkModal('Followers'));
+        }
+
+        function openNetworkModal(type) {
+            if (!isLoggedInUser) { showAuthModal(); return; }
+            document.getElementById('networkModalTitle').innerText = type;
+            const modal = document.getElementById('networkModal');
+            const body = document.getElementById('networkModalBody');
+            
+            // Placeholder empty state for the popup list
+            body.innerHTML = `
+                <div class="empty-state" style="margin-top: 40px; padding: 20px;">
+                    <p style="font-size: 14px; color: #64748B;">You have no ${type.toLowerCase()} to display.</p>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function closePreviewModal() {
@@ -638,10 +690,52 @@
             updateTime(); setInterval(updateTime, 1000);
         }
 
+        // Main dropdown Menu Handlers (includes privacy toggle & broker click intercept)
         function setupMenuHandlers() {
             const menuBtn = document.getElementById('openMenuBtn'), dropdown = document.getElementById('profileMenuDropdown');
             menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); });
-            document.addEventListener('click', (e) => { if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) dropdown.classList.remove('show'); });
+            
+            document.addEventListener('click', (e) => { 
+                if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) dropdown.classList.remove('show'); 
+            });
+            
+            // Broker Portal Redirection Guard
+            document.getElementById('brokerMenuBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!isLoggedInUser) {
+                    showAuthModal();
+                    dropdown.classList.remove('show');
+                } else {
+                    window.location.href = 'broker.html';
+                }
+            });
+
+            // Network Privacy Toggle Logic
+            const privacyBtn = document.getElementById('togglePrivacyBtn');
+            const privacySwitch = document.getElementById('privacySwitch');
+            
+            privacyBtn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // keep menu open during toggle
+                if (!isLoggedInUser || !currentActiveUserId) return;
+                
+                const isCurrentlyOn = privacySwitch.classList.contains('on');
+                const newValue = !isCurrentlyOn;
+                
+                if(newValue) privacySwitch.classList.add('on');
+                else privacySwitch.classList.remove('on');
+                
+                try {
+                    await update(ref(db, `users/${currentActiveUserId}`), { isNetworkPublic: newValue });
+                    showToast(`Network visibility is now ${newValue ? 'Public' : 'Private'}`);
+                } catch(err) {
+                    // Revert toggle if DB fails
+                    if(!newValue) privacySwitch.classList.add('on');
+                    else privacySwitch.classList.remove('on');
+                    showToast("Failed to update privacy settings.");
+                }
+            });
+
+            // Logout
             document.getElementById('logoutBtn').addEventListener('click', async () => {
                 try {
                     localStorage.setItem('user_logged_out', 'true'); 
@@ -807,16 +901,12 @@
         }
 
         function isPostInCategory(post, targetCategory) {
-            // Check for hidden tab explicitly
             if (targetCategory === 'hidden') {
                 return post.isHidden === true;
             }
-            
-            // If it's not the hidden tab, filter out hidden posts
             if (post.isHidden) {
                 return false; 
             }
-
             if (targetCategory === 'all') return true;
             const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim(),
                   target = targetCategory.toLowerCase().trim();

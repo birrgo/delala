@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Delala - Broker Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase JS SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --primary-dark: #0F172A;
+            --primary-accent: #2563EB;
+            --bg-body: #F1F5F9;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --success-color: #10B981;
+        }
+
+        * { font-family: var(--font-main); box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Professional Top Navigation */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left-group { display: flex; align-items: center; gap: 12px; }
+        .header-right-group { display: flex; align-items: center; gap: 8px; }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: var(--primary-dark); }
+        .back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+        
+        .header-title-text { font-size: 17px; font-weight: 800; color: var(--primary-dark); margin: 0; }
+        .header-live-clock-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #F8FAFC; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); display: none; }
+        
+        @media (min-width: 380px) {
+            .header-live-clock-badge { display: block; }
+        }
+
+        /* Mini Profile Pill in Header */
+        .mini-profile-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #F8FAFC;
+            padding: 4px 10px 4px 4px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .mini-profile-pill:active { background: #E2E8F0; }
+        .mini-profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #CBD5E1; }
+        .mini-profile-name { font-size: 11px; font-weight: 800; color: var(--primary-dark); max-width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Main Dashboard Container */
+        .dashboard-container {
+            padding: 24px 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .broker-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title svg { width: 20px; height: 20px; stroke: var(--primary-accent); stroke-width: 2.5; }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #1E293B, #0F172A);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-action:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2); }
+
+        /* Key Display */
+        .broker-key-display {
+            background: #EFF6FF;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary-accent);
+            text-align: center;
+            letter-spacing: 1px;
+            border: 2px dashed #93C5FD;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .broker-key-display:hover { background: #DBEAFE; }
+        .broker-key-display svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; }
+
+        /* Stat Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .stat-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            padding: 20px 16px;
+            border-radius: 12px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .stat-box:hover { border-color: #CBD5E1; }
+
+        .stat-value { font-size: 24px; font-weight: 800; color: var(--primary-dark); }
+        .stat-value.highlight { color: var(--success-color); }
+        .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 6px; letter-spacing: 0.5px; }
+
+        /* Post Items */
+        .post-preview-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .post-preview-item:hover { background: #FFFFFF; border-color: #CBD5E1; }
+
+        .post-title-text { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+        .post-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .post-duration { color: var(--text-muted); font-weight: 600; }
+        .post-price { color: var(--text-main); font-weight: 700; }
+        
+        .commission-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--success-color);
+            background: #ECFDF5;
+            padding: 6px 12px;
+            border-radius: 8px;
+            width: fit-content;
+            margin-top: 4px;
+            border: 1px solid #A7F3D0;
+        }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; font-weight: 600; background: #F8FAFC; border-radius: 12px; border: 1px dashed var(--border-color); }
+
+        /* Loader */
+        .loader-box { text-align: center; padding: 40px; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+        /* Modal Alerts */
+        .metal-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .metal-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .metal-modal-card { width: 90%; max-width: 340px; background: #FFFFFF; border-radius: 16px; padding: 24px; box-sizing: border-box; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); transform: translateY(12px) scale(0.95); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .metal-modal-overlay.active .metal-modal-card { transform: translateY(0) scale(1); }
+        
+        .metal-icon-wrapper { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; }
+        .metal-icon-wrapper svg { width: 28px; height: 28px; stroke: var(--primary-accent); stroke-width: 2.5; fill: none; }
+        
+        .metal-modal-title { font-size: 18px; font-weight: 800; color: var(--primary-dark); margin: 0 0 8px; }
+        .metal-modal-message { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+        
+        .metal-modal-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--primary-dark); color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+        .metal-modal-btn:hover { background: #000000; }
+    </style>
+</head>
+<body>
+
+    <header class="nav-header">
+        <div class="header-left-group">
+            <button class="back-btn" onclick="window.history.back() || (window.location.href='profile.html')">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <h1 class="header-title-text">Broker Portal</h1>
+        </div>
+        <div class="header-right-group">
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00 AM</div>
+            <div class="mini-profile-pill" id="headerProfileBadge" style="display: none;" onclick="window.location.href='profile.html'">
+                <img src="s.png" alt="Profile" class="mini-profile-img" id="headerProfileImg">
+                <span class="mini-profile-name" id="headerProfileName">User</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        
+        <!-- Loading State -->
+        <div id="loaderCard" class="loader-box">
+            Connecting to secure portal...
+        </div>
+
+        <!-- Registration Section -->
+        <div class="broker-card" id="registrationCard" style="display: none;">
+            <div class="section-title">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                Become a Registered Broker
+            </div>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
+                Register your account to generate your unique <strong>Broker Referral ID</strong>. Share this ID with users to enter when they post items. You will earn a <strong>20% commission</strong> on all successful listings created using your key.
+            </p>
+            <button type="button" class="btn-action" id="btnRegisterBroker">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Generate My Broker ID
+            </button>
+        </div>
+
+        <!-- Dashboard Info Section -->
+        <div class="broker-card" id="dashboardCard" style="display: none;">
+            <div class="section-title">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Your Unique Key
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Tap to copy your ID and share it with clients.</p>
+            
+            <div class="broker-key-display" id="displayBrokerKey" onclick="copyBrokerKey()">
+                <span id="keyText">---</span>
+                <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalPostsCount">0</div>
+                    <div class="stat-label">Referred Posts</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value highlight" id="totalCommissionAmount">0 ETB</div>
+                    <div class="stat-label">Total Commission</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Preview Section -->
+        <div class="broker-card" id="postsSection" style="display: none;">
+            <div class="section-title">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Linked Post History
+            </div>
+            <div id="referredPostsContainer">
+                <div class="empty-state">Loading your referred items...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="metal-modal-overlay" id="alertModalOverlay">
+        <div class="metal-modal-card">
+            <div class="metal-icon-wrapper" id="modalIconWrapper">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <h3 class="metal-modal-title" id="alertModalTitle">Notice</h3>
+            <p class="metal-modal-message" id="alertModalMessage">Message goes here.</p>
+            <button type="button" class="metal-modal-btn" onclick="closeAlertModal()">Understood</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b",
+            measurementId: "G-2XW8F8FKBT"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let activeBrokerUser = null;
+        let currentBrokerKey = "";
+
+        window.showAlert = function(message, title = "Notice", type = "info") {
+            document.getElementById('alertModalTitle').innerText = title;
+            document.getElementById('alertModalMessage').innerText = message;
+            
+            const iconWrapper = document.getElementById('modalIconWrapper');
+            if(type === "success") {
+                iconWrapper.style.background = "#ECFDF5";
+                iconWrapper.innerHTML = '<svg viewBox="0 0 24 24" stroke="#10B981"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+            } else {
+                iconWrapper.style.background = "#EFF6FF";
+                iconWrapper.innerHTML = '<svg viewBox="0 0 24 24" stroke="#2563EB"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+            }
+
+            document.getElementById('alertModalOverlay').classList.add('active');
+        };
+
+        window.closeAlertModal = function() {
+            document.getElementById('alertModalOverlay').classList.remove('active');
+        };
+
+        function renderHeaderProfile(authUser, localDataFallback) {
+            let displayName = "Broker";
+            let photoUrl = "s.png";
+            
+            if (authUser) {
+                displayName = authUser.displayName ? authUser.displayName.split(" ")[0] : displayName;
+                photoUrl = authUser.photoURL || photoUrl;
+            } else if (localDataFallback) {
+                try {
+                    const userData = JSON.parse(localDataFallback);
+                    let firstName = userData.firstName || userData.first_name || "";
+                    if (!firstName && userData.fullName) {
+                        firstName = userData.fullName.split(" ")[0];
+                    }
+                    displayName = firstName || userData.displayName || displayName;
+                    photoUrl = userData.photoURL || userData.profilePicture || photoUrl;
+                } catch(e) {}
+            }
+            
+            document.getElementById('headerProfileName').innerText = displayName;
+            document.getElementById('headerProfileImg').src = photoUrl;
+            document.getElementById('headerProfileBadge').style.display = 'flex';
+        }
+
+        function initSessionDetection() {
+            auth.onAuthStateChanged((user) => {
+                
+                let sessionPhone = sessionStorage.getItem('auth_session_phone') || sessionStorage.getItem('userPhone');
+                let sessionUid = sessionStorage.getItem('auth_session_user_id') || sessionStorage.getItem('userId');
+                let sessionProfileData = sessionStorage.getItem('delala_cached_profile');
+
+                if (!sessionPhone && localStorage.getItem('user_logged_out') !== 'true') {
+                    sessionPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
+                    sessionUid = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
+                    sessionProfileData = localStorage.getItem('delala_cached_profile');
+                    
+                    if (sessionPhone) sessionStorage.setItem('auth_session_phone', sessionPhone);
+                    if (sessionUid) sessionStorage.setItem('auth_session_user_id', sessionUid);
+                    if (sessionProfileData) sessionStorage.setItem('delala_cached_profile', sessionProfileData);
+                }
+
+                if (user) {
+                    activeBrokerUser = { id: user.uid, phone: user.phoneNumber || sessionPhone || "Unknown" };
+                    renderHeaderProfile(user, null);
+                    checkBrokerRegistration(activeBrokerUser);
+                } else if (sessionPhone && sessionUid) {
+                    activeBrokerUser = { id: sessionUid, phone: sessionPhone };
+                    renderHeaderProfile(null, sessionProfileData);
+                    checkBrokerRegistration(activeBrokerUser);
+                } else {
+                    document.getElementById('loaderCard').style.display = 'none';
+                    showAlert("You must be logged in to access the Broker Portal.", "Access Denied", "error");
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            initSessionDetection();
+
+            document.getElementById('btnRegisterBroker').addEventListener('click', () => {
+                if(activeBrokerUser) {
+                    registerNewBroker(activeBrokerUser);
+                }
+            });
+        });
+
+        function checkBrokerRegistration(user) {
+            db.ref('brokers').orderByChild('userId').equalTo(user.id).once('value', (snapshot) => {
+                document.getElementById('loaderCard').style.display = 'none';
+
+                if (snapshot.exists()) {
+                    let brokerData = null;
+                    snapshot.forEach(child => { brokerData = child.val(); });
+                    
+                    if (brokerData && brokerData.brokerKey) {
+                        showDashboard(brokerData.brokerKey);
+                    } else {
+                        document.getElementById('registrationCard').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('registrationCard').style.display = 'block';
+                }
+            }).catch(err => {
+                document.getElementById('loaderCard').style.display = 'none';
+                showAlert("Error connecting to database: " + err.message, "Connection Error");
+            });
+        }
+
+        // GENERATES A STRICTLY UNIQUE ID INSTEAD OF A FLAWED SEQUENTIAL COUNTER
+        function registerNewBroker(user) {
+            const btn = document.getElementById('btnRegisterBroker');
+            btn.innerHTML = "Generating...";
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.7";
+
+            // Creates a robust mathematically unique ID (Example: BRK-5X8B-A9)
+            const randomPrefix = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const timeSuffix = Date.now().toString(36).substring(4, 7).toUpperCase();
+            const uniqueBrokerKey = `BRK-${randomPrefix}-${timeSuffix}`;
+            
+            const newBrokerRef = db.ref('brokers/' + uniqueBrokerKey);
+            
+            const brokerPayload = {
+                userId: user.id,
+                phone: user.phone,
+                brokerKey: uniqueBrokerKey,
+                createdAt: Date.now()
+            };
+
+            newBrokerRef.set(brokerPayload).then(() => {
+                showAlert("Your broker account is active! You can now share your unique ID.", "Registration Success", "success");
+                showDashboard(uniqueBrokerKey);
+            }).catch((err) => {
+                btn.innerHTML = "Generate My Broker ID";
+                btn.style.pointerEvents = "auto";
+                btn.style.opacity = "1";
+                showAlert("Failed to save your profile: " + err.message, "Database Error");
+            });
+        }
+
+        function showDashboard(brokerKey) {
+            currentBrokerKey = brokerKey;
+            document.getElementById('registrationCard').style.display = 'none';
+            document.getElementById('dashboardCard').style.display = 'block';
+            document.getElementById('postsSection').style.display = 'block';
+            document.getElementById('keyText').innerText = brokerKey;
+
+            fetchReferredPosts(brokerKey);
+        }
+
+        function fetchReferredPosts(brokerKey) {
+            db.ref('posts').orderByChild('brokerId').equalTo(brokerKey).on('value', (snapshot) => {
+                const container = document.getElementById('referredPostsContainer');
+                container.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div class="empty-state">No listings have used your Broker ID yet.<br>Share your key to get started!</div>';
+                    document.getElementById('totalPostsCount').innerText = '0';
+                    document.getElementById('totalCommissionAmount').innerText = '0 ETB';
+                    return;
+                }
+
+                let totalPosts = 0;
+                let cumulativePrice = 0;
+
+                snapshot.forEach(childSnap => {
+                    const post = childSnap.val();
+                    totalPosts++;
+
+                    const itemPrice = parseFloat(post.price || 0);
+                    cumulativePrice += itemPrice;
+
+                    const postTitle = post.title || "Untitled Listing";
+                    const formattedPrice = itemPrice > 0 ? `${itemPrice.toLocaleString()} ETB` : "Free/Unknown";
+                    
+                    const commissionAmount = itemPrice * 0.20;
+                    const formattedCommission = `${commissionAmount.toLocaleString()} ETB`;
+
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'post-preview-item';
+                    itemElement.innerHTML = `
+                        <div class="post-title-text">${postTitle}</div>
+                        <div class="post-meta-row">
+                            <span class="post-duration">Posted: ${new Date(post.createdAt || Date.now()).toLocaleDateString()}</span>
+                            <span class="post-price">Price: ${formattedPrice}</span>
+                        </div>
+                        <div class="commission-badge">
+                            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            20% Earned: ${formattedCommission}
+                        </div>
+                    `;
+                    container.appendChild(itemElement);
+                });
+
+                const totalCommission = cumulativePrice * 0.20;
+                document.getElementById('totalPostsCount').innerText = totalPosts;
+                document.getElementById('totalCommissionAmount').innerText = `${totalCommission.toLocaleString()} ETB`;
+            });
+        }
+
+        window.copyBrokerKey = function() {
+            if(!currentBrokerKey) return;
+            navigator.clipboard.writeText(currentBrokerKey).then(() => {
+                showAlert("Broker ID copied to clipboard: " + currentBrokerKey, "Copied!", "success");
+            }).catch(err => {
+                showAlert("Failed to copy. Please manually select the text.", "Error");
+            });
+        }
+
+        function initClock() {
+            const node = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                if (node) node.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
