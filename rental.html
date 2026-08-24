@@ -543,11 +543,26 @@
                 if (!catStr.includes(activeCategoryFilter)) return false;
             }
             if (activeLocationFilter) {
+                // ADDED region, zone, uniqueName, etc. to completely support broader location searches
                 const locStr = [
-                    item.address, item.locationString, item.location, item.city, item.country,
-                    item.locationDetails?.city, item.locationDetails?.subcity, item.locationDetails?.country
+                    item.address, 
+                    item.locationString, 
+                    typeof item.location === 'string' ? item.location : '', 
+                    item.city, 
+                    item.country,
+                    item.locationDetails?.country,
+                    item.locationDetails?.region,
+                    item.locationDetails?.zone,
+                    item.locationDetails?.city,
+                    item.locationDetails?.subcity,
+                    item.locationDetails?.uniqueName,
+                    item.locationDetails?.landmark
                 ].filter(Boolean).join(' ').toLowerCase();
-                if (!locStr.includes(activeLocationFilter)) return false;
+                
+                // Allow matches like "oromia" if the filter is "oromia region" to be safer.
+                const searchStr = activeLocationFilter.replace(' region', '').trim();
+                
+                if (!locStr.includes(searchStr)) return false;
             }
             return true;
         }
