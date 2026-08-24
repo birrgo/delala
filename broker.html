@@ -376,7 +376,7 @@
                 photoUrl = authUser.photoURL || photoUrl;
             } else if (localDataFallback) {
                 try {
-                    const userData = JSON.parse(localDataFallback);
+                    const userData = typeof localDataFallback === 'string' ? JSON.parse(localDataFallback) : localDataFallback;
                     let firstName = userData.firstName || userData.first_name || "";
                     if (!firstName && userData.fullName) {
                         firstName = userData.fullName.split(" ")[0];
@@ -391,32 +391,29 @@
             document.getElementById('headerProfileBadge').style.display = 'flex';
         }
 
+        // CORRECTED SESSION DETECTION: Matches Profile.html by reading localStorage
         function initSessionDetection() {
             auth.onAuthStateChanged((user) => {
-                
-                let sessionPhone = sessionStorage.getItem('auth_session_phone') || sessionStorage.getItem('userPhone');
-                let sessionUid = sessionStorage.getItem('auth_session_user_id') || sessionStorage.getItem('userId');
-                let sessionProfileData = sessionStorage.getItem('delala_cached_profile');
+                // Ensure we read localStorage exactly how profile.html sets it
+                let isLoggedOut = localStorage.getItem('user_logged_out') === 'true';
+                let storedPhone = localStorage.getItem('auth_session_phone') || sessionStorage.getItem('auth_session_phone');
+                let storedUid = localStorage.getItem('auth_session_user_id') || sessionStorage.getItem('auth_session_user_id');
+                let storedProfile = localStorage.getItem('delala_cached_profile') || sessionStorage.getItem('delala_cached_profile');
 
-                if (!sessionPhone && localStorage.getItem('user_logged_out') !== 'true') {
-                    sessionPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone');
-                    sessionUid = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
-                    sessionProfileData = localStorage.getItem('delala_cached_profile');
-                    
-                    if (sessionPhone) sessionStorage.setItem('auth_session_phone', sessionPhone);
-                    if (sessionUid) sessionStorage.setItem('auth_session_user_id', sessionUid);
-                    if (sessionProfileData) sessionStorage.setItem('delala_cached_profile', sessionProfileData);
-                }
-
-                if (user) {
-                    activeBrokerUser = { id: user.uid, phone: user.phoneNumber || sessionPhone || "Unknown" };
-                    renderHeaderProfile(user, null);
+                // If user is signed into Firebase Auth and not manually logged out
+                if (user && !isLoggedOut) {
+                    activeBrokerUser = { id: user.uid, phone: user.phoneNumber || storedPhone || "Unknown" };
+                    renderHeaderProfile(user, storedProfile);
                     checkBrokerRegistration(activeBrokerUser);
-                } else if (sessionPhone && sessionUid) {
-                    activeBrokerUser = { id: sessionUid, phone: sessionPhone };
-                    renderHeaderProfile(null, sessionProfileData);
+                } 
+                // If there's a stored phone number from profile/login and not manually logged out
+                else if (storedPhone && !isLoggedOut) {
+                    activeBrokerUser = { id: storedUid || storedPhone, phone: storedPhone };
+                    renderHeaderProfile(null, storedProfile);
                     checkBrokerRegistration(activeBrokerUser);
-                } else {
+                } 
+                // Access Denied - Missing login data
+                else {
                     document.getElementById('loaderCard').style.display = 'none';
                     showAlert("You must be logged in to access the Broker Portal.", "Access Denied", "error");
                     setTimeout(() => window.location.href = 'login.html', 2000);
@@ -436,6 +433,7 @@
         });
 
         function checkBrokerRegistration(user) {
+            // First search by ID
             db.ref('brokers').orderByChild('userId').equalTo(user.id).once('value', (snapshot) => {
                 document.getElementById('loaderCard').style.display = 'none';
 
@@ -449,7 +447,18 @@
                         document.getElementById('registrationCard').style.display = 'block';
                     }
                 } else {
-                    document.getElementById('registrationCard').style.display = 'block';
+                    // Fallback to search by phone to cover edge cases
+                    db.ref('brokers').orderByChild('phone').equalTo(user.phone).once('value', (phoneSnap) => {
+                        if (phoneSnap.exists()) {
+                            let brokerDataFallback = null;
+                            phoneSnap.forEach(child => { brokerDataFallback = child.val(); });
+                            if (brokerDataFallback && brokerDataFallback.brokerKey) {
+                                showDashboard(brokerDataFallback.brokerKey);
+                                return;
+                            }
+                        }
+                        document.getElementById('registrationCard').style.display = 'block';
+                    });
                 }
             }).catch(err => {
                 document.getElementById('loaderCard').style.display = 'none';
@@ -457,7 +466,6 @@
             });
         }
 
-        // GENERATES A STRICTLY UNIQUE ID INSTEAD OF A FLAWED SEQUENTIAL COUNTER
         function registerNewBroker(user) {
             const btn = document.getElementById('btnRegisterBroker');
             btn.innerHTML = "Generating...";

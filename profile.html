@@ -598,21 +598,169 @@
             document.getElementById('followersBlock').addEventListener('click', () => openNetworkModal('Followers'));
         }
 
-        function openNetworkModal(type) {
-            if (!isLoggedInUser) { showAuthModal(); return; }
+        // DYNAMIC FIREBASE NETWORK FETCH (Followers & Following)
+        async function openNetworkModal(type) {
+            if (!isLoggedInUser || !currentActiveUserId) { showAuthModal(); return; }
             document.getElementById('networkModalTitle').innerText = type;
             const modal = document.getElementById('networkModal');
             const body = document.getElementById('networkModalBody');
+            const nodeName = type.toLowerCase();
             
-            // Placeholder empty state for the popup list
+            // 1. Immediately check the profile number. If it's 0, skip the database call entirely.
+            const uiCountText = document.getElementById(nodeName + 'Count').innerText;
+            if (uiCountText === '0' || uiCountText === '0.0' || uiCountText === '') {
+                body.innerHTML = `
+                    <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
+                        <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
+                    </div>
+                `;
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // 2. Loading State with Visual Spinner
             body.innerHTML = `
-                <div class="empty-state" style="margin-top: 40px; padding: 20px;">
-                    <p style="font-size: 14px; color: #64748B;">You have no ${type.toLowerCase()} to display.</p>
+                <div style="text-align: center; padding: 40px 20px; color: #64748B; font-size: 14px; font-weight: 600;">
+                    <div style="width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
+                    Loading ${nodeName}...
+                    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
                 </div>
             `;
             
             modal.classList.add('active');
             modal.style.display = 'flex';
+
+            try {
+                let data = null;
+                const possibleIds = new Set([currentActiveUserId]);
+                const sessionPhone = localStorage.getItem('auth_session_phone');
+                if (sessionPhone) {
+                    possibleIds.add(String(sessionPhone).replace(/\D/g, '').replace(/^0+/, ''));
+                }
+
+                // 3. Robust Fallback Fetching System
+                for (const pid of possibleIds) {
+                    if (!pid) continue;
+                    
+                    // Root node check (e.g. followers/UID)
+                    try {
+                        const snap = await get(ref(db, `${nodeName}/${pid}`));
+                        if (snap.exists() && typeof snap.val() === 'object') {
+                            data = snap.val(); 
+                            break;
+                        }
+                    } catch(e) { }
+                    
+                    // Nested list check (e.g. users/UID/followersList)
+                    if (!data) {
+                        try {
+                            const snap = await get(ref(db, `users/${pid}/${nodeName}List`));
+                            if (snap.exists() && typeof snap.val() === 'object') {
+                                data = snap.val(); 
+                                break;
+                            }
+                        } catch(e) { }
+                    }
+                }
+
+                // If completely missing or denied
+                if (!data) {
+                    body.innerHTML = `
+                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
+                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 4. Data Parsing Engine (Extracts User IDs from any structure)
+                let validUids = [];
+                if (Array.isArray(data)) {
+                    validUids = data;
+                } else {
+                    for (let [k, v] of Object.entries(data)) {
+                        if (k === 'count' || String(k).startsWith('_')) continue;
+                        if (typeof v === 'string') {
+                            validUids.push(v);
+                        } else if (typeof v === 'object' && v !== null && (v.userId || v.id)) {
+                            validUids.push(v.userId || v.id);
+                        } else {
+                            validUids.push(k); // Assumes keys are UIDs (Boolean Map or Data Object format)
+                        }
+                    }
+                }
+                
+                // Deduplicate and sanitize
+                validUids = [...new Set(validUids)].filter(id => id && String(id).trim() !== '');
+
+                if (validUids.length === 0) {
+                    body.innerHTML = `
+                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
+                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 5. Generate User Cards UI
+                let html = '<div style="display:flex; flex-direction:column; gap:12px; padding: 16px;">';
+                let validUsersFound = false;
+
+                for (const uid of validUids) {
+                    const cleanUid = String(uid).replace(/\D/g, '').replace(/^0+/, '') || uid;
+                    try {
+                        let uSnap = await get(ref(db, `users/${uid}`));
+                        if (!uSnap.exists() && cleanUid !== uid) {
+                            uSnap = await get(ref(db, `users/${cleanUid}`)); // Fallback to Phone ID
+                        }
+                        
+                        if (uSnap.exists()) {
+                            validUsersFound = true;
+                            const uData = uSnap.val();
+                            let fName = uData.firstName || uData.first_name || "";
+                            if (!fName && uData.fullName) fName = uData.fullName.split(' ')[0] || "User";
+                            
+                            const dName = fName || uData.displayName || "User";
+                            const handle = uData.username || uData.handle || dName.toLowerCase().replace(/\s+/g, '');
+                            const pUrl = uData.photoURL || uData.profilePicture || "s.png";
+                            
+                            html += `
+                                <div style="display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; background:#F8FAFC; border:1px solid #E2E8F0; transition: background 0.2s; cursor:pointer;" onclick="window.location.href='profile.html?id=${uid}'">
+                                    <img src="${pUrl}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid #FFF; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                                    <div style="flex:1;">
+                                        <div style="font-size:14px; font-weight:800; color:#0F172A;">${dName}</div>
+                                        <div style="font-size:12px; font-weight:600; color:#64748B;">@${handle}</div>
+                                    </div>
+                                    <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:#CBD5E1; fill:none; stroke-width:2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            `;
+                        }
+                    } catch(err) {
+                        console.warn("Failed to load individual user profile:", uid);
+                    }
+                }
+                html += '</div>';
+                
+                if (!validUsersFound) {
+                     body.innerHTML = `
+                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
+                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
+                        </div>
+                    `;
+                } else {
+                    body.innerHTML = html;
+                }
+
+            } catch (error) {
+                // Failsafe catch block to prevent red warning texts
+                console.warn("Network modal completely failed, defaulting to empty state:", error);
+                body.innerHTML = `
+                    <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
+                        <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display at this time.</p>
+                    </div>
+                `;
+            }
         }
 
         function closePreviewModal() {
