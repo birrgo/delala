@@ -190,10 +190,51 @@
         </div>
     </div>
 
-    <!-- Service Worker Registration & Installation Logic -->
+    <!-- Frontend Connection Detection & Service Worker Registration -->
     <script>
+        // --- Real-Time Offline & Connection Checking ---
+        
+        // 1. Handle complete network loss in real-time
+        window.addEventListener('offline', () => {
+            console.log('[App] Network lost, redirecting to offline screen...');
+            window.location.href = '/offline.html';
+        });
+
+        // 2. Function to check for low connection speeds
+        function checkConnectionSpeed() {
+            if ('connection' in navigator) {
+                const effectiveType = navigator.connection.effectiveType;
+                
+                // If speed is slow-2g or 2g, redirect to low.html
+                if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+                    if (!window.location.pathname.includes('/low.html')) {
+                        console.log(`[App] Slow connection detected (${effectiveType}), redirecting...`);
+                        window.location.href = '/low.html';
+                    }
+                }
+            }
+        }
+
+        // 3. Listen for dynamic changes in network quality
+        if ('connection' in navigator) {
+            navigator.connection.addEventListener('change', checkConnectionSpeed);
+        }
+
+        // --- Service Worker & Install Logic ---
+        
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
+                
+                // Check status immediately on load
+                if (!navigator.onLine) {
+                    if (!window.location.pathname.includes('/offline.html')) {
+                        window.location.href = '/offline.html';
+                    }
+                } else {
+                    checkConnectionSpeed();
+                }
+
+                // Register Service Worker
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('Service Worker registered:', reg.scope))
                     .catch(err => console.error('Service Worker registration failed:', err));
