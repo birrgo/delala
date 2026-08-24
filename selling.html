@@ -94,11 +94,11 @@
             color: #334155;
         }
 
-        /* Professional App Popup Styling - Restricted to Main Body */
+        /* Coming Soon App Popup Styling (Matched exactly to Selling Post) */
         .custom-popup-overlay {
             position: fixed;
-            top: 45px;      /* Adjusted closer to top to give room to lift */
-            bottom: 95px;   /* Ensures it clears the bottom nav */
+            top: 50px;      
+            bottom: 95px;   
             left: 0;
             right: 0;
             background: rgba(15, 23, 42, 0.6);
@@ -107,9 +107,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: 60px; /* Increased padding significantly to lift the popup card higher */
-            z-index: 900;   /* Lower than bottom-nav (1000) so menu remains strictly top level */
-            opacity: 1; /* Make visible by default */
+            padding-bottom: 130px; 
+            z-index: 900;   
+            opacity: 1; 
             visibility: visible;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
@@ -123,15 +123,15 @@
             background: #ffffff;
             width: 85%;
             max-width: 320px;
-            border-radius: 24px;
-            padding: 20px 24px 26px; 
+            border-radius: 22px;
+            padding: 16px 20px 20px; 
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transform: translateY(0) scale(1); /* Ensure it's in place */
+            transform: translateY(0) scale(1); 
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px; 
         }
 
         .custom-popup-overlay.hide-popup .custom-popup-modal {
@@ -139,24 +139,24 @@
         }
         
         .popup-top-brand {
-            font-size: 16px;
+            font-size: 14px; 
             font-weight: 800;
             color: #0F2C59;
-            margin: 0 0 5px 0;
+            margin: 0 0 2px 0; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .popup-status-icon {
-            font-size: 44px;
+            font-size: 34px; 
             display: inline-block;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             line-height: 1;
         }
 
         .popup-main-title {
-            font-size: 20px;
+            font-size: 18px; 
             font-weight: 800;
             color: #0F172A;
             margin: 0;
@@ -166,18 +166,18 @@
         }
 
         .popup-body-desc {
-            font-size: 14.5px;
+            font-size: 13.5px; 
             color: #64748B;
             margin: 0;
-            line-height: 1.5;
+            line-height: 1.4; 
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .popup-amharic-desc {
-            font-size: 14px;
+            font-size: 13px; 
             color: #475569;
             margin: 0;
-            line-height: 1.6;
+            line-height: 1.4; 
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -185,16 +185,16 @@
             background: #0F2C59;
             color: #ffffff;
             border: none;
-            border-radius: 14px;
-            padding: 15px 20px;
+            border-radius: 12px;
+            padding: 12px 20px; 
             width: 100%;
-            font-size: 15px;
+            font-size: 14.5px;
             font-weight: 700;
             font-family: 'Plus Jakarta Sans', sans-serif;
             cursor: pointer;
             transition: background 0.2s ease, transform 0.1s ease;
             box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
-            margin-top: 15px;
+            margin-top: 8px; 
         }
 
         .popup-dismiss-action:active {
@@ -206,7 +206,7 @@
             border: none;
             border-top: 1px solid #E2E8F0;
             width: 100%;
-            margin: 5px 0;
+            margin: 4px 0; 
         }
     </style>
 </head>
