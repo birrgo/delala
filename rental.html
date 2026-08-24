@@ -239,7 +239,7 @@
                 </div>
                 <span>Selling</span>
             </a>
-            <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item">
+            <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -396,11 +396,11 @@
             const formattedLoc = hasLoc ? (activeLocationFilter.charAt(0).toUpperCase() + activeLocationFilter.slice(1)) : '';
 
             if (hasCat && hasLoc) {
-                DOM.headerTitleMain.innerText = `📍 ${formattedLoc}`;
+                DOM.headerTitleMain.innerText = ` ${formattedLoc}`;
                 DOM.headerTitleSub.innerText = formattedCat;
                 DOM.headerTitleSub.style.display = 'block';
             } else if (hasLoc) {
-                DOM.headerTitleMain.innerText = `📍 ${formattedLoc}`;
+                DOM.headerTitleMain.innerText = ` ${formattedLoc}`;
                 DOM.headerTitleSub.style.display = 'none';
             } else if (hasCat) {
                 DOM.headerTitleMain.innerText = formattedCat;
@@ -811,7 +811,7 @@
                 },
                 (error) => {
                     DOM.gpsBtn.style.opacity = "1";
-                    triggerSystemAlert("GPS Error", "Unable to retrieve position.", "📍");
+                    triggerSystemAlert("GPS Error", "Unable to retrieve position.", "");
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
