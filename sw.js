@@ -1,13 +1,12 @@
-const CACHE_NAME = 'delala-cache-v3'; // Updated cache version to 'v3' so it saves the new files
+const CACHE_NAME = 'delala-cache-v4'; // Updated to 'v4' to force browsers to save the new index.html
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/rental.html',
   '/news.css',
   '/s.png',
-  '/manifest.json',
-  '/offline.html', // Added offline screen
-  '/low.html'      // Added low connection screen
+  '/manifest.json'
+  // Removed offline.html and low.html since they are now popups inside index.html
 ];
 
 // Install Event: Cache essential app assets
@@ -18,7 +17,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
 
 // Activate Event: Clean up outdated caches
@@ -35,7 +34,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim();
+  self.clients.claim(); // Take control of all clients immediately
 });
 
 // Fetch Event: Bypass non-GET & API requests, serve cached static assets offline
@@ -56,32 +55,13 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      // 3. Custom Network Logic for Page Navigations (Added Low & Offline Function)
-      if (request.mode === 'navigate') {
-        const fetchPromise = fetch(request);
-        
-        // Create an 8-second timeout to detect slow network connections
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 8000)
-        );
-
-        // Race the network fetch against the 8-second timeout
-        return Promise.race([fetchPromise, timeoutPromise]).catch((error) => {
-          if (error.message === 'timeout') {
-            // If it took longer than 8 seconds, show Low Connection page
-            console.log('[Service Worker] Connection too slow, serving low.html');
-            return caches.match('/low.html');
-          }
-          // If the network completely failed (offline), show Offline page
-          console.log('[Service Worker] Network failed, serving offline.html');
-          return caches.match('/offline.html');
-        });
-      }
-
-      // 4. Standard fallback for everything else (images, scripts, etc.)
+      // 3. If not in cache, fetch from the network
       return fetch(request).catch(() => {
-        // Keeping your previous fallback logic intact just in case
+        
+        // 4. Fallback Logic: If the network completely fails (offline) during navigation
         if (request.mode === 'navigate') {
+          console.log('[Service Worker] Network failed, serving cached index.html');
+          // Serve the main app shell. The JS inside index.html will trigger the offline popup instantly!
           return caches.match('/index.html');
         }
       });
