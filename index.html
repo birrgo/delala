@@ -24,37 +24,6 @@
     <link rel="icon" type="image/png" sizes="192x192" href="s.png">
     <link rel="icon" type="image/png" sizes="512x512" href="s.png">
 
-    <!-- Open Graph / Facebook / Discord / WhatsApp / Telegram Meta Tags -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://delala.online/">
-    <meta property="og:site_name" content="Delala">
-    <meta property="og:title" content="Delala - Rentals, Selling & Job Vacancies">
-    <meta property="og:description" content="Explore rental listings, items for sale, job vacancies, and tech updates on Delala.">
-    <meta property="og:image" content="https://delala.online/s.png">
-    <meta property="og:image:secure_url" content="https://delala.online/s.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="500">
-    <meta property="og:image:height" content="500">
-
-    <!-- X / Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Delala - Rentals, Selling & Job Vacancies">
-    <meta name="twitter:description" content="Explore rental listings, items for sale, job vacancies, and tech updates on Delala.">
-    <meta name="twitter:image" content="https://delala.online/s.png">
-    <meta name="twitter:image:alt" content="Delala Logo Preview">
-
-    <!-- Schema.org Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Delala",
-      "url": "https://delala.online/",
-      "image": "https://delala.online/s.png",
-      "description": "Explore rental listings, items for sale, job vacancies, and tech updates on Delala."
-    }
-    </script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -149,12 +118,156 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
+
+        /* =========================================================
+           POPUP OVERLAY STYLES (Offline & Low Connection)
+           ========================================================= */
+        .connection-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            
+            /* Hidden by default */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .connection-popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .status-card {
+            background: #FFFFFF;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+            border: 1px solid #E2E8F0;
+            
+            /* Slide down when hidden, slide up when shown */
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .connection-popup-overlay.show .status-card {
+            transform: translateY(0);
+        }
+
+        /* Icon Variants */
+        .icon-container {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+        
+        .icon-container.offline-icon {
+            background: #FEF2F2;
+            color: #DC2626;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+        
+        .icon-container.low-icon {
+            background: #FFF7ED;
+            color: #EA580C;
+            animation: pulseWarning 2s infinite ease-in-out;
+        }
+
+        .icon-container svg {
+            width: 32px;
+            height: 32px;
+            stroke-width: 2.5;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .status-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .status-description {
+            font-size: 14.5px;
+            color: #64748B;
+            margin: 0 0 28px 0;
+            line-height: 1.5;
+        }
+
+        /* Popup Buttons */
+        .primary-popup-btn {
+            background: #0F2C59;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            padding: 15px 24px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .primary-popup-btn:active {
+            transform: scale(0.97);
+            background: #081B38;
+        }
+
+        .secondary-popup-btn {
+            background: transparent;
+            color: #64748B;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.2s ease;
+            width: 100%;
+        }
+
+        .secondary-popup-btn:active {
+            color: #0F172A;
+        }
+
+        /* Animations */
+        @keyframes pulseWarning {
+            0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.2); }
+            70% { box-shadow: 0 0 0 15px rgba(234, 88, 12, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+        }
+        
+        @keyframes floatIcon {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Main App UI -->
     <div class="app-view">
-        <!-- Hidden Image for SEO -->
         <img src="https://delala.online/s.png" alt="Delala Logo Preview" style="display:none;">
 
         <!-- Top Light Wave Gradient -->
@@ -190,57 +303,132 @@
         </div>
     </div>
 
-    <!-- Frontend Connection Detection & Service Worker Registration -->
-    <script>
-        // --- Real-Time Offline & Connection Checking ---
-        
-        // 1. Handle complete network loss in real-time
-        window.addEventListener('offline', () => {
-            console.log('[App] Network lost, redirecting to offline screen...');
-            window.location.href = '/offline.html';
-        });
 
-        // 2. Function to check for low connection speeds
+    <!-- ==========================================
+         OFFLINE POPUP OVERLAY
+         ========================================== -->
+    <div id="offlinePopup" class="connection-popup-overlay">
+        <div class="status-card">
+            <div class="icon-container offline-icon">
+                <svg viewBox="0 0 24 24">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                    <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                    <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                </svg>
+            </div>
+            <h1 class="status-title">You are Offline</h1>
+            <p class="status-description">It looks like you've lost your network connection. Please check your Wi-Fi or cellular data.</p>
+            
+            <button class="primary-popup-btn" onclick="checkIfOnline()">Try Again</button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         SLOW CONNECTION POPUP OVERLAY
+         ========================================== -->
+    <div id="lowConnectionPopup" class="connection-popup-overlay">
+        <div class="status-card">
+            <div class="icon-container low-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 20h.01"></path>
+                    <path d="M8.5 16.429a5 5 0 0 1 7 0"></path>
+                    <path d="M5 12.859a10 10 0 0 1 14 0" opacity="0.3"></path>
+                    <path d="M2 9.289a15 15 0 0 1 20 0" opacity="0.3"></path>
+                </svg>
+            </div>
+            <h1 class="status-title">Slow Connection</h1>
+            <p class="status-description">Your internet connection seems unstable. Things might take a little longer to load than usual.</p>
+            
+            <button class="primary-popup-btn" onclick="window.location.reload()">Refresh Page</button>
+            <button class="secondary-popup-btn" onclick="hideLowConnectionPopup()">Continue Anyway</button>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         SCRIPTS: Connection Tracking & PWA Setup
+         ========================================== -->
+    <script>
+        // DOM Elements
+        const offlinePopup = document.getElementById('offlinePopup');
+        const lowConnectionPopup = document.getElementById('lowConnectionPopup');
+
+        // --- Offline Status Functions ---
+        function showOfflinePopup() {
+            // Hide low connection popup if it's open, show offline popup
+            lowConnectionPopup.classList.remove('show');
+            offlinePopup.classList.add('show');
+            console.log('[App] Network offline popup displayed.');
+        }
+
+        function hideOfflinePopup() {
+            offlinePopup.classList.remove('show');
+        }
+
+        function checkIfOnline() {
+            if (navigator.onLine) {
+                hideOfflinePopup();
+                checkConnectionSpeed(); // Check if they came back online to a slow network
+            } else {
+                alert("You are still offline. Please check your connection settings.");
+            }
+        }
+
+        // Event listeners for total network loss or recovery
+        window.addEventListener('offline', showOfflinePopup);
+        window.addEventListener('online', hideOfflinePopup);
+
+
+        // --- Slow Connection Functions ---
+        function hideLowConnectionPopup() {
+            lowConnectionPopup.classList.remove('show');
+        }
+
         function checkConnectionSpeed() {
+            // If they are completely offline, ignore speed checks
+            if (!navigator.onLine) return;
+
             if ('connection' in navigator) {
                 const effectiveType = navigator.connection.effectiveType;
                 
-                // If speed is slow-2g or 2g, redirect to low.html
+                // If speed is slow-2g or 2g, SHOW the popup
                 if (effectiveType === 'slow-2g' || effectiveType === '2g') {
-                    if (!window.location.pathname.includes('/low.html')) {
-                        console.log(`[App] Slow connection detected (${effectiveType}), redirecting...`);
-                        window.location.href = '/low.html';
-                    }
+                    console.log(`[App] Slow connection detected (${effectiveType}), showing popup.`);
+                    lowConnectionPopup.classList.add('show');
+                } else {
+                    // If connection improves, auto-hide the popup
+                    hideLowConnectionPopup();
                 }
             }
         }
 
-        // 3. Listen for dynamic changes in network quality
+        // Listen for dynamic changes in network quality
         if ('connection' in navigator) {
             navigator.connection.addEventListener('change', checkConnectionSpeed);
         }
 
-        // --- Service Worker & Install Logic ---
-        
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                
-                // Check status immediately on load
-                if (!navigator.onLine) {
-                    if (!window.location.pathname.includes('/offline.html')) {
-                        window.location.href = '/offline.html';
-                    }
-                } else {
-                    checkConnectionSpeed();
-                }
+        // --- Initialization on Load ---
+        window.addEventListener('load', () => {
+            // Check initial network status
+            if (!navigator.onLine) {
+                showOfflinePopup();
+            } else {
+                checkConnectionSpeed();
+            }
 
-                // Register Service Worker
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('Service Worker registered:', reg.scope))
                     .catch(err => console.error('Service Worker registration failed:', err));
-            });
-        }
+            }
+        });
 
+        // --- PWA Installation Logic ---
         let deferredPrompt;
         const installBtn = document.getElementById('pwaInstallBtn');
 
@@ -250,7 +438,6 @@
             deferredPrompt = e;
         });
 
-        // Always handle click event
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -258,7 +445,6 @@
                 console.log(`User response to install prompt: ${outcome}`);
                 deferredPrompt = null;
             } else {
-                // Fallback guidance if prompt isn't natively available (iOS or already installed)
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
                 if (isIOS) {
                     alert('To install Delala on iOS: tap the Share button in Safari and select "Add to Home Screen".');
