@@ -3,90 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Profile</title>
+    <title>Delala - My Profile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
-        /* Compact Header Adjustment */
-        .nav-header {
-            padding: 6px 16px !important;
-            height: 46px !important;
-            min-height: 46px !important;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header-title-text {
-            font-size: 16px !important;
-            margin: 0 !important;
-        }
-
-        /* Profile Left-Aligned Layout */
-        .profile-info-section { 
-            position: relative; 
-            z-index: 5; 
-            display: flex; 
-            flex-direction: row; 
-            align-items: flex-start; 
-            gap: 14px; 
-            padding: 12px 16px 8px; 
-            text-align: left; 
-        }
-
-        .profile-left-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-            width: 72px;
-        }
-
-        .profile-right-col {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            flex: 1;
-            min-width: 0;
-            padding-top: 2px;
-        }
-
+        .nav-header { padding: 6px 16px !important; height: 46px !important; min-height: 46px !important; display: flex; align-items: center; justify-content: space-between; }
+        .header-title-text { font-size: 16px !important; margin: 0 !important; }
+        .profile-info-section { position: relative; z-index: 5; display: flex; flex-direction: row; align-items: flex-start; gap: 14px; padding: 12px 16px 8px; text-align: left; }
+        .profile-left-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 72px; }
+        .profile-right-col { display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0; padding-top: 2px; }
         .avatar-container { position: relative; margin-bottom: 6px; cursor: pointer; }
         .profile-avatar-img { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2.5px solid #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.12); background: #252830; }
         .avatar-badge { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #0052FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; border: 2px solid #FFF; font-weight: 800; font-size: 12px; }
-        
         .profile-display-name { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; color: var(--text-dark, #0F172A); min-height: 22px; }
         .profile-username { font-size: 12px; color: var(--text-muted, #64748B); font-weight: 600; margin-bottom: 8px; min-height: 16px; }
-        
-        .edit-profile-pill-btn { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 4px; 
-            padding: 5px 0; 
-            width: 100%; 
-            border-radius: 16px; 
-            background: #F1F5F9; 
-            border: 1px solid #CBD5E1; 
-            color: #0F172A; 
-            font-size: 10px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: background 0.2s; 
-        }
-        .edit-profile-pill-btn:active { background: #E2E8F0; }
-        .edit-profile-pill-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
-
-        /* Bolder Stats Row */
+        .edit-profile-pill-btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 0; width: 100%; border-radius: 16px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #0F172A; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .edit-profile-pill-btn:active { background: #E2E8F0; transform: scale(0.96); }
+        .edit-profile-pill-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; }
         .stats-metrics-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px; width: 100%; }
         .metric-block { display: flex; flex-direction: column; align-items: center; flex: 1; transition: opacity 0.15s; }
         .metric-block.clickable { cursor: pointer; }
         .metric-block.clickable:active { opacity: 0.6; }
-        .metric-num { font-size: 15px; font-weight: 900; color: #0F172A; } /* Made bolder */
-        .metric-label { font-size: 10px; color: #334155; font-weight: 700; } /* Made bolder */
-        
+        .metric-num { font-size: 15px; font-weight: 900; color: #0F172A; }
+        .metric-label { font-size: 10px; color: #334155; font-weight: 700; }
         .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); animation: slideDown 0.3s ease; }
         .upload-progress-card.active { display: block; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -95,27 +37,21 @@
         .upload-card-percent { font-size: 12px; font-weight: 800; color: #2563EB; }
         .upload-progress-bar-bg { width: 100%; height: 8px; background: #F1F5F9; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0; }
         .upload-progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563EB, #1D4ED8); border-radius: 10px; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        /* Category Bar */
         .category-tabs-bar { display: flex; align-items: center; justify-content: space-around; gap: 4px; padding: 8px 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border-light, #E2E8F0); }
         .category-pill-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 10px; border-radius: 12px; background: #F1F5F9; border: 1px solid var(--border-light, #E2E8F0); color: #475569; font-size: 10px; font-weight: 700; text-decoration: none; transition: all 0.2s ease; cursor: pointer; flex: 1; min-width: 52px; }
         .category-pill-btn:active { transform: scale(0.95); }
         .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
         .category-pill-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
-        
         .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; }
         .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark, #0F172A); overflow: hidden; cursor: pointer; }
         .post-grid-item img, .post-grid-item video { width: 100%; height: 100%; object-fit: cover; }
         .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
         .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
         .empty-grid-msg { grid-column: span 3; text-align: center; padding: 30px 16px; color: var(--text-muted, #64748B); font-size: 13px; font-weight: 600; cursor: pointer; }
-        
-        /* 3-Dot Menu Dropdown */
         .menu-wrapper { position: relative; display: inline-block; }
         .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
         .menu-action-btn:active { background-color: #F1F5F9; }
         .menu-action-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-        
         .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 190px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
         .profile-menu-dropdown.show { display: flex; }
         .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; color: #0F172A; }
@@ -123,13 +59,10 @@
         .dropdown-menu-item.logout-item { color: #DC2626; }
         .dropdown-menu-item.logout-item:active { background: #FEF2F2; }
         .dropdown-menu-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-        
-        /* Toggle Switch CSS */
         .toggle-switch { width: 34px; height: 20px; background: #CBD5E1; border-radius: 20px; position: relative; transition: background 0.3s; flex-shrink: 0; pointer-events: none; }
         .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
         .toggle-switch.on { background: #10B981; }
         .toggle-switch.on::after { transform: translateX(14px); }
-
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #E2E8F0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
         .nav-item.active { color: #0F172A; }
@@ -139,7 +72,6 @@
         .post-fab-btn:active { transform: scale(0.92); }
         .post-fab-btn svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.8; }
         .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 100000; align-items: center; justify-content: center; padding: 16px; }
         .modal-overlay.active { display: flex; }
         .modal-card { background: #FFF; border-radius: 20px; max-width: 440px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; animation: modalPop 0.25s cubic-bezier(0.16,1,0.3,1); }
@@ -148,15 +80,12 @@
         .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0F172A; }
         .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #64748B; font-weight: 700; }
         .modal-body { padding: 16px 20px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 12px; }
-        
         .preview-section { background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0; }
         .preview-section-title { font-size: 10px; font-weight: 800; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
         .preview-map-box { width: 100%; height: 160px; border-radius: 10px; margin-top: 8px; border: 1px solid #E2E8F0; overflow: hidden; }
-        
         .delete-post-btn { background: #DC2626; color: #FFF; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 6px rgba(220,38,38,0.2); }
         .delete-post-btn:active { background: #991B1B; transform: scale(0.98); }
         .delete-post-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; }
-        
         .verify-icon-wrapper { width: 48px; height: 48px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px; border: 1px solid #FEE2E2; }
         .verify-icon-wrapper svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
         .verify-subtitle { font-size: 12px; color: #64748B; text-align: center; line-height: 1.5; margin: 0 0 12px; font-weight: 500; }
@@ -170,13 +99,11 @@
         .btn-secondary:active { background: #E2E8F0; }
         .btn-danger { flex: 1; background: #DC2626; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(220,38,38,0.2); transition: background 0.15s; }
         .btn-danger:active { background: #991B1B; }
-        
         .auth-prompt-card { text-align: center; padding: 8px; }
         .auth-prompt-icon { width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
         .auth-prompt-icon svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; }
         .auth-btn-primary { width: 100%; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
         .auth-btn-secondary { width: 100%; background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; margin-top: 8px; }
-        
         .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: #0F172A; color: #FFF; padding: 10px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 200000; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
@@ -195,8 +122,6 @@
                     </button>
                     <!-- 3-Dot Dropdown -->
                     <div class="profile-menu-dropdown" id="profileMenuDropdown">
-                        
-                        <!-- Privacy Toggle -->
                         <div class="dropdown-menu-item" id="togglePrivacyBtn" style="justify-content: space-between;">
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -204,20 +129,15 @@
                             </div>
                             <div class="toggle-switch on" id="privacySwitch"></div>
                         </div>
-
                         <hr style="border:none; border-top:1px solid #E2E8F0; margin:2px 0;">
-                        
-                        <!-- Broker Portal Link -->
                         <a href="broker.html" class="dropdown-menu-item" id="brokerMenuBtn">
                             <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
                             <span>Broker Portal</span>
                         </a>
-
                         <a href="usera.html" class="dropdown-menu-item payment-item">
                             <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                             <span>Payment</span>
                         </a>
-
                         <button class="dropdown-menu-item logout-item" id="logoutBtn">
                             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                             <span>Logout</span>
@@ -239,12 +159,11 @@
             <!-- Profile Info Section -->
             <section class="profile-info-section">
                 <div class="profile-left-col">
-                    <div class="avatar-container" id="avatarClickGroup">
+                    <div class="avatar-container" id="avatarClickGroup" onclick="window.location.href='edit.html'">
                         <img src="s.png" alt="Profile" class="profile-avatar-img" id="userAvatarImg">
                         <div class="avatar-badge">+</div>
                     </div>
-                    <!-- Open edit profile button -->
-                    <button type="button" class="edit-profile-pill-btn" id="openEditProfileBtn">
+                    <button type="button" class="edit-profile-pill-btn" onclick="window.location.href='edit.html'">
                         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>Edit</span>
                     </button>
@@ -254,7 +173,6 @@
                     <h1 class="profile-display-name" id="userDisplayName">User</h1>
                     <p class="profile-username" id="userHandle">@user</p>
 
-                    <!-- Bolder Stats with Click Listeners for Network Popup -->
                     <div class="stats-metrics-row">
                         <div class="metric-block clickable" id="followingBlock"><span class="metric-num" id="followingCount">0</span><span class="metric-label">Following</span></div>
                         <div class="metric-block clickable" id="followersBlock"><span class="metric-num" id="followersCount">0</span><span class="metric-label">Followers</span></div>
@@ -288,7 +206,6 @@
                 </button>
             </nav>
 
-            <!-- Native Posts Grid -->
             <main class="posts-grid" id="postsGridContainer"></main>
         </div>
 
@@ -320,7 +237,7 @@
         </div>
     </div>
     
-    <!-- Network (Followers/Following) Modal -->
+    <!-- Network Modal -->
     <div class="modal-overlay" id="networkModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -366,7 +283,6 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Primary Firebase Setup
         const primaryConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
             authDomain: "delala-1b582.firebaseapp.com", 
@@ -381,7 +297,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Secondary Firebase Setup
         const serviceDbConfig = {
             apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
             authDomain: "tsestlive.firebaseapp.com",
@@ -391,10 +306,10 @@
         const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
         const serviceDb = getDatabase(serviceApp);
 
-        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all', currentActiveUserId = null, 
-            postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
+        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all';
+        let myLoggedInUid = null;
+        let postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
             pendingPostToDelete = null, isLoggedInUser = false;
-            
         let primaryPosts = [];
         let servicePosts = [];
 
@@ -407,26 +322,13 @@
         function hydrateCachedProfile() {
             const cachedUser = localStorage.getItem('delala_cached_profile');
             if (!cachedUser || localStorage.getItem('user_logged_out') === 'true') return false;
-            try {
-                const data = JSON.parse(cachedUser);
-                applyProfileToDOM(data);
-                isLoggedInUser = true;
-                return true;
-            } catch (e) {
-                return false;
-            }
+            try { applyProfileToDOM(JSON.parse(cachedUser)); isLoggedInUser = true; return true; } catch (e) { return false; }
         }
 
         function hydrateCachedPosts() {
             const cachedPosts = localStorage.getItem('delala_cached_posts');
             if (!cachedPosts || localStorage.getItem('user_logged_out') === 'true') return false;
-            try {
-                allUserPosts = JSON.parse(cachedPosts);
-                renderFilteredGrid(true);
-                return true;
-            } catch (e) {
-                return false;
-            }
+            try { allUserPosts = JSON.parse(cachedPosts); renderFilteredGrid(true); return true; } catch (e) { return false; }
         }
 
         function applyProfileToDOM(userData) {
@@ -444,13 +346,12 @@
             document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
             document.getElementById('ratingCount').innerText = (userData.rating || "0.0") + " ★";
             
-            // Apply network privacy toggle state
             const privacySwitch = document.getElementById('privacySwitch');
             if (userData.hasOwnProperty('isNetworkPublic')) {
                 if (userData.isNetworkPublic) privacySwitch.classList.add('on');
                 else privacySwitch.classList.remove('on');
             } else {
-                privacySwitch.classList.add('on'); // Default Public
+                privacySwitch.classList.add('on'); 
             }
         }
 
@@ -464,27 +365,12 @@
             setupVerifyModalHandlers(); 
             setupCategoryFilterButtons(); 
             setupAuthPromptEvents();
-            setupEditProfileHandlers();
             
             requestAnimationFrame(() => {
                 initLiveClock();
                 checkAndRunPendingUpload();
             });
         });
-
-        // Edit profile box (Opens without cooldown)
-        function setupEditProfileHandlers() {
-            const openBtn = document.getElementById('openEditProfileBtn');
-            const avatarGroup = document.getElementById('avatarClickGroup');
-
-            const openEdit = () => {
-                if (!isLoggedInUser) { showAuthModal(); return; }
-                window.location.href = 'edit.html'; // Removed 3-day restriction
-            };
-
-            openBtn?.addEventListener('click', openEdit);
-            avatarGroup?.addEventListener('click', openEdit);
-        }
 
         function showAuthModal() {
             const overlay = document.getElementById('authPromptModal');
@@ -503,9 +389,8 @@
         }
 
         function showToast(message) {
-            const toast = document.getElementById('toastNotification'), toastMsg = document.getElementById('toastMessage');
-            if (!toast || !toastMsg) return;
-            toastMsg.innerText = message; toast.classList.add('show');
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = message; toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
@@ -578,14 +463,11 @@
             });
         }
 
-        // --- Modals Setup ---
         function setupModalHandlers() {
-            // Preview Post Modal
             const previewOverlay = document.getElementById('postPreviewModal');
             document.getElementById('closePreviewModalBtn').addEventListener('click', closePreviewModal);
             previewOverlay.addEventListener('click', (e) => { if (e.target === previewOverlay) closePreviewModal(); });
             
-            // Network Popup (Followers/Following) Modal
             const networkOverlay = document.getElementById('networkModal');
             document.getElementById('closeNetworkModalBtn').addEventListener('click', () => {
                 networkOverlay.classList.remove('active'); networkOverlay.style.display = 'none';
@@ -598,135 +480,102 @@
             document.getElementById('followersBlock').addEventListener('click', () => openNetworkModal('Followers'));
         }
 
-        // DYNAMIC FIREBASE NETWORK FETCH (Followers & Following)
+        // ==========================================
+        //  AGGRESSIVE NETWORK FETCH & USER.HTML REDIRECT
+        // ==========================================
         async function openNetworkModal(type) {
-            if (!isLoggedInUser || !currentActiveUserId) { showAuthModal(); return; }
+            if (!isLoggedInUser || !myLoggedInUid) { showAuthModal(); return; }
             document.getElementById('networkModalTitle').innerText = type;
             const modal = document.getElementById('networkModal');
             const body = document.getElementById('networkModalBody');
             const nodeName = type.toLowerCase();
             
-            // 1. Immediately check the profile number. If it's 0, skip the database call entirely.
             const uiCountText = document.getElementById(nodeName + 'Count').innerText;
             if (uiCountText === '0' || uiCountText === '0.0' || uiCountText === '') {
-                body.innerHTML = `
-                    <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
-                        <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
-                    </div>
-                `;
+                body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
                 modal.classList.add('active');
                 modal.style.display = 'flex';
                 return;
             }
 
-            // 2. Loading State with Visual Spinner
-            body.innerHTML = `
-                <div style="text-align: center; padding: 40px 20px; color: #64748B; font-size: 14px; font-weight: 600;">
-                    <div style="width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
-                    Loading ${nodeName}...
-                    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-                </div>
-            `;
-            
+            body.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #64748B; font-size: 14px; font-weight: 600;"><div style="width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>Loading ${nodeName}...<style>@keyframes spin { to { transform: rotate(360deg); } }</style></div>`;
             modal.classList.add('active');
             modal.style.display = 'flex';
 
             try {
-                let data = null;
-                const possibleIds = new Set([currentActiveUserId]);
-                const sessionPhone = localStorage.getItem('auth_session_phone');
-                if (sessionPhone) {
-                    possibleIds.add(String(sessionPhone).replace(/\D/g, '').replace(/^0+/, ''));
-                }
+                let dataObj = {};
+                let hasData = false;
 
-                // 3. Robust Fallback Fetching System
+                const possibleIds = new Set([myLoggedInUid]);
+                const sessionPhone = localStorage.getItem('auth_session_phone');
+                if (sessionPhone) possibleIds.add(String(sessionPhone).replace(/\D/g, '').replace(/^0+/, ''));
+
                 for (const pid of possibleIds) {
                     if (!pid) continue;
-                    
-                    // Root node check (e.g. followers/UID)
-                    try {
-                        const snap = await get(ref(db, `${nodeName}/${pid}`));
-                        if (snap.exists() && typeof snap.val() === 'object') {
-                            data = snap.val(); 
-                            break;
-                        }
-                    } catch(e) { }
-                    
-                    // Nested list check (e.g. users/UID/followersList)
-                    if (!data) {
+                    // Aggressively search ALL known database paths
+                    const pathsToCheck = [
+                        `${nodeName}/${pid}`, 
+                        `users/${pid}/${nodeName}List`, 
+                        `users/${pid}/${nodeName}_list`,
+                        `users/${pid}/${nodeName}` // Legacy object structure
+                    ];
+
+                    for (const path of pathsToCheck) {
                         try {
-                            const snap = await get(ref(db, `users/${pid}/${nodeName}List`));
+                            const snap = await get(ref(db, path));
                             if (snap.exists() && typeof snap.val() === 'object') {
-                                data = snap.val(); 
-                                break;
+                                Object.assign(dataObj, snap.val());
+                                hasData = true;
                             }
                         } catch(e) { }
                     }
                 }
 
-                // If completely missing or denied
-                if (!data) {
-                    body.innerHTML = `
-                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
-                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
-                        </div>
-                    `;
+                if (!hasData) {
+                    body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
                     return;
                 }
 
-                // 4. Data Parsing Engine (Extracts User IDs from any structure)
-                let validUids = [];
-                if (Array.isArray(data)) {
-                    validUids = data;
-                } else {
-                    for (let [k, v] of Object.entries(data)) {
-                        if (k === 'count' || String(k).startsWith('_')) continue;
-                        if (typeof v === 'string') {
-                            validUids.push(v);
-                        } else if (typeof v === 'object' && v !== null && (v.userId || v.id)) {
-                            validUids.push(v.userId || v.id);
-                        } else {
-                            validUids.push(k); // Assumes keys are UIDs (Boolean Map or Data Object format)
-                        }
+                // Extract valid UIDs
+                let validUids = new Set();
+                for (let [k, v] of Object.entries(dataObj)) {
+                    if (k === 'count' || String(k).startsWith('_')) continue;
+                    if (typeof v === 'object' && v !== null && (v.uid || v.userId || v.id)) {
+                        validUids.add(v.uid || v.userId || v.id);
+                    } else if (typeof v === 'string') {
+                        validUids.add(v);
+                    } else if (k.length > 5) {
+                        validUids.add(k);
                     }
                 }
                 
-                // Deduplicate and sanitize
-                validUids = [...new Set(validUids)].filter(id => id && String(id).trim() !== '');
-
-                if (validUids.length === 0) {
-                    body.innerHTML = `
-                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
-                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
-                        </div>
-                    `;
+                if (validUids.size === 0) {
+                    body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
                     return;
                 }
 
-                // 5. Generate User Cards UI
                 let html = '<div style="display:flex; flex-direction:column; gap:12px; padding: 16px;">';
                 let validUsersFound = false;
 
-                for (const uid of validUids) {
+                for (const uid of Array.from(validUids)) {
+                    if(!uid || String(uid).trim() === '') continue;
                     const cleanUid = String(uid).replace(/\D/g, '').replace(/^0+/, '') || uid;
+                    
                     try {
                         let uSnap = await get(ref(db, `users/${uid}`));
-                        if (!uSnap.exists() && cleanUid !== uid) {
-                            uSnap = await get(ref(db, `users/${cleanUid}`)); // Fallback to Phone ID
-                        }
+                        if (!uSnap.exists() && cleanUid !== uid) uSnap = await get(ref(db, `users/${cleanUid}`));
                         
                         if (uSnap.exists()) {
                             validUsersFound = true;
                             const uData = uSnap.val();
-                            let fName = uData.firstName || uData.first_name || "";
-                            if (!fName && uData.fullName) fName = uData.fullName.split(' ')[0] || "User";
+                            let fName = uData.firstName || uData.first_name || uData.fullName?.split(' ')[0] || "User";
+                            let dName = uData.displayName || fName;
+                            let handle = uData.username || uData.handle || dName.toLowerCase().replace(/\s+/g, '');
+                            let pUrl = uData.photoURL || uData.profilePicture || "s.png";
                             
-                            const dName = fName || uData.displayName || "User";
-                            const handle = uData.username || uData.handle || dName.toLowerCase().replace(/\s+/g, '');
-                            const pUrl = uData.photoURL || uData.profilePicture || "s.png";
-                            
+                            // REDIRECTS TO user.html
                             html += `
-                                <div style="display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; background:#F8FAFC; border:1px solid #E2E8F0; transition: background 0.2s; cursor:pointer;" onclick="window.location.href='profile.html?id=${uid}'">
+                                <div style="display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; background:#F8FAFC; border:1px solid #E2E8F0; transition: background 0.2s; cursor:pointer;" onclick="window.location.href='user.html?id=${uid}'">
                                     <img src="${pUrl}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid #FFF; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
                                     <div style="flex:1;">
                                         <div style="font-size:14px; font-weight:800; color:#0F172A;">${dName}</div>
@@ -736,30 +585,14 @@
                                 </div>
                             `;
                         }
-                    } catch(err) {
-                        console.warn("Failed to load individual user profile:", uid);
-                    }
+                    } catch(err) {}
                 }
                 html += '</div>';
                 
-                if (!validUsersFound) {
-                     body.innerHTML = `
-                        <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
-                            <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p>
-                        </div>
-                    `;
-                } else {
-                    body.innerHTML = html;
-                }
+                body.innerHTML = validUsersFound ? html : `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
 
             } catch (error) {
-                // Failsafe catch block to prevent red warning texts
-                console.warn("Network modal completely failed, defaulting to empty state:", error);
-                body.innerHTML = `
-                    <div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;">
-                        <p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display at this time.</p>
-                    </div>
-                `;
+                body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display at this time.</p></div>`;
             }
         }
 
@@ -800,7 +633,7 @@
                 errorMsg.innerText = "Please enter your valid 6-digit Security PIN."; errorMsg.style.display = 'block'; return;
             }
 
-            const activePhone = localStorage.getItem('auth_session_phone') || currentActiveUserId;
+            const activePhone = localStorage.getItem('auth_session_phone') || myLoggedInUid;
             if (!activePhone) {
                 errorMsg.innerText = "User session expired. Please log in again."; errorMsg.style.display = 'block'; return;
             }
@@ -810,7 +643,7 @@
                 confirmBtn.disabled = true; confirmBtn.innerText = "Verifying..."; errorMsg.style.display = 'none';
                 let userRef = ref(db, `users/${cleanPhone}`), snapshot = await get(userRef);
 
-                if (!snapshot.exists() && currentActiveUserId) { snapshot = await get(ref(db, `users/${currentActiveUserId}`)); }
+                if (!snapshot.exists() && myLoggedInUid) { snapshot = await get(ref(db, `users/${myLoggedInUid}`)); }
                 if (!snapshot.exists()) { errorMsg.innerText = "User profile not found. Please log in again."; errorMsg.style.display = 'block'; return; }
 
                 const userData = snapshot.val(), storedPinHash = userData.securityPin || userData.pin || '', enteredPinHash = await hashPin(inputVal);
@@ -838,7 +671,6 @@
             updateTime(); setInterval(updateTime, 1000);
         }
 
-        // Main dropdown Menu Handlers (includes privacy toggle & broker click intercept)
         function setupMenuHandlers() {
             const menuBtn = document.getElementById('openMenuBtn'), dropdown = document.getElementById('profileMenuDropdown');
             menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); });
@@ -847,7 +679,6 @@
                 if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) dropdown.classList.remove('show'); 
             });
             
-            // Broker Portal Redirection Guard
             document.getElementById('brokerMenuBtn').addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!isLoggedInUser) {
@@ -858,13 +689,12 @@
                 }
             });
 
-            // Network Privacy Toggle Logic
             const privacyBtn = document.getElementById('togglePrivacyBtn');
             const privacySwitch = document.getElementById('privacySwitch');
             
             privacyBtn.addEventListener('click', async (e) => {
-                e.stopPropagation(); // keep menu open during toggle
-                if (!isLoggedInUser || !currentActiveUserId) return;
+                e.stopPropagation(); 
+                if (!isLoggedInUser || !myLoggedInUid) return;
                 
                 const isCurrentlyOn = privacySwitch.classList.contains('on');
                 const newValue = !isCurrentlyOn;
@@ -873,17 +703,15 @@
                 else privacySwitch.classList.remove('on');
                 
                 try {
-                    await update(ref(db, `users/${currentActiveUserId}`), { isNetworkPublic: newValue });
+                    await update(ref(db, `users/${myLoggedInUid}`), { isNetworkPublic: newValue });
                     showToast(`Network visibility is now ${newValue ? 'Public' : 'Private'}`);
                 } catch(err) {
-                    // Revert toggle if DB fails
                     if(!newValue) privacySwitch.classList.add('on');
                     else privacySwitch.classList.remove('on');
                     showToast("Failed to update privacy settings.");
                 }
             });
 
-            // Logout
             document.getElementById('logoutBtn').addEventListener('click', async () => {
                 try {
                     localStorage.setItem('user_logged_out', 'true'); 
@@ -924,10 +752,33 @@
         }
 
         function evaluateAuthState(user) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetProfileId = urlParams.get('id') || urlParams.get('userId');
             const sessionPhone = localStorage.getItem('auth_session_phone');
-            if (user) { isLoggedInUser = true; localStorage.removeItem('user_logged_out'); fetchUserDataAndPosts(user.uid, user); }
-            else if (sessionPhone) { isLoggedInUser = true; localStorage.removeItem('user_logged_out'); fetchUserByPhone(sessionPhone); }
-            else { renderLoggedOutGuestState(); }
+            const sessionUid = localStorage.getItem('auth_session_user_id');
+            
+            if (user) myLoggedInUid = user.uid;
+            else if (sessionUid) myLoggedInUid = sessionUid;
+            else if (sessionPhone) myLoggedInUid = sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
+
+            if (myLoggedInUid) {
+                isLoggedInUser = true;
+                localStorage.removeItem('user_logged_out');
+            } else {
+                isLoggedInUser = false;
+            }
+
+            // REDIRECT TO USER.HTML IF VIEWING SOMEONE ELSE
+            if (targetProfileId && targetProfileId !== myLoggedInUid && !String(sessionPhone).includes(targetProfileId)) {
+                window.location.replace(`user.html?id=${targetProfileId}`);
+                return;
+            }
+
+            if (myLoggedInUid) {
+                fetchUserDataAndPosts(myLoggedInUid);
+            } else {
+                renderLoggedOutGuestState();
+            }
         }
 
         function setupAuthListener() {
@@ -937,65 +788,31 @@
             });
         }
 
-        async function fetchUserByPhone(phone) {
-            const cleanPhone = phone.replace(/^0+/, '');
-            try {
-                const snapshot = await get(ref(db, `users/${cleanPhone}`));
-                if (snapshot.exists()) { renderUserProfile(snapshot.val(), cleanPhone); return; }
-                const querySnap = await get(ref(db, 'users'));
-                if (querySnap.exists()) {
-                    const data = querySnap.val();
-                    const matchedKey = Object.keys(data).find(k => {
-                        const u = data[k];
-                        const uPhone = String(u.cleanPhone || u.phone || u.phoneNumber || '').replace(/\D/g, '').replace(/^0+/, '');
-                        return uPhone === cleanPhone || k === cleanPhone;
-                    });
-                    if (matchedKey) {
-                        renderUserProfile(data[matchedKey], matchedKey);
-                        return;
-                    }
-                }
-                renderLoggedOutGuestState();
-            } catch (err) { renderLoggedOutGuestState(); }
-        }
-
-        function renderUserProfile(userData, userId) {
-            isLoggedInUser = true;
-            currentActiveUserId = userId;
-            localStorage.setItem('delala_cached_profile', JSON.stringify(userData));
-            applyProfileToDOM(userData);
-            fetchPostsForUser(userId);
-        }
-
-        function fetchUserDataAndPosts(userId, authUser) {
-            isLoggedInUser = true;
-            currentActiveUserId = userId;
+        function fetchUserDataAndPosts(userId) {
             get(ref(db, `users/${userId}`)).then((snapshot) => {
                 if (snapshot.exists()) { 
-                    renderUserProfile(snapshot.val(), userId); 
-                } else {
-                    const parts = authUser.displayName ? authUser.displayName.split(' ') : [], firstName = parts[0] || "User";
-                    const fallbackProfile = { displayName: authUser.displayName || firstName, photoURL: authUser.photoURL || 's.png', following: 0, followers: 0 };
-                    localStorage.setItem('delala_cached_profile', JSON.stringify(fallbackProfile));
+                    applyProfileToDOM(snapshot.val());
+                    localStorage.setItem('delala_cached_profile', JSON.stringify(snapshot.val()));
+                } else if (auth.currentUser) {
+                    const fallbackProfile = { displayName: auth.currentUser.displayName || "User", photoURL: auth.currentUser.photoURL || 's.png', following: 0, followers: 0 };
                     applyProfileToDOM(fallbackProfile);
-                    fetchPostsForUser(userId);
+                    localStorage.setItem('delala_cached_profile', JSON.stringify(fallbackProfile));
+                } else {
+                    renderLoggedOutGuestState();
                 }
-            }).catch(() => fetchPostsForUser(userId));
+            }).catch(() => { });
+            
+            fetchPostsForUser(userId);
         }
 
         function fetchPostsForUser(userId) {
             if (postsUnsubscribe) postsUnsubscribe();
             if (servicePostsUnsubscribe) servicePostsUnsubscribe();
 
-            const sessionPhone = localStorage.getItem('auth_session_phone') || '';
-            const cleanPhone = String(sessionPhone).replace(/\D/g, '').replace(/^0+/, '');
-            const targetIds = new Set([String(userId), cleanPhone, sessionPhone].filter(Boolean));
-
             const isPostBelongingToUser = (post) => {
                 if (!post) return false;
                 const pUserId = String(post.userId || post.uid || post.user_id || '');
-                const pPhone = String(post.postedByPhone || post.phone || post.userPhone || post.cleanPhone || '').replace(/\D/g, '').replace(/^0+/, '');
-                return targetIds.has(pUserId) || (pPhone && targetIds.has(pPhone));
+                return pUserId === String(userId) || (post.postedByPhone && post.postedByPhone.includes(userId));
             };
 
             const parseTimestamp = (p) => {
@@ -1003,13 +820,11 @@
                 if (!val) return 0;
                 const num = Number(val);
                 if (!isNaN(num) && num > 0) return num;
-                const parsedDate = new Date(val).getTime();
-                return isNaN(parsedDate) ? 0 : parsedDate;
+                return isNaN(new Date(val).getTime()) ? 0 : new Date(val).getTime();
             };
 
             const updateGrid = () => {
                 allUserPosts = [...primaryPosts, ...servicePosts];
-                
                 allUserPosts.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
                 
                 let totalLikes = 0;
@@ -1022,12 +837,8 @@
             postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
                 primaryPosts = [];
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    Object.keys(data).forEach(key => {
-                        const item = data[key];
-                        if (isPostBelongingToUser(item)) {
-                            primaryPosts.push({ id: key, _dbSource: 'primary', ...item });
-                        }
+                    snapshot.forEach(c => {
+                        if (isPostBelongingToUser(c.val())) primaryPosts.push({ id: c.key, _dbSource: 'primary', ...c.val() });
                     });
                 }
                 updateGrid();
@@ -1036,12 +847,8 @@
             servicePostsUnsubscribe = onValue(ref(serviceDb, 'posts'), (snapshot) => {
                 servicePosts = [];
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    Object.keys(data).forEach(key => {
-                        const item = data[key];
-                        if (isPostBelongingToUser(item)) {
-                            servicePosts.push({ id: key, _dbSource: 'service', ...item });
-                        }
+                    snapshot.forEach(c => {
+                        if (isPostBelongingToUser(c.val())) servicePosts.push({ id: c.key, _dbSource: 'service', ...c.val() });
                     });
                 }
                 updateGrid();
@@ -1049,17 +856,11 @@
         }
 
         function isPostInCategory(post, targetCategory) {
-            if (targetCategory === 'hidden') {
-                return post.isHidden === true;
-            }
-            if (post.isHidden) {
-                return false; 
-            }
+            if (targetCategory === 'hidden') return post.isHidden === true;
+            if (post.isHidden) return false; 
             if (targetCategory === 'all') return true;
-            const categoryVal = String(post.category || post.rentalType || post.type || post.postType || post.post_type || '').toLowerCase().trim(),
-                  target = targetCategory.toLowerCase().trim();
-
-            return categoryVal === target;
+            const categoryVal = String(post.category || post.rentalType || post.type || post.postType || '').toLowerCase().trim();
+            return categoryVal === targetCategory.toLowerCase().trim();
         }
 
         function renderFilteredGrid(isFromCache = false) {
@@ -1138,28 +939,21 @@
                         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         <span>Delete Post</span>
                     </button>
-                </div>`;
+                </div>
+            `;
 
             const previewModal = document.getElementById('postPreviewModal');
             previewModal.classList.add('active'); previewModal.style.display = 'flex';
             
             document.getElementById('deletePostBtn')?.addEventListener('click', () => openVerifyModal(post));
-            
-            document.getElementById('editPostBtn')?.addEventListener('click', () => {
-                const sourceDb = post._dbSource || 'primary';
-                window.location.href = `edit1.html?postId=${post.id}&db=${sourceDb}`;
-            });
-
+            document.getElementById('editPostBtn')?.addEventListener('click', () => window.location.href = `edit1.html?postId=${post.id}&db=${post._dbSource || 'primary'}`);
             document.getElementById('hidePostBtn')?.addEventListener('click', async () => {
                 const targetDatabase = post._dbSource === 'service' ? serviceDb : db;
                 try {
-                    const postRef = ref(targetDatabase, `posts/${post.id}`);
-                    await update(postRef, { isHidden: !isHidden });
+                    await update(ref(targetDatabase, `posts/${post.id}`), { isHidden: !isHidden });
                     showToast(isHidden ? "Post unhidden successfully!" : "Post hidden successfully!");
                     closePreviewModal();
-                } catch (err) {
-                    showToast("Failed to update post status.");
-                }
+                } catch (err) { showToast("Failed to update post status."); }
             });
 
             if (post.location && post.location.latitude && post.location.longitude) {

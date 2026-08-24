@@ -347,19 +347,17 @@
             let requestedCategory = urlParams.get('category');
             let requestedLocation = urlParams.get('location');
 
-            // Save to session or retrieve if not in URL
             if (requestedCategory) sessionStorage.setItem('rental_cat_filter', requestedCategory);
             else requestedCategory = sessionStorage.getItem('rental_cat_filter');
 
             if (requestedLocation) sessionStorage.setItem('rental_loc_filter', requestedLocation);
             else requestedLocation = sessionStorage.getItem('rental_loc_filter');
 
-            // Apply filters
             if (requestedCategory && requestedCategory !== 'all') {
                 activeCategoryFilter = requestedCategory.toLowerCase();
                 if (DOM.catLinkBtn) DOM.catLinkBtn.classList.add('active-filter-indicator');
             } else {
-                sessionStorage.removeItem('rental_cat_filter'); // clear if explicitly 'all'
+                sessionStorage.removeItem('rental_cat_filter'); 
             }
 
             if (requestedLocation) {
@@ -367,7 +365,6 @@
                 if (DOM.locLinkBtn) DOM.locLinkBtn.classList.add('active-filter-indicator');
             }
 
-            // Keep menu links updated with current state
             if (DOM.catLinkBtn) {
                 DOM.catLinkBtn.setAttribute('href', `cat.html${activeLocationFilter ? '?location=' + encodeURIComponent(activeLocationFilter) : ''}`);
             }
@@ -430,8 +427,15 @@
             const cleanPhone = phone.replace(/^0+/, '');
             try {
                 const snapshot = await get(ref(db, `users/${cleanPhone}`));
+                
+                // Fetch the new root-level following node
+                const followingSnap = await get(ref(db, `following/${cleanPhone}`));
+                const followingList = followingSnap.exists() ? followingSnap.val() : {};
+
                 if (snapshot.exists()) {
-                    applyUserDataToDOM(snapshot.val(), cleanPhone);
+                    const data = snapshot.val();
+                    data._realFollowingList = followingList;
+                    applyUserDataToDOM(data, cleanPhone);
                     return;
                 }
                 const querySnap = await get(ref(db, 'users'));
@@ -443,6 +447,8 @@
                         return uPhone === cleanPhone || k === cleanPhone;
                     });
                     if (matchedKey) {
+                        const matchedFollowingSnap = await get(ref(db, `following/${matchedKey}`));
+                        data[matchedKey]._realFollowingList = matchedFollowingSnap.exists() ? matchedFollowingSnap.val() : {};
                         applyUserDataToDOM(data[matchedKey], matchedKey);
                         return;
                     }
@@ -455,12 +461,24 @@
             currentActiveUserId = userId;
             try {
                 const snapshot = await get(ref(db, `users/${userId}`));
+                
+                // Fetch the new root-level following node
+                const followingSnap = await get(ref(db, `following/${userId}`));
+                const followingList = followingSnap.exists() ? followingSnap.val() : {};
+
                 if (snapshot.exists()) {
-                    applyUserDataToDOM(snapshot.val(), userId);
+                    const userData = snapshot.val();
+                    userData._realFollowingList = followingList;
+                    applyUserDataToDOM(userData, userId);
                 } else {
                     const parts = authUser.displayName ? authUser.displayName.split(' ') : [];
                     const firstName = parts[0] || "User";
-                    const fallbackData = { displayName: authUser.displayName || firstName, firstName: firstName, photoURL: authUser.photoURL || '' };
+                    const fallbackData = { 
+                        displayName: authUser.displayName || firstName, 
+                        firstName: firstName, 
+                        photoURL: authUser.photoURL || '',
+                        _realFollowingList: followingList
+                    };
                     applyUserDataToDOM(fallbackData, userId);
                 }
             } catch (e) { renderGuestState(); }
@@ -479,7 +497,10 @@
             currentUserDisplayName = userData.displayName || `${firstName} ${middleName}`.trim() || userData.username || "User";
             currentUserPhoto = userData.profilePicture || userData.photoURL || '';
 
-            if (userData.following_list && typeof userData.following_list === 'object') {
+            // Updated checks to read the true following list we just fetched
+            if (userData._realFollowingList) {
+                userFollowingSet = new Set(Object.keys(userData._realFollowingList));
+            } else if (userData.following_list && typeof userData.following_list === 'object') {
                 userFollowingSet = new Set(Object.keys(userData.following_list));
             } else if (userData.following && typeof userData.following === 'object') {
                 userFollowingSet = new Set(Object.keys(userData.following));
@@ -543,7 +564,6 @@
                 if (!catStr.includes(activeCategoryFilter)) return false;
             }
             if (activeLocationFilter) {
-                // ADDED region, zone, uniqueName, etc. to completely support broader location searches
                 const locStr = [
                     item.address, 
                     item.locationString, 
@@ -559,7 +579,6 @@
                     item.locationDetails?.landmark
                 ].filter(Boolean).join(' ').toLowerCase();
                 
-                // Allow matches like "oromia" if the filter is "oromia region" to be safer.
                 const searchStr = activeLocationFilter.replace(' region', '').trim();
                 
                 if (!locStr.includes(searchStr)) return false;
@@ -729,12 +748,9 @@
             return null;
         }
 
-        // --- ENHANCED GEOHASH FETCHING ---
         async function fetchNearbyItemsFromDB() {
             if (!currentUserCoordinates) return;
             isLoading = true;
-            // Changed precision to 3 (approx 156km x 156km box) for better accuracy 
-            // Ensures points within 50km are found even if they cross a level-4 geohash boundary.
             const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
             const nodePaths = ['posts', 'delala_new'];
             const matchingItems = [];
@@ -742,7 +758,6 @@
 
             try {
                 for (const nodePath of nodePaths) {
-                    // Query Realtime Database using the 'geohash' index as defined in your rules
                     const q = query(ref(db, nodePath), orderByChild('geohash'), startAt(userGeohash), endAt(userGeohash + '\uf8ff'));
                     const snapshot = await get(q);
                     
@@ -754,7 +769,6 @@
                         processDistanceCheck(rawItem, seenIds, matchingItems);
                     });
 
-                    // Fallback: If DB items don't have the 'geohash' property populated, fetch recent and filter client-side
                     if (!itemsFoundByGeohash) {
                         const fallbackQ = query(ref(db, nodePath), limitToLast(50));
                         const fbSnapshot = await get(fallbackQ);
@@ -865,48 +879,92 @@
             if (userId && userId !== 'unknown') window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
         };
 
+        // ==========================================
+        //  DATABASE SAVER - REAL USER INFO
+        // ==========================================
         window.toggleFollowUser = async function(event, authorId) {
             if (event) event.stopPropagation();
             const activeUserId = getActiveLoggedInUserId();
             if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to follow.", "🔐");
             if (activeUserId === authorId) return triggerSystemAlert("Action Restricted", "You cannot follow yourself.", "ℹ️");
 
-            const followRef = ref(db, `users/${activeUserId}/following_list/${authorId}`);
-            const followingCountRef = ref(db, `users/${activeUserId}/following`);
-            const followerCountRef = ref(db, `users/${authorId}/followers`);
+            // Disable buttons temporarily
+            const btns = document.querySelectorAll(`.follow-btn-${authorId}`);
+            btns.forEach(btn => { btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; });
+
+            const followingRef = ref(db, `following/${activeUserId}/${authorId}`);
+            const followerRef = ref(db, `followers/${authorId}/${activeUserId}`);
+            
+            const myUserRef = ref(db, `users/${activeUserId}/following`);
+            const targetUserRef = ref(db, `users/${authorId}/followers`);
             
             const isFollowing = userFollowingSet.has(authorId);
 
             try {
+                let myFollowingCount = parseInt((await get(myUserRef)).val()) || 0;
+                let targetFollowersCount = parseInt((await get(targetUserRef)).val()) || 0;
+
                 if (isFollowing) { 
-                    await remove(followRef); 
+                    // --- UNFOLLOW ---
+                    await remove(followingRef); 
+                    await remove(followerRef);
                     userFollowingSet.delete(authorId); 
-                    runTransaction(followingCountRef, current => Math.max(0, (current || 1) - 1));
-                    runTransaction(followerCountRef, current => Math.max(0, (current || 1) - 1));
+                    await set(myUserRef, Math.max(0, myFollowingCount - 1));
+                    await set(targetUserRef, Math.max(0, targetFollowersCount - 1));
                 } else { 
-                    await set(followRef, true); 
+                    // --- FOLLOW (Saves Rich Object) ---
+                    const now = Date.now();
+                    
+                    // Fetch real info to save
+                    let myData = {};
+                    try { const mSnap = await get(ref(db, `users/${activeUserId}`)); if(mSnap.exists()) myData = mSnap.val(); } catch(e){}
+                    
+                    let targetData = userProfileCache[authorId] || {};
+                    if (!targetData || Object.keys(targetData).length === 0) {
+                        try { const tSnap = await get(ref(db, `users/${authorId}`)); if(tSnap.exists()) targetData = tSnap.val(); } catch(e){}
+                    }
+
+                    await set(followingRef, {
+                        uid: authorId,
+                        displayName: targetData.displayName || targetData.fullName || targetData.firstName || "User",
+                        username: targetData.username || targetData.handle || "user",
+                        photoURL: targetData.photoURL || targetData.profilePicture || "s.png",
+                        timestamp: now
+                    });
+
+                    await set(followerRef, {
+                        uid: activeUserId,
+                        displayName: myData.displayName || myData.fullName || myData.firstName || "User",
+                        username: myData.username || myData.handle || "user",
+                        photoURL: myData.photoURL || myData.profilePicture || "s.png",
+                        timestamp: now
+                    });
+
                     userFollowingSet.add(authorId); 
-                    runTransaction(followingCountRef, current => (current || 0) + 1);
-                    runTransaction(followerCountRef, current => (current || 0) + 1);
+                    await set(myUserRef, myFollowingCount + 1);
+                    await set(targetUserRef, targetFollowersCount + 1);
                 }
                 
-                document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
-                    btn.innerText = isFollowing ? "+ Follow" : "Following";
-                    isFollowing ? btn.classList.remove('following') : btn.classList.add('following');
+                // Update UI Buttons
+                btns.forEach(btn => {
+                    btn.innerText = userFollowingSet.has(authorId) ? "Following" : "+ Follow";
+                    userFollowingSet.has(authorId) ? btn.classList.add('following') : btn.classList.remove('following');
                 });
-            } catch (err) { console.error("Follow error:", err); }
+            } catch (err) { 
+                console.error("Follow error:", err); 
+                triggerSystemAlert("Error", "Failed to update follow status.", "⚠️");
+            } finally {
+                btns.forEach(btn => { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; });
+            }
         };
 
-        // --- OPTIMISTIC UI UPDATE FOR LIKE BUTTON ---
         window.toggleLikePost = function(event, itemId, path) {
             if (event) event.stopPropagation();
             const activeUserId = getActiveLoggedInUserId();
             if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
             
-            // 1. Update UI Instantly
             const likeBtn = document.getElementById(`like-btn-${itemId}`);
             const likeCountNode = document.getElementById(`like-count-${itemId}`);
-            
             if (!likeBtn || !likeCountNode) return;
 
             const isCurrentlyLiked = likeBtn.classList.contains('liked');
@@ -915,7 +973,6 @@
             likeBtn.classList.toggle('liked', !isCurrentlyLiked);
             likeCountNode.innerText = isCurrentlyLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
 
-            // Update internal cache
             const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
             if (cachedItem) {
                 if (!cachedItem.likedBy) cachedItem.likedBy = {};
@@ -929,7 +986,6 @@
                 }
             }
 
-            // 2. Perform background Database sync without freezing the UI
             const likedByRef = ref(db, `${path}/${itemId}/likedBy/${activeUserId}`);
             const likesCountRef = ref(db, `${path}/${itemId}/likes`);
 
@@ -941,10 +997,7 @@
                     set(likedByRef, true);
                     runTransaction(likesCountRef, (current) => (current || 0) + 1);
                 }
-            } catch (err) { 
-                console.error("Background sync like error:", err); 
-                // Optional: Revert UI if needed, but typically fine to fail silently on like toggles
-            }
+            } catch (err) { console.error("Background sync like error:", err); }
         };
 
         window.toggleCommentBox = function(event, itemId) {
