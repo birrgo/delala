@@ -93,6 +93,121 @@
             font-weight: 700;
             color: #334155;
         }
+
+        /* Professional App Popup Styling - Restricted to Main Body */
+        .custom-popup-overlay {
+            position: fixed;
+            top: 45px;      /* Adjusted closer to top to give room to lift */
+            bottom: 95px;   /* Ensures it clears the bottom nav */
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 60px; /* Increased padding significantly to lift the popup card higher */
+            z-index: 900;   /* Lower than bottom-nav (1000) so menu remains strictly top level */
+            opacity: 1; /* Make visible by default */
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-popup-overlay.hide-popup {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .custom-popup-modal {
+            background: #ffffff;
+            width: 85%;
+            max-width: 320px;
+            border-radius: 24px;
+            padding: 20px 24px 26px; 
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(0) scale(1); /* Ensure it's in place */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-popup-overlay.hide-popup .custom-popup-modal {
+            transform: translateY(20px) scale(0.95);
+        }
+        
+        .popup-top-brand {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0F2C59;
+            margin: 0 0 5px 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .popup-status-icon {
+            font-size: 44px;
+            display: inline-block;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .popup-main-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+
+        .popup-body-desc {
+            font-size: 14.5px;
+            color: #64748B;
+            margin: 0;
+            line-height: 1.5;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .popup-amharic-desc {
+            font-size: 14px;
+            color: #475569;
+            margin: 0;
+            line-height: 1.6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .popup-dismiss-action {
+            background: #0F2C59;
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 15px 20px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
+            margin-top: 15px;
+        }
+
+        .popup-dismiss-action:active {
+            background: #081B38;
+            transform: scale(0.97);
+        }
+        
+        .popup-divider {
+            border: none;
+            border-top: 1px solid #E2E8F0;
+            width: 100%;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -108,12 +223,25 @@
             </defs>
         </svg>
 
+        <!-- The Startup Popup that will be shown immediately inside the body only -->
         <div class="custom-popup-overlay" id="customPopupModule">
             <div class="custom-popup-modal">
-                <span class="popup-status-icon" id="popupIconNode">ℹ️</span>
-                <h3 class="popup-main-title" id="popupTitleNode">Status Alert</h3>
-                <p class="popup-body-desc" id="popupDescNode">Notification update context.</p>
-                <button class="popup-dismiss-action" id="closePopupBtn">Continue</button>
+                <h4 class="popup-top-brand">Hulum Gebeya | ሁሉም ገበያ</h4>
+                <span class="popup-status-icon" id="popupIconNode">🚀</span>
+                
+                <h3 class="popup-main-title" id="popupTitleNode">Coming Soon!</h3>
+                <p class="popup-body-desc" id="popupDescNode">
+                    The Future of Shopping is Almost Here! We are building a massive, all-in-one marketplace just for you. Whether you want to discover great deals or start selling your own products to a huge audience, Hulum Gebeya is the place to do it. Everything you want, for everyone. Stay tuned!
+                </p>
+                
+                <hr class="popup-divider">
+                
+                <h3 class="popup-main-title">በቅርብ ቀን ይጠብቁን!</h3>
+                <p class="popup-amharic-desc">
+                    ዘመናዊው የግብይት ስፍራችን በቅርቡ ይከፈታል! የሚፈልጉትን ማንኛውንም ዕቃ በቀላሉ የሚገዙበት፣ እንዲሁም የራስዎን ምርቶች ለብዙሃን የሚያቀርቡበትን ግዙፍ እና ዘመናዊ የገበያ ስፍራ እየገነባን ነው። ሁሉም ነገር ለሁሉም ሰው የተዘጋጀበት — ሁሉም ገበያ! ለትልቅ ግብይት ዝግጁ ይሁኑ!
+                </p>
+                
+                <button class="popup-dismiss-action" id="closePopupBtn">Got it</button>
             </div>
         </div>
 
@@ -166,7 +294,7 @@
             </footer>
         </main>
 
-        <!-- Bottom Navigation Menu matched to Delala structure -->
+        <!-- Bottom Navigation Menu -->
         <nav class="bottom-nav">
             <!-- 1. Rental -->
             <a id="nav-rental" href="rental.html" class="nav-item" data-filter="Rental">
@@ -184,7 +312,7 @@
                 <span>Selling</span>
             </a>
 
-            <!-- 5th Curved Center Post Button -->
+            <!-- 3. Curved Center Post Button -->
             <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -195,15 +323,17 @@
                 <span class="post-fab-label">Post</span>
             </a>
 
-            <!-- 3. Job Vacancy -->
-            <a id="nav-vacancy" href="vacancy.html" class="nav-item" data-filter="Job Vacancy">
+            <!-- 4. Service -->
+            <a id="nav-service" href="service.html" class="nav-item" data-filter="Service">
                 <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
                 </div>
-                <span>Vacancy</span>
+                <span>Service</span>
             </a>
 
-            <!-- 4. Profile -->
+            <!-- 5. Profile -->
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -240,10 +370,12 @@
             setupSearchEngineControls();
             setupNewsReaderModalControls();
 
+            // Setup Professional Popup close button to redirect to rental.html
             const closeBtn = document.getElementById('closePopupBtn');
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
-                    document.getElementById('customPopupModule').classList.remove('show-popup');
+                    // Redirect directly to rental.html instead of just hiding it
+                    window.location.href = 'rental.html';
                 });
             }
             
