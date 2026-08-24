@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Offline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #0F172A;
+        }
+
+        .status-card {
+            background: #FFFFFF;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+            border: 1px solid #E2E8F0;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon-container {
+            width: 72px;
+            height: 72px;
+            background: #FEF2F2; /* Soft red background */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: #DC2626; /* Red accent */
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        .icon-container svg {
+            width: 32px;
+            height: 32px;
+            stroke-width: 2.5;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            font-size: 14.5px;
+            color: #64748B;
+            margin: 0 0 28px 0;
+            line-height: 1.5;
+        }
+
+        .primary-btn {
+            background: #0F2C59;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            padding: 15px 24px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
+        }
+
+        .primary-btn:active {
+            transform: scale(0.97);
+            background: #081B38;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatIcon {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-card">
+        <div class="icon-container">
+            <svg viewBox="0 0 24 24">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+        </div>
+        <h1 class="title">You are Offline</h1>
+        <p class="description">It looks like you've lost your network connection. Please check your Wi-Fi or cellular data.</p>
+        
+        <button class="primary-btn" onclick="window.history.back()">Try Again</button>
+    </div>
+
+    <!-- Automatically reload/go back when internet is restored -->
+    <script>
+        window.addEventListener('online', function() {
+            window.history.back(); // Or replace with window.location.href = 'index.html';
+        });
+    </script>
+
+</body>
+</html>

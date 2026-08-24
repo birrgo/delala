@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hulum - Slow Connection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #0F172A;
+        }
+
+        .status-card {
+            background: #FFFFFF;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+            border: 1px solid #E2E8F0;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon-container {
+            width: 72px;
+            height: 72px;
+            background: #FFF7ED; /* Soft orange background */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: #EA580C; /* Orange accent */
+            animation: pulseWarning 2s infinite ease-in-out;
+        }
+
+        .icon-container svg {
+            width: 32px;
+            height: 32px;
+            stroke-width: 2.5;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            font-size: 14.5px;
+            color: #64748B;
+            margin: 0 0 28px 0;
+            line-height: 1.5;
+        }
+
+        .primary-btn {
+            background: #0F2C59;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            padding: 15px 24px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .primary-btn:active {
+            transform: scale(0.97);
+            background: #081B38;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: #64748B;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.2s ease;
+        }
+
+        .secondary-btn:active {
+            color: #0F172A;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseWarning {
+            0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.2); }
+            70% { box-shadow: 0 0 0 15px rgba(234, 88, 12, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-card">
+        <div class="icon-container">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 20h.01"></path>
+                <path d="M8.5 16.429a5 5 0 0 1 7 0"></path>
+                <path d="M5 12.859a10 10 0 0 1 14 0" opacity="0.3"></path>
+                <path d="M2 9.289a15 15 0 0 1 20 0" opacity="0.3"></path>
+            </svg>
+        </div>
+        <h1 class="title">Slow Connection</h1>
+        <p class="description">Your internet connection seems unstable. Things might take a little longer to load than usual.</p>
+        
+        <button class="primary-btn" onclick="window.location.reload()">Refresh Page</button>
+        <button class="secondary-btn" onclick="window.history.back()">Continue Anyway</button>
+    </div>
+
+</body>
+</html>
