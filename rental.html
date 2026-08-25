@@ -65,14 +65,6 @@
             height: 18px;
         }
 
-        .header-controls-left .location-action-btn:active,
-        .header-controls-left .search-action-btn:active,
-        .header-controls-right .location-action-btn:active,
-        .header-controls-right .search-action-btn:active {
-            transform: scale(0.92);
-            background: rgba(56, 189, 248, 0.25);
-        }
-
         .header-title-container {
             position: absolute;
             left: 50%;
@@ -106,7 +98,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100%;
             text-transform: capitalize;
         }
 
@@ -123,7 +114,6 @@
             border-radius: 8px;
             z-index: 5;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            letter-spacing: -0.01em;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             text-transform: capitalize;
         }
@@ -150,7 +140,17 @@
             background: #F1F5F9; border: 1px solid #E2E8F0; color: #475569;
             flex-shrink: 0; cursor: pointer; transition: all 0.2s ease;
         }
-        .btn-view-author-profile-icon:active { transform: scale(0.9); background: #E2E8F0; }
+        
+        /* Pull to refresh styles */
+        .ptr-indicator {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            height: 0; overflow: hidden; transition: height 0.25s ease;
+            color: #38BDF8; font-size: 13px; font-weight: 700;
+            background: transparent; width: 100%;
+        }
+        .ptr-icon { width: 20px; height: 20px; fill: currentColor; transform: rotate(0deg); transition: transform 0.3s ease;}
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .ptr-spin { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
@@ -214,6 +214,12 @@
         </header>
 
         <main class="app-content" style="padding-top: 70px;">
+            <!-- Pull To Refresh Indicator -->
+            <div id="ptr-indicator" class="ptr-indicator">
+                <svg class="ptr-icon" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"></path></svg>
+                <span id="ptr-text">Pull to refresh</span>
+            </div>
+
             <div class="broadcasts-container" id="broadcastsContainer"></div>
 
             <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
@@ -283,11 +289,25 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        const SafeCache = {
+            set: (k, v) => { try { sessionStorage.setItem(k, v); } catch(e){} },
+            get: (k) => { try { return sessionStorage.getItem(k); } catch(e){ return null; } },
+            remove: (k) => { try { sessionStorage.removeItem(k); } catch(e){} }
+        };
+        const SafeLocal = {
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e){} },
+            get: (k) => { try { return localStorage.getItem(k); } catch(e){ return null; } },
+            remove: (k) => { try { localStorage.removeItem(k); } catch(e){} }
+        };
+
+        const CACHE_KEY = 'hulum_rental_cache_v1';
         const BATCH_LIMIT = 8; 
+        
         let lastLoadedTimestamp = null;
         let lastLoadedKey = null;
         let isLoading = false;
         let hasMoreItems = true;
+        let isRefreshingView = false; // Prevents clearing old data until new data arrives
         
         let localCachedBroadcasts = [];
         let currentUserCoordinates = null;
@@ -321,6 +341,191 @@
         const BITS = [16, 8, 4, 2, 1];
         const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
+        function setupNavigationStateSaving() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.href && !link.href.includes('#')) {
+                        SafeCache.set('rental_scroll_pos', window.scrollY.toString());
+                    }
+                });
+            });
+        }
+
+        function setupPullToRefresh() {
+            let startY = 0; let currentY = 0; let isPulling = false;
+            const ptrEl = document.getElementById('ptr-indicator');
+            const ptrText = document.getElementById('ptr-text');
+            const ptrIcon = document.querySelector('.ptr-icon');
+
+            if (!ptrEl || !ptrText || !ptrIcon) return;
+
+            document.addEventListener('touchstart', e => {
+                if (window.scrollY === 0) {
+                    startY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchmove', e => {
+                if (!isPulling) return;
+                currentY = e.touches[0].clientY;
+                let pullDist = currentY - startY;
+                
+                if (pullDist > 0 && window.scrollY === 0) {
+                    let height = Math.min(pullDist / 2, 70); 
+                    ptrEl.style.height = height + 'px';
+                    
+                    if (height > 55) {
+                        ptrText.innerText = "Release to refresh";
+                        ptrIcon.style.transform = "rotate(180deg)";
+                    } else {
+                        ptrText.innerText = "Pull to refresh";
+                        ptrIcon.style.transform = "rotate(0deg)";
+                    }
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchend', () => {
+                if (!isPulling) return;
+                isPulling = false;
+                let pullDist = currentY - startY;
+                
+                if (pullDist > 110 && window.scrollY === 0) {
+                    ptrEl.style.height = '50px';
+                    ptrText.innerText = "Refreshing...";
+                    ptrIcon.classList.add('ptr-spin');
+                    refreshData();
+                } else {
+                    ptrEl.style.height = '0px';
+                    ptrIcon.style.transform = "rotate(0deg)";
+                }
+                startY = 0; currentY = 0;
+            });
+        }
+
+        // BACKGROUND REFRESH: Keeps old items visible until new ones load
+        function refreshData() {
+            isRefreshingView = true;
+            isLoading = false; // Reset lock just in case
+            
+            // Reset pagination to fetch top newest items, BUT leave DOM alone
+            lastLoadedTimestamp = null;
+            lastLoadedKey = null;
+            hasMoreItems = true;
+            
+            fetchItemsBatch().finally(() => {
+                // Fetch is completely done, hide the spinner
+                isRefreshingView = false;
+                
+                const ptrEl = document.getElementById('ptr-indicator');
+                const ptrIcon = document.querySelector('.ptr-icon');
+                if (ptrEl) ptrEl.style.height = '0px';
+                setTimeout(() => {
+                    if (ptrIcon) {
+                        ptrIcon.classList.remove('ptr-spin');
+                        ptrIcon.style.transform = "rotate(0deg)";
+                    }
+                    const pText = document.getElementById('ptr-text');
+                    if (pText) pText.innerText = "Pull to refresh";
+                }, 300);
+            });
+        }
+
+        setTimeout(() => {
+            const footerEl = document.getElementById('footerShieldText');
+            if (footerEl && footerEl.innerText === 'Loading user...') footerEl.innerText = 'Guest (Timeout)';
+            
+            if (DOM.triggerEl && DOM.triggerEl.innerText === 'Loading...' && localCachedBroadcasts.length === 0) {
+                DOM.triggerEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Network took too long.</span> <button onclick="window.location.reload()" style="margin-left:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>`;
+            }
+        }, 12000);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                setupNavigationStateSaving();
+                setupPullToRefresh();
+                
+                let requestedCategory = urlParams.get('category');
+                let requestedLocation = urlParams.get('location');
+
+                if (requestedCategory) SafeCache.set('rental_cat_filter', requestedCategory);
+                else requestedCategory = SafeCache.get('rental_cat_filter');
+
+                if (requestedLocation) SafeCache.set('rental_loc_filter', requestedLocation);
+                else requestedLocation = SafeCache.get('rental_loc_filter');
+
+                if (requestedCategory && requestedCategory !== 'all') {
+                    activeCategoryFilter = requestedCategory.toLowerCase();
+                    if (DOM.catLinkBtn) DOM.catLinkBtn.classList.add('active-filter-indicator');
+                } else {
+                    SafeCache.remove('rental_cat_filter'); 
+                }
+
+                if (requestedLocation) {
+                    activeLocationFilter = requestedLocation.trim().toLowerCase();
+                    if (DOM.locLinkBtn) DOM.locLinkBtn.classList.add('active-filter-indicator');
+                }
+
+                if (DOM.catLinkBtn) DOM.catLinkBtn.setAttribute('href', `cat.html${activeLocationFilter ? '?location=' + encodeURIComponent(activeLocationFilter) : ''}`);
+                if (DOM.locLinkBtn) DOM.locLinkBtn.setAttribute('href', `city.html${activeCategoryFilter !== 'all' ? '?category=' + encodeURIComponent(activeCategoryFilter) : ''}`);
+
+                updateHeaderTitleDisplay();
+
+                if (DOM.closePopupBtn) {
+                    DOM.closePopupBtn.addEventListener('click', () => {
+                        if (DOM.popupModal) DOM.popupModal.classList.remove('show-popup');
+                    });
+                }
+
+                setupInfiniteScrollObserver();
+                setupGpsDetectionControl();
+                setupAuthListener();
+                
+                checkCacheAndLoad();
+            } catch (initError) {
+                if (DOM.triggerEl) DOM.triggerEl.innerText = "App encountered an error loading.";
+            }
+        });
+
+        function saveStateToCache() {
+            try {
+                const cacheData = {
+                    items: localCachedBroadcasts,
+                    lastLoadedTimestamp: lastLoadedTimestamp,
+                    lastLoadedKey: lastLoadedKey,
+                    categoryFilter: activeCategoryFilter,
+                    locationFilter: activeLocationFilter,
+                    hasMoreItems: hasMoreItems
+                };
+                SafeCache.set(CACHE_KEY, JSON.stringify(cacheData));
+            } catch(e) {}
+        }
+
+        function checkCacheAndLoad() {
+            const cachedString = SafeCache.get(CACHE_KEY);
+            let usedCache = false;
+
+            if (cachedString && !isGpsActive) {
+                try {
+                    const parsed = JSON.parse(cachedString);
+                    if (parsed.categoryFilter === activeCategoryFilter && parsed.locationFilter === activeLocationFilter && parsed.items && parsed.items.length > 0) {
+                        localCachedBroadcasts = parsed.items;
+                        lastLoadedTimestamp = parsed.lastLoadedTimestamp;
+                        lastLoadedKey = parsed.lastLoadedKey;
+                        hasMoreItems = parsed.hasMoreItems;
+                        
+                        renderFilteredListings(localCachedBroadcasts);
+                        usedCache = true;
+                        
+                        if (DOM.triggerEl && !hasMoreItems) DOM.triggerEl.innerText = "All items loaded.";
+                    }
+                } catch(e) {}
+            }
+
+            if (!usedCache) fetchItemsBatch();
+        }
+
         function encodeFastGeohash(latitude, longitude, precision = 7) {
             let isEven = true, lat = [-90.0, 90.0], lon = [-180.0, 180.0], bit = 0, ch = 0, geohash = "";
             while (geohash.length < precision) {
@@ -340,53 +545,8 @@
         }
         function deg2rad(deg) { return deg * (Math.PI / 180); }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // --- SESSION STORAGE FILTERING LOGIC ---
-            let requestedCategory = urlParams.get('category');
-            let requestedLocation = urlParams.get('location');
-
-            if (requestedCategory) sessionStorage.setItem('rental_cat_filter', requestedCategory);
-            else requestedCategory = sessionStorage.getItem('rental_cat_filter');
-
-            if (requestedLocation) sessionStorage.setItem('rental_loc_filter', requestedLocation);
-            else requestedLocation = sessionStorage.getItem('rental_loc_filter');
-
-            if (requestedCategory && requestedCategory !== 'all') {
-                activeCategoryFilter = requestedCategory.toLowerCase();
-                if (DOM.catLinkBtn) DOM.catLinkBtn.classList.add('active-filter-indicator');
-            } else {
-                sessionStorage.removeItem('rental_cat_filter'); 
-            }
-
-            if (requestedLocation) {
-                activeLocationFilter = requestedLocation.trim().toLowerCase();
-                if (DOM.locLinkBtn) DOM.locLinkBtn.classList.add('active-filter-indicator');
-            }
-
-            if (DOM.catLinkBtn) {
-                DOM.catLinkBtn.setAttribute('href', `cat.html${activeLocationFilter ? '?location=' + encodeURIComponent(activeLocationFilter) : ''}`);
-            }
-
-            if (DOM.locLinkBtn) {
-                DOM.locLinkBtn.setAttribute('href', `city.html${activeCategoryFilter !== 'all' ? '?category=' + encodeURIComponent(activeCategoryFilter) : ''}`);
-            }
-
-            updateHeaderTitleDisplay();
-
-            if (DOM.closePopupBtn) {
-                DOM.closePopupBtn.addEventListener('click', () => DOM.popupModal.classList.remove('show-popup'));
-            }
-
-            setupInfiniteScrollObserver();
-            setupGpsDetectionControl();
-            setupAuthListener();
-            
-            fetchItemsBatch();
-        });
-
         function updateHeaderTitleDisplay() {
+            if (!DOM.headerTitleMain || !DOM.headerTitleSub) return;
             const hasCat = activeCategoryFilter && activeCategoryFilter !== 'all';
             const hasLoc = activeLocationFilter && activeLocationFilter.length > 0;
             const formattedCat = hasCat ? (activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1)) : '';
@@ -410,12 +570,12 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, (user) => {
-                const sessionPhone = localStorage.getItem('auth_session_phone');
+                const sessionPhone = SafeLocal.get('auth_session_phone');
                 if (user) {
-                    localStorage.removeItem('user_logged_out');
+                    SafeLocal.remove('user_logged_out');
                     fetchUserData(user.uid, user);
                 } else if (sessionPhone) {
-                    localStorage.removeItem('user_logged_out');
+                    SafeLocal.remove('user_logged_out');
                     fetchUserByPhone(sessionPhone);
                 } else {
                     renderGuestState();
@@ -427,8 +587,6 @@
             const cleanPhone = phone.replace(/^0+/, '');
             try {
                 const snapshot = await get(ref(db, `users/${cleanPhone}`));
-                
-                // Fetch the new root-level following node
                 const followingSnap = await get(ref(db, `following/${cleanPhone}`));
                 const followingList = followingSnap.exists() ? followingSnap.val() : {};
 
@@ -454,15 +612,13 @@
                     }
                 }
                 renderGuestState();
-            } catch (err) { renderGuestState(); }
+            } catch (err) { renderGuestState(true); }
         }
 
         async function fetchUserData(userId, authUser) {
             currentActiveUserId = userId;
             try {
                 const snapshot = await get(ref(db, `users/${userId}`));
-                
-                // Fetch the new root-level following node
                 const followingSnap = await get(ref(db, `following/${userId}`));
                 const followingList = followingSnap.exists() ? followingSnap.val() : {};
 
@@ -481,7 +637,7 @@
                     };
                     applyUserDataToDOM(fallbackData, userId);
                 }
-            } catch (e) { renderGuestState(); }
+            } catch (e) { renderGuestState(true); }
         }
 
         function applyUserDataToDOM(userData, userId) {
@@ -497,7 +653,6 @@
             currentUserDisplayName = userData.displayName || `${firstName} ${middleName}`.trim() || userData.username || "User";
             currentUserPhoto = userData.profilePicture || userData.photoURL || '';
 
-            // Updated checks to read the true following list we just fetched
             if (userData._realFollowingList) {
                 userFollowingSet = new Set(Object.keys(userData._realFollowingList));
             } else if (userData.following_list && typeof userData.following_list === 'object') {
@@ -518,15 +673,22 @@
                 if (iconEl) iconEl.style.display = 'none'; 
             }
             if (nameEl) nameEl.innerText = shortFirstName;
-            if (footerShieldEl) footerShieldEl.innerText = `${shortFirstName} Verified`;
-
-            if (localCachedBroadcasts.length > 0) {
-                DOM.container.innerHTML = '';
-                renderFilteredListings(localCachedBroadcasts);
+            if (footerShieldEl) {
+                footerShieldEl.innerText = `${shortFirstName} Verified`;
+                footerShieldEl.style.color = 'inherit';
             }
+            
+            document.querySelectorAll('.btn-follow-author').forEach(btn => {
+                const authId = btn.className.match(/follow-btn-([^ ]+)/);
+                if (authId && authId[1]) {
+                    const isF = userFollowingSet.has(authId[1]);
+                    btn.innerText = isF ? "Following" : "+ Follow";
+                    if (isF) btn.classList.add('following');
+                }
+            });
         }
 
-        function renderGuestState() {
+        function renderGuestState(isError = false) {
             currentActiveUserId = null;
             currentUserPhoto = '';
             currentUserDisplayName = '';
@@ -540,13 +702,15 @@
             if (imgEl) imgEl.style.display = 'none';
             if (iconEl) iconEl.style.display = 'block';
             if (nameEl) nameEl.innerText = 'Profile';
-            if (footerShieldEl) footerShieldEl.innerText = 'Guest Verified';
+            if (footerShieldEl) {
+                footerShieldEl.innerText = isError ? 'Guest (Network Issue)' : 'Guest Verified';
+            }
         }
 
         function getActiveLoggedInUserId() {
             if (currentActiveUserId) return currentActiveUserId;
             if (auth.currentUser) return auth.currentUser.uid;
-            const sessionPhone = localStorage.getItem('auth_session_phone');
+            const sessionPhone = SafeLocal.get('auth_session_phone');
             if (sessionPhone) return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
             return null;
         }
@@ -580,7 +744,6 @@
                 ].filter(Boolean).join(' ').toLowerCase();
                 
                 const searchStr = activeLocationFilter.replace(' region', '').trim();
-                
                 if (!locStr.includes(searchStr)) return false;
             }
             return true;
@@ -589,7 +752,9 @@
         async function fetchItemsBatch() {
             if (isLoading || !hasMoreItems) return;
             isLoading = true;
-            if (DOM.triggerEl) DOM.triggerEl.innerText = `Loading...`;
+            
+            // Do not alter bottom loading text if refreshing top
+            if (DOM.triggerEl && !isRefreshingView) DOM.triggerEl.innerText = `Loading...`;
 
             const nodePaths = ['posts', 'delala_new'];
             try {
@@ -612,10 +777,20 @@
                 const rawResults = await Promise.all(fetchPromises);
                 const fetchedListings = rawResults.flat();
 
+                // SUCCESSFUL FETCH: If refreshing, NOW it's safe to wipe old data
+                if (isRefreshingView) {
+                    if (DOM.container) DOM.container.innerHTML = '';
+                    localCachedBroadcasts = [];
+                    SafeCache.remove(CACHE_KEY);
+                    isRefreshingView = false; // Turn off immediately so pagination works on recursive calls
+                }
+
                 if (fetchedListings.length === 0) {
                     hasMoreItems = false;
+                    saveStateToCache();
                     if (DOM.triggerEl) DOM.triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
                     if (localCachedBroadcasts.length === 0) renderEmptyState();
+                    isLoading = false;
                     return;
                 }
 
@@ -637,6 +812,7 @@
                 if (validItems.length > 0) {
                     localCachedBroadcasts.push(...validItems);
                     renderFilteredListings(validItems);
+                    saveStateToCache();
                 } 
                 
                 if (validItems.length === 0 && hasMoreItems) {
@@ -648,7 +824,13 @@
                     DOM.triggerEl.innerText = hasMoreItems ? "Loading..." : "All items loaded.";
                 }
 
-            } catch (error) { console.error("Error loading posts:", error); } 
+            } catch (error) { 
+                console.error("Error loading posts:", error); 
+                // ONLY show bottom error if not refreshing
+                if (DOM.triggerEl && !isRefreshingView) {
+                    DOM.triggerEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Network error. Cannot load items.</span> <button onclick="window.location.reload()" style="margin-left:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>`;
+                }
+            } 
             finally { isLoading = false; }
         }
 
@@ -689,13 +871,15 @@
                 if (clickNode) {
                     clickNode.setAttribute('onclick', `navigateToAuthorProfile(event, '${authorId}', '${dName.replace(/'/g, "\\'")}')`);
                 }
-            } catch(e) { console.error("Failed to hydrate author profile:", e); }
+            } catch(e) {}
         }
 
         function renderFilteredListings(itemsToAppend) {
             if (!DOM.container) return;
             const fragment = document.createDocumentFragment();
             itemsToAppend.forEach(item => {
+                if(document.getElementById(`item-card-${item.id}`)) return;
+                
                 const card = document.createElement('article');
                 card.className = "featured-broadcast-card";
                 card.id = `item-card-${item.id}`;
@@ -727,7 +911,7 @@
         function setupInfiniteScrollObserver() {
             if (!DOM.triggerEl) return;
             const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && !isLoading && hasMoreItems && !isGpsActive) {
+                if (entries[0].isIntersecting && !isLoading && hasMoreItems && !isGpsActive && !isRefreshingView) {
                     fetchItemsBatch();
                 }
             }, { rootMargin: '200px', threshold: 0.1 });
@@ -779,7 +963,7 @@
                     }
                 }
                 
-                DOM.container.innerHTML = '';
+                if (DOM.container) DOM.container.innerHTML = '';
                 matchingItems.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
                 localCachedBroadcasts = matchingItems; 
                 
@@ -788,8 +972,7 @@
 
                 if (DOM.triggerEl) DOM.triggerEl.innerText = matchingItems.length > 0 ? "All nearby items loaded." : "No items found within 50km.";
             } catch (error) { 
-                console.error("Error fetching nearby posts:", error); 
-                DOM.container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Error locating nearby items.</div>';
+                if (DOM.container) DOM.container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Error locating nearby items.</div>';
             } 
             finally { isLoading = false; }
         }
@@ -820,7 +1003,7 @@
                     currentUserCoordinates = { lat: position.coords.latitude, lng: position.coords.longitude };
                     isGpsActive = true;
                     DOM.gpsBtn.classList.add('active-gps');
-                    DOM.container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:600; color:#64748B;">Searching Database for items within 50km...</div>`;
+                    if (DOM.container) DOM.container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:600; color:#64748B;">Searching Database for items within 50km...</div>`;
                     await fetchNearbyItemsFromDB();
                 },
                 (error) => {
@@ -837,64 +1020,66 @@
                 if (isGpsActive) {
                     isGpsActive = false;
                     DOM.gpsBtn.classList.remove('active-gps');
-                    localCachedBroadcasts = []; lastLoadedTimestamp = null; lastLoadedKey = null; hasMoreItems = true;
-                    DOM.container.innerHTML = '';
-                    fetchItemsBatch();
+                    
+                    if (DOM.container) DOM.container.innerHTML = '';
+                    checkCacheAndLoad();
                 } else { window.triggerGpsAcquisition(); }
             });
         }
 
         function restoreScrollPosition() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetItemId = urlParams.get('returnId');
-            const savedPos = sessionStorage.getItem('rental_scroll_pos');
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetItemId = urlParams.get('returnId');
+                const savedPos = SafeCache.get('rental_scroll_pos');
 
-            if (targetItemId) {
-                const targetCard = document.getElementById(`item-card-${targetItemId}`);
-                if (targetCard) {
-                    targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    targetCard.style.outline = '2px solid #38BDF8';
-                    setTimeout(() => { targetCard.style.outline = 'none'; }, 2000);
-                    return;
+                if (targetItemId) {
+                    const targetCard = document.getElementById(`item-card-${targetItemId}`);
+                    if (targetCard) {
+                        targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        targetCard.style.outline = '2px solid #38BDF8';
+                        setTimeout(() => { targetCard.style.outline = 'none'; }, 2000);
+                        return;
+                    }
                 }
-            }
-            if (savedPos !== null) {
-                window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'smooth' });
-                sessionStorage.removeItem('rental_scroll_pos');
-            }
+                if (savedPos !== null && window.scrollY === 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'auto' });
+                        SafeCache.remove('rental_scroll_pos');
+                    }, 10);
+                }
+            } catch(e){}
         }
 
         window.openFullNewsReader = function(itemId, path) {
-            sessionStorage.setItem('rental_scroll_pos', window.scrollY.toString());
+            SafeCache.set('rental_scroll_pos', window.scrollY.toString());
             window.location.href = `rentalfull.html?id=${encodeURIComponent(itemId)}&path=${encodeURIComponent(path || 'posts')}`;
         };
 
         function triggerSystemAlert(title, message, icon = "ℹ️") {
-            DOM.popupTitleNode.innerText = title; DOM.popupDescNode.innerText = message; DOM.popupIconNode.innerText = icon;
-            DOM.popupModal.classList.add('show-popup');
+            if (DOM.popupTitleNode) DOM.popupTitleNode.innerText = title; 
+            if (DOM.popupDescNode) DOM.popupDescNode.innerText = message; 
+            if (DOM.popupIconNode) DOM.popupIconNode.innerText = icon;
+            if (DOM.popupModal) DOM.popupModal.classList.add('show-popup');
         }
 
         window.navigateToAuthorProfile = function(event, userId, userName) {
             if (event) event.stopPropagation();
+            SafeCache.set('rental_scroll_pos', window.scrollY.toString());
             if (userId && userId !== 'unknown') window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
         };
 
-        // ==========================================
-        //  DATABASE SAVER - REAL USER INFO
-        // ==========================================
         window.toggleFollowUser = async function(event, authorId) {
             if (event) event.stopPropagation();
             const activeUserId = getActiveLoggedInUserId();
             if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to follow.", "🔐");
             if (activeUserId === authorId) return triggerSystemAlert("Action Restricted", "You cannot follow yourself.", "ℹ️");
 
-            // Disable buttons temporarily
             const btns = document.querySelectorAll(`.follow-btn-${authorId}`);
             btns.forEach(btn => { btn.style.pointerEvents = 'none'; btn.style.opacity = '0.6'; });
 
             const followingRef = ref(db, `following/${activeUserId}/${authorId}`);
             const followerRef = ref(db, `followers/${authorId}/${activeUserId}`);
-            
             const myUserRef = ref(db, `users/${activeUserId}/following`);
             const targetUserRef = ref(db, `users/${authorId}/followers`);
             
@@ -905,17 +1090,13 @@
                 let targetFollowersCount = parseInt((await get(targetUserRef)).val()) || 0;
 
                 if (isFollowing) { 
-                    // --- UNFOLLOW ---
                     await remove(followingRef); 
                     await remove(followerRef);
                     userFollowingSet.delete(authorId); 
                     await set(myUserRef, Math.max(0, myFollowingCount - 1));
                     await set(targetUserRef, Math.max(0, targetFollowersCount - 1));
                 } else { 
-                    // --- FOLLOW (Saves Rich Object) ---
                     const now = Date.now();
-                    
-                    // Fetch real info to save
                     let myData = {};
                     try { const mSnap = await get(ref(db, `users/${activeUserId}`)); if(mSnap.exists()) myData = mSnap.val(); } catch(e){}
                     
@@ -945,13 +1126,11 @@
                     await set(targetUserRef, targetFollowersCount + 1);
                 }
                 
-                // Update UI Buttons
                 btns.forEach(btn => {
                     btn.innerText = userFollowingSet.has(authorId) ? "Following" : "+ Follow";
                     userFollowingSet.has(authorId) ? btn.classList.add('following') : btn.classList.remove('following');
                 });
             } catch (err) { 
-                console.error("Follow error:", err); 
                 triggerSystemAlert("Error", "Failed to update follow status.", "⚠️");
             } finally {
                 btns.forEach(btn => { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; });
@@ -984,6 +1163,7 @@
                     cachedItem.likedBy[activeUserId] = true; 
                     cachedItem.likes = (cachedItem.likes || 0) + 1; 
                 }
+                saveStateToCache();
             }
 
             const likedByRef = ref(db, `${path}/${itemId}/likedBy/${activeUserId}`);
@@ -997,7 +1177,7 @@
                     set(likedByRef, true);
                     runTransaction(likesCountRef, (current) => (current || 0) + 1);
                 }
-            } catch (err) { console.error("Background sync like error:", err); }
+            } catch (err) {}
         };
 
         window.toggleCommentBox = function(event, itemId) {
@@ -1044,7 +1224,7 @@
                 }
                 const cCountNode = document.getElementById(`comment-count-${itemId}`);
                 if (cCountNode) cCountNode.innerText = parseInt(cCountNode.innerText || '0', 10) + 1;
-            } catch (err) { console.error("Comment error:", err); }
+            } catch (err) {}
         };
 
         function extractAllImages(item) {

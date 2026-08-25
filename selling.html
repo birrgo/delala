@@ -6,7 +6,7 @@
     <title>Hulum - Selling Items</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
     <style>
         /* Light Bottom Nav matched to First Code */
@@ -94,7 +94,7 @@
             color: #334155;
         }
 
-        /* Coming Soon App Popup Styling (Matched exactly to Selling Post) */
+        /* Coming Soon App Popup Styling */
         .custom-popup-overlay {
             position: fixed;
             top: 50px;      
@@ -208,6 +208,45 @@
             width: 100%;
             margin: 4px 0; 
         }
+
+        /* --- PULL TO REFRESH STYLES --- */
+        .ptr-indicator {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            height: 0; overflow: hidden; transition: height 0.25s ease;
+            color: #38BDF8; font-size: 13px; font-weight: 700;
+            background: transparent; width: 100%;
+        }
+        .ptr-icon { width: 20px; height: 20px; fill: currentColor; transform: rotate(0deg); transition: transform 0.3s ease;}
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .ptr-spin { animation: spin 1s linear infinite; }
+
+        /* --- REDUCED CARD HEIGHT OVERRIDES --- */
+        .featured-broadcast-card {
+            padding: 10px 12px !important;
+            margin-bottom: 12px !important;
+            border-radius: 14px !important;
+            gap: 6px !important;
+        }
+        .broadcast-image-frame {
+            height: 160px !important; /* Reduced from default */
+            border-radius: 10px !important;
+            margin: 6px 0 !important;
+        }
+        .broadcast-title {
+            font-size: 14.5px !important;
+            margin-bottom: 2px !important;
+        }
+        .broadcast-body-text {
+            font-size: 12.5px !important;
+            line-height: 1.35 !important;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Truncates to 2 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .badge-meta-row {
+            margin-bottom: 4px !important;
+        }
     </style>
 </head>
 <body>
@@ -283,10 +322,14 @@
         </header>
 
         <main class="app-content">
+            <!-- Pull To Refresh Indicator -->
+            <div id="ptr-indicator" class="ptr-indicator">
+                <svg class="ptr-icon" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"></path></svg>
+                <span id="ptr-text">Pull to refresh</span>
+            </div>
+
             <div class="broadcasts-container" id="broadcastsContainer">
-                <div class="featured-broadcast-card">
-                    <h2 class="broadcast-title" style="font-size:14px; text-align:center; color: var(--text-muted);">Connecting to Secure Node...</h2>
-                </div>
+                <!-- Items will inject here -->
             </div>
 
             <footer class="verified-footer-shield">
@@ -296,23 +339,18 @@
 
         <!-- Bottom Navigation Menu -->
         <nav class="bottom-nav">
-            <!-- 1. Rental -->
             <a id="nav-rental" href="rental.html" class="nav-item" data-filter="Rental">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 </div>
                 <span>Rental</span>
             </a>
-
-            <!-- 2. Selling (Active Tab) -->
             <a id="nav-selling" href="selling.html" class="nav-item active" data-filter="Selling">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                 </div>
                 <span>Selling</span>
             </a>
-
-            <!-- 3. Curved Center Post Button -->
             <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -322,8 +360,6 @@
                 </div>
                 <span class="post-fab-label">Post</span>
             </a>
-
-            <!-- 4. Service -->
             <a id="nav-service" href="service.html" class="nav-item" data-filter="Service">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -332,8 +368,6 @@
                 </div>
                 <span>Service</span>
             </a>
-
-            <!-- 5. Profile -->
             <a id="nav-profile" href="profile.html" class="nav-item" data-filter="Profile">
                 <div class="icon-bg">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -345,7 +379,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9rJzhpR8IV0sTTgPOezZoh3qJpvI6Gjk",
@@ -361,12 +395,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // --- CACHING WRAPPERS ---
+        const SafeCache = {
+            set: (k, v) => { try { sessionStorage.setItem(k, v); } catch(e){} },
+            get: (k) => { try { return sessionStorage.getItem(k); } catch(e){ return null; } },
+            remove: (k) => { try { sessionStorage.removeItem(k); } catch(e){} }
+        };
+
+        const CACHE_KEY = 'hulum_selling_cache_v1';
         let rawNewsCache = {}; 
         let localCachedBroadcasts = [];
         let cardClockIntervalId = null;
+        let isRefreshingView = false;
 
         document.addEventListener('DOMContentLoaded', () => {
-            streamLiveAdminUpdatesLog();
+            setupNavigationStateSaving();
+            setupPullToRefresh();
             setupSearchEngineControls();
             setupNewsReaderModalControls();
 
@@ -374,13 +418,212 @@
             const closeBtn = document.getElementById('closePopupBtn');
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
-                    // Redirect directly to rental.html instead of just hiding it
                     window.location.href = 'rental.html';
                 });
             }
             
             initiateLiveInterfaceClocks();
+            checkCacheAndLoad();
         });
+
+        // --- STATE SAVING ---
+        function setupNavigationStateSaving() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.href && !link.href.includes('#')) {
+                        SafeCache.set('selling_scroll_pos', window.scrollY.toString());
+                    }
+                });
+            });
+        }
+
+        // --- CACHE LOGIC ---
+        function saveStateToCache() {
+            try {
+                const cacheData = { items: localCachedBroadcasts };
+                SafeCache.set(CACHE_KEY, JSON.stringify(cacheData));
+            } catch(e) {}
+        }
+
+        function checkCacheAndLoad() {
+            const cachedString = SafeCache.get(CACHE_KEY);
+            let usedCache = false;
+
+            if (cachedString) {
+                try {
+                    const parsed = JSON.parse(cachedString);
+                    if (parsed.items && parsed.items.length > 0) {
+                        localCachedBroadcasts = parsed.items;
+                        renderFilteredBroadcasts();
+                        restoreScrollPosition();
+                        usedCache = true;
+                    }
+                } catch(e) {}
+            }
+
+            // Always fetch fresh data quietly in background if cache was used,
+            // or visibly fetch it if no cache exists.
+            if (!usedCache) {
+                document.getElementById('broadcastsContainer').innerHTML = `
+                    <div class="featured-broadcast-card">
+                        <h2 class="broadcast-title" style="font-size:14px; text-align:center; color: var(--text-muted);">Loading Items...</h2>
+                    </div>`;
+            }
+            fetchSellingData(usedCache);
+        }
+
+        function restoreScrollPosition() {
+            try {
+                const savedPos = SafeCache.get('selling_scroll_pos');
+                if (savedPos !== null && window.scrollY === 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'auto' });
+                        SafeCache.remove('selling_scroll_pos');
+                    }, 10);
+                }
+            } catch(e){}
+        }
+
+        // --- PULL TO REFRESH ---
+        function setupPullToRefresh() {
+            let startY = 0; let currentY = 0; let isPulling = false;
+            const ptrEl = document.getElementById('ptr-indicator');
+            const ptrText = document.getElementById('ptr-text');
+            const ptrIcon = document.querySelector('.ptr-icon');
+
+            if (!ptrEl || !ptrText || !ptrIcon) return;
+
+            document.addEventListener('touchstart', e => {
+                if (window.scrollY === 0) {
+                    startY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchmove', e => {
+                if (!isPulling) return;
+                currentY = e.touches[0].clientY;
+                let pullDist = currentY - startY;
+                
+                if (pullDist > 0 && window.scrollY === 0) {
+                    let height = Math.min(pullDist / 2, 70); 
+                    ptrEl.style.height = height + 'px';
+                    
+                    if (height > 55) {
+                        ptrText.innerText = "Release to refresh";
+                        ptrIcon.style.transform = "rotate(180deg)";
+                    } else {
+                        ptrText.innerText = "Pull to refresh";
+                        ptrIcon.style.transform = "rotate(0deg)";
+                    }
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchend', () => {
+                if (!isPulling) return;
+                isPulling = false;
+                let pullDist = currentY - startY;
+                
+                if (pullDist > 110 && window.scrollY === 0) {
+                    ptrEl.style.height = '50px';
+                    ptrText.innerText = "Refreshing...";
+                    ptrIcon.classList.add('ptr-spin');
+                    refreshData();
+                } else {
+                    ptrEl.style.height = '0px';
+                    ptrIcon.style.transform = "rotate(0deg)";
+                }
+                startY = 0; currentY = 0;
+            });
+        }
+
+        function refreshData() {
+            isRefreshingView = true;
+            fetchSellingData(true);
+        }
+
+        // --- FETCHING DATA ---
+        async function fetchSellingData(isBackgroundFetch = false) {
+            const newsNodes = ['hulumNews', 'hulumNews/Selling', 'newNews/selling'];
+            
+            try {
+                const fetchPromises = newsNodes.map(nodePath => get(ref(db, nodePath)));
+                const snapshots = await Promise.all(fetchPromises);
+                
+                let newData = {};
+                
+                snapshots.forEach((snapshot, index) => {
+                    const nodePath = newsNodes[index];
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.keys(data).forEach(key => {
+                            const val = data[key];
+                            if (typeof val === 'object' && val !== null) {
+                                if (isSellingCategory(val, nodePath)) {
+                                    newData[`${nodePath}/${key}`] = { 
+                                        id: key, 
+                                        _dbPath: nodePath,
+                                        ...val 
+                                    };
+                                }
+                            }
+                        });
+                    }
+                });
+
+                rawNewsCache = newData;
+
+                // Only clear the container when new data successfully arrives
+                if (isRefreshingView || !isBackgroundFetch) {
+                    document.getElementById('broadcastsContainer').innerHTML = '';
+                }
+
+                rebuildAndRenderBroadcastsCache();
+                
+            } catch (error) {
+                console.error("Database Node Error:", error);
+                if (!isBackgroundFetch && localCachedBroadcasts.length === 0) {
+                    document.getElementById('broadcastsContainer').innerHTML = `
+                        <div style="text-align:center; padding: 20px; color:#ef4444; font-weight:600;">
+                            Network error. Could not load items. <br><button onclick="window.location.reload()" style="margin-top:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>
+                        </div>`;
+                }
+            } finally {
+                // If this was triggered by a pull-to-refresh, hide the spinner
+                if (isRefreshingView) {
+                    isRefreshingView = false;
+                    const ptrEl = document.getElementById('ptr-indicator');
+                    const ptrIcon = document.querySelector('.ptr-icon');
+                    if (ptrEl) ptrEl.style.height = '0px';
+                    setTimeout(() => {
+                        if (ptrIcon) {
+                            ptrIcon.classList.remove('ptr-spin');
+                            ptrIcon.style.transform = "rotate(0deg)";
+                        }
+                        const pText = document.getElementById('ptr-text');
+                        if (pText) pText.innerText = "Pull to refresh";
+                    }, 300);
+                }
+            }
+        }
+
+        function rebuildAndRenderBroadcastsCache() {
+            localCachedBroadcasts = Object.values(rawNewsCache).filter(item => isSellingCategory(item, item._dbPath || ''));
+            
+            localCachedBroadcasts.sort((a, b) => {
+                let timeA = a.updatedAt || a.createdAtTimestamp || a.timestamp || 0;
+                let timeB = b.updatedAt || b.createdAtTimestamp || b.timestamp || 0;
+                
+                if (!timeA && a.date) timeA = new Date(a.date).getTime() || 0;
+                if (!timeB && b.date) timeB = new Date(b.date).getTime() || 0;
+
+                if (timeA !== 0 || timeB !== 0) return timeB - timeA;
+                return b.id.localeCompare(a.id);
+            });
+
+            renderFilteredBroadcasts();
+            saveStateToCache(); // Cache successfully loaded data
+        }
 
         function getYouTubeEmbedUrl(url) {
             if (!url) return null;
@@ -428,57 +671,6 @@
             }
             const cat = String(item.category || '').trim().toLowerCase();
             return cat === 'selling' || cat === 'sell' || cat === 'sales';
-        }
-
-        function streamLiveAdminUpdatesLog() {
-            const newsNodes = ['hulumNews', 'hulumNews/Selling', 'newNews/selling'];
-
-            newsNodes.forEach(nodePath => {
-                const nodeRef = ref(db, nodePath);
-                
-                onValue(nodeRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        Object.keys(data).forEach(key => {
-                            const val = data[key];
-                            if (typeof val === 'object' && val !== null) {
-                                if (isSellingCategory(val, nodePath)) {
-                                    rawNewsCache[`${nodePath}/${key}`] = { 
-                                        id: key, 
-                                        _dbPath: nodePath,
-                                        ...val 
-                                    };
-                                }
-                            }
-                        });
-                    } else {
-                        Object.keys(rawNewsCache).forEach(k => {
-                            if (k.startsWith(nodePath)) delete rawNewsCache[k];
-                        });
-                    }
-
-                    rebuildAndRenderBroadcastsCache();
-                }, (error) => {
-                    console.error(`Database Node Error (${nodePath}):`, error);
-                });
-            });
-        }
-
-        function rebuildAndRenderBroadcastsCache() {
-            localCachedBroadcasts = Object.values(rawNewsCache).filter(item => isSellingCategory(item, item._dbPath || ''));
-            
-            localCachedBroadcasts.sort((a, b) => {
-                let timeA = a.updatedAt || a.createdAtTimestamp || a.timestamp || 0;
-                let timeB = b.updatedAt || b.createdAtTimestamp || b.timestamp || 0;
-                
-                if (!timeA && a.date) timeA = new Date(a.date).getTime() || 0;
-                if (!timeB && b.date) timeB = new Date(b.date).getTime() || 0;
-
-                if (timeA !== 0 || timeB !== 0) return timeB - timeA;
-                return b.id.localeCompare(a.id);
-            });
-
-            renderFilteredBroadcasts();
         }
 
         function renderEmptyState() {
@@ -537,6 +729,7 @@
         }
 
         window.openFullNewsReader = function(itemId) {
+            SafeCache.set('selling_scroll_pos', window.scrollY.toString());
             const item = localCachedBroadcasts.find(n => n.id === itemId);
             if (!item) return;
 
@@ -625,6 +818,7 @@
             const container = document.getElementById('broadcastsContainer');
             if (!container) return;
             
+            // Only completely clear innerHTML if we are not just silently updating the background
             container.innerHTML = "";
 
             if (localCachedBroadcasts.length === 0) {

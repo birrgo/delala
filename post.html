@@ -442,17 +442,54 @@
     </div>
 
     <script>
-        // Check local storage for active authentication session key
-        const userPhoneSession = localStorage.getItem('auth_session_phone');
+        // --- SAFE STORAGE WRAPPERS ---
+        const SafeCache = {
+            set: (k, v) => { try { sessionStorage.setItem(k, v); } catch(e){} },
+            get: (k) => { try { return sessionStorage.getItem(k); } catch(e){ return null; } },
+            remove: (k) => { try { sessionStorage.removeItem(k); } catch(e){} }
+        };
+        const SafeLocal = {
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e){} },
+            get: (k) => { try { return localStorage.getItem(k); } catch(e){ return null; } },
+            remove: (k) => { try { localStorage.removeItem(k); } catch(e){} }
+        };
+
+        // Check local storage for active authentication session key safely
+        const userPhoneSession = SafeLocal.get('auth_session_phone');
         const isLoggedIn = Boolean(userPhoneSession && userPhoneSession.trim().length > 0);
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Track routing history
-            localStorage.setItem('delala_last_page', 'post.html');
+            // Track routing history safely
+            SafeLocal.set('delala_last_page', 'post.html');
 
+            setupNavigationStateSaving();
+            restoreScrollPosition();
             initiateLiveInterfaceClocks();
             setupAccessControl();
         });
+
+        // --- STATE SAVING ---
+        function setupNavigationStateSaving() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.href && !link.href.includes('#')) {
+                        SafeCache.set('post_scroll_pos', window.scrollY.toString());
+                    }
+                });
+            });
+        }
+
+        function restoreScrollPosition() {
+            try {
+                const savedPos = SafeCache.get('post_scroll_pos');
+                if (savedPos !== null && window.scrollY === 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'auto' });
+                        SafeCache.remove('post_scroll_pos');
+                    }, 10);
+                }
+            } catch(e){}
+        }
 
         function initiateLiveInterfaceClocks() {
             const cornerClockNode = document.getElementById('topCornerLiveClock');
@@ -480,21 +517,27 @@
                 });
             });
 
-            closeBtn.addEventListener('click', closeModal);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
 
-            authModal.addEventListener('click', (e) => {
-                if (e.target === authModal) {
-                    closeModal();
-                }
-            });
+            if (authModal) {
+                authModal.addEventListener('click', (e) => {
+                    if (e.target === authModal) {
+                        closeModal();
+                    }
+                });
+            }
         }
 
         function openModal() {
-            document.getElementById('authModal').classList.add('active');
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('authModal').classList.remove('active');
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.remove('active');
         }
     </script>
 </body>
