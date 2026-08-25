@@ -431,14 +431,26 @@
             });
         }
 
+        // --- UPDATED TIMEOUT ---
+        // This is now set to 3 minutes (180,000 ms) and includes the helpful popup
         setTimeout(() => {
             const footerEl = document.getElementById('footerShieldText');
             if (footerEl && footerEl.innerText === 'Loading user...') footerEl.innerText = 'Guest (Timeout)';
             
             if (DOM.triggerEl && DOM.triggerEl.innerText === 'Loading...' && localCachedBroadcasts.length === 0) {
+                // Show the inline error with the Retry button 
                 DOM.triggerEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Network took too long.</span> <button onclick="window.location.reload()" style="margin-left:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>`;
+                
+                // Trigger the popup to explain the delay after 3 minutes
+                if (typeof triggerSystemAlert === 'function') {
+                    triggerSystemAlert(
+                        "Search Complete", 
+                        "The deep search took a long time or no items were found on this network connection. You can tap Retry to try again.", 
+                        "⏳"
+                    );
+                }
             }
-        }, 12000);
+        }, 180000); // 180000 ms = 3 minutes
 
         document.addEventListener('DOMContentLoaded', () => {
             try {
