@@ -6,14 +6,20 @@
     <title>Hulum - Apps Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="news.css">
 
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #f4f5f7;
+        /* Override to slightly reduce top header height */
+        .nav-header {
+            padding: 6px 16px !important;
+            height: 46px !important;
+            min-height: 46px !important;
+        }
+
+        /* Adjust bottom padding since nav bar is removed */
+        .app-view {
+            padding-bottom: 20px !important; 
         }
 
         .category-menu-wrapper {
@@ -286,6 +292,11 @@
 <body>
 
     <div class="app-view">
+        <!-- Curved Background Wave Header updated to Solid Dark Blue -->
+        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="#0d1b2a"/>
+        </svg>
+
         <!-- Search Drawer Overlay -->
         <div class="search-modal-overlay" id="searchModalOverlay">
             <div class="search-box-header">
@@ -302,7 +313,20 @@
             </div>
         </div>
 
-        <!-- Standalone Category Menu Bar -->
+        <!-- Header Bar -->
+        <header class="nav-header">
+            <div class="header-left-group">
+                <h1 class="header-title-text">Hulum Store</h1>
+            </div>
+            
+            <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
+
+            <button class="search-action-btn" id="openSearchBtn" aria-label="Search Apps">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </header>
+
+        <!-- Category Menu Bar -->
         <div class="category-menu-wrapper">
             <div class="category-menu">
                 <button class="menu-tab active" data-category="installed">Installed</button>
@@ -341,6 +365,7 @@
         <footer class="verified-footer-shield">
             <span class="footer-shield-text">Hulum Secure Matrix Verified</span>
         </footer>
+
     </div>
 
     <!-- Firebase Modular Imports -->
@@ -367,11 +392,24 @@
         let selectedAppKey = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            initLiveClock();
             initSearchControls();
             initCategoryTabs();
             initModalControls();
             streamAppsData();
         });
+
+        function initLiveClock() {
+            const clockNode = document.getElementById('topCornerLiveClock');
+            setInterval(() => {
+                const now = new Date();
+                if (clockNode) {
+                    clockNode.innerText = now.toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                }
+            }, 1000);
+        }
 
         function getDomain(url) {
             try {
@@ -597,23 +635,20 @@
             const overlay = document.getElementById('searchModalOverlay');
             const input = document.getElementById('appSearchInput');
 
-            if (openBtn) {
-                openBtn.addEventListener('click', () => {
-                    overlay.classList.add('active-search');
-                    input.value = '';
-                    input.focus();
-                    executeAppSearch('');
-                });
-            }
+            openBtn.addEventListener('click', () => {
+                overlay.classList.add('active-search');
+                input.value = '';
+                input.focus();
+                executeAppSearch('');
+            });
 
-            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active-search'));
+            closeBtn.addEventListener('click', () => overlay.classList.remove('active-search'));
 
-            if (input) input.addEventListener('input', (e) => executeAppSearch(e.target.value));
+            input.addEventListener('input', (e) => executeAppSearch(e.target.value));
         }
 
         function executeAppSearch(query) {
             const container = document.getElementById('searchResultsArea');
-            if (!container) return;
             const cleanQuery = query.trim().toLowerCase();
 
             if (!cleanQuery) {

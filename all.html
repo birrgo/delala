@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Posts Filter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #E2E8F0; }
+        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        
+        .post-grid-item { 
+            position: relative; 
+            aspect-ratio: 3 / 4; 
+            background: #0F172A; 
+            overflow: hidden; 
+            cursor: pointer;
+            /* Added fade-in for smoother perceived loading */
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .post-grid-item img, .post-grid-item video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            background: #1E293B; /* Placeholder color before image loads */
+        }
+        
+        .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
+        .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+        .empty-grid-msg { grid-column: span 3; text-align: center; padding: 30px 16px; color: #64748B; font-size: 13px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <main class="posts-grid" id="postsGridContainer">
+        <!-- Instantly injected by JS -->
+    </main>
+
+    <script>
+        // Store posts globally for the onclick handler
+        window.activePosts = [];
+
+        function renderGrid() {
+            const container = document.getElementById('postsGridContainer');
+            const parent = window.parent;
+            
+            // 1. Instantly attempt to load from parent, fallback to LocalStorage for zero-wait load
+            let posts = [];
+            if (parent && parent.allUserPosts && parent.allUserPosts.length > 0) {
+                posts = parent.allUserPosts;
+            } else {
+                try {
+                    const cached = localStorage.getItem('delala_cached_posts');
+                    if (cached) posts = JSON.parse(cached);
+                } catch(e) {}
+            }
+
+            if (!posts || posts.length === 0) {
+                container.innerHTML = '<div class="empty-grid-msg">Loading items...</div>';
+                return;
+            }
+
+            // Filter out hidden posts
+            window.activePosts = posts.filter(post => post.isHidden !== true);
+
+            if (window.activePosts.length === 0) {
+                container.innerHTML = '<div class="empty-grid-msg">No active items found.</div>';
+                return;
+            }
+
+            // 2. High-Speed DOM Injection: String building is significantly faster than document.createElement in loops
+            const formatCount = (parent && parent.formatCount) ? parent.formatCount : (v => v);
+            let htmlString = '';
+
+            for (let i = 0; i < window.activePosts.length; i++) {
+                const post = window.activePosts[i];
+                const views = post.views || post.viewCount || 0;
+                const mediaSrc = (post.images && post.images.length > 0) 
+                    ? post.images[0] 
+                    : (post.imageUrl || post.image || post.mediaUrl || post.photo || '40789.png');
+
+                // Using decoding="async" prevents images from blocking the main UI thread while scrolling
+                htmlString += `
+                    <div class="post-grid-item" onclick="openPost(${i})" style="animation-delay: ${i * 0.02}s">
+                        <img src="${mediaSrc}" alt="Post" loading="lazy" decoding="async">
+                        <div class="post-views-count">
+                            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <span>${formatCount(views)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Single DOM paint
+            container.innerHTML = htmlString;
+        }
+
+        // Fast inline click handler pointing to parent function
+        function openPost(index) {
+            const parent = window.parent;
+            const post = window.activePosts[index];
+            if (parent && parent.openPreviewModal && post) {
+                parent.openPreviewModal(post);
+            }
+        }
+
+        // 3. Execute immediately without waiting for a setTimeout delay
+        renderGrid();
+
+        // 4. Setup a small observer in case parent data arrives a fraction of a second later
+        window.addEventListener('load', () => {
+            if (!window.activePosts || window.activePosts.length === 0) {
+                // Check once more slightly after load
+                requestAnimationFrame(renderGrid);
+            }
+        });
+    </script>
+</body>
+</html>

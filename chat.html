@@ -6,22 +6,18 @@
     <title>Delala - Messages</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
-            --primary-dark: #0F172A;
-            --bg-body: #F4F7F9;
-            --card-bg: #FFFFFF;
-            --border-color: #E2E8F0;
+            --primary-dark: #1E293B;
+            --bg-body: #F8FAFC;
             --text-main: #0F172A;
             --text-muted: #64748B;
-            --success-color: #10B981; /* Vibrant Green */
+            --success-color: #10B981;
             --danger-color: #EF4444;
-
-            --silver-grad: linear-gradient(145deg, #64748B, #334155, #0F172A);
-            --silver-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.25), inset 0px -2px 4px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(15, 23, 42, 0.25);
+            --blue-accent: #3B82F6;
         }
 
         * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
@@ -29,130 +25,139 @@
         html, body { width: 100%; height: 100%; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); display: flex; flex-direction: column; z-index: 1; }
 
-        /* --- Refined Header & Unique White Search Box --- */
+        /* --- Dark Blue Shine Header --- */
         .inbox-header {
-            background: #0F172A;
-            padding: 16px; display: flex; align-items: center; width: 100%; position: relative; z-index: 20;
-            box-shadow: 0 4px 15px rgba(15,23,42,0.15); border-bottom: 1px solid #1E293B;
+            background: linear-gradient(135deg, #091C40 0%, #030B1C 100%);
+            padding: 12px 16px; 
+            display: flex; align-items: center; width: 100%; 
+            position: relative; z-index: 20;
+            box-shadow: 0 4px 20px rgba(3, 11, 28, 0.2);
+            overflow: hidden;
         }
 
-        .search-input-wrapper-3d {
-            width: 100%; height: 48px;
-            background: #FFFFFF; /* White Background */
-            border-radius: 12px; /* Reduced Curve */
-            padding: 0 6px 0 16px; display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 2px 0px rgba(255,255,255,1);
-            border: 1px solid #E2E8F0; transition: all 0.3s ease;
+        /* Shine Animation Effect */
+        .inbox-header::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-25deg);
+            animation: shine 5s infinite;
         }
 
-        .search-input-wrapper-3d:focus-within {
-            border-color: #3B82F6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2), 0 0 0 3px rgba(59,130,246,0.1);
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 200%; }
+            100% { left: 200%; }
         }
 
-        .search-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #0F172A; outline: none; }
-        .search-input::placeholder { color: #94A3B8; font-weight: 500; }
-
-        .btn-icon-3d {
-            background: var(--silver-grad); border: 1px solid #475569; width: 36px; height: 36px;
-            border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #FFFFFF;
-            cursor: pointer; transition: all 0.2s; flex-shrink: 0; box-shadow: var(--silver-shadow);
+        /* --- Reduced Modern Search Box --- */
+        .search-input-wrapper {
+            width: 100%; height: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; /* Sleek pill shape */
+            padding: 0 6px 0 16px; display: flex; align-items: center; gap: 10px;
+            position: relative; z-index: 2; transition: all 0.2s ease;
         }
-        .btn-icon-3d:active { transform: scale(0.95); }
-        .btn-icon-3d svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+        .search-input-wrapper:focus-within { background: #FFFFFF; box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+
+        .search-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 500; color: #1E293B; outline: none; }
+        .search-input::placeholder { color: #94A3B8; font-weight: 400; }
+
+        .btn-icon {
+            background: var(--blue-accent); width: 30px; height: 30px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF;
+            cursor: pointer; transition: transform 0.2s; flex-shrink: 0; border: none;
+        }
+        .btn-icon:active { transform: scale(0.92); }
+        .btn-icon svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
 
         /* Search Dropdown */
         .search-results-dropdown {
-            position: absolute; top: 72px; left: 16px; right: 16px; background: #FFF; border: 1px solid var(--border-color);
-            border-radius: 12px; max-height: 280px; overflow-y: auto; display: none; box-shadow: 0 12px 30px rgba(15,23,42,0.15); z-index: 25;
+            position: absolute; top: 60px; left: 16px; right: 16px; background: #FFF; border-radius: 12px; 
+            max-height: 280px; overflow-y: auto; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 25;
+            border: 1px solid #E2E8F0;
         }
-        .search-result-item { padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; border-bottom: 1px solid #F1F5F9; }
+        .search-result-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #F1F5F9; }
         .search-result-item:active { background: #F8FAFC; }
-        .search-result-info h4 { font-size: 14px; font-weight: 800; color: var(--primary-dark); }
-        .search-result-info p { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+        .search-result-info h4 { font-size: 14px; font-weight: 600; color: var(--primary-dark); }
+        .search-result-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-        /* Conversations List */
-        .conversations-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        /* Conversations List - Flat Modern UI */
+        .conversations-list { flex: 1; overflow-y: auto; padding: 12px 8px; display: flex; flex-direction: column; gap: 4px; }
 
-        /* Premium Chat Cards */
         .chat-item {
-            background: var(--card-bg); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;
-            cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-color); position: relative; overflow: hidden;
-            user-select: none; -webkit-user-select: none; /* Prevents text selection on hold */
+            background: transparent; border-radius: 14px; padding: 12px 10px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; transition: all 0.2s ease; position: relative;
+            user-select: none; -webkit-user-select: none; border: 1px solid transparent;
         }
-        .chat-item:active { background: #F8FAFC; transform: scale(0.98); }
+        .chat-item:active, .chat-item:hover { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transform: translateY(-1px); }
         
-        .chat-item.pinned { border-left: 4px solid #3B82F6; } /* Highlight for pinned chats */
+        .chat-item.pinned .chat-item-info .chat-item-top h3 { color: var(--blue-accent); }
 
         .chat-item-avatar {
-            width: 50px; height: 50px; border-radius: 50%; background: var(--silver-grad); box-shadow: var(--silver-shadow);
-            border: 2px solid #FFFFFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px; flex-shrink: 0; position: relative; box-sizing: border-box;
+            width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #E2E8F0, #CBD5E1); 
+            color: #475569; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 18px; flex-shrink: 0; position: relative;
         }
         .chat-item-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        /* --- Updated Online/Offline Indicator --- */
         .online-dot {
-            position: absolute; bottom: 0px; right: 0px; width: 14px; height: 14px;
+            position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px;
             background: var(--success-color); border: 2px solid #FFFFFF; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4); z-index: 2;
         }
-        .online-dot.offline { 
-            background: rgba(255, 255, 255, 0.4); /* Transparent White */
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            box-shadow: none; 
-            backdrop-filter: blur(2px);
-        }
+        .online-dot.offline { background: #CBD5E1; }
 
         .chat-item-info { flex: 1; min-width: 0; }
         .chat-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .chat-item-top h3 { font-size: 15px; font-weight: 800; color: var(--primary-dark); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .username-preview { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: lowercase; }
-        .chat-item-top span { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
-        .chat-item-msg { font-size: 13px; font-weight: 500; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
-        .pin-icon { width: 12px; height: 12px; fill: #3B82F6; margin-left: 4px; display: none; }
+        .chat-item-top h3 { font-size: 15px; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-item-top span { font-size: 11px; color: #94A3B8; font-weight: 500; flex-shrink: 0; }
+        .chat-item-msg { font-size: 13px; font-weight: 400; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .pin-icon { width: 14px; height: 14px; fill: var(--blue-accent); display: none; }
         .chat-item.pinned .pin-icon { display: inline-block; }
 
         /* Empty State */
         .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .empty-icon { width: 64px; height: 64px; background: var(--silver-grad); color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--silver-shadow); border: 2px solid #FFFFFF; }
-        .empty-icon svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2.5; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
-        .empty-state h3 { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
-        .empty-state p { font-size: 12px; font-weight: 600; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
-        .auth-btn-primary { width: 100%; max-width: 240px; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
+        .empty-icon { width: 56px; height: 56px; background: #E2E8F0; color: #64748B; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+        .empty-icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
+        .auth-btn-primary { width: 100%; max-width: 200px; background: var(--blue-accent); color: #FFF; border: none; padding: 12px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; transition: opacity 0.2s; }
+        .auth-btn-primary:active { opacity: 0.8; }
 
         /* Bottom Sheet Context Menu */
-        .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(2px); }
+        .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); z-index: 5000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(4px); }
         .bottom-sheet { background: #FFF; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 20px 16px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); padding-bottom: max(20px, env(safe-area-inset-bottom)); }
         .bottom-sheet-overlay.show { display: flex; }
         .bottom-sheet-overlay.show .bottom-sheet { transform: translateY(0); }
-        .sheet-handle { width: 40px; height: 5px; background: #E2E8F0; border-radius: 5px; margin: 0 auto 16px; }
-        .sheet-menu { display: flex; flex-direction: column; gap: 6px; }
-        .sheet-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: none; background: #F8FAFC; color: var(--primary-dark); font-size: 15px; font-weight: 700; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .sheet-handle { width: 40px; height: 4px; background: #E2E8F0; border-radius: 4px; margin: 0 auto 20px; }
+        .sheet-menu { display: flex; flex-direction: column; gap: 8px; }
+        .sheet-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: none; background: #F8FAFC; color: var(--primary-dark); font-size: 15px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.2s; }
         .sheet-btn:active { background: #E2E8F0; }
         .sheet-btn.danger { color: var(--danger-color); background: #FEF2F2; }
         .sheet-btn.danger:active { background: #FEE2E2; }
-        .sheet-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+        .sheet-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
 
         /* Custom Alert */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-card { background: #FFF; border-radius: 20px; width: 100%; max-width: 320px; padding: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-card { background: #FFF; border-radius: 20px; width: 100%; max-width: 300px; padding: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-overlay.show { display: flex; }
-        .modal-title { font-size: 18px; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
-        .modal-text { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
+        .modal-text { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.4; }
         .modal-btn-group { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; }
         .modal-btn-cancel { background: #F1F5F9; color: var(--text-main); }
         .modal-btn-danger { background: var(--danger-color); color: #FFF; }
-        .modal-btn-primary { background: var(--primary-dark); color: #FFF; }
+        .modal-btn-primary { background: var(--blue-accent); color: #FFF; }
     </style>
 </head>
 <body>
 
     <div id="inboxScreen" class="screen">
         <header class="inbox-header">
-            <div class="search-input-wrapper-3d">
-                <input type="text" id="userSearchInput" class="search-input" placeholder="Search by username or phone...">
-                <button class="btn-icon-3d" id="btnSearchTrigger" title="Search">
+            <div class="search-input-wrapper">
+                <input type="text" id="userSearchInput" class="search-input" placeholder="Search users...">
+                <button class="btn-icon" id="btnSearchTrigger" title="Search">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.55" y2="16.55"></line></svg>
                 </button>
             </div>
@@ -207,7 +212,7 @@
         const searchResultsDropdown = document.getElementById('searchResultsDropdown');
         
         let myUserId = null;
-        let selectedInboxUserId = null; // Used for hold actions
+        let selectedInboxUserId = null; 
 
         function getActiveUserId(firebaseUser) {
             if (firebaseUser) return firebaseUser.uid;
@@ -257,7 +262,6 @@
                 }
 
                 const sortedChats = Object.keys(myChats).map(uid => ({ otherUserId: uid, ...myChats[uid] })).sort((a, b) => {
-                    // Pinned chats float to the top
                     if(a.isPinned && !b.isPinned) return -1;
                     if(!a.isPinned && b.isPinned) return 1;
                     return b.timestamp - a.timestamp;
@@ -268,7 +272,6 @@
                     db.ref(`users/${uid}`).once('value', (uSnap) => {
                         const uData = uSnap.val() || {};
                         const displayName = uData.displayName || uData.fullName || uid;
-                        const username = uData.username ? `@${uData.username}` : '';
                         const photoURL = uData.photoURL || uData.profilePicture || '';
                         const isOnline = uData.presence ? uData.presence.isOnline : false;
                         
@@ -289,15 +292,14 @@
                             </div>
                         `;
 
-                        // LONG PRESS LOGIC
                         let holdTimer;
                         let isHolding = false;
                         const startHold = (e) => { isHolding = false; holdTimer = setTimeout(() => { isHolding = true; openHoldMenu(uid, chatInfo.isPinned); }, 600); };
                         const endHold = () => { clearTimeout(holdTimer); };
                         
-                        item.addEventListener('touchstart', startHold);
+                        item.addEventListener('touchstart', startHold, {passive: true});
                         item.addEventListener('touchend', endHold);
-                        item.addEventListener('touchmove', endHold);
+                        item.addEventListener('touchmove', endHold, {passive: true});
                         item.addEventListener('mousedown', startHold);
                         item.addEventListener('mouseup', endHold);
                         item.addEventListener('mouseleave', endHold);
@@ -337,8 +339,8 @@
         function openHoldMenu(uid, isPinned) {
             selectedInboxUserId = uid; currentlyPinned = isPinned;
             document.getElementById('btnPinUser').innerHTML = isPinned 
-                ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Unpin User` 
-                : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg> Pin User`;
+                ? `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Unpin User` 
+                : `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg> Pin User`;
             holdMenu.classList.add('show');
         }
         function closeHoldMenu() { holdMenu.classList.remove('show'); }
@@ -353,7 +355,7 @@
             showAlert("Delete Chat", "Are you sure you want to delete this conversation? This removes it from your inbox.", true, () => {
                 db.ref(`user_chats/${myUserId}/${selectedInboxUserId}`).remove();
                 const chatId = [myUserId, selectedInboxUserId].sort().join('_');
-                db.ref(`chat_messages/${chatId}`).remove(); // Optional: clears actual messages too
+                db.ref(`chat_messages/${chatId}`).remove();
             });
         }
 
@@ -361,7 +363,6 @@
             closeHoldMenu();
             showAlert("Block & Delete", "This will delete the chat and block the user. Proceed?", true, () => {
                 db.ref(`user_chats/${myUserId}/${selectedInboxUserId}`).remove();
-                // To implement full block, you'd save to a blocklist node here:
                 db.ref(`users/${myUserId}/blocked/${selectedInboxUserId}`).set(true);
                 showAlert("Blocked", "User has been blocked and chat deleted.", false);
             });
@@ -394,7 +395,7 @@
                             const resItem = document.createElement('div');
                             resItem.className = 'search-result-item';
                             resItem.onclick = () => { searchResultsDropdown.style.display = 'none'; userSearchInput.value = ''; window.location.href = `chat1.html?userId=${encodeURIComponent(uid)}&userName=${encodeURIComponent(displayName)}`; };
-                            resItem.innerHTML = `<div class="chat-item-avatar" style="width:40px;height:40px;font-size:15px;border-width:1px;">${avatar}</div><div class="search-result-info"><h4>${displayName}</h4><p>${username ? `@${u.username}` : phone}</p></div>`;
+                            resItem.innerHTML = `<div class="chat-item-avatar" style="width:36px;height:36px;font-size:14px;border-width:0;">${avatar}</div><div class="search-result-info"><h4>${displayName}</h4><p>${username ? `@${u.username}` : phone}</p></div>`;
                             searchResultsDropdown.appendChild(resItem);
                         }
                     });
@@ -403,7 +404,6 @@
             });
         }
 
-        // Helpers
         function formatTime(ts) { if(!ts) return ''; return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
         function escapeHtml(text) { const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return text.replace(/[&<>"']/g, function(m) { return map[m]; }); }
     </script>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Delala - Edit Profile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -122,10 +122,11 @@
             background: #FFF;
             box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
-        .form-input:disabled {
-            background: #F1F5F9;
-            color: #94A3B8;
+        .form-input:disabled, .form-input[readonly] {
+            background: #E2E8F0;
+            color: #64748B;
             cursor: not-allowed;
+            border-color: #CBD5E1;
         }
         
         textarea.form-input {
@@ -171,7 +172,7 @@
             <svg viewBox="0 0 24 24"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
         </button>
         <h1>Edit Profile</h1>
-        <div style="width: 40px;"></div> <!-- Spacer for center alignment -->
+        <div style="width: 40px;"></div>
     </header>
 
     <div class="container">
@@ -199,13 +200,14 @@
 
             <div class="form-group">
                 <label class="form-label">Phone Number (Required)</label>
-                <input type="tel" id="inputPhone" class="form-input" placeholder="0912345678" readonly style="background: #E2E8F0; color: #64748B;">
+                <input type="tel" id="inputPhone" class="form-input" placeholder="0912345678" readonly>
                 <span style="font-size:10px; color:#94A3B8;">Phone number is tied to your account and cannot be easily changed.</span>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Email Address (Optional)</label>
-                <input type="email" id="inputEmail" class="form-input" placeholder="email@example.com">
+                <label class="form-label">Email Address</label>
+                <input type="email" id="inputEmail" class="form-input" placeholder="No email linked" readonly>
+                <span style="font-size:10px; color:#94A3B8;">Email address tied to OTP signup is read-only.</span>
             </div>
 
             <div class="form-group">
@@ -221,8 +223,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // Removed Firebase Storage entirely
         import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
@@ -238,10 +240,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const storage = getStorage(app);
 
         let currentActiveUserId = null;
-        let selectedAvatarFile = null;
+        
+        // Track original state to prevent resetting cooldown for avatar/bio changes
+        window.originalProfileState = {
+            name: "",
+            username: "",
+            lastEdit: 0
+        };
 
         const ui = {
             avatarPreview: document.getElementById('avatarPreview'),
@@ -264,16 +271,56 @@
             setTimeout(() => ui.toast.classList.remove('show'), 3500);
         }
 
-        // Handle Avatar File Selection
+        // --- Client-Side Image Compression ---
+        // This takes the image file and turns it into a tiny compressed text string (Base64)
+        function compressImageToBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        // Set max dimensions for profile picture
+                        const MAX_SIZE = 300; 
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height *= MAX_SIZE / width;
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width *= MAX_SIZE / height;
+                                height = MAX_SIZE;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compress to JPEG with 70% quality (keeps the string very small for Realtime DB)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve(compressedBase64);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         ui.avatarTrigger.addEventListener('click', () => {
             if (ui.saveBtn.disabled) return; 
             ui.avatarInput.click();
         });
         
+        // Just show preview when they pick a file, we compress when they click save
         ui.avatarInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                selectedAvatarFile = file;
                 const reader = new FileReader();
                 reader.onload = (evt) => ui.avatarPreview.src = evt.target.result;
                 reader.readAsDataURL(file);
@@ -287,29 +334,17 @@
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     
-                    // --- 1-Month Edit Cooldown Check ---
-                    const lastEdit = data.lastProfileEdit || 0;
+                    window.originalProfileState.lastEdit = data.lastProfileEdit || 0;
                     const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
                     
-                    if (Date.now() - lastEdit < oneMonthMs) {
-                        const remainingMs = oneMonthMs - (Date.now() - lastEdit);
+                    if (Date.now() - window.originalProfileState.lastEdit < oneMonthMs) {
+                        const remainingMs = oneMonthMs - (Date.now() - window.originalProfileState.lastEdit);
                         const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
                         
-                        showToast(`Cooldown active: You can edit your profile again in ${days} day(s).`);
+                        showToast(`Name & Username are locked for ${days} more day(s).`);
                         
-                        // Disable the form
                         ui.inputName.disabled = true;
                         ui.inputUsername.disabled = true;
-                        ui.inputEmail.disabled = true;
-                        ui.inputBio.disabled = true;
-                        ui.saveBtn.disabled = true;
-                        ui.avatarTrigger.style.cursor = 'not-allowed';
-                        ui.avatarBadge.style.display = 'none';
-                        ui.avatarLabel.innerText = 'Profile edits locked for 1 month';
-                        
-                        populateFields(data, userId);
-                        setTimeout(() => window.location.href = 'profile.html', 3500);
-                        return;
                     }
 
                     populateFields(data, userId);
@@ -329,10 +364,19 @@
                 middleName = parts.slice(1).join(" ") || ""; 
             }
 
-            ui.inputName.value = `${firstName} ${middleName}`.trim() || data.displayName || "";
-            ui.inputUsername.value = (data.username || data.handle || "").replace(/^@/, '');
+            const parsedName = `${firstName} ${middleName}`.trim() || data.displayName || "";
+            const parsedUsername = (data.username || data.handle || "").replace(/^@/, '');
+
+            const authEmail = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "";
+            const realEmail = data.emailAddress || data.email || authEmail || "";
+
+            window.originalProfileState.name = parsedName;
+            window.originalProfileState.username = parsedUsername;
+
+            ui.inputName.value = parsedName;
+            ui.inputUsername.value = parsedUsername;
             ui.inputPhone.value = data.phone || data.cleanPhone || userId || "";
-            ui.inputEmail.value = data.email || "";
+            ui.inputEmail.value = realEmail; 
             ui.inputBio.value = data.bio || data.about || "";
             
             if (data.photoURL || data.profilePicture) {
@@ -340,7 +384,6 @@
             }
         }
 
-        // Authentication State Check
         onAuthStateChanged(auth, (user) => {
             const sessionPhone = localStorage.getItem('auth_session_phone');
             if (user) {
@@ -360,10 +403,10 @@
             
             const newName = ui.inputName.value.trim();
             const newUsername = ui.inputUsername.value.trim().replace(/^@/, '');
-            const newEmail = ui.inputEmail.value.trim();
+            const existingEmail = ui.inputEmail.value.trim();
             const newBio = ui.inputBio.value.trim();
 
-            if (!newName) {
+            if (!newName && !ui.inputName.disabled) {
                 showToast("Display name cannot be empty.");
                 return;
             }
@@ -374,11 +417,10 @@
             try {
                 let finalPhotoURL = ui.avatarPreview.src;
 
-                // 1. Upload new avatar if selected
-                if (selectedAvatarFile) {
-                    const imgRef = storageRef(storage, `avatars/${currentActiveUserId}_${Date.now()}`);
-                    await uploadBytes(imgRef, selectedAvatarFile);
-                    finalPhotoURL = await getDownloadURL(imgRef);
+                // 1. Process Image to Base64 String instead of uploading to Storage
+                const avatarFile = ui.avatarInput.files[0];
+                if (avatarFile) {
+                    finalPhotoURL = await compressImageToBase64(avatarFile);
                 }
 
                 // 2. Format names
@@ -386,28 +428,36 @@
                 const firstName = nameParts[0] || "";
                 const middleName = nameParts.slice(1).join(" ") || "";
 
-                // 3. Prepare payload for Database
+                // 3. Determine cooldown status
+                let updatedLastEdit = window.originalProfileState.lastEdit;
+                if (!ui.inputName.disabled) {
+                    if (newName !== window.originalProfileState.name || newUsername !== window.originalProfileState.username) {
+                        updatedLastEdit = Date.now(); 
+                    }
+                }
+
+                // 4. Prepare payload for Realtime Database
                 const profileUpdate = {
                     displayName: newName,
                     firstName: firstName,
                     middleName: middleName,
                     username: newUsername,
-                    email: newEmail,
+                    email: existingEmail, 
+                    emailAddress: existingEmail,
                     bio: newBio,
-                    photoURL: finalPhotoURL,
+                    photoURL: finalPhotoURL, // Now saves as a text string!
                     profilePicture: finalPhotoURL,
-                    lastProfileEdit: Date.now() 
+                    lastProfileEdit: updatedLastEdit 
                 };
 
-                // 4. Update Database
+                // 5. Update Database
                 await update(ref(db, `users/${currentActiveUserId}`), profileUpdate);
 
-                // 5. Safely attempt to update Firebase Auth
-                // (Wrapped in try/catch to prevent failure if using custom phone auth or local file paths)
+                // 6. Safely attempt to update Firebase Auth (Auth profile limits URLs, so we skip it if it's base64)
                 if (auth.currentUser) {
                     try {
                         const authUpdates = { displayName: newName };
-                        // Auth strictly requires valid HTTP/HTTPS URLs. Avoid breaking if using local "s.png"
+                        // Only save standard HTTP urls to Auth, prevent crash with long base64 strings
                         if (finalPhotoURL && finalPhotoURL.startsWith('http')) {
                             authUpdates.photoURL = finalPhotoURL;
                         }
@@ -417,7 +467,7 @@
                     }
                 }
 
-                // 6. Update local cache
+                // 7. Update local cache
                 const cached = localStorage.getItem('delala_cached_profile');
                 let currentObj = cached ? JSON.parse(cached) : {};
                 const updatedProfile = { ...currentObj, ...profileUpdate };
@@ -428,7 +478,6 @@
 
             } catch (err) {
                 console.error("Save error:", err);
-                // Now displays the exact Firebase error message for easier debugging
                 showToast(err.message || "Failed to save changes. Please try again.");
                 ui.saveBtn.disabled = false;
                 ui.saveBtn.innerText = "Save Changes";

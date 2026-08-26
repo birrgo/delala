@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
+        /* Shared Styles Maintained */
         .nav-header { padding: 6px 16px !important; height: 46px !important; min-height: 46px !important; display: flex; align-items: center; justify-content: space-between; }
         .header-title-text { font-size: 16px !important; margin: 0 !important; }
         .profile-info-section { position: relative; z-index: 5; display: flex; flex-direction: row; align-items: flex-start; gap: 14px; padding: 12px 16px 8px; text-align: left; }
@@ -42,12 +43,10 @@
         .category-pill-btn:active { transform: scale(0.95); }
         .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
         .category-pill-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
-        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light, #E2E8F0); min-height: 200px; }
-        .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark, #0F172A); overflow: hidden; cursor: pointer; }
-        .post-grid-item img, .post-grid-item video { width: 100%; height: 100%; object-fit: cover; }
-        .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
-        .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
-        .empty-grid-msg { grid-column: span 3; text-align: center; padding: 30px 16px; color: var(--text-muted, #64748B); font-size: 13px; font-weight: 600; cursor: pointer; }
+        
+        /* Iframe Styles */
+        .posts-iframe-container { width: 100%; min-height: 50vh; display: block; border: none; background: var(--border-light, #E2E8F0); }
+        
         .menu-wrapper { position: relative; display: inline-block; }
         .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
         .menu-action-btn:active { background-color: #F1F5F9; }
@@ -164,7 +163,7 @@
                         <div class="avatar-badge">+</div>
                     </div>
                     <button type="button" class="edit-profile-pill-btn" onclick="window.location.href='edit.html'">
-                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>Edit</span>
                     </button>
                 </div>
@@ -184,7 +183,7 @@
 
             <!-- Navigation Tabs Bar with Targets -->
             <nav class="category-tabs-bar" aria-label="Profile Navigation Filter">
-                <button type="button" class="category-pill-btn active" data-category="all">
+                <button type="button" class="category-pill-btn active" data-category="all" data-src="all.html">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
                     <span>All</span>
                 </button>
@@ -200,13 +199,14 @@
                     <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
                     <span>App</span>
                 </button>
-                <button type="button" class="category-pill-btn" data-category="hidden">
+                <button type="button" class="category-pill-btn" data-category="hidden" data-src="hidden.html">
                     <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     <span>Hidden</span>
                 </button>
             </nav>
 
-            <main class="posts-grid" id="postsGridContainer"></main>
+            <!-- Replaced Grid with Iframe -->
+            <iframe id="postsIframe" src="all.html" class="posts-iframe-container"></iframe>
         </div>
 
         <nav class="bottom-nav">
@@ -218,7 +218,7 @@
         </nav>
     </div>
 
-    <!-- Auth Prompt Modal -->
+    <!-- Modals -->
     <div class="modal-overlay" id="authPromptModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -236,21 +236,7 @@
             </div>
         </div>
     </div>
-    
-    <!-- Network Modal -->
-    <div class="modal-overlay" id="networkModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="networkModalTitle">Network</h3>
-                <button type="button" class="modal-close-btn" id="closeNetworkModalBtn">✕</button>
-            </div>
-            <div class="modal-body" id="networkModalBody" style="min-height: 250px; padding: 0;">
-                <div class="empty-state" style="margin-top: 40px; padding: 20px;">Loading users...</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Post Preview Modal -->
     <div class="modal-overlay" id="postPreviewModal">
         <div class="modal-card">
             <div class="modal-header"><h3>Post Details</h3><button type="button" class="modal-close-btn" id="closePreviewModalBtn">✕</button></div>
@@ -258,7 +244,6 @@
         </div>
     </div>
 
-    <!-- Verify Delete Modal -->
     <div class="modal-overlay" id="verifyDeleteModal">
         <div class="modal-card">
             <div class="modal-header"><h3>Verify Deletion</h3><button type="button" class="modal-close-btn" id="closeVerifyModalBtn">✕</button></div>
@@ -283,6 +268,11 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // EXPOSE TO GLOBAL FOR IFRAMES TO ACCESS
+        window.allUserPosts = [];
+        window.formatCount = formatCount;
+        window.openPreviewModal = openPreviewModal;
+
         const primaryConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
             authDomain: "delala-1b582.firebaseapp.com", 
@@ -306,7 +296,7 @@
         const serviceApp = initializeApp(serviceDbConfig, "ServiceApp");
         const serviceDb = getDatabase(serviceApp);
 
-        let previewMapInstance = null, allUserPosts = [], currentSelectedCategory = 'all';
+        let previewMapInstance = null;
         let myLoggedInUid = null;
         let postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
             pendingPostToDelete = null, isLoggedInUser = false;
@@ -323,12 +313,6 @@
             const cachedUser = localStorage.getItem('delala_cached_profile');
             if (!cachedUser || localStorage.getItem('user_logged_out') === 'true') return false;
             try { applyProfileToDOM(JSON.parse(cachedUser)); isLoggedInUser = true; return true; } catch (e) { return false; }
-        }
-
-        function hydrateCachedPosts() {
-            const cachedPosts = localStorage.getItem('delala_cached_posts');
-            if (!cachedPosts || localStorage.getItem('user_logged_out') === 'true') return false;
-            try { allUserPosts = JSON.parse(cachedPosts); renderFilteredGrid(true); return true; } catch (e) { return false; }
         }
 
         function applyProfileToDOM(userData) {
@@ -356,7 +340,6 @@
         }
 
         hydrateCachedProfile();
-        hydrateCachedPosts();
 
         document.addEventListener('DOMContentLoaded', () => {
             setupAuthListener(); 
@@ -449,16 +432,19 @@
                     const category = btn.getAttribute('data-category');
                     const targetSrc = btn.getAttribute('data-src');
 
+                    // Navigate if it's an external page
                     if (['chat', 'app', 'activity'].includes(category) && targetSrc) {
                         window.location.href = targetSrc;
                         return;
                     }
 
+                    // Otherwise switch the iframe contents
                     document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    currentSelectedCategory = category;
-                    renderFilteredGrid();
+                    if(targetSrc) {
+                        document.getElementById('postsIframe').src = targetSrc;
+                    }
                 });
             });
         }
@@ -468,132 +454,14 @@
             document.getElementById('closePreviewModalBtn').addEventListener('click', closePreviewModal);
             previewOverlay.addEventListener('click', (e) => { if (e.target === previewOverlay) closePreviewModal(); });
             
-            const networkOverlay = document.getElementById('networkModal');
-            document.getElementById('closeNetworkModalBtn').addEventListener('click', () => {
-                networkOverlay.classList.remove('active'); networkOverlay.style.display = 'none';
+            document.getElementById('followingBlock').addEventListener('click', () => {
+                if (!isLoggedInUser || !myLoggedInUid) { showAuthModal(); return; }
+                window.location.href = `follow.html?type=following`;
             });
-            networkOverlay.addEventListener('click', (e) => { 
-                if (e.target === networkOverlay) { networkOverlay.classList.remove('active'); networkOverlay.style.display = 'none'; }
+            document.getElementById('followersBlock').addEventListener('click', () => {
+                if (!isLoggedInUser || !myLoggedInUid) { showAuthModal(); return; }
+                window.location.href = `follow.html?type=followers`;
             });
-            
-            document.getElementById('followingBlock').addEventListener('click', () => openNetworkModal('Following'));
-            document.getElementById('followersBlock').addEventListener('click', () => openNetworkModal('Followers'));
-        }
-
-        // ==========================================
-        //  AGGRESSIVE NETWORK FETCH & USER.HTML REDIRECT
-        // ==========================================
-        async function openNetworkModal(type) {
-            if (!isLoggedInUser || !myLoggedInUid) { showAuthModal(); return; }
-            document.getElementById('networkModalTitle').innerText = type;
-            const modal = document.getElementById('networkModal');
-            const body = document.getElementById('networkModalBody');
-            const nodeName = type.toLowerCase();
-            
-            const uiCountText = document.getElementById(nodeName + 'Count').innerText;
-            if (uiCountText === '0' || uiCountText === '0.0' || uiCountText === '') {
-                body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
-                modal.classList.add('active');
-                modal.style.display = 'flex';
-                return;
-            }
-
-            body.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #64748B; font-size: 14px; font-weight: 600;"><div style="width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>Loading ${nodeName}...<style>@keyframes spin { to { transform: rotate(360deg); } }</style></div>`;
-            modal.classList.add('active');
-            modal.style.display = 'flex';
-
-            try {
-                let dataObj = {};
-                let hasData = false;
-
-                const possibleIds = new Set([myLoggedInUid]);
-                const sessionPhone = localStorage.getItem('auth_session_phone');
-                if (sessionPhone) possibleIds.add(String(sessionPhone).replace(/\D/g, '').replace(/^0+/, ''));
-
-                for (const pid of possibleIds) {
-                    if (!pid) continue;
-                    // Aggressively search ALL known database paths
-                    const pathsToCheck = [
-                        `${nodeName}/${pid}`, 
-                        `users/${pid}/${nodeName}List`, 
-                        `users/${pid}/${nodeName}_list`,
-                        `users/${pid}/${nodeName}` // Legacy object structure
-                    ];
-
-                    for (const path of pathsToCheck) {
-                        try {
-                            const snap = await get(ref(db, path));
-                            if (snap.exists() && typeof snap.val() === 'object') {
-                                Object.assign(dataObj, snap.val());
-                                hasData = true;
-                            }
-                        } catch(e) { }
-                    }
-                }
-
-                if (!hasData) {
-                    body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
-                    return;
-                }
-
-                // Extract valid UIDs
-                let validUids = new Set();
-                for (let [k, v] of Object.entries(dataObj)) {
-                    if (k === 'count' || String(k).startsWith('_')) continue;
-                    if (typeof v === 'object' && v !== null && (v.uid || v.userId || v.id)) {
-                        validUids.add(v.uid || v.userId || v.id);
-                    } else if (typeof v === 'string') {
-                        validUids.add(v);
-                    } else if (k.length > 5) {
-                        validUids.add(k);
-                    }
-                }
-                
-                if (validUids.size === 0) {
-                    body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
-                    return;
-                }
-
-                let html = '<div style="display:flex; flex-direction:column; gap:12px; padding: 16px;">';
-                let validUsersFound = false;
-
-                for (const uid of Array.from(validUids)) {
-                    if(!uid || String(uid).trim() === '') continue;
-                    const cleanUid = String(uid).replace(/\D/g, '').replace(/^0+/, '') || uid;
-                    
-                    try {
-                        let uSnap = await get(ref(db, `users/${uid}`));
-                        if (!uSnap.exists() && cleanUid !== uid) uSnap = await get(ref(db, `users/${cleanUid}`));
-                        
-                        if (uSnap.exists()) {
-                            validUsersFound = true;
-                            const uData = uSnap.val();
-                            let fName = uData.firstName || uData.first_name || uData.fullName?.split(' ')[0] || "User";
-                            let dName = uData.displayName || fName;
-                            let handle = uData.username || uData.handle || dName.toLowerCase().replace(/\s+/g, '');
-                            let pUrl = uData.photoURL || uData.profilePicture || "s.png";
-                            
-                            // REDIRECTS TO user.html
-                            html += `
-                                <div style="display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; background:#F8FAFC; border:1px solid #E2E8F0; transition: background 0.2s; cursor:pointer;" onclick="window.location.href='user.html?id=${uid}'">
-                                    <img src="${pUrl}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid #FFF; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
-                                    <div style="flex:1;">
-                                        <div style="font-size:14px; font-weight:800; color:#0F172A;">${dName}</div>
-                                        <div style="font-size:12px; font-weight:600; color:#64748B;">@${handle}</div>
-                                    </div>
-                                    <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:#CBD5E1; fill:none; stroke-width:2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                </div>
-                            `;
-                        }
-                    } catch(err) {}
-                }
-                html += '</div>';
-                
-                body.innerHTML = validUsersFound ? html : `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display.</p></div>`;
-
-            } catch (error) {
-                body.innerHTML = `<div class="empty-state" style="margin-top: 40px; padding: 20px; text-align: center;"><p style="font-size: 14px; color: #64748B; font-weight:600;">You have no ${nodeName} to display at this time.</p></div>`;
-            }
         }
 
         function closePreviewModal() {
@@ -734,7 +602,6 @@
         function renderLoggedOutGuestState() {
             isLoggedInUser = false;
             localStorage.removeItem('delala_cached_profile');
-            localStorage.removeItem('delala_cached_posts');
             
             if (document.getElementById('userDisplayName')) document.getElementById('userDisplayName').innerText = 'Guest User';
             document.getElementById('userHandle').innerText = "@guest";
@@ -744,9 +611,13 @@
             document.getElementById('likesCount').innerText = '0';
             document.getElementById('ratingCount').innerText = '0.0 ★';
             
-            const gridContainer = document.getElementById('postsGridContainer');
-            gridContainer.innerHTML = `<div class="empty-grid-msg" id="loginGridBtn">Please login or create an account to view profile posts.</div>`;
-            document.getElementById('loginGridBtn')?.addEventListener('click', showAuthModal);
+            window.allUserPosts = [];
+            
+            // Reload the iframe to update the empty state
+            const iframe = document.getElementById('postsIframe');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.renderGrid) {
+                iframe.contentWindow.renderGrid();
+            }
             
             showAuthModal();
         }
@@ -768,7 +639,6 @@
                 isLoggedInUser = false;
             }
 
-            // REDIRECT TO USER.HTML IF VIEWING SOMEONE ELSE
             if (targetProfileId && targetProfileId !== myLoggedInUid && !String(sessionPhone).includes(targetProfileId)) {
                 window.location.replace(`user.html?id=${targetProfileId}`);
                 return;
@@ -824,14 +694,21 @@
             };
 
             const updateGrid = () => {
-                allUserPosts = [...primaryPosts, ...servicePosts];
-                allUserPosts.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
+                let postsList = [...primaryPosts, ...servicePosts];
+                postsList.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
                 
                 let totalLikes = 0;
-                allUserPosts.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
+                postsList.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
                 document.getElementById('likesCount').innerText = formatCount(totalLikes);
                 
-                renderFilteredGrid(false);
+                // Expose to window for the child iframes to read
+                window.allUserPosts = postsList;
+                
+                // Tell the currently visible iframe to re-render
+                const iframe = document.getElementById('postsIframe');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.renderGrid) {
+                    iframe.contentWindow.renderGrid();
+                }
             };
             
             postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
@@ -853,44 +730,6 @@
                 }
                 updateGrid();
             });
-        }
-
-        function isPostInCategory(post, targetCategory) {
-            if (targetCategory === 'hidden') return post.isHidden === true;
-            if (post.isHidden) return false; 
-            if (targetCategory === 'all') return true;
-            const categoryVal = String(post.category || post.rentalType || post.type || post.postType || '').toLowerCase().trim();
-            return categoryVal === targetCategory.toLowerCase().trim();
-        }
-
-        function renderFilteredGrid(isFromCache = false) {
-            const container = document.getElementById('postsGridContainer');
-            container.innerHTML = '';
-            const filteredPosts = allUserPosts.filter(post => isPostInCategory(post, currentSelectedCategory));
-
-            if (filteredPosts.length > 0) {
-                const fragment = document.createDocumentFragment();
-                filteredPosts.forEach(post => {
-                    const views = post.views || post.viewCount || 0,
-                          mediaSrc = (post.images && post.images.length > 0) 
-                              ? post.images[0] 
-                              : (post.imageUrl || post.image || post.mediaUrl || post.photo || '40789.png'),
-                          gridCell = document.createElement('div');
-                          
-                    gridCell.className = 'post-grid-item';
-                    gridCell.innerHTML = `<img src="${mediaSrc}" alt="Post" loading="lazy"><div class="post-views-count"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>${formatCount(views)}</span></div>`;
-                    gridCell.addEventListener('click', () => openPreviewModal(post));
-                    fragment.appendChild(gridCell);
-                });
-                container.appendChild(fragment);
-            } else {
-                const label = currentSelectedCategory.charAt(0).toUpperCase() + currentSelectedCategory.slice(1);
-                container.innerHTML = `<div class="empty-grid-msg">No ${currentSelectedCategory === 'all' ? '' : label} items found.</div>`;
-            }
-
-            if (!isFromCache && allUserPosts.length > 0) {
-                localStorage.setItem('delala_cached_posts', JSON.stringify(allUserPosts));
-            }
         }
 
         function openPreviewModal(post) {

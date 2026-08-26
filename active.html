@@ -9,250 +9,196 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #F4F7F9; /* Slightly deeper to make silver pop */
+            --bg-body: #F8FAFC; 
             --text-dark: #0F172A;
             --text-muted: #64748B;
             --border-light: #E2E8F0;
-            --primary-blue: #60A5FA;
-            --accent-green: #34D399;
-            --accent-red: #F87171;
-            --accent-yellow: #FBBF24;
-            
-            /* Premium Silver Dark 3D Variables */
-            --silver-grad: linear-gradient(145deg, #64748B, #334155, #0F172A);
-            --silver-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.25), inset 0px -2px 4px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(15, 23, 42, 0.25);
+            --primary-blue: #2563EB;
+            --card-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; padding-bottom: 40px; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; padding-bottom: 24px; }
 
-        /* Premium 3D Header */
+        /* Ultra-Compact Dark Blue Header (No Back Button) */
         .track-header {
-            padding: 16px;
-            background: linear-gradient(145deg, #1E293B, #0F172A);
-            box-shadow: 0 4px 15px rgba(15,23,42,0.2);
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 60%, #1E40AF 100%);
+            border-bottom: 1px solid #1E293B;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.2);
             color: #FFF;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: sticky; top: 0; z-index: 20;
-            border-bottom: 1px solid #334155;
-        }
-        .back-btn { background: none; border: none; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; }
-        .back-btn:active { background: rgba(255,255,255,0.1); }
-        .back-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-        .track-header h1 { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.3px; }
-
-        /* Tabs / Toggle */
-        .view-toggle-container {
-            position: sticky;
-            top: 61px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            gap: 10px;
-        }
-        .toggle-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 14px;
-            border: 1px solid var(--border-light);
-            background: #F8FAFC;
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            position: sticky; top: 0; z-index: 20;
         }
-        .toggle-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+        .track-header h1 { font-size: 15px; font-weight: 700; margin: 0; letter-spacing: -0.2px; z-index: 1; text-align: center; }
+
+        /* Tabs Navigation (Compact) */
+        .view-toggle-container {
+            position: sticky; top: 38px; z-index: 10;
+            background: rgba(248, 250, 252, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex; gap: 8px;
+        }
+        .toggle-btn {
+            flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border-light);
+            background: #FFF; font-size: 12px; font-weight: 700; color: var(--text-muted);
+            cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .toggle-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; }
         
-        /* 3D Silver Dark Active State */
         .toggle-btn.active {
-            background: var(--silver-grad);
-            box-shadow: var(--silver-shadow);
-            color: #FFF;
-            border-color: #1E293B;
-            transform: translateY(-2px);
+            background: #1E3A8A; color: #FFF;
+            border-color: #1E3A8A; box-shadow: 0 3px 10px rgba(30, 58, 138, 0.2);
         }
 
         /* View Sections */
         .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 3D Silver Icons for Cards */
-        .icon-3d-silver {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: var(--silver-grad);
-            box-shadow: var(--silver-shadow);
-            border: 1px solid #334155;
+        /* Compact Dynamic Image Avatar */
+        .avatar-frame {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            background: #F1F5F9; overflow: hidden;
+            border: 1px solid var(--border-light);
         }
-        .icon-3d-silver svg { width: 20px; height: 20px; stroke-width: 2.5; fill: none; }
+        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Colored Glowing Strokes on Silver */
-        .stroke-blue { stroke: var(--primary-blue); }
-        .stroke-red { stroke: var(--accent-red); }
-        .stroke-yellow { stroke: var(--accent-yellow); }
-        .stroke-green { stroke: var(--accent-green); }
+        /* Fallback icon styling */
+        .avatar-frame svg { width: 18px; height: 18px; stroke-width: 2.2; fill: none; }
+        .bg-blue { background: #DBEAFE; color: #2563EB; }
+        .bg-red { background: #FEE2E2; color: #DC2626; }
+        .bg-yellow { background: #FEF3C7; color: #D97706; }
+        .bg-green { background: #D1FAE5; color: #059669; }
+        .bg-purple { background: #E0E7FF; color: #4F46E5; }
 
         /* NOTIFICATIONS VIEW */
-        .notifications-list { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .notifications-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .notification-card {
-            background: #FFF;
-            border-radius: 20px;
-            padding: 16px;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 6px 16px rgba(15,23,42,0.03);
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            position: relative;
-            overflow: hidden;
-        }
-        /* Top Metallic Edge Accent */
-        .notification-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, #94A3B8, #334155);
+            background: #FFF; border-radius: 12px; padding: 10px 12px;
+            border: 1px solid var(--border-light); 
+            border-left: 3px solid #1E3A8A;
+            box-shadow: var(--card-shadow);
+            display: flex; align-items: center; gap: 10px;
         }
 
-        .notif-content { flex: 1; font-size: 13.5px; color: #334155; line-height: 1.5; }
-        .notif-content strong { color: var(--text-dark); font-weight: 800; }
-        .notif-post-title { font-weight: 800; color: #1E293B; }
-        .notif-time { font-size: 11px; font-weight: 700; color: #94A3B8; margin-top: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
-        .notif-quote { margin-top: 8px; padding: 10px 14px; background: #F8FAFC; border-left: 4px solid #475569; border-radius: 6px 12px 12px 6px; font-size: 12.5px; color: #475569; font-weight: 500; font-style: italic; }
+        .notif-content { flex: 1; font-size: 12.5px; color: #334155; line-height: 1.35; }
+        .notif-content strong { color: var(--text-dark); font-weight: 700; }
+        .notif-time { font-size: 10px; font-weight: 600; color: #94A3B8; margin-top: 3px; display: block; }
+        .notif-quote { margin-top: 5px; padding: 6px 8px; background: #F8FAFC; border-left: 2px solid #3B82F6; border-radius: 4px; font-size: 12px; color: #334155; font-style: italic; }
 
-        /* STATS OVERVIEW VIEW */
-        .dashboard-overview { padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        /* DASHBOARD VIEW */
+        .dashboard-overview { padding: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .overview-card {
-            background: #FFF;
-            border-radius: 20px;
-            padding: 18px;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 6px 16px rgba(15,23,42,0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-        .overview-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, #94A3B8, #334155);
+            background: #FFF; border-radius: 12px; padding: 10px 12px;
+            border: 1px solid var(--border-light); box-shadow: var(--card-shadow);
+            display: flex; flex-direction: column; gap: 4px;
         }
         
-        .overview-val { font-size: 24px; font-weight: 800; color: var(--text-dark); line-height: 1; margin-top: 4px; }
-        .overview-label { font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
+        .overview-val { font-size: 18px; font-weight: 800; color: var(--text-dark); line-height: 1; margin-top: 2px; }
+        .overview-label { font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.4px; }
 
-        .feed-header { padding: 8px 16px; font-size: 15px; font-weight: 800; color: var(--text-dark); }
-        .activity-feed-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+        .feed-header { padding: 4px 12px 6px; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+        .activity-feed-list { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
 
         .activity-card {
-            background: #FFF;
-            border-radius: 20px;
-            border: 1px solid var(--border-light);
-            padding: 18px;
-            box-shadow: 0 6px 16px rgba(15,23,42,0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            background: #FFF; border-radius: 12px; border: 1px solid var(--border-light);
+            padding: 10px 12px; box-shadow: var(--card-shadow);
+            display: flex; flex-direction: column; gap: 8px;
         }
 
-        .activity-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-        .item-title-wrapper { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        .item-title { font-size: 15px; font-weight: 800; color: var(--text-dark); line-height: 1.3; }
-        .item-date { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
-        .item-category { font-size: 10px; font-weight: 800; background: var(--silver-grad); color: #FFF; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(15,23,42,0.2); }
+        .activity-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .item-title-wrapper { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .item-title { font-size: 13.5px; font-weight: 700; color: var(--text-dark); line-height: 1.2; }
+        .item-date { font-size: 10px; font-weight: 600; color: #94A3B8; }
+        .item-category { font-size: 9px; font-weight: 700; background: #F1F5F9; color: #334155; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; border: 1px solid #E2E8F0; }
 
         .activity-stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            background: #F8FAFC;
-            padding: 14px;
-            border-radius: 14px;
-            border: 1px solid var(--border-light);
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+            background: #F8FAFC; padding: 8px; border-radius: 8px; border: 1px solid #F1F5F9;
         }
 
-        .stat-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .stat-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .stat-icon { color: #64748B; }
-        .stat-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; }
-        .stat-num { font-size: 14px; font-weight: 800; color: var(--text-dark); }
+        .stat-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        .stat-num { font-size: 11.5px; font-weight: 700; color: var(--text-dark); }
         
-        .empty-state { text-align:center; padding:50px 20px; color:#64748B; font-size:14px; font-weight:700; background:#FFF; border-radius:20px; border:1px solid #E2E8F0; box-shadow: 0 6px 16px rgba(15,23,42,0.03); }
+        .empty-state { text-align:center; padding:24px 16px; color:#64748B; font-size:13px; font-weight:600; background:#FFF; border-radius:12px; border:1px solid var(--border-light); box-shadow: var(--card-shadow); }
     </style>
 </head>
 <body>
 
-    <!-- Professional 3D Header -->
+    <!-- Header Without Back Button -->
     <header class="track-header">
-        <button class="back-btn" onclick="window.history.back()">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </button>
         <h1>Activity Hub</h1>
     </header>
 
-    <!-- Tabs Toggle -->
+    <!-- Navigation Tabs -->
     <div class="view-toggle-container">
         <button class="toggle-btn active" data-target="notificationsView">
             <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             Notifications
         </button>
         <button class="toggle-btn" data-target="statsView">
-            <svg viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"></path><path d="M3 15h6v6H3z"></path><path d="M13 15h6v6h-6z"></path></svg>
-            All Stats
+            Dashboard
         </button>
     </div>
 
-    <!-- VIEW 1: NOTIFICATIONS (Default) -->
+    <!-- VIEW 1: NOTIFICATIONS -->
     <div id="notificationsView" class="view-section active">
         <main class="notifications-list" id="notificationsFeed">
-            <div class="empty-state">Loading notifications...</div>
+            <div class="empty-state">Loading activity...</div>
         </main>
     </div>
 
-    <!-- VIEW 2: ALL STATS (Preview Dashboard) -->
+    <!-- VIEW 2: DASHBOARD -->
     <div id="statsView" class="view-section">
         <!-- Global Overview -->
         <section class="dashboard-overview">
             <div class="overview-card">
-                <div class="icon-3d-silver"><svg class="stroke-blue" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+                <div class="avatar-frame bg-blue">
+                    <img src="all.jpg" alt="Views" onerror="this.remove();">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
                 <div class="overview-val" id="totalViews">0</div>
                 <div class="overview-label">Total Views</div>
             </div>
             <div class="overview-card">
-                <div class="icon-3d-silver"><svg class="stroke-red" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+                <div class="avatar-frame bg-red">
+                    <img src="li.jpg" alt="Likes" onerror="this.remove();">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
                 <div class="overview-val" id="totalLikes">0</div>
                 <div class="overview-label">Total Likes</div>
             </div>
             <div class="overview-card">
-                <div class="icon-3d-silver"><svg class="stroke-yellow" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                <div class="avatar-frame bg-yellow">
+                    <img src="ree.jpg" alt="Rating" onerror="this.remove();">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
                 <div class="overview-val" id="avgRating">0.0</div>
                 <div class="overview-label">Avg Rating</div>
             </div>
             <div class="overview-card">
-                <div class="icon-3d-silver"><svg class="stroke-green" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                <div class="avatar-frame bg-green">
+                    <img src="co.jpg" alt="Comments" onerror="this.remove();">
+                    <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                </div>
                 <div class="overview-val" id="totalComments">0</div>
                 <div class="overview-label">Comments</div>
             </div>
         </section>
 
         <div class="feed-header">
-            <span>Listing Breakdown</span>
+            <span>Listing Performance</span>
         </div>
 
         <main class="activity-feed-list" id="activityFeed">
@@ -280,9 +226,12 @@
         const db = getDatabase(app);
         let currentActiveUserId = null;
 
-        // --- Tabs Logic ---
+        let postNotifications = [];
+        let followerNotifications = [];
+        let followingNotifications = [];
+
         document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
                 
@@ -291,7 +240,6 @@
             });
         });
 
-        // --- Utility Functions ---
         function formatCount(num) {
             const val = parseInt(num) || 0;
             if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
@@ -315,12 +263,19 @@
             return "Just now";
         }
 
-        // --- Core Data Fetching ---
+        function combineAndRenderNotifications() {
+            const combined = [...postNotifications, ...followerNotifications, ...followingNotifications];
+            renderNotifications(combined);
+        }
+
         function listenActivityMetrics(userId) {
             const postsRef = ref(db, 'posts');
+            const followersRef = ref(db, `followers/${userId}`);
+            const followingRef = ref(db, `following/${userId}`);
+
             onValue(postsRef, (snapshot) => {
                 const itemsList = [];
-                const masterNotifications = [];
+                postNotifications = [];
                 let globalViews = 0, globalLikes = 0, globalComments = 0, totalRatingSum = 0, ratedPostsCount = 0;
 
                 if (snapshot.exists()) {
@@ -333,38 +288,29 @@
                         if (postOwnerId === cleanCurrentId || String(item.userId) === String(userId)) {
                             itemsList.push({ id: key, ...item });
                             
-                            // Aggregate Global Stats
                             globalViews += (parseInt(item.views || item.viewCount) || 0);
                             globalLikes += (parseInt(item.likes || item.likesCount) || 0);
                             
                             const postTitle = item.title || 'Untitled Listing';
 
-                            // Aggregate Comments
                             if (item.comments) {
                                 Object.values(item.comments).forEach(c => {
                                     globalComments++;
-                                    masterNotifications.push({ type: 'comment', user: c.userName || 'Someone', text: c.text, time: c.timestamp, post: postTitle });
+                                    postNotifications.push({ type: 'comment', user: c.userName || 'Someone', text: c.text, time: c.timestamp, post: postTitle });
                                 });
                             }
-
-                            // Aggregate Ratings
                             if (item.ratings) {
                                 Object.values(item.ratings).forEach(r => {
-                                    const rVal = r.rating || r.value;
-                                    masterNotifications.push({ type: 'rating', user: r.userName || 'Someone', val: rVal, time: r.timestamp, post: postTitle });
+                                    postNotifications.push({ type: 'rating', user: r.userName || 'Someone', val: r.rating || r.value, time: r.timestamp, post: postTitle });
                                 });
                             }
-
-                            // Calculate Overall Average Rating
                             if (item.averageRating && parseFloat(item.averageRating) > 0) {
                                 totalRatingSum += parseFloat(item.averageRating);
                                 ratedPostsCount++;
                             }
-
-                            // Aggregate Likes 
                             if (item.likedBy) {
-                                Object.keys(item.likedBy).forEach(likerId => {
-                                    masterNotifications.push({ type: 'like', user: 'Someone', time: item.createdAt || Date.now(), post: postTitle });
+                                Object.keys(item.likedBy).forEach(() => {
+                                    postNotifications.push({ type: 'like', user: 'Someone', time: item.createdAt || Date.now(), post: postTitle });
                                 });
                             }
                         }
@@ -376,18 +322,49 @@
                 document.getElementById('totalComments').innerText = formatCount(globalComments);
                 document.getElementById('avgRating').innerText = ratedPostsCount > 0 ? (totalRatingSum / ratedPostsCount).toFixed(1) : '0.0';
 
-                renderNotifications(masterNotifications);
+                combineAndRenderNotifications();
                 renderActivityFeed(itemsList);
+            });
+
+            onValue(followersRef, (snapshot) => {
+                followerNotifications = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const val = child.val();
+                        const time = (typeof val === 'object' && val !== null) ? val.timestamp : val;
+                        followerNotifications.push({
+                            type: 'follower',
+                            user: child.key,
+                            time: time || Date.now()
+                        });
+                    });
+                }
+                combineAndRenderNotifications();
+            });
+
+            onValue(followingRef, (snapshot) => {
+                followingNotifications = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const val = child.val();
+                        const time = (typeof val === 'object' && val !== null) ? val.timestamp : val;
+                        followingNotifications.push({
+                            type: 'following',
+                            user: child.key,
+                            time: time || Date.now()
+                        });
+                    });
+                }
+                combineAndRenderNotifications();
             });
         }
 
-        // --- Render Views ---
         function renderNotifications(notifications) {
             const container = document.getElementById('notificationsFeed');
             container.innerHTML = '';
 
             if (notifications.length === 0) {
-                container.innerHTML = `<div class="empty-state">No recent activity on your posts yet.</div>`;
+                container.innerHTML = `<div class="empty-state">No recent notifications.</div>`;
                 return;
             }
 
@@ -399,26 +376,57 @@
 
                 if (notif.type === 'like') {
                     card.innerHTML = `
-                        <div class="icon-3d-silver"><svg class="stroke-red" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+                        <div class="avatar-frame bg-red">
+                            <img src="li.jpg" alt="Like" onerror="this.remove();">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </div>
                         <div class="notif-content">
-                            <strong>${notif.user}</strong> liked your post <span class="notif-post-title">"${notif.post}"</span>.
+                            <strong>${notif.user}</strong> liked your post "<strong>${notif.post}</strong>".
                             <span class="notif-time">${timeAgo(notif.time)}</span>
                         </div>
                     `;
                 } else if (notif.type === 'rating') {
                     card.innerHTML = `
-                        <div class="icon-3d-silver"><svg class="stroke-yellow" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                        <div class="avatar-frame bg-yellow">
+                            <img src="ree.jpg" alt="Rating" onerror="this.remove();">
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
                         <div class="notif-content">
-                            <strong>${notif.user}</strong> rated your post <span class="notif-post-title">"${notif.post}"</span> <strong>${notif.val} Stars</strong>.
+                            <strong>${notif.user}</strong> rated "<strong>${notif.post}</strong>" <strong>${notif.val} Stars</strong>.
                             <span class="notif-time">${timeAgo(notif.time)}</span>
                         </div>
                     `;
                 } else if (notif.type === 'comment') {
                     card.innerHTML = `
-                        <div class="icon-3d-silver"><svg class="stroke-blue" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                        <div class="avatar-frame bg-blue">
+                            <img src="co.jpg" alt="Comment" onerror="this.remove();">
+                            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </div>
                         <div class="notif-content">
-                            <strong>${notif.user}</strong> commented on <span class="notif-post-title">"${notif.post}"</span>.
+                            <strong>${notif.user}</strong> commented on "<strong>${notif.post}</strong>".
                             <div class="notif-quote">"${notif.text}"</div>
+                            <span class="notif-time">${timeAgo(notif.time)}</span>
+                        </div>
+                    `;
+                } else if (notif.type === 'follower') {
+                    card.innerHTML = `
+                        <div class="avatar-frame bg-purple">
+                            <img src="fe.jpg" alt="Follower" onerror="this.remove();">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="notif-content">
+                            <strong>${notif.user}</strong> started following you.
+                            <span class="notif-time">${timeAgo(notif.time)}</span>
+                        </div>
+                    `;
+                } else if (notif.type === 'following') {
+                    card.innerHTML = `
+                        <div class="avatar-frame bg-green">
+                            <img src="fo.jpg" alt="Following" onerror="this.remove();">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="notif-content">
+                            You started following <strong>${notif.user}</strong>.
                             <span class="notif-time">${timeAgo(notif.time)}</span>
                         </div>
                     `;
@@ -475,7 +483,6 @@
             });
         }
 
-        // --- Initialize Auth ---
         onAuthStateChanged(auth, (user) => {
             const sessionPhone = localStorage.getItem('auth_session_phone');
             if (user) {
