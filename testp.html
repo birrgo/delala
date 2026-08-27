@@ -106,38 +106,6 @@
             box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
         }
 
-        .step-header-flex {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            border-bottom: 1px solid #F1F5F9;
-            padding-bottom: 10px;
-        }
-
-        .step-title {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin: 0;
-        }
-
-        .btn-clear-draft {
-            background: #FEE2E2;
-            color: var(--danger-color);
-            border: 1px solid #FCA5A5;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-clear-draft:active { transform: scale(0.96); }
-
         .section-block {
             margin-bottom: 22px;
             padding-bottom: 18px;
@@ -208,6 +176,16 @@
 
         .photo-slot.has-image {
             border: 1px solid var(--border-color);
+        }
+        
+        .photo-slot.upgrade-slot {
+            border-color: #93C5FD;
+            background: #EFF6FF;
+        }
+
+        .photo-slot.upgrade-slot:hover {
+            border-color: #3B82F6;
+            background: #DBEAFE;
         }
 
         .photo-slot img {
@@ -539,7 +517,9 @@
                                 <span>Fee: <strong id="photoFeeDisplay" class="badge-highlight">FREE</strong></span>
                             </button>
 
+                            <!-- The grid where slots render dynamically -->
                             <div class="photo-upload-grid" id="photoUploadGrid"></div>
+
                             <input type="file" id="photoFileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
                         </div>
 
@@ -590,7 +570,7 @@
     <div class="category-modal-overlay" id="photoPricingOverlay">
         <div class="category-modal-card">
             <div class="category-modal-header">
-                <span>Select Photo Package / ፎቶ ጥቅል ይምረጡ</span>
+                <span id="pricingModalHeaderTitle">Select Photo Package / ፎቶ ጥቅል ይምረጡ</span>
                 <div class="custom-radio"></div>
             </div>
             <div class="category-modal-list" id="photoPricingList">
@@ -657,13 +637,16 @@
             try { draft = rawDraft ? JSON.parse(rawDraft) : {}; } catch (e) { draft = {}; }
             try { step1 = rawStep1 ? JSON.parse(rawStep1) : {}; } catch (e) { step1 = {}; }
 
+            // Ensure we pull in the category, subcategory, and any category fees from earlier steps
             const mainCategory = draft.serviceType || draft.category || step1.serviceType || step1.category || "";
+            const categoryFee = draft.categoryFee || step1.categoryFee || 0; 
 
             return {
                 ...step1,
                 ...draft,
                 serviceType: mainCategory,
-                category: mainCategory
+                category: mainCategory,
+                categoryFee: categoryFee
             };
         }
 
@@ -671,16 +654,23 @@
             try {
                 const current = getFormSession();
 
+                // Calculate the final total payable before sending to payment page
+                const baseCategoryFee = parseInt(current.categoryFee || 0);
+                const totalPayable = baseCategoryFee + currentPhotoFee;
+
                 const photoDetails = {
                     photos: uploadedPhotos,
                     selectedPhotoLimit: selectedPhotoLimit,
                     photoFee: currentPhotoFee
                 };
 
+                // Save ALL critical details specifically formatted for the checkout page
                 const draft = {
                     ...current,
                     photoDetails: photoDetails,
                     photos: uploadedPhotos,
+                    photoFee: currentPhotoFee,        // Added for direct access in checkout
+                    totalPayable: totalPayable,       // THIS is what you charge the user
                     updatedAt: Date.now()
                 };
 
@@ -688,24 +678,6 @@
                 localStorage.setItem(SESSION_KEY, JSON.stringify(draft));
             } catch (e) {
                 console.warn("Storage update skipped to prevent overflow", e);
-            }
-        }
-
-        function clearDraft() {
-            if (confirm("Are you sure you want to delete all saved draft information?")) {
-                sessionStorage.removeItem(SESSION_KEY);
-                localStorage.removeItem(SESSION_KEY);
-                sessionStorage.removeItem(STEP1_KEY);
-                localStorage.removeItem(STEP1_KEY);
-                sessionStorage.removeItem('selectedGpsLocation');
-
-                uploadedPhotos = [];
-                selectedPhotoLimit = 1;
-                currentPhotoFee = 0;
-                renderPhotoGrid();
-                updatePhotoTierUI();
-
-                alert("Draft information deleted successfully.");
             }
         }
 
@@ -744,40 +716,60 @@
 
         function fetchDatabasePhotoPrices() {
             const container = document.getElementById('photoPricingList');
-            let htmlOptions = `
-                <div class="category-item ${selectedPhotoLimit === 1 ? 'selected' : ''}" data-limit="1" data-fee="0">
-                    <div class="category-text-group"><span>1 Photo</span><span>—</span><span>FREE</span></div>
-                    <div class="custom-radio"></div>
-                </div>
-            `;
+            const session = getFormSession();
+            const currentCategory = (session.category || session.serviceType || "").trim().toLowerCase();
 
             db.ref('settings/pricing_records').once('value', (snapshot) => {
+                let optionsMap = new Map();
+                
+                // Tier 1: 1 Free photo by default
+                optionsMap.set(1, 0);
+
                 if (snapshot.exists()) {
                     const records = snapshot.val();
-                    const optionsList = [];
                     Object.keys(records).forEach(key => {
                         const rec = records[key];
-                        if (rec && rec.photo_limit > 1) {
-                            optionsList.push({ limit: parseInt(rec.photo_limit), fee: parseInt(rec.photo_price || 0) });
+                        if (rec) {
+                            const recCategory = (rec.category || "").trim().toLowerCase();
+                            if (!recCategory || !currentCategory || recCategory === currentCategory) {
+                                const limit = parseInt(rec.photo_limit || 0);
+                                const price = parseInt(rec.photo_price || 0);
+                                if (limit > 0) {
+                                    if (!optionsMap.has(limit) || price < optionsMap.get(limit)) {
+                                        optionsMap.set(limit, price);
+                                    }
+                                }
+                            }
                         }
                     });
-                    optionsList.sort((a, b) => a.limit - b.limit);
-                    optionsList.forEach(opt => {
-                        const isSelected = selectedPhotoLimit === opt.limit;
-                        const feeFormatted = opt.fee === 0 ? "FREE" : `${opt.fee.toLocaleString()} ETB`;
-                        const labelText = opt.limit >= 100 ? "Unlimited (Max 100)" : `${opt.limit} Photos`;
-                        htmlOptions += `
-                            <div class="category-item ${isSelected ? 'selected' : ''}" data-limit="${opt.limit}" data-fee="${opt.fee}">
-                                <div class="category-text-group"><span>${labelText}</span><span>—</span><span>${feeFormatted}</span></div>
-                                <div class="custom-radio"></div>
-                            </div>
-                        `;
-                    });
                 }
+
+                const sortedLimits = Array.from(optionsMap.keys()).sort((a, b) => a - b);
+                let htmlOptions = '';
+
+                sortedLimits.forEach(limit => {
+                    const fee = optionsMap.get(limit);
+                    const isSelected = selectedPhotoLimit === limit;
+                    const feeFormatted = fee === 0 ? "FREE" : `${fee.toLocaleString()} ETB`;
+                    const labelText = limit >= 100 ? "Unlimited (Max 100)" : `${limit}${limit === 1 ? 'Photo' : 'Photos'}`;
+
+                    htmlOptions += `
+                        <div class="category-item ${isSelected ? 'selected' : ''}" data-limit="${limit}" data-fee="${fee}">
+                            <div class="category-text-group"><span>${labelText}</span><span>—</span><span>${feeFormatted}</span></div>
+                            <div class="custom-radio"></div>
+                        </div>
+                    `;
+                });
+
                 container.innerHTML = htmlOptions;
                 bindPricingItemClicks();
             }).catch(() => {
-                container.innerHTML = htmlOptions;
+                container.innerHTML = `
+                    <div class="category-item selected" data-limit="1" data-fee="0">
+                        <div class="category-text-group"><span>1 Photo</span><span>—</span><span>FREE</span></div>
+                        <div class="custom-radio"></div>
+                    </div>
+                `;
                 bindPricingItemClicks();
             });
         }
@@ -798,6 +790,9 @@
                     currentPhotoFee = fee;
                     items.forEach(i => i.classList.remove('selected'));
                     item.classList.add('selected');
+                    
+                    // Reset modal title when selected normally
+                    document.getElementById('pricingModalHeaderTitle').innerText = 'Select Photo Package / ፎቶ ጥቅል ይምረጡ';
 
                     renderPhotoGrid();
                     updatePhotoTierUI();
@@ -808,9 +803,14 @@
         }
 
         function setupPhotoPricingModal() {
-            const trigger = document.getElementById('openPhotoPricingModalBtn');
+            const triggerBadge = document.getElementById('openPhotoPricingModalBtn');
             const overlay = document.getElementById('photoPricingOverlay');
-            if (trigger) trigger.addEventListener('click', () => overlay.classList.add('active'));
+
+            if (triggerBadge) triggerBadge.addEventListener('click', () => {
+                document.getElementById('pricingModalHeaderTitle').innerText = 'Select Photo Package / ፎቶ ጥቅል ይምረጡ';
+                overlay.classList.add('active');
+            });
+
             if (overlay) {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) overlay.classList.remove('active');
@@ -820,7 +820,7 @@
 
         function triggerFileInput() {
             if (uploadedPhotos.length >= selectedPhotoLimit) {
-                return showErrorModal(`You have reached your tier limit of ${selectedPhotoLimit} photo(s). Tap 'Photos / Fee' to choose a higher package.`);
+                return showErrorModal(`You have reached your tier limit of ${selectedPhotoLimit} photo(s). Upgrade to a higher package to upload more.`);
             }
             document.getElementById('photoFileInput').click();
         }
@@ -855,22 +855,41 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            const totalSlotsToDisplay = selectedPhotoLimit;
-            for (let i = 0; i < totalSlotsToDisplay; i++) {
+            // We show exactly enough slots dynamically. At least 2 slots are always shown. 
+            // We'll render empty slots up to the user's limit, and append exactly ONE upgrade slot if below max.
+            let slotsToRender = Math.max(uploadedPhotos.length + 1, 2);
+
+            for (let i = 0; i < slotsToRender; i++) {
                 const slot = document.createElement('div');
+
                 if (i < uploadedPhotos.length) {
+                    // Uploaded Image
                     slot.className = 'photo-slot has-image';
                     slot.innerHTML = `
                         <img src="${uploadedPhotos[i]}" alt="Photo ${i + 1}">
                         <button type="button" class="remove-btn" onclick="removePhoto(${i})">×</button>
                     `;
                 } else {
-                    slot.className = 'photo-slot';
-                    slot.onclick = triggerFileInput;
-                    slot.innerHTML = `
-                        <span class="photo-slot-plus-icon">+</span>
-                        <span class="photo-slot-label">Photo ${i + 1}</span>
-                    `;
+                    if (i < selectedPhotoLimit) {
+                        // Regular empty slot within limit
+                        slot.className = 'photo-slot';
+                        slot.onclick = triggerFileInput;
+                        slot.innerHTML = `
+                            <span class="photo-slot-plus-icon">+</span>
+                            <span class="photo-slot-label">Photo ${i + 1}</span>
+                        `;
+                    } else {
+                        // Extra slot used to trigger upgrade menu
+                        slot.className = 'photo-slot upgrade-slot';
+                        slot.onclick = () => {
+                            document.getElementById('pricingModalHeaderTitle').innerText = 'More than one is paid';
+                            document.getElementById('photoPricingOverlay').classList.add('active');
+                        };
+                        slot.innerHTML = `
+                            <span class="photo-slot-plus-icon" style="color: #2563EB;">+</span>
+                            <span class="photo-slot-label" style="color: #2563EB;">Photo ${i + 1}</span>
+                        `;
+                    }
                 }
                 grid.appendChild(slot);
             }
