@@ -4,714 +4,625 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>Yala Tech | Online Work in Ethiopia, Tech Tips & Vacancies</title>
-    <meta name="title" content="Shiqela | Online Work in Ethiopia, Tech Tips & Vacancies">
-    <meta name="description" content="Shiqela is your primary platform for online work in Ethiopia, tech tips, digital skills, and vacancies.">
-    <link rel="canonical" href="https://shiqela.online/">
+    <title>Delala | Rentals, Selling, Job Vacancies & Tech Tips</title>
+    <meta name="title" content="Delala | Rentals, Selling, Job Vacancies & Tech Tips">
+    <meta name="description" content="Delala is your primary platform for rental listings, selling items, online vacancies, tech tips, and job opportunities in Ethiopia.">
+    <meta name="keywords" content="delala, rental ethiopia, selling ethiopia, job vacancy, online work in ethiopia, tech tips, ethiopian jobs, profile">
+    <meta name="author" content="Delala">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://delala.online/">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Delala">
+    <link rel="apple-touch-icon" href="s.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="s.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="s.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="news.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        .menu-iframe-overlay {
-            position: fixed;
+        :root {
+            --text-main: #ffffff;
+            --text-muted: #e2e8f0;
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #020617; 
+            overflow: hidden;
+        }
+
+        .app-view {
+            height: 100vh;
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            background-image: url('bgu.png');
+            background-size: cover;
+            background-position: center bottom;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        @media (max-aspect-ratio: 9/16) {
+            .app-view {
+                width: 100vw;
+                height: 100vh;
+                aspect-ratio: auto;
+            }
+        }
+
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 12px 4px rgba(0, 255, 255, 0.4); }
+            50% { box-shadow: 0 0 20px 6px rgba(0, 255, 255, 0.7); }
+        }
+
+        /* --- Header Section (No Blur) --- */
+        .header {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: clamp(35px, 6vh, 45px) 20px 20px 20px;
+            text-align: center;
+            animation: fadeInDown 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .header h2 {
+            font-size: clamp(20px, 3.5vh, 26px);
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            text-shadow: 0 2px 10px rgba(0,0,0,1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h3 {
+            font-size: clamp(15px, 2.2vh, 18px);
+            font-weight: 500;
+            color: #bae6fd;
+            text-shadow: 0 2px 10px rgba(0,0,0,1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .map-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 5;
+        }
+
+        .pin-wrapper {
+            position: absolute;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .pin-center { top: 24%; left: 50%; animation-delay: 0s; }
+        .pin-rent { top: 38%; left: 16%; animation-delay: 0.5s; }
+        .pin-sell { top: 38%; left: 84%; animation-delay: 1.5s; }
+        .pin-buy { top: 61%; left: 32%; animation-delay: 1s; }
+        .pin-hire { top: 61%; left: 68%; animation-delay: 2s; }
+
+        .pin {
+            position: absolute;
+            bottom: 0;
+            left: -28px; 
+            width: 56px; 
+            height: 56px; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--glass-shadow), inset 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .pin-center .pin {
+            left: -32px;
+            width: 64px;
+            height: 64px;
+        }
+
+        .pin::after {
+            content: '';
+            position: absolute;
+            bottom: -15px; 
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 10px 0; 
+            border-style: solid;
+            border-color: rgba(200, 220, 255, 0.5) transparent transparent transparent;
+            z-index: -1;
+        }
+
+        .pin::before {
+            content: '';
+            position: absolute;
+            bottom: -13px; 
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 13px 8px 0; 
+            border-style: solid;
+            border-color: rgba(15, 25, 40, 0.9) transparent transparent transparent;
+            z-index: -1;
+        }
+
+        .pin i {
+            font-size: 20px; 
+            color: var(--text-main);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+        }
+
+        .pin img {
+            width: 60%;
+            height: 60%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        .glow-dot {
+            position: absolute;
+            bottom: -20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 5px;
+            background: #00ffff;
+            border-radius: 50%;
+            z-index: -2;
+            animation: pulseGlow 3s infinite;
+        }
+
+        .pin-label {
+            position: absolute;
+            top: 15px; 
+            left: 0; 
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+        }
+
+        .pin-label .en {
+            font-size: clamp(12px, 2vh, 14px);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .pin-label .am {
+            font-size: clamp(10px, 1.5vh, 12px);
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* --- Footer Section (Fixed Blur Issue) --- */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            padding: 40px 20px 70px 20px;
+            text-align: center;
+            animation: slideUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 0.2s;
+            opacity: 0; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The blur and mask are now on a pseudo-element behind the content */
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(2, 6, 23, 0.95) 0%, rgba(2, 6, 23, 0.6) 75%, transparent 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
+            mask-image: linear-gradient(to top, black 70%, transparent 100%);
+            z-index: -1; 
+        }
+
+        /* --- 3D Bold Dark Blue Button --- */
+        .btn-start {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 85%;
+            max-width: 320px;
+            padding: 18px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--text-main);
+            /* Rich 3D Dark Blue Gradient */
+            background: linear-gradient(180deg, #1e40af 0%, #172554 100%); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* 3D Shadows: Outer drop shadow + Inner top highlight + Inner bottom shadow */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 
+                        inset 0 3px 6px rgba(255, 255, 255, 0.3),
+                        inset 0 -4px 8px rgba(0, 0, 0, 0.6);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+            margin-bottom: 20px; 
+        }
+
+        /* Glossy reflection on top of the button */
+        .btn-start::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 45%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 50px 50px 0 0;
+            pointer-events: none;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, #2563eb 0%, #1e3a8a 100%); 
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 
+                        inset 0 3px 6px rgba(255, 255, 255, 0.4),
+                        inset 0 -4px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Compression effect on click */
+        .btn-start:active {
+            transform: translateY(3px) scale(0.97);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
+                        inset 0 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-start span {
+            font-size: clamp(16px, 2.5vh, 19px);
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 2; 
+        }
+
+        .footer p {
+            font-size: clamp(12px, 1.8vh, 15px);
+            line-height: 1.6;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0,0,0,1);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* =========================================================
+           POPUP OVERLAY STYLES (Offline & Low Connection)
+           ========================================================= */
+        .connection-popup-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .menu-iframe-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .menu-iframe-drawer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 75%;
-            height: 100%;
-            border: none;
-            background: #081B38;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-        }
-        .menu-iframe-overlay.active .menu-iframe-drawer {
-            transform: translateX(0);
+
+        .connection-popup-overlay.show {
+            opacity: 1; visibility: visible;
         }
 
-        :root {
-            --bottom-nav-height: 65px;
-        }
-
-        .bottom-nav {
-            z-index: 99998 !important; 
-        }
-        .search-modal-overlay {
-            z-index: 9990 !important;
-            padding-bottom: 140px !important;
-        }
-
-        /* UPDATED AD CONTAINER CSS */
-        .ad-container-wrapper {
-            position: fixed;
-            /* Removed the extra gap so it sits flush on the bottom nav */
-            bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            pointer-events: none; 
-            z-index: 99999 !important;
-        }
-        .admob-banner-container {
-            width: 100%; /* Forces ad to fit full width */
-            height: auto;
-            min-height: 50px;
+        .status-card {
             background: #ffffff;
-            color: #202124;
+            color: #0f172a;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .connection-popup-overlay.show .status-card {
+            transform: translateY(0);
+        }
+
+        .icon-container {
+            width: 72px; height: 72px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 4px 12px;
-            border-top: 1px solid #dadce0; /* Top border only for seamless look */
-            box-shadow: 0px -4px 12px rgba(0, 0, 0, 0.1); /* Upward shadow */
-            pointer-events: auto;
-        }
-        /* END UPDATED AD CONTAINER CSS */
-
-        .ad-badge {
-            background: #fbbc04;
-            color: #202124;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 3px;
-            text-transform: uppercase;
-        }
-        .clickable-news-card {
-            cursor: pointer;
-        }
-        .inline-feed-ad {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 14px;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            justify-content: center;
+            margin: 0 auto 20px auto;
         }
         
-        .feed-loader-box {
-            text-align: center;
-            padding: 20px;
-            margin: 15px 20px;
-            color: #9ca3af;
-            font-size: 14px;
-            font-weight: 700;
-            display: none;
-            transition: all 0.2s ease;
+        .icon-container.offline-icon {
+            background: #FEF2F2; color: #DC2626;
+            animation: floatIcon 3s ease-in-out infinite;
         }
-        .loader-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(156, 163, 175, 0.3);
-            border-top-color: #9ca3af;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
+        
+        .icon-container.low-icon {
+            background: #FFF7ED; color: #EA580C;
+            animation: pulseWarning 2s infinite ease-in-out;
         }
 
-        .initial-fullscreen-loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            text-align: center;
-        }
-        .initial-loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 20px;
+        .icon-container svg {
+            width: 32px; height: 32px;
+            stroke-width: 2.5; stroke: currentColor;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status-title {
+            font-size: 20px; font-weight: 800;
+            margin: 0 0 10px 0; letter-spacing: -0.5px;
+        }
+
+        .status-description {
+            font-size: 14.5px; color: #64748B;
+            margin: 0 0 28px 0; line-height: 1.5;
+        }
+
+        .primary-popup-btn {
+            background: #0F2C59; color: #FFFFFF;
+            border: none; border-radius: 14px;
+            padding: 15px 24px; width: 100%;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);
+            margin-bottom: 12px;
+        }
+        .primary-popup-btn:active {
+            transform: scale(0.97); background: #081B38;
+        }
+
+        .secondary-popup-btn {
+            background: transparent; color: #64748B;
+            border: none; font-size: 14px; font-weight: 600;
+            cursor: pointer; padding: 10px; width: 100%;
+        }
+        
+        @keyframes pulseWarning {
+            0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.2); }
+            70% { box-shadow: 0 0 0 15px rgba(234, 88, 12, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+        }
+        @keyframes floatIcon {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-view">
-        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
-            <defs>
-                <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#081B38"/>
-                    <stop offset="1" stop-color="#0F2C59"/>
-                </linearGradient>
-            </defs>
-        </svg>
-
-        <div class="menu-iframe-overlay" id="menuIframeOverlay">
-            <iframe class="menu-iframe-drawer" id="menuIframe" src="about:blank"></iframe>
-        </div>
-
-        <div class="search-modal-overlay" id="searchModalOverlay">
-            <div class="search-box-header">
-                <div class="search-input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Search any word or code..." autocomplete="off">
-                </div>
-                <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
-            </div>
-            <div class="search-results-area" id="searchResultsArea">
-                <div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">
-                    Type a word above to search all posted items.
-                </div>
-            </div>
-        </div>
-
-        <!-- UPDATED HEADER WITH "WHAT'S NEW" -->
-        <header class="nav-header" style="display: flex; align-items: center; justify-content: space-between; padding-left: 16px; padding-right: 16px; gap: 14px;">
-            <div class="header-left-group" style="display: flex; align-items: center; gap: 12px;">
-                <button type="button" class="menu-action-btn" id="openMenuIframeBtn" aria-label="Open Menu" style="background: none; border: none; cursor: pointer; color: #ffffff; padding: 0; display: flex; align-items: center; justify-content: center;">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                <span style="color: #ffffff; font-size: 17px; font-weight: 700; white-space: nowrap;">What's new?</span>
-            </div>
-
-            <div class="header-center-group" style="flex: 1;" onclick="document.getElementById('openSearchBtn').click()">
-                <div style="background: rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <span style="font-size: 14px; color: #ffffff; font-weight: 600;">Search updates...</span>
-                </div>
-            </div>
-
-            <button class="search-action-btn" id="openSearchBtn" style="display: none;"></button>
+    <main class="app-view">
+        
+        <header class="header">
+            <h2>የቅርብን በቅርብ ያግኙ</h2>
+            <h3>Find what's near you right away!</h3>
         </header>
 
-        <main class="app-content" id="mainContentArea">
-            <div class="category-filter-row filter-btn-grid" id="filterPillsRow">
-                <button class="filter-pill filter-btn active-pill active" data-filter="Shikela Update" data-category="Shikela Update">Yala Tech Update</button>
-                <button class="filter-pill filter-btn" data-filter="Shikela Tips" data-category="Shikela Tips">Yala Tech Tips</button>
-            </div>
-
-            <div class="broadcasts-container" id="broadcastsContainer">
-                <div class="initial-fullscreen-loader">
-                    <div class="initial-loader-spinner"></div>
-                    <h2 style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0;">Loading latest updates...</h2>
-                    <p style="color: #9ca3af; font-size: 13px; margin-top: 8px;">Please wait while we connect</p>
+        <section class="map-layer">
+            
+            <div class="pin-wrapper pin-center">
+                <div class="pin">
+                    <img src="s.png" alt="S Logo Pin">
+                    <div class="glow-dot"></div>
                 </div>
             </div>
 
-            <div class="feed-loader-box" id="feedLoaderBox">
-                <span class="loader-spinner" id="loaderSpinner" style="display:none;"></span>
-                <span id="loaderText">Loading...</span>
-            </div>
-
-            <footer class="verified-footer-shield">
-                <span class="footer-shield-text">Yala Tech Matrix Verified</span>
-            </footer>
-        </main>
-
-        <div class="ad-container-wrapper" id="adContainerWrapper" style="display: none;">
-            <div class="admob-banner-container" id="admobBannerNode">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="ad-badge">Ad</span>
-                    <span style="font-size:12px; font-weight:600; color:#3c4043;" id="bannerAdLabel">AdMob Banner</span>
+            <div class="pin-wrapper pin-rent">
+                <div class="pin">
+                    <i class="fa-solid fa-building"></i>
+                    <div class="glow-dot"></div>
                 </div>
-                <button style="background:#1a73e8; color:#fff; border:none; padding:5px 12px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer;">LEARN MORE</button>
+                <div class="pin-label">
+                    <span class="en">Rent</span>
+                    <span class="am">ያከራዩ</span>
+                </div>
             </div>
+
+            <div class="pin-wrapper pin-sell">
+                <div class="pin">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <div class="glow-dot"></div>
+                </div>
+                <div class="pin-label">
+                    <span class="en">Sell</span>
+                    <span class="am">ይሽጡ</span>
+                </div>
+            </div>
+
+            <div class="pin-wrapper pin-buy">
+                <div class="pin">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <div class="glow-dot"></div>
+                </div>
+                <div class="pin-label">
+                    <span class="en">Buy</span>
+                    <span class="am">ይግዙ</span>
+                </div>
+            </div>
+
+            <div class="pin-wrapper pin-hire">
+                <div class="pin">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <div class="glow-dot"></div>
+                </div>
+                <div class="pin-label">
+                    <span class="en">Hire Services</span>
+                    <span class="am">አገልግሎቶችን ያግኙ</span>
+                </div>
+            </div>
+
+        </section>
+
+        <footer class="footer">
+            <a href="rental.html" class="btn-start" aria-label="Get Started">
+                <span>Get Started</span>
+            </a>
+            <p>Rent, Sell, Buy & Hire. Discover everything near you.<br>ያከራዩ፣ ይሽጡ፣ ይግዙ፣ አገልግሎቶችን ያግኙ። ሁሉንም ነገር በአቅራቢያዎ ያግኙ።</p>
+        </footer>
+
+    </main>
+
+    <div id="offlinePopup" class="connection-popup-overlay">
+        <div class="status-card">
+            <div class="icon-container offline-icon">
+                <svg viewBox="0 0 24 24">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                    <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                    <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                </svg>
+            </div>
+            <h1 class="status-title">You are Offline</h1>
+            <p class="status-description">It looks like you've lost your network connection. Please check your Wi-Fi or cellular data.</p>
+            
+            <button class="primary-popup-btn" onclick="checkIfOnline()">Try Again</button>
         </div>
-
-        <nav class="bottom-nav" id="mainBottomNav">
-            <a id="nav-home" href="index.html" class="nav-item active">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                </div>
-                <span>Home</span>
-            </a>
-            <a id="nav-jobs" href="s.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                </div>
-                <span>Online Jobs</span>
-            </a>
-            <a id="nav-tech" href="in.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                </div>
-                <span>Tech</span>
-            </a>
-            <a id="nav-social" href="sm.html" class="nav-item">
-                <div class="icon-bg">
-                    <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                </div>
-                <span>Social Media</span>
-            </a>
-        </nav>
     </div>
 
-    <!-- Capacitor & AdMob -->
-    <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@5.0.0/dist/capacitor.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@capacitor-community/admob@5.0.0/dist/plugin.min.js"></script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCqwgwiukwKb7o6gwnaLoPQSWc7BfMDuYQ",
-            authDomain: "besuad.firebaseapp.com",
-            databaseURL: "https://besuad-default-rtdb.firebaseio.com",
-            projectId: "besuad",
-            storageBucket: "besuad.firebasestorage.app",
-            messagingSenderId: "641705823615",
-            appId: "1:641705823615:web:6502b2511ff8c0f251de4a",
-            measurementId: "G-2YSX71N08Q"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const APP_NODE_NAME = "app1";
-
-        let rawShikelaNewsData = {};
-        let rawNewNewsData = {};
-        let localCachedBroadcasts = [];
-        let currentActiveCategoryFilter = "Shikela Update";
-        let isBannerInitialized = false;
-
-        let currentVisibleFeedCount = 0;
-        let isFetchingMore = false;
-        const FEED_BATCH_SIZE = 3;
-
-        window.globalAdConfig = {
-            status: false,
-            bannerId: "",
-            interstitialId: "",
-            nativeId: "",
-            interstitialInterval: 3,
-            placements: {}
-        };
-
-        function initApp() {
-            adjustBottomNavigationOffsets();
-            fetchDatabaseAdConfig();
-            streamLiveAdminUpdatesLog();
-            bindVisualInterfaceControls();
-            setupSearchEngineControls();
-            setupIntersectionObserver();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
-
-        window.addEventListener('pageshow', (event) => {
-            if (event.persisted && window.globalAdConfig.status) {
-                setTimeout(() => {
-                    triggerBannerAd();
-                }, 300);
-            }
-        });
-
-        function setupIntersectionObserver() {
-            const loaderBox = document.getElementById('feedLoaderBox');
-            if (!loaderBox) return;
-
-            const options = {
-                root: null,
-                rootMargin: '400px',
-                threshold: 0
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !document.getElementById('searchModalOverlay').classList.contains('active-search')) {
-                        executeLoadMoreBatch();
-                    }
-                });
-            }, options);
-
-            observer.observe(loaderBox);
-        }
-
-        function executeLoadMoreBatch() {
-            if (isFetchingMore) return;
+    <div id="lowConnectionPopup" class="connection-popup-overlay">
+        <div class="status-card">
+            <div class="icon-container low-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 20h.01"></path>
+                    <path d="M8.5 16.429a5 5 0 0 1 7 0"></path>
+                    <path d="M5 12.859a10 10 0 0 1 14 0" opacity="0.3"></path>
+                    <path d="M2 9.289a15 15 0 0 1 20 0" opacity="0.3"></path>
+                </svg>
+            </div>
+            <h1 class="status-title">Slow Connection</h1>
+            <p class="status-description">Your internet connection seems unstable. Things might take a little longer to load than usual.</p>
             
-            const filtered = localCachedBroadcasts.filter(item => (item.category || "").trim().toLowerCase() === currentActiveCategoryFilter.trim().toLowerCase());
-            if (currentVisibleFeedCount >= filtered.length) return;
-
-            isFetchingMore = true;
-            
-            const loaderSpinner = document.getElementById('loaderSpinner');
-            const loaderText = document.getElementById('loaderText');
-            
-            if (loaderSpinner) loaderSpinner.style.display = 'inline-block';
-            if (loaderText) loaderText.innerText = 'Loading...';
-
-            setTimeout(() => {
-                renderFilteredBroadcasts(false); 
-                isFetchingMore = false;
-            }, 300); 
-        }
-
-        function updateLoaderUI() {
-            const loaderBox = document.getElementById('feedLoaderBox');
-            const loaderSpinner = document.getElementById('loaderSpinner');
-            const loaderText = document.getElementById('loaderText');
-            
-            if (!loaderBox) return;
-
-            const filtered = localCachedBroadcasts.filter(item => (item.category || "").trim().toLowerCase() === currentActiveCategoryFilter.trim().toLowerCase());
-
-            loaderBox.style.display = 'block';
-
-            if (currentVisibleFeedCount >= filtered.length) {
-                if (filtered.length > 0) {
-                    if (loaderSpinner) loaderSpinner.style.display = 'none';
-                    if (loaderText) loaderText.innerText = 'All updates loaded ✅';
-                } else {
-                    loaderBox.style.display = 'none';
-                }
-            } else {
-                if (loaderSpinner) loaderSpinner.style.display = 'none';
-                if (loaderText) loaderText.innerText = 'Loading...';
-            }
-        }
-
-        function adjustBottomNavigationOffsets() {
-            const nav = document.getElementById('mainBottomNav');
-            if (nav) {
-                const navHeight = nav.offsetHeight || 65;
-                document.documentElement.style.setProperty('--bottom-nav-height', `${navHeight}px`);
-                const mainArea = document.getElementById('mainContentArea');
-                if (mainArea) mainArea.style.paddingBottom = `${navHeight + 65}px`;
-            }
-        }
-
-        function fetchDatabaseAdConfig() {
-            const adManagerRef = ref(db, `${APP_NODE_NAME}/adManager`);
-            onValue(adManagerRef, (snapshot) => {
-                if (!snapshot.exists()) return;
-
-                const adData = snapshot.val();
-                const isStatusOn = (adData.adStatus === "ON" || adData.adStatus === true || adData.adStatus === "true" || adData.adStatus === 1);
-
-                window.globalAdConfig = {
-                    status: isStatusOn,
-                    bannerId: (adData.adMobBannerUnitId || "ca-app-pub-3940256099942544/6300978111").trim(),
-                    interstitialId: (adData.adMobInterstitialUnitId || "ca-app-pub-3940256099942544/1033173712").trim(),
-                    nativeId: (adData.adMobNativeUnitId || "ca-app-pub-3940256099942544/2247696110").trim(),
-                    interstitialInterval: parseInt(adData.interstitialAdInterval, 10) || 3,
-                    placements: adData.placements || {},
-                    isTesting: (adData.adMobBannerUnitId || "").includes("3940256099942544")
-                };
-
-                if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-                    const { AdMob } = Capacitor.Plugins;
-                    AdMob.initialize({
-                        requestTrackingAuthorization: true,
-                        initializeForTesting: window.globalAdConfig.isTesting
-                    }).then(() => {
-                        setTimeout(triggerBannerAd, 500);
-                    }).catch(e => console.warn("AdMob Init:", e));
-                } else {
-                    triggerBannerAd();
-                }
-                
-                if (localCachedBroadcasts.length > 0) renderFilteredBroadcasts(true);
-            });
-        }
-
-        async function triggerBannerAd() {
-            const adWrapper = document.getElementById('adContainerWrapper');
-            const nav = document.getElementById('mainBottomNav');
-            const navHeight = nav ? nav.offsetHeight : 65;
-
-            const shouldShowBanner = window.globalAdConfig.status && 
-                                     (window.globalAdConfig.placements?.bannerAdHomePage !== false) && 
-                                     Boolean(window.globalAdConfig.bannerId);
-
-            if (!shouldShowBanner) {
-                if (adWrapper) adWrapper.style.display = 'none';
-                return;
-            }
-
-            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-                const { AdMob, BannerAdSize, BannerAdPosition } = Capacitor.Plugins;
-                try {
-                    if (isBannerInitialized) {
-                        await AdMob.resumeBanner().catch(() => {});
-                    } else {
-                        await AdMob.showBanner({
-                            adId: window.globalAdConfig.bannerId,
-                            adSize: 'BANNER',
-                            position: 'BOTTOM_CENTER',
-                            margin: navHeight
-                        });
-                        isBannerInitialized = true;
-                    }
-                } catch (e) {
-                    console.error("Banner Show Error:", e);
-                }
-            } else {
-                if (adWrapper) {
-                    adWrapper.style.display = 'flex';
-                    const label = document.getElementById('bannerAdLabel');
-                    if (label) label.innerText = `Banner: ${window.globalAdConfig.bannerId.slice(-8)}`;
-                }
-            }
-        }
-
-        window.navigateToFull = async function(itemId, nodeName) {
-            const targetUrl = `full.html?id=${encodeURIComponent(itemId)}&node=${encodeURIComponent(nodeName || 'shikelaNews')}`;
-            
-            const adWrapper = document.getElementById('adContainerWrapper');
-            if (adWrapper) adWrapper.style.display = 'none';
-
-            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-                const { AdMob } = Capacitor.Plugins;
-                try {
-                    await AdMob.hideBanner().catch(() => {});
-                    await AdMob.removeBanner().catch(() => {});
-                    isBannerInitialized = false; 
-                } catch (e) {
-                    console.warn("Banner cleanup warning:", e);
-                }
-            }
-
-            window.location.href = targetUrl;
-        };
-
-        function extractValidTimestamp(item) {
-            const raw = item.timestamp || item.updatedAt || item.createdAtTimestamp || item.createdAt || item.date;
-            if (typeof raw === 'number' && !isNaN(raw)) return raw;
-            if (typeof raw === 'string') {
-                const parsed = parseInt(raw, 10);
-                if (!isNaN(parsed) && parsed > 1000000000) return parsed < 100000000000 ? parsed * 1000 : parsed;
-                const dateParsed = new Date(raw).getTime();
-                if (!isNaN(dateParsed)) return dateParsed;
-            }
-            return Date.now();
-        }
-
-        function rebuildAndRenderBroadcastsCache() {
-            localCachedBroadcasts = [];
-            const addNode = (dataObj, defaultCat, nodeName) => {
-                Object.keys(dataObj).forEach(key => {
-                    const item = dataObj[key];
-                    if (typeof item === 'object' && item !== null) {
-                        localCachedBroadcasts.push({
-                            id: key,
-                            sourceNode: nodeName,
-                            ...item,
-                            title: item.title || item.newsTitle || defaultCat,
-                            category: item.category || defaultCat,
-                            resolvedTimestamp: extractValidTimestamp(item)
-                        });
-                    }
-                });
-            };
-            addNode(rawShikelaNewsData, "Shikela Update", "shikelaNews");
-            addNode(rawNewNewsData, "Shikela Tips", "newNews");
-            localCachedBroadcasts.sort((a, b) => b.resolvedTimestamp - a.resolvedTimestamp);
-            
-            renderFilteredBroadcasts(true);
-        }
-
-        function streamLiveAdminUpdatesLog() {
-            onValue(ref(db, `${APP_NODE_NAME}/shikelaNews`), (snapshot) => {
-                rawShikelaNewsData = snapshot.exists() ? snapshot.val() : {};
-                rebuildAndRenderBroadcastsCache();
-            });
-            onValue(ref(db, `${APP_NODE_NAME}/newNews`), (snapshot) => {
-                rawNewNewsData = snapshot.exists() ? snapshot.val() : {};
-                rebuildAndRenderBroadcastsCache();
-            });
-        }
-
-        function buildSingleNewsCardHTML(item) {
-            const headline = item.title || item.newsTitle || "Yala Tech Update";
-            const fullContent = item.content || item.message || "";
-            const displayCategory = (item.category || "Yala Tech Update").replace('Shikela', 'Yala Tech'); 
-            const category = item.category || "Shikela Update";
-            const imageUrl = item.imageUrl || item.image || "";
-
-            const previewContent = fullContent.length > 120 ? fullContent.substring(0, 120).trim() + "..." : fullContent;
-            const numericalTime = item.resolvedTimestamp || Date.now();
-            const pillBadgeClass = category.toLowerCase().includes("tips") ? "spotlight-pill system-badge" : "spotlight-pill";
-
-            let imageHTML = imageUrl ? `<div class="broadcast-image-frame"><img src="${imageUrl}" onload="this.classList.add('loaded')"></div>` : "";
-
-            return `
-                <div class="clickable-news-card" onclick="navigateToFull('${item.id}', '${item.sourceNode}')">
-                    <div class="badge-meta-row">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="${pillBadgeClass}" style="text-transform: uppercase;">${displayCategory}</span>
-                        </div>
-                        <span class="timestamp-log-text" data-timestamp="${numericalTime}"></span>
-                    </div>
-                    ${imageHTML}
-                    <div class="clickable-news-content">
-                        <h2 class="broadcast-title">${headline}</h2>
-                        <p class="broadcast-body-text">${previewContent}</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function getInlineNativeAdHTML() {
-            if (!window.globalAdConfig.status) return "";
-            
-            const nativeId = window.globalAdConfig.nativeId || "ca-app-pub-3940256099942544/2247696110";
-            
-            return `
-                <div class="inline-feed-ad">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                        <span class="ad-badge">Ad</span>
-                        <span style="font-size:11px; color:#64748b; font-weight:600;">Sponsored Content</span>
-                    </div>
-                    <div style="font-size:32px; margin-bottom:8px;">💡</div>
-                    <strong style="font-size:15px; color:#1e293b; display:block;">Promoted Opportunities</strong>
-                    <span style="font-size:13px; color:#64748b; display:block; margin: 4px 0 2px 0;">In-feed content placement directly embedded in stream.</span>
-                    <span style="font-size:10px; color:#9ca3af; display:block; margin-bottom: 12px; word-break: break-all;">ID: ${nativeId}</span>
-                    <button style="background:#2563eb; color:#fff; border:none; padding:12px 18px; border-radius:8px; font-size:13px; font-weight:700; width:100%; cursor:pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">LEARN MORE</button>
-                </div>
-            `;
-        }
-
-        function renderFilteredBroadcasts(reset = false) {
-            const container = document.getElementById('broadcastsContainer');
-            if (!container) return;
-
-            const filtered = localCachedBroadcasts.filter(item => (item.category || "").trim().toLowerCase() === currentActiveCategoryFilter.trim().toLowerCase());
-            
-            if (reset) {
-                container.innerHTML = "";
-                currentVisibleFeedCount = 0;
-            }
-
-            if (filtered.length === 0) {
-                if (reset) container.innerHTML = `<article class="featured-broadcast-card"><h2 class="broadcast-title">No updates posted today.</h2></article>`;
-                updateLoaderUI();
-                return;
-            }
-
-            const nextBatch = filtered.slice(currentVisibleFeedCount, currentVisibleFeedCount + FEED_BATCH_SIZE);
-            if (nextBatch.length === 0) {
-                updateLoaderUI();
-                return; 
-            }
-
-            nextBatch.forEach((item) => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                container.appendChild(card);
-                
-                currentVisibleFeedCount++;
-
-                if (currentVisibleFeedCount % 2 === 0) {
-                    if (window.globalAdConfig.status && window.globalAdConfig.placements?.nativeAdPostList !== false) {
-                        const inlineAdWrapper = document.createElement('div');
-                        inlineAdWrapper.innerHTML = getInlineNativeAdHTML();
-                        container.appendChild(inlineAdWrapper);
-                    }
-                }
-            });
-
-            updateLoaderUI();
-        }
-
-        function setupSearchEngineControls() {
-            const openBtn = document.getElementById('openSearchBtn');
-            const closeBtn = document.getElementById('closeSearchDrawerBtn');
-            const searchOverlay = document.getElementById('searchModalOverlay');
-            const searchInput = document.getElementById('newsCodeSearchInput');
-
-            if (openBtn) {
-                openBtn.addEventListener('click', () => {
-                    searchOverlay.classList.add('active-search');
-                    if (searchInput) { searchInput.value = ''; searchInput.focus(); executeNewsSearchQuery(''); }
-                });
-            }
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => searchOverlay.classList.remove('active-search'));
-            }
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => executeNewsSearchQuery(e.target.value));
-            }
-        }
-
-        function executeNewsSearchQuery(query) {
-            const resultsArea = document.getElementById('searchResultsArea');
-            if (!resultsArea) return;
-
-            const cleanQuery = query.trim().toLowerCase();
-            if (!cleanQuery) {
-                resultsArea.innerHTML = `<div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">Type any word or code above to search all posts.</div>`;
-                return;
-            }
-
-            const matchedNews = localCachedBroadcasts.filter(item => {
-                const code = String(item.newsCode || item.code || item.id || '').toLowerCase();
-                const title = String(item.title || item.newsTitle || '').toLowerCase();
-                const content = String(item.content || item.message || '').toLowerCase();
-                const cat = String(item.category || '').toLowerCase();
-                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || cat.includes(cleanQuery);
-            });
-
-            if (matchedNews.length === 0) {
-                resultsArea.innerHTML = `<div style="text-align:center; padding:30px 20px; color:#ffffff; font-size:13px; font-weight:600;">No updates matching "<strong>${cleanQuery}</strong>" found.</div>`;
-                return;
-            }
-
-            resultsArea.innerHTML = '';
-            
-            matchedNews.forEach((item) => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                resultsArea.appendChild(card);
-            });
-        }
-
-        function bindVisualInterfaceControls() {
-            document.querySelectorAll('.filter-btn').forEach(pill => {
-                pill.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(p => p.classList.remove('active-pill', 'active'));
-                    this.classList.add('active-pill', 'active');
-                    currentActiveCategoryFilter = this.getAttribute('data-filter') || "Shikela Update";
-                    renderFilteredBroadcasts(true); 
-                });
-            });
-        }
-    </script>
+            <button class="primary-popup-btn" onclick="window.location.reload()">Refresh Page</button>
+            <button class="secondary-popup-btn" onclick="hideLowConnectionPopup()">Continue Anyway</button>
+        </div>
+    </div>
 
     <script>
-        const openBtn = document.getElementById('openMenuIframeBtn');
-        const overlay = document.getElementById('menuIframeOverlay');
-        openBtn.addEventListener('click', () => { document.getElementById('menuIframe').src = 'menu.html'; overlay.classList.add('active'); });
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        const offlinePopup = document.getElementById('offlinePopup');
+        const lowConnectionPopup = document.getElementById('lowConnectionPopup');
+
+        function showOfflinePopup() {
+            lowConnectionPopup.classList.remove('show');
+            offlinePopup.classList.add('show');
+        }
+
+        function hideOfflinePopup() {
+            offlinePopup.classList.remove('show');
+        }
+
+        function checkIfOnline() {
+            if (navigator.onLine) {
+                hideOfflinePopup();
+                checkConnectionSpeed(); 
+            } else {
+                alert("You are still offline. Please check your connection settings.");
+            }
+        }
+
+        window.addEventListener('offline', showOfflinePopup);
+        window.addEventListener('online', hideOfflinePopup);
+
+        function hideLowConnectionPopup() {
+            lowConnectionPopup.classList.remove('show');
+        }
+
+        function checkConnectionSpeed() {
+            if (!navigator.onLine) return;
+            if ('connection' in navigator) {
+                const effectiveType = navigator.connection.effectiveType;
+                if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+                    lowConnectionPopup.classList.add('show');
+                } else {
+                    hideLowConnectionPopup();
+                }
+            }
+        }
+
+        if ('connection' in navigator) {
+            navigator.connection.addEventListener('change', checkConnectionSpeed);
+        }
+
+        window.addEventListener('load', () => {
+            if (!navigator.onLine) {
+                showOfflinePopup();
+            } else {
+                checkConnectionSpeed();
+            }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            }
+        });
     </script>
+
 </body>
 </html>
