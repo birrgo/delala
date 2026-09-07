@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Firebase Image Uploader</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          #7c3aed,
+          transparent 35%
+        ),
+        radial-gradient(
+          circle at bottom right,
+          #06b6d4,
+          transparent 35%
+        ),
+        #0f172a;
+
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .card {
+      padding: 30px;
+
+      border-radius: 28px;
+
+      background: rgba(255, 255, 255, 0.10);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo {
+      width: 68px;
+      height: 68px;
+
+      margin: 0 auto 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7c3aed,
+          #06b6d4
+        );
+
+      font-size: 30px;
+
+      box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      margin: 0;
+
+      text-align: center;
+
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 8px 0 28px;
+
+      text-align: center;
+
+      color:
+        rgba(255, 255, 255, 0.65);
+
+      font-size: 14px;
+    }
+
+    .upload-area {
+      min-height: 190px;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 25px;
+
+      border:
+        2px dashed
+        rgba(255, 255, 255, 0.28);
+
+      border-radius: 22px;
+
+      background:
+        rgba(255, 255, 255, 0.06);
+
+      cursor: pointer;
+
+      transition: 0.25s ease;
+    }
+
+    .upload-area:hover {
+      border-color: #a78bfa;
+
+      background:
+        rgba(124, 58, 237, 0.15);
+
+      transform: translateY(-2px);
+    }
+
+    .upload-icon {
+      font-size: 46px;
+
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .upload-hint {
+      margin-top: 8px;
+
+      color:
+        rgba(255, 255, 255, 0.5);
+
+      font-size: 12px;
+    }
+
+    #imageInput {
+      display: none;
+    }
+
+    .preview-box {
+      display: none;
+
+      margin-top: 20px;
+
+      overflow: hidden;
+
+      border-radius: 20px;
+
+      background:
+        rgba(0, 0, 0, 0.25);
+    }
+
+    #preview {
+      display: block;
+
+      width: 100%;
+
+      max-height: 330px;
+
+      object-fit: contain;
+    }
+
+    .file-name {
+      padding: 12px 15px;
+
+      color:
+        rgba(255, 255, 255, 0.7);
+
+      font-size: 13px;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+    }
+
+    .upload-btn {
+      width: 100%;
+
+      margin-top: 20px;
+
+      padding: 16px;
+
+      border: 0;
+
+      border-radius: 16px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7c3aed,
+          #06b6d4
+        );
+
+      color: white;
+
+      font-size: 16px;
+
+      font-weight: 800;
+
+      cursor: pointer;
+
+      transition: 0.2s ease;
+
+      box-shadow:
+        0 10px 30px
+        rgba(124, 58, 237, 0.3);
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 15px 40px
+        rgba(124, 58, 237, 0.4);
+    }
+
+    .upload-btn:disabled {
+      opacity: 0.5;
+
+      cursor: not-allowed;
+
+      transform: none;
+    }
+
+    .status {
+      display: none;
+
+      margin-top: 18px;
+
+      padding: 14px 15px;
+
+      border-radius: 14px;
+
+      background:
+        rgba(255, 255, 255, 0.08);
+
+      font-size: 13px;
+
+      line-height: 1.5;
+    }
+
+    .url-box {
+      display: none;
+
+      margin-top: 20px;
+    }
+
+    .url-label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 13px;
+
+      font-weight: 800;
+    }
+
+    .url-row {
+      display: flex;
+
+      gap: 8px;
+    }
+
+    #url {
+      min-width: 0;
+
+      flex: 1;
+
+      padding: 13px;
+
+      border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
+
+      border-radius: 13px;
+
+      outline: none;
+
+      color: white;
+
+      background:
+        rgba(0, 0, 0, 0.25);
+
+      font-size: 11px;
+    }
+
+    .copy-btn {
+      padding: 0 17px;
+
+      border: 0;
+
+      border-radius: 13px;
+
+      background: white;
+
+      color: #111827;
+
+      font-weight: 800;
+
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .info {
+      margin-top: 15px;
+
+      padding: 12px;
+
+      border-radius: 13px;
+
+      background:
+        rgba(255, 255, 255, 0.05);
+
+      color:
+        rgba(255, 255, 255, 0.55);
+
+      font-size: 11px;
+
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 20px;
+
+      text-align: center;
+
+      color:
+        rgba(255, 255, 255, 0.4);
+
+      font-size: 11px;
+    }
+
+    @media (max-width: 480px) {
+
+      .card {
+        padding: 22px;
+
+        border-radius: 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .url-row {
+        flex-direction: column;
+      }
+
+      .copy-btn {
+        padding: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <section class="card">
+
+      <div class="logo">
+        🖼️
+      </div>
+
+      <h1>
+        Image Uploader
+      </h1>
+
+      <p class="subtitle">
+        Store your image directly in Firebase Database
+      </p>
+
+
+      <!-- SELECT IMAGE -->
+
+      <label
+        class="upload-area"
+        for="imageInput"
+      >
+
+        <div class="upload-icon">
+          ☁️
+        </div>
+
+        <div class="upload-text">
+          Choose an image
+        </div>
+
+        <div class="upload-hint">
+          JPG • PNG • WEBP • Maximum 3 MB
+        </div>
+
+      </label>
+
+
+      <input
+        type="file"
+        id="imageInput"
+        accept="image/jpeg,image/png,image/webp"
+      >
+
+
+      <!-- PREVIEW -->
+
+      <div
+        class="preview-box"
+        id="previewBox"
+      >
+
+        <img
+          id="preview"
+          alt="Image Preview"
+        >
+
+        <div
+          class="file-name"
+          id="fileName"
+        ></div>
+
+      </div>
+
+
+      <!-- BUTTON -->
+
+      <button
+        class="upload-btn"
+        id="uploadBtn"
+        disabled
+      >
+        🚀 Save Image
+      </button>
+
+
+      <!-- STATUS -->
+
+      <div
+        class="status"
+        id="status"
+      ></div>
+
+
+      <!-- RESULT -->
+
+      <div
+        class="url-box"
+        id="urlBox"
+      >
+
+        <label class="url-label">
+          🔗 Image String
+        </label>
+
+        <div class="url-row">
+
+          <input
+            type="text"
+            id="url"
+            readonly
+          >
+
+          <button
+            class="copy-btn"
+            id="copyBtn"
+          >
+            Copy
+          </button>
+
+        </div>
+
+        <div class="info">
+          This is a Base64 data URL stored in
+          Firebase Realtime Database. You can use
+          it directly as an image src.
+        </div>
+
+      </div>
+
+
+      <div class="footer">
+        Powered by Firebase Realtime Database
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script type="module">
+
+    /*
+    ============================================
+    FIREBASE
+    ============================================
+    */
+
+    import {
+      initializeApp
+    } from
+      "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+
+    import {
+      getDatabase,
+      ref,
+      push,
+      set
+    } from
+      "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+
+    /*
+    ============================================
+    YOUR FIREBASE CONFIG
+    ============================================
+    */
+
+    const firebaseConfig = {
+
+      apiKey:
+        "AIzaSyDWhFuwd5QQ5EUqLlpcdSbh42JGJp1kZ3k",
+
+      authDomain:
+        "image-ac531.firebaseapp.com",
+
+      databaseURL:
+        "https://image-ac531-default-rtdb.firebaseio.com",
+
+      projectId:
+        "image-ac531",
+
+      storageBucket:
+        "image-ac531.firebasestorage.app",
+
+      messagingSenderId:
+        "1061495087191",
+
+      appId:
+        "1:1061495087191:web:517aaa5ff4a302a6840312",
+
+      measurementId:
+        "G-WBGRT9VNE7"
+    };
+
+
+    /*
+    ============================================
+    INITIALIZE FIREBASE
+    ============================================
+    */
+
+    const app =
+      initializeApp(firebaseConfig);
+
+    const database =
+      getDatabase(app);
+
+
+    /*
+    ============================================
+    ELEMENTS
+    ============================================
+    */
+
+    const imageInput =
+      document.getElementById(
+        "imageInput"
+      );
+
+    const uploadBtn =
+      document.getElementById(
+        "uploadBtn"
+      );
+
+    const preview =
+      document.getElementById(
+        "preview"
+      );
+
+    const previewBox =
+      document.getElementById(
+        "previewBox"
+      );
+
+    const fileName =
+      document.getElementById(
+        "fileName"
+      );
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+    const urlBox =
+      document.getElementById(
+        "urlBox"
+      );
+
+    const urlInput =
+      document.getElementById(
+        "url"
+      );
+
+    const copyBtn =
+      document.getElementById(
+        "copyBtn"
+      );
+
+
+    let selectedFile = null;
+
+
+    /*
+    ============================================
+    SELECT IMAGE
+    ============================================
+    */
+
+    imageInput.addEventListener(
+      "change",
+      function () {
+
+        const file =
+          imageInput.files[0];
+
+
+        if (!file) {
+          return;
+        }
+
+
+        /*
+        CHECK TYPE
+        */
+
+        if (
+          ![
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+          ].includes(file.type)
+        ) {
+
+          showStatus(
+            "❌ Please select JPG, PNG or WEBP.",
+            true
+          );
+
+          imageInput.value = "";
+
+          return;
+        }
+
+
+        /*
+        CHECK SIZE
+        */
+
+        const maxSize =
+          3 * 1024 * 1024;
+
+
+        if (file.size > maxSize) {
+
+          showStatus(
+            "❌ Image must be smaller than 3 MB.",
+            true
+          );
+
+          imageInput.value = "";
+
+          return;
+        }
+
+
+        selectedFile = file;
+
+
+        /*
+        PREVIEW
+        */
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          function (event) {
+
+            preview.src =
+              event.target.result;
+
+            previewBox.style.display =
+              "block";
+          };
+
+
+        reader.readAsDataURL(file);
+
+
+        fileName.textContent =
+          file.name;
+
+
+        uploadBtn.disabled =
+          false;
+
+
+        urlBox.style.display =
+          "none";
+
+
+        status.style.display =
+          "none";
+
+      }
+    );
+
+
+    /*
+    ============================================
+    SAVE IMAGE
+    ============================================
+    */
+
+    uploadBtn.addEventListener(
+      "click",
+      async function () {
+
+        if (!selectedFile) {
+
+          showStatus(
+            "❌ Please choose an image first.",
+            true
+          );
+
+          return;
+        }
+
+
+        try {
+
+          uploadBtn.disabled =
+            true;
+
+
+          showStatus(
+            "⏳ Converting image to Base64..."
+          );
+
+
+          /*
+          CONVERT IMAGE TO BASE64
+          */
+
+          const base64 =
+            await fileToBase64(
+              selectedFile
+            );
+
+
+          /*
+          CHECK BASE64 SIZE
+          */
+
+          if (
+            base64.length >
+            4500000
+          ) {
+
+            showStatus(
+              "❌ Image is too large after conversion.",
+              true
+            );
+
+            uploadBtn.disabled =
+              false;
+
+            return;
+          }
+
+
+          showStatus(
+            "☁️ Saving image to Firebase..."
+          );
+
+
+          /*
+          CREATE UNIQUE DATABASE ID
+          */
+
+          const imageRef =
+            push(
+              ref(
+                database,
+                "images"
+              )
+            );
+
+
+          /*
+          SAVE BASE64 STRING
+          */
+
+          await set(
+            imageRef,
+            base64
+          );
+
+
+          /*
+          SHOW RESULT
+          */
+
+          urlInput.value =
+            base64;
+
+
+          urlBox.style.display =
+            "block";
+
+
+          preview.src =
+            base64;
+
+
+          showStatus(
+            "✅ Image saved successfully!"
+          );
+
+
+          uploadBtn.disabled =
+            false;
+
+        }
+
+        catch (error) {
+
+          console.error(error);
+
+
+          showStatus(
+            "❌ Upload failed: " +
+            error.message,
+            true
+          );
+
+
+          uploadBtn.disabled =
+            false;
+        }
+
+      }
+    );
+
+
+    /*
+    ============================================
+    FILE → BASE64
+    ============================================
+    */
+
+    function fileToBase64(file) {
+
+      return new Promise(
+        function (resolve, reject) {
+
+          const reader =
+            new FileReader();
+
+
+          reader.onload =
+            function () {
+
+              resolve(
+                reader.result
+              );
+
+            };
+
+
+          reader.onerror =
+            function () {
+
+              reject(
+                new Error(
+                  "Could not read image."
+                )
+              );
+
+            };
+
+
+          reader.readAsDataURL(file);
+
+        }
+      );
+
+    }
+
+
+    /*
+    ============================================
+    COPY
+    ============================================
+    */
+
+    copyBtn.addEventListener(
+      "click",
+      async function () {
+
+        if (!urlInput.value) {
+          return;
+        }
+
+
+        try {
+
+          await navigator.clipboard.writeText(
+            urlInput.value
+          );
+
+
+          copyBtn.textContent =
+            "Copied!";
+
+
+          setTimeout(
+            function () {
+
+              copyBtn.textContent =
+                "Copy";
+
+            },
+            1500
+          );
+
+        }
+
+        catch (error) {
+
+          urlInput.select();
+
+          document.execCommand(
+            "copy"
+          );
+
+          copyBtn.textContent =
+            "Copied!";
+
+        }
+
+      }
+    );
+
+
+    /*
+    ============================================
+    STATUS
+    ============================================
+    */
+
+    function showStatus(
+      message,
+      isError = false
+    ) {
+
+      status.textContent =
+        message;
+
+
+      status.style.display =
+        "block";
+
+
+      status.style.color =
+        isError
+          ? "#fecaca"
+          : "#d1fae5";
+
+    }
+
+  </script>
+
+</body>
+</html>
