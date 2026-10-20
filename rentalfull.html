@@ -216,6 +216,39 @@
         window.activeItemTitle = "Check out this listing on Hulum";
         window.currentItemAuthorId = null;
 
+        /* --- APP DEEP LINKING / INTENT REDIRECT USING www.hulum.online --- */
+        window.openInAppOrPlayStore = function() {
+            // Replace current hostname dynamically or enforce www.hulum.online with current pathname/search
+            const currentPathAndQuery = window.location.pathname + window.location.search;
+            const targetUrl = `https://www.hulum.online${currentPathAndQuery}`;
+            const apkDownloadUrl = "https://www.hulum.online/download/hulum.apk"; // Update with your actual APK direct download link if hosted elsewhere
+            
+            const isAndroid = /android/i.test(navigator.userAgent);
+            const isIOS = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase());
+
+            if (isAndroid) {
+                // Construct Android intent to attempt opening the app using www.hulum.online
+                const cleanUrl = targetUrl.replace(/^https?:\/\//, '');
+                const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.hulum.app;end;`;
+                window.location.href = intentUrl;
+
+                // Fallback: If app is not installed, prompt user to download the APK first
+                setTimeout(() => {
+                    if (confirm("Hulum App is required to view this shared item. Would you like to download the app now?")) {
+                        window.location.href = apkDownloadUrl;
+                    }
+                }, 1500);
+            } else if (isIOS) {
+                if (confirm("Hulum App is required to view this shared item. Would you like to download the app now?")) {
+                    window.location.href = apkDownloadUrl;
+                }
+            } else {
+                if (confirm("Please download the Hulum App to view this shared item.")) {
+                    window.location.href = apkDownloadUrl;
+                }
+            }
+        };
+
         /* --- UNIFIED POPUP NOTIFICATION CONTROLLER --- */
         window.showCustomAlert = function(title, message, icon = 'ℹ️') {
             const modal = document.getElementById('customAlertModal');
@@ -253,7 +286,11 @@
         window.handleShareClick = function(headline) {
             if (headline) window.activeItemTitle = headline;
             
-            const currentUrl = encodeURIComponent(window.location.href);
+            // Force shared URLs to use www.hulum.online domain
+            const currentPathAndQuery = window.location.pathname + window.location.search;
+            const fullDomainUrl = `https://www.hulum.online${currentPathAndQuery}`;
+            
+            const encodedUrl = encodeURIComponent(fullDomainUrl);
             const titleText = encodeURIComponent(window.activeItemTitle);
 
             const tgBtn = document.getElementById('shareTelegramBtn');
@@ -264,13 +301,13 @@
             const msgBtn = document.getElementById('shareMessageBtn');
             const mailBtn = document.getElementById('shareEmailBtn');
 
-            if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${currentUrl}&text=${titleText}`;
-            if (waBtn) waBtn.href = `https://api.whatsapp.com/send?text=${titleText}%20${currentUrl}`;
+            if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${titleText}`;
+            if (waBtn) waBtn.href = `https://api.whatsapp.com/send?text=${titleText}%20${encodedUrl}`;
             if (igBtn) igBtn.href = `https://instagram.com`;
-            if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`;
+            if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
             if (ttBtn) ttBtn.href = `https://www.tiktok.com`;
-            if (msgBtn) msgBtn.href = `sms:?body=${titleText}%20${currentUrl}`;
-            if (mailBtn) mailBtn.href = `mailto:?subject=${titleText}&body=${currentUrl}`;
+            if (msgBtn) msgBtn.href = `sms:?body=${titleText}%20${encodedUrl}`;
+            if (mailBtn) mailBtn.href = `mailto:?subject=${titleText}&body=${encodedUrl}`;
 
             const shareModalNode = document.getElementById('shareModal');
             if (shareModalNode) shareModalNode.classList.add('active');
@@ -487,12 +524,15 @@
 
         /* --- SHARE COUNTER & CLIPBOARD --- */
         window.copyToClipboardAndCount = async function() {
+            const currentPathAndQuery = window.location.pathname + window.location.search;
+            const fullDomainUrl = `https://www.hulum.online${currentPathAndQuery}`;
+
             try {
-                await navigator.clipboard.writeText(window.location.href);
+                await navigator.clipboard.writeText(fullDomainUrl);
                 window.showCustomAlert('Copied!', 'Link copied to clipboard.', '📋');
             } catch (err) {
                 const tempInput = document.createElement('input');
-                tempInput.value = window.location.href;
+                tempInput.value = fullDomainUrl;
                 document.body.appendChild(tempInput);
                 tempInput.select();
                 document.execCommand('copy');
@@ -693,7 +733,7 @@
                     allImages.push(...Object.values(item.images));
                 }
             }
-            allImages = [...new Set(allImages)]; // Remove duplicates
+            allImages = [...new Set(allImages)];
 
             const postedByUserName = item.authorName || item.postedBy || item.userName || "Verified User";
             const postDate = item.createdAt ? new Date(item.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
@@ -745,7 +785,7 @@
             const isPostOwner = (item.userId === currentUserId || item.authorId === currentUserId);
             const canDeletePost = isPostOwner || isAdmin;
 
-            // Contact Info
+            // Contact Info Extraction from database
             const contact = item.contactInfo || {};
             const phone = contact.phone || item.phone || "";
             const telegram = contact.telegram || "";
@@ -844,7 +884,7 @@
                     ${city ? `<div class="info-term-item"><span class="info-term-label">City</span><span class="info-term-value">${city}</span></div>` : ''}
                     ${subcity ? `<div class="info-term-item"><span class="info-term-label">Subcity</span><span class="info-term-value">${subcity}</span></div>` : ''}
                     ${region ? `<div class="info-term-item"><span class="info-term-label">Region</span><span class="info-term-value">${region}</span></div>` : ''}
-                    ${lat && lng ? `<div class="info-term-item"><span class="info-term-label">GPS Coordinates</span><span class="info-term-value">${lat}, ${lng}</span></div>` : ''}
+                    ${lat && lng ? `<div class="info-term-item"><span class="info-term-label">GPS Coordinates</span><span class="info-term-value">${lat},${lng}</span></div>` : ''}
                     
                     <div class="info-term-item">
                         <span class="info-term-label" style="margin-bottom:6px;">Rate Article</span>
