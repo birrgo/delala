@@ -7,16 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; background-color: #081B38; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: white; text-align: center; }
-        .loading-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .loading-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: #38BDF8; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .info-text { font-size: 16px; font-weight: 500; opacity: 0.9; max-width: 80%; line-height: 1.4; }
+        .info-text { font-size: 16px; font-weight: 500; opacity: 0.9; max-width: 90%; line-height: 1.4; }
+        .error-btn { margin-top: 15px; padding: 10px 20px; background: #38BDF8; color: #081B38; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
     <div class="loading-container">
-        <div class="spinner"></div>
-        <div class="info-text" id="statusText">Requesting GPS Permission...</div>
+        <div class="spinner" id="loadingSpinner"></div>
+        <div class="info-text" id="statusText">Requesting GPS Location Permission...</div>
+        <button class="error-btn" id="retryBtn" onclick="window.location.href='rental.html'">Return to Rentals</button>
     </div>
 
     <script type="module">
@@ -63,6 +65,25 @@
             return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
         }
 
+        function itemMatchesActiveCategory(item) {
+            const activeCategoryFilter = sessionStorage.getItem('rental_cat_filter');
+            if (!activeCategoryFilter || activeCategoryFilter === 'all') return true;
+
+            const rawCatStr = [
+                item.rentalSubCategory, 
+                item.subCategory, 
+                item.category, 
+                item.rentalType, 
+                item.title,
+                item.mainCategory
+            ].filter(Boolean).join(' ').toLowerCase();
+
+            const noSpaceCatStr = rawCatStr.replace(/\s/g, ''); 
+            const targetCat = activeCategoryFilter.toLowerCase().replace(/\s/g, '');
+            
+            return rawCatStr.includes(targetCat) || noSpaceCatStr.includes(targetCat);
+        }
+
         function extractItemCoordinates(item) {
             if (item.location && typeof item.location === 'object') {
                 const lat = parseFloat(item.location.latitude); const lng = parseFloat(item.location.longitude);
@@ -78,7 +99,7 @@
         }
 
         async function fetchNearbyItems(coords) {
-            document.getElementById('statusText').innerText = "Searching items near you...";
+            document.getElementById('statusText').innerText = "Searching items near your location...";
             const userGeohash = encodeFastGeohash(coords.lat, coords.lng, 3);
             const nodePaths = ['posts', 'delala_new'];
             const matchingItems = [];
@@ -96,7 +117,7 @@
                     });
 
                     if (!itemsFound) {
-                        const fallbackQ = query(ref(db, nodePath), limitToLast(50));
+                        const fallbackQ = query(ref(db, nodePath), limitToLast(60));
                         const fbSnapshot = await get(fallbackQ);
                         fbSnapshot.forEach((childSnap) => {
                             processItem(childSnap, nodePath, coords, seenIds, matchingItems);
@@ -106,7 +127,12 @@
                 
                 matchingItems.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
                 
-                sessionStorage.setItem('hulum_external_filter', JSON.stringify({ filter: 'gps', coords: coords, items: matchingItems }));
+                sessionStorage.setItem('hulum_external_filter', JSON.stringify({ 
+                    filter: 'gps', 
+                    coords: coords, 
+                    items: matchingItems 
+                }));
+                
                 window.location.replace('rental.html');
                 
             } catch (error) {
@@ -116,7 +142,8 @@
 
         function processItem(childSnap, nodePath, coords, seenIds, matchingItems) {
             const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
-            if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem)) {
+            
+            if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem) && itemMatchesActiveCategory(rawItem)) {
                 const itemCoords = extractItemCoordinates(rawItem);
                 if (itemCoords) {
                     const dist = calculateDistanceKm(coords.lat, coords.lng, itemCoords.lat, itemCoords.lng);
@@ -131,6 +158,7 @@
 
         window.onload = function() {
             if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
                 window.location.replace('rental.html');
                 return;
             }
@@ -141,10 +169,12 @@
                     fetchNearbyItems(coords);
                 },
                 (error) => {
-                    // Always redirect back immediately if permission denied/failed
-                    window.location.replace('rental.html');
+                    // Handle permission denied or timeout gracefully without looping
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('statusText').innerText = "Location permission denied or unavailable.";
+                    document.getElementById('retryBtn').style.display = 'inline-block';
                 },
-                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         };
     </script>
