@@ -184,6 +184,29 @@
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
 
+        .btn-prev {
+            flex: 1;
+            height: 46px;
+            padding: 0 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .btn-prev:hover {
+            background: #F1F5F9;
+        }
+
         .btn-next {
             flex: 1;
             height: 46px;
@@ -609,6 +632,10 @@
                     </div>
 
                     <div class="step-actions">
+                        <button type="button" class="btn-prev" id="btnPrev2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Step 1
+                        </button>
                         <button type="button" class="btn-next" id="btnNext2">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -761,7 +788,7 @@
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId');
             
             if (!userPhone) {
-                showErrorModal("You must be logged in to create a post. Redirecting to login...", "Account Required");
+                showErrorModal("You must be logged in to create or edit a post. Redirecting to login...", "Account Required");
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
@@ -770,11 +797,209 @@
             return { phone: userPhone, id: userId || userPhone };
         }
 
-        function refreshFormState() {
+        /**
+         * Helper utility to select an option in a drop-down or reveal the custom text field if option is custom.
+         */
+        function setSelectOrCustomValue(selectId, customInputId, value) {
+            if (!value) return;
+            const selectElem = document.getElementById(selectId);
+            const customElem = document.getElementById(customInputId);
+            if (!selectElem) return;
+
+            let exists = false;
+            for (let i = 0; i < selectElem.options.length; i++) {
+                if (selectElem.options[i].value === value) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (exists) {
+                selectElem.value = value;
+                if (customElem) customElem.style.display = 'none';
+            } else if (customElem) {
+                selectElem.value = 'custom';
+                customElem.style.display = 'block';
+                customElem.value = value;
+            }
+        }
+
+        /**
+         * Fetch post data directly from Firebase Realtime Database using urlPostId
+         */
+        async function fetchPostFromDatabase(postId) {
+            if (!postId) return null;
+
+            // 1. Try Firebase SDK if initialized in window scope
+            if (window.firebase && firebase.database) {
+                try {
+                    const snapshot = await firebase.database().ref('posts/' + postId).once('value');
+                    if (snapshot.exists()) {
+                        return snapshot.val();
+                    }
+                } catch (e) {
+                    console.warn("Firebase SDK query error:", e);
+                }
+            }
+
+            // 2. Fetch directly via Realtime Database REST API endpoints
+            const dbEndpoints = [
+                localStorage.getItem('firebase_db_url'),
+                localStorage.getItem('firebaseDbUrl'),
+                'https://delala-default-rtdb.firebaseio.com',
+                'https://delala-app-default-rtdb.firebaseio.com'
+            ].filter(Boolean);
+
+            for (let baseUrl of dbEndpoints) {
+                try {
+                    const cleanUrl = baseUrl.replace(/\/$/, "");
+                    const response = await fetch(`${cleanUrl}/posts/${postId}.json`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && typeof data === 'object') return data;
+                    }
+                } catch (err) {
+                    console.warn("DB REST Fetch error:", err);
+                }
+            }
+
+            return null;
+        }
+
+        /**
+         * Reads edit data directly from the Database first, with session fallback, and populates form fields.
+         */
+        async function loadAndFillPostData() {
+            let itemData = null;
+
+            // 1. Primary: Fetch live edit data directly from the Database using URL postId
+            if (urlPostId) {
+                itemData = await fetchPostFromDatabase(urlPostId);
+            }
+
+            // 2. Secondary: Fallback to local/session drafts if DB fetch fails or is offline
+            if (!itemData) {
+                const part1Draft = sessionStorage.getItem('delalaEditDraftPart1');
+                const directEditPost = sessionStorage.getItem('delalaEditPostData') || 
+                                       sessionStorage.getItem('editingPostData') || 
+                                       sessionStorage.getItem('editPost') || 
+                                       localStorage.getItem('editPost_' + urlPostId) ||
+                                       localStorage.getItem('selectedPostToEdit');
+
+                if (part1Draft) {
+                    try { itemData = JSON.parse(part1Draft); } catch (e) {}
+                } else if (directEditPost) {
+                    try { itemData = JSON.parse(directEditPost); } catch (e) {}
+                }
+            }
+
+            if (!itemData) return;
+
+            // Keep synced in session storage for multi-step navigation
+            sessionStorage.setItem('delalaEditPostData', JSON.stringify(itemData));
+
+            // 1. Populate Basic Fields
+            if (itemData.title || itemData.postTitle) {
+                document.getElementById('postTitle').value = itemData.title || itemData.postTitle || '';
+            }
+            if (itemData.price || itemData.rentalPrice) {
+                document.getElementById('rentalPrice').value = itemData.price || itemData.rentalPrice || '';
+            }
+            if (itemData.paymentPeriod) {
+                document.getElementById('paymentPeriod').value = itemData.paymentPeriod;
+            }
+            if (itemData.body || itemData.postContent || itemData.description) {
+                document.getElementById('postContent').value = itemData.body || itemData.postContent || itemData.description || '';
+            }
+
+            // Extract nested properties if stored in categorySpecificDetails
+            const catSpecs = itemData.categorySpecificDetails || itemData;
+
+            // 2. Main Category Selection & Subfield Rendering
+            const targetCategory = catSpecs.resCategory || itemData.resCategory || itemData.houseCategory || itemData.subCategory || itemData.category;
+            if (targetCategory && document.getElementById('resCategory')) {
+                document.getElementById('resCategory').value = targetCategory;
+                
+                // Do not overwrite user custom content if already present
+                const hasExistingContent = !!(itemData.title || itemData.body);
+                handleResidentialCategoryChange(!hasExistingContent);
+
+                // 3. Populate Subcategory-Specific Fields
+                if (catSpecs.compoundType && document.getElementById('compoundType')) {
+                    document.getElementById('compoundType').value = catSpecs.compoundType;
+                    handleCompoundTypeChange();
+                }
+
+                // Rooms
+                const roomVal = catSpecs.roomCount || catSpecs.roomCountSelect || catSpecs.rooms || catSpecs.bedrooms;
+                const roomCustomVal = catSpecs.roomCountCustom;
+                if (roomCustomVal) {
+                    setSelectOrCustomValue('roomCountSelect', 'roomCountCustom', roomCustomVal);
+                    document.getElementById('roomCountSelect').value = 'custom';
+                    document.getElementById('roomCountCustom').style.display = 'block';
+                } else if (roomVal) {
+                    setSelectOrCustomValue('roomCountSelect', 'roomCountCustom', roomVal);
+                }
+
+                // Floor Level
+                const floorVal = catSpecs.floorLevel || catSpecs.floorLevelSelect || catSpecs.floor;
+                const floorCustomVal = catSpecs.floorLevelCustom;
+                if (floorCustomVal) {
+                    setSelectOrCustomValue('floorLevelSelect', 'floorLevelCustom', floorCustomVal);
+                    document.getElementById('floorLevelSelect').value = 'custom';
+                    document.getElementById('floorLevelCustom').style.display = 'block';
+                } else if (floorVal) {
+                    setSelectOrCustomValue('floorLevelSelect', 'floorLevelCustom', floorVal);
+                }
+
+                // Room Dimensions W x H
+                let widthVal = catSpecs.sizeWidthSelect || catSpecs.sizeWidthCustom || catSpecs.width;
+                let heightVal = catSpecs.sizeHeightSelect || catSpecs.sizeHeightCustom || catSpecs.height;
+                
+                if ((!widthVal || !heightVal) && catSpecs.mainRoomSize) {
+                    const parts = catSpecs.mainRoomSize.split('×').map(s => s.trim());
+                    if (parts.length === 2) {
+                        widthVal = widthVal || parts[0];
+                        heightVal = heightVal || parts[1];
+                    }
+                }
+
+                if (catSpecs.sizeWidthCustom) {
+                    setSelectOrCustomValue('sizeWidthSelect', 'sizeWidthCustom', catSpecs.sizeWidthCustom);
+                    document.getElementById('sizeWidthSelect').value = 'custom';
+                    document.getElementById('sizeWidthCustom').style.display = 'block';
+                } else if (widthVal) {
+                    setSelectOrCustomValue('sizeWidthSelect', 'sizeWidthCustom', widthVal);
+                }
+
+                if (catSpecs.sizeHeightCustom) {
+                    setSelectOrCustomValue('sizeHeightSelect', 'sizeHeightCustom', catSpecs.sizeHeightCustom);
+                    document.getElementById('sizeHeightSelect').value = 'custom';
+                    document.getElementById('sizeHeightCustom').style.display = 'block';
+                } else if (heightVal) {
+                    setSelectOrCustomValue('sizeHeightSelect', 'sizeHeightCustom', heightVal);
+                }
+
+                // Land Area
+                const landVal = catSpecs.totalLandArea || catSpecs.landAreaSelect || catSpecs.landArea;
+                const landCustomVal = catSpecs.landAreaCustom;
+                if (landCustomVal) {
+                    setSelectOrCustomValue('landAreaSelect', 'landAreaCustom', landCustomVal);
+                    document.getElementById('landAreaSelect').value = 'custom';
+                    document.getElementById('landAreaCustom').style.display = 'block';
+                } else if (landVal) {
+                    setSelectOrCustomValue('landAreaSelect', 'landAreaCustom', landVal);
+                }
+            }
+
+            bindCustomSelectHandlers();
+        }
+
+        async function refreshFormState() {
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            restoreSavedDraft();
+            await loadAndFillPostData();
             bindCustomSelectHandlers();
         }
 
@@ -782,6 +1007,13 @@
             initClock();
             refreshFormState();
 
+            // Previous Step Button: Return to Step 1 Edit Page
+            document.getElementById('btnPrev2').addEventListener('click', () => {
+                saveDraftToSession();
+                window.location.href = `editrentalpost1.html?postId=${urlPostId}&db=${urlDbSource}`;
+            });
+
+            // Next Step Button: Proceed to Step 3 Edit Location Page
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
 
@@ -804,7 +1036,7 @@
                 }
 
                 saveDraftToSession();
-                window.location.href = `editrentalpost1.html?postId=${urlPostId}&db=${urlDbSource}`;
+                window.location.href = `editrentalpost3.html?postId=${urlPostId}&db=${urlDbSource}`;
             });
         });
 
@@ -814,7 +1046,7 @@
 
         function saveDraftToSession() {
             let draftData = {};
-            const rawDraft = sessionStorage.getItem('delalaEditDraftPart1');
+            const rawDraft = sessionStorage.getItem('delalaEditDraftPart1') || sessionStorage.getItem('delalaEditPostData');
             if (rawDraft) {
                 try { draftData = JSON.parse(rawDraft); } catch (e) {}
             }
@@ -822,6 +1054,7 @@
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
+            draftData.postId = urlPostId;
             draftData.rentalType = 'Residential Property';
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
@@ -832,73 +1065,12 @@
             
             const catDetails = getCategoryDetails();
             draftData.categorySpecificDetails = catDetails;
-            Object.assign(draftData, catDetails); // Merge flatly for compatibility
+            Object.assign(draftData, catDetails);
 
             draftData.activeCategoryOnStep2 = 'Residential Property';
 
             sessionStorage.setItem('delalaEditDraftPart1', JSON.stringify(draftData));
-        }
-
-        function restoreSavedDraft() {
-            const rawDraft = sessionStorage.getItem('delalaEditDraftPart1');
-            if (!rawDraft) return;
-
-            try {
-                let draft = JSON.parse(rawDraft);
-
-                document.getElementById('postTitle').value = draft.title || '';
-                
-                if (document.getElementById('rentalPrice')) {
-                    document.getElementById('rentalPrice').value = draft.price || '';
-                }
-                if (draft.paymentPeriod && document.getElementById('paymentPeriod')) {
-                    document.getElementById('paymentPeriod').value = draft.paymentPeriod;
-                }
-                
-                document.getElementById('postContent').value = draft.body || draft.description || '';
-
-                const c = draft.categorySpecificDetails || draft;
-                if (c) {
-                    if (c.resCategory && document.getElementById('resCategory')) {
-                        document.getElementById('resCategory').value = c.resCategory;
-                        handleResidentialCategoryChange(false);
-                    }
-                    if (c.compoundType && document.getElementById('compoundType')) document.getElementById('compoundType').value = c.compoundType;
-                    
-                    if (c.roomCountSelect && document.getElementById('roomCountSelect')) {
-                        document.getElementById('roomCountSelect').value = c.roomCountSelect;
-                        toggleCustomInput('roomCountSelect', 'roomCountCustom');
-                        if (c.roomCountCustom && document.getElementById('roomCountCustom')) document.getElementById('roomCountCustom').value = c.roomCountCustom;
-                    }
-
-                    if (c.sizeWidthSelect && document.getElementById('sizeWidthSelect')) {
-                        document.getElementById('sizeWidthSelect').value = c.sizeWidthSelect;
-                        toggleCustomInput('sizeWidthSelect', 'sizeWidthCustom');
-                        if (c.sizeWidthCustom && document.getElementById('sizeWidthCustom')) document.getElementById('sizeWidthCustom').value = c.sizeWidthCustom;
-                    }
-
-                    if (c.sizeHeightSelect && document.getElementById('sizeHeightSelect')) {
-                        document.getElementById('sizeHeightSelect').value = c.sizeHeightSelect;
-                        toggleCustomInput('sizeHeightSelect', 'sizeHeightCustom');
-                        if (c.sizeHeightCustom && document.getElementById('sizeHeightCustom')) document.getElementById('sizeHeightCustom').value = c.sizeHeightCustom;
-                    }
-
-                    if (c.landAreaSelect && document.getElementById('landAreaSelect')) {
-                        document.getElementById('landAreaSelect').value = c.landAreaSelect;
-                        toggleCustomInput('landAreaSelect', 'landAreaCustom');
-                        if (c.landAreaCustom && document.getElementById('landAreaCustom')) document.getElementById('landAreaCustom').value = c.landAreaCustom;
-                    }
-
-                    if (c.floorLevelSelect && document.getElementById('floorLevelSelect')) {
-                        document.getElementById('floorLevelSelect').value = c.floorLevelSelect;
-                        toggleCustomInput('floorLevelSelect', 'floorLevelCustom');
-                        if (c.floorLevelCustom && document.getElementById('floorLevelCustom')) document.getElementById('floorLevelCustom').value = c.floorLevelCustom;
-                    }
-                }
-
-            } catch (err) {
-                console.error("Failed to restore draft", err);
-            }
+            sessionStorage.setItem('delalaEditPostData', JSON.stringify(draftData));
         }
 
         const CATEGORY_TITLES = {

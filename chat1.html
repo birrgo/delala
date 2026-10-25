@@ -11,35 +11,35 @@
     <style>
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
-            --primary-dark: #0F172A;
+            --primary-dark: #001A33;
             --bg-body: #F4F7F9;
             --card-bg: #FFFFFF;
             --border-color: #E2E8F0;
-            --text-main: #0F172A;
+            --text-main: #001A33;
             --text-muted: #64748B;
             --success-color: #34D399;
             --offline-color: #94A3B8;
             --danger-color: #EF4444;
 
             --silver-grad: linear-gradient(145deg, #64748B, #334155, #0F172A);
-            --silver-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.25), inset 0px -2px 4px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(15, 23, 42, 0.25);
         }
 
-        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        * { font-family: var(--font-main); box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
         
         html, body { width: 100%; height: 100%; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
 
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); display: flex; flex-direction: column; z-index: 1; }
 
-        /* Header */
+        /* Header - Fixed overlapping with safe-area-inset-top */
         .chat-header {
-            background: linear-gradient(145deg, #1E293B, #0F172A);
-            padding: 12px 16px; display: flex; align-items: center; gap: 12px; width: 100%; z-index: 20;
-            box-shadow: 0 4px 15px rgba(15,23,42,0.25); border-bottom: 1px solid #334155; position: relative;
+            background: var(--primary-dark);
+            padding: calc(12px + env(safe-area-inset-top)) 12px 12px 16px; 
+            display: flex; align-items: center; gap: 10px; width: 100%; z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,26,51,0.25); border-bottom: 1px solid rgba(255,255,255,0.1); position: relative;
         }
 
         .header-avatar {
-            width: 42px; height: 42px; border-radius: 50%; background: var(--silver-grad); border: 2px solid #FFFFFF;
+            width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #FFFFFF;
             display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 800; font-size: 16px;
             flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); overflow: hidden; cursor: pointer;
         }
@@ -52,13 +52,35 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--offline-color); }
         .status-dot.online { background: var(--success-color); box-shadow: 0 0 6px rgba(52, 211, 153, 0.6); }
 
+        /* In-Header Live Location Pill */
+        .live-location-pill {
+            display: none; align-items: center; flex-shrink: 0; gap: 6px;
+            background: linear-gradient(145deg, #001c38, #001529);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,255,255,0.06);
+            border: 1px solid rgba(0,0,0,0.3); border-radius: 20px;
+            padding: 4px 6px 4px 10px; margin-right: 2px;
+        }
+        .ll-dot {
+            width: 8px; height: 8px; background: var(--danger-color);
+            border-radius: 50%; animation: pulse 1.5s infinite; flex-shrink: 0;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
+        .ll-text { color: #FFFFFF; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .ll-stop {
+            background: var(--danger-color); color: #FFF; border: none; padding: 4px 10px;
+            border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 10px; transition: transform 0.1s;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .ll-stop:active { transform: scale(0.92); }
+
         /* 3 Dot Menu */
-        .header-menu-btn { background: transparent; border: none; color: #FFFFFF; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; transition: background 0.2s; }
+        .header-menu-btn { background: transparent; border: none; color: #FFFFFF; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
         .header-menu-btn:active { background: rgba(255,255,255,0.1); }
         .header-menu-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
         
         .dropdown-menu {
-            position: absolute; top: 56px; right: 16px; background: #FFFFFF; border-radius: 12px;
+            position: absolute; top: calc(56px + env(safe-area-inset-top)); right: 16px; background: #FFFFFF; border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--border-color);
             min-width: 180px; display: none; flex-direction: column; z-index: 100; overflow: hidden;
         }
@@ -84,7 +106,7 @@
         .message-bubble:active { transform: scale(0.98); }
 
         .message-bubble.incoming { background: #FFFFFF; color: var(--text-main); align-self: flex-start; margin-right: auto; border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-        .message-bubble.outgoing { background: linear-gradient(145deg, #1E293B, #0F172A); color: #FFFFFF; align-self: flex-end; margin-left: auto; border-bottom-right-radius: 4px; }
+        .message-bubble.outgoing { background: var(--primary-dark); color: #FFFFFF; align-self: flex-end; margin-left: auto; border-bottom-right-radius: 4px; }
         .message-time { font-size: 10px; margin-top: 6px; text-align: right; opacity: 0.7; font-weight: 600; }
 
         /* Quoted Reply Block */
@@ -108,25 +130,38 @@
         .chat-input-area {
             background: #FFFFFF; padding: 12px 16px; display: flex; align-items: center; gap: 8px;
             border-top: 1px solid var(--border-color); padding-bottom: max(12px, env(safe-area-inset-bottom));
+            z-index: 11; transition: opacity 0.3s;
         }
 
         .action-btn { background: transparent; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
         .action-btn:active { background: #F1F5F9; color: var(--primary-dark); transform: scale(0.95); }
         .action-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-        .chat-input { flex: 1; height: 44px; background: #F1F5F9; border: 1px solid var(--border-color); border-radius: 22px; padding: 0 16px; font-size: 14px; font-weight: 500; color: var(--text-main); outline: none; transition: all 0.3s; }
-        .chat-input:focus { border-color: #94A3B8; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(226,232,240,0.5); }
+        .chat-input { flex: 1; height: 44px; background: #F1F5F9; border: 1px solid var(--border-color); border-radius: 22px; padding: 0 16px; font-size: 14px; font-weight: 500; color: var(--text-main); outline: none; transition: all 0.3s; user-select: text; -webkit-user-select: text; }
+        .chat-input:focus { border-color: var(--primary-dark); background: #FFFFFF; box-shadow: 0 0 0 2px rgba(0,26,51,0.1); }
 
-        .send-btn { background: var(--silver-grad); border: none; width: 44px; height: 44px; border-radius: 50%; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--silver-shadow); flex-shrink: 0; }
+        /* Send & Location Buttons */
+        .send-btn { background: var(--primary-dark); border: none; width: 44px; height: 44px; border-radius: 50%; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
         .send-btn:active { transform: scale(0.92); }
         .send-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px;}
-        .btn-loc-highlight { background: #F1F5F9; color: #0F172A; }
+        
+        .btn-loc-highlight { background: #F1F5F9; color: var(--primary-dark); }
+        .btn-loc-highlight.active { 
+            color: #FFF; background: var(--danger-color); 
+            animation: locPulse 1.5s infinite; 
+        }
+        @keyframes locPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
 
         /* Location Card */
         .location-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 14px; margin-top: 4px; min-width: 200px; }
         .incoming .location-card { background: #F8FAFC; border-color: #E2E8F0; box-shadow: 0 4px 6px rgba(15,23,42,0.05); }
-        .outgoing .location-card { background: rgba(15,23,42,0.4); border-color: rgba(255,255,255,0.15); }
+        .outgoing .location-card { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.15); }
         .location-icon-wrapper { width: 42px; height: 42px; border-radius: 50%; background: var(--success-color); display: flex; align-items: center; justify-content: center; color: #FFFFFF; box-shadow: 0 4px 10px rgba(52, 211, 153, 0.4); flex-shrink: 0; }
+        .location-icon-wrapper.live { background: #3B82F6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); }
         .location-icon-wrapper svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; }
         .location-details { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .location-details strong { font-size: 14px; color: inherit; line-height: 1; }
@@ -135,7 +170,7 @@
         .location-details a.map-btn { background: #FFFFFF; color: var(--primary-dark) !important; font-size: 11px !important; font-weight: 800 !important; text-decoration: none !important; padding: 6px 10px; border-radius: 8px; text-align: center; display: inline-block; }
 
         /* Custom Modal UI */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,26,51,0.6); backdrop-filter: blur(4px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-card { background: #FFF; border-radius: 20px; width: 100%; max-width: 340px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center; transform: scale(0.9); transition: transform 0.2s; }
         .modal-overlay.show { display: flex; }
         .modal-overlay.show .modal-card { transform: scale(1); }
@@ -146,7 +181,7 @@
         .modal-btn-cancel { background: #F1F5F9; color: var(--text-main); }
         .modal-btn-cancel:active { background: #E2E8F0; }
         .modal-btn-primary { background: var(--primary-dark); color: #FFF; }
-        .modal-btn-primary:active { background: #334155; }
+        .modal-btn-primary:active { background: #000B18; }
         .modal-btn-danger { background: var(--danger-color); color: #FFF; }
         .modal-btn-danger:active { background: #B91C1C; }
 
@@ -169,18 +204,27 @@
     <div class="screen">
         <header class="chat-header">
             <div class="header-avatar" id="headerAvatar" onclick="viewProfile()"></div>
+            
             <div class="chat-header-info" onclick="viewProfile()">
                 <h2 id="chatTitle">Loading...</h2>
                 <p><span id="statusIndicator" class="status-dot"></span> <span id="chatStatus">Connecting...</span></p>
             </div>
+
+            <div class="live-location-pill" id="liveLocationBanner">
+                <span class="ll-dot"></span>
+                <span class="ll-text">Live Location</span>
+                <button class="ll-stop" onclick="stopLiveLocation()">Stop</button>
+            </div>
+
             <button class="header-menu-btn" id="headerMenuBtn">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
+            
             <div class="dropdown-menu" id="headerDropdown">
                 <button class="dropdown-item" onclick="viewProfile()"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> View Profile</button>
                 <button class="dropdown-item" onclick="comingSoon('Search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Search Messages</button>
                 <button class="dropdown-item" onclick="comingSoon('Mute')"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg> Mute Chat</button>
-                <button class="dropdown-item danger" onclick="comingSoon('Block')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Block User</button>
+                <button class="dropdown-item danger" onclick="toggleBlockUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> <span id="blockUserText">Block User</span></button>
                 <button class="dropdown-item danger" onclick="promptClearChat()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Clear Chat</button>
             </div>
         </header>
@@ -197,12 +241,12 @@
             </button>
         </div>
 
-        <div class="chat-input-area">
+        <div class="chat-input-area" id="chatInputArea">
             <button class="action-btn" id="btnCopyLocation" title="Copy My Location Link">
                 <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             </button>
             <input type="text" id="messageInput" class="chat-input" placeholder="Type a message...">
-            <button class="action-btn btn-loc-highlight" id="btnLocation" title="Send Location to Chat">
+            <button class="action-btn btn-loc-highlight" id="btnLocation" title="Share Live Location">
                 <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </button>
             <button class="send-btn" id="btnSend">
@@ -226,6 +270,7 @@
         <div class="bottom-sheet">
             <div class="sheet-handle"></div>
             <div class="sheet-menu">
+                <button class="sheet-btn" onclick="forwardMessage()"><svg viewBox="0 0 24 24"><polyline points="15 14 20 9 15 4"></polyline><path d="M4 20v-7a4 4 0 0 1 4-4h12"></path></svg> Forward</button>
                 <button class="sheet-btn" onclick="initReply()"><svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg> Reply</button>
                 <button class="sheet-btn" onclick="shareMessage()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share / Copy</button>
                 <button class="sheet-btn danger" onclick="promptDeleteForMe()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete for me</button>
@@ -255,7 +300,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const otherUserId = urlParams.get('userId');
-        const fallbackName = urlParams.get('userName') || otherUserId;
+        const fallbackName = urlParams.get('userName') || "User";
 
         let myUserId = null;
         let chatId = null;
@@ -263,53 +308,56 @@
         let selectedMsgId = null;
         let selectedMsgText = null;
         let selectedMsgSender = null;
-        let activeReplyData = null; // Holds data when replying
+        let activeReplyData = null; 
+        
+        let watchPositionId = null;
+        let isBlockedByMe = false;
+        let hasBlockedMe = false;
 
-        // UI Elements
-        const chatMessages = document.getElementById('chatMessages');
+        const chatMessagesElement = document.getElementById('chatMessages');
+        const chatInputArea = document.getElementById('chatInputArea');
         const messageInput = document.getElementById('messageInput');
         const headerDropdown = document.getElementById('headerDropdown');
-        const alertOverlay = document.getElementById('customAlertOverlay');
         const msgContextOverlay = document.getElementById('msgContextOverlay');
-        
-        document.getElementById('chatTitle').textContent = fallbackName;
+        const customAlertOverlay = document.getElementById('customAlertOverlay');
 
-        // Custom UI Alert System
+        const cachedProfileName = localStorage.getItem(`profile_name_${otherUserId}`);
+        document.getElementById('chatTitle').textContent = cachedProfileName || fallbackName;
+
         function showCustomAlert(title, message, isConfirm = false, onConfirm = null) {
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertMessage').textContent = message;
             const btnGroup = document.getElementById('alertBtnGroup');
-            
             if (isConfirm) {
                 btnGroup.innerHTML = `
                     <button class="modal-btn modal-btn-cancel" onclick="closeAlert()">Cancel</button>
-                    <button class="modal-btn modal-btn-danger" id="confirmActionBtn">Yes, Delete</button>
+                    <button class="modal-btn modal-btn-danger" id="confirmActionBtn">Confirm</button>
                 `;
-                document.getElementById('confirmActionBtn').onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+                document.getElementById('confirmActionBtn').onclick = () => { 
+                    closeAlert(); 
+                    if(onConfirm) onConfirm(); 
+                };
             } else {
                 btnGroup.innerHTML = `<button class="modal-btn modal-btn-primary" onclick="closeAlert()">OK</button>`;
             }
-            alertOverlay.classList.add('show');
+            customAlertOverlay.classList.add('show');
         }
-        function closeAlert() { alertOverlay.classList.remove('show'); }
+
+        function closeAlert() { customAlertOverlay.classList.remove('show'); }
         function comingSoon(feature) { closeMenu(); showCustomAlert("Coming Soon", `The ${feature} feature is currently in development.`); }
         function viewProfile() { window.location.href = `user.html?userId=${otherUserId}`; }
 
-        // Header Menu Logic
         document.getElementById('headerMenuBtn').onclick = (e) => { e.stopPropagation(); headerDropdown.classList.toggle('show'); };
-        document.addEventListener('click', (e) => {
-            if (!headerDropdown.contains(e.target) && e.target.closest('#headerMenuBtn') === null) {
-                closeMenu();
-            }
-        });
+        document.addEventListener('click', (e) => { if (!headerDropdown.contains(e.target) && e.target.closest('#headerMenuBtn') === null) closeMenu(); });
         function closeMenu() { headerDropdown.classList.remove('show'); }
 
-        // Fetch User Profile
         db.ref(`users/${otherUserId}`).once('value', (snap) => {
             const uData = snap.val();
             if(uData) {
                 const displayName = uData.displayName || uData.fullName || fallbackName;
                 document.getElementById('chatTitle').textContent = displayName;
+                localStorage.setItem(`profile_name_${otherUserId}`, displayName);
+                
                 const photoURL = uData.photoURL || uData.profilePicture;
                 if(photoURL) document.getElementById('headerAvatar').innerHTML = `<img src="${photoURL}" alt="${displayName}">`;
                 else document.getElementById('headerAvatar').textContent = displayName.charAt(0).toUpperCase();
@@ -318,7 +366,6 @@
             }
         });
 
-        // Authentication Setup
         function getActiveUserId(firebaseUser) {
             if (firebaseUser) return firebaseUser.uid;
             const sessionPhone = localStorage.getItem('auth_session_phone');
@@ -330,9 +377,16 @@
             myUserId = getActiveUserId(user);
             if (myUserId) {
                 chatId = [myUserId, otherUserId].sort().join('_');
-                trackPresence(); loadMessages();
+                trackPresence(); 
+                trackBlocks();
+                
+                if (localStorage.getItem('live_tracking_active') === 'true' && localStorage.getItem('live_tracking_chatId') === chatId) {
+                    startLiveLocation(true); 
+                }
+                
+                loadMessages();
             } else {
-                chatMessages.innerHTML = `<div style="text-align:center; padding: 20px; color: #64748B;">Please log in to chat.</div>`;
+                chatMessagesElement.innerHTML = `<div style="text-align:center; padding: 20px; color: #64748B;">Please log in to chat.</div>`;
             }
         });
 
@@ -345,52 +399,120 @@
             });
         }
 
-        // Load & Render Messages
-        function loadMessages() {
-            if (unsubscribeMessages) db.ref(`chat_messages/${chatId}`).off('value', unsubscribeMessages);
-
-            unsubscribeMessages = db.ref(`chat_messages/${chatId}`).on('value', (snapshot) => {
-                chatMessages.innerHTML = '';
-                const messages = snapshot.val();
-                if(!messages) return;
-
-                Object.keys(messages).forEach(msgKey => {
-                    const msg = messages[msgKey];
-                    // Skip if deleted for me
-                    if (msg.deletedFor && msg.deletedFor[myUserId]) return;
-
-                    const isOutgoing = String(msg.sender) === String(myUserId);
-                    const div = document.createElement('div');
-                    div.className = `message-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
-                    
-                    let innerHTML = '';
-                    // Render quoted reply if exists
-                    if (msg.replyTo) {
-                        innerHTML += `<div class="quoted-reply">${escapeHtml(msg.replyTo)}</div>`;
-                    }
-                    innerHTML += `<div>${formatMessage(msg.text)}</div><div class="message-time">${formatTime(msg.timestamp)}</div>`;
-                    
-                    div.innerHTML = innerHTML;
-                    // Open Context Menu on Click
-                    div.onclick = () => openMsgContext(msgKey, msg.text, msg.sender);
-                    
-                    chatMessages.appendChild(div);
-                });
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+        function trackBlocks() {
+            db.ref(`blocks/${myUserId}/${otherUserId}`).on('value', snap => {
+                isBlockedByMe = snap.val() === true;
+                document.getElementById('blockUserText').textContent = isBlockedByMe ? 'Unblock User' : 'Block User';
+                updateInputUI();
+            });
+            db.ref(`blocks/${otherUserId}/${myUserId}`).on('value', snap => {
+                hasBlockedMe = snap.val() === true;
+                updateInputUI();
             });
         }
 
-        // Sending Message
+        function toggleBlockUser() {
+            closeMenu();
+            if (isBlockedByMe) {
+                db.ref(`blocks/${myUserId}/${otherUserId}`).remove();
+                showCustomAlert("Unblocked", "You have unblocked this user.");
+            } else {
+                showCustomAlert("Block User", "Are you sure you want to block this user? They won't be able to send you messages.", true, () => {
+                    db.ref(`blocks/${myUserId}/${otherUserId}`).set(true);
+                    showCustomAlert("Blocked", "User has been blocked.");
+                });
+            }
+        }
+
+        function updateInputUI() {
+            if (isBlockedByMe) {
+                chatInputArea.style.pointerEvents = 'none';
+                chatInputArea.style.opacity = '0.5';
+                messageInput.placeholder = "You blocked this user.";
+            } else if (hasBlockedMe) {
+                chatInputArea.style.pointerEvents = 'none';
+                chatInputArea.style.opacity = '0.5';
+                messageInput.placeholder = "You cannot reply to this conversation.";
+            } else {
+                chatInputArea.style.pointerEvents = 'auto';
+                chatInputArea.style.opacity = '1';
+                messageInput.placeholder = "Type a message...";
+            }
+        }
+
+        function renderMessages(messages) {
+            chatMessagesElement.innerHTML = '';
+            
+            let pressTimer;
+
+            Object.keys(messages).forEach(msgKey => {
+                const msg = messages[msgKey];
+                
+                if (msg.deletedFor && msg.deletedFor[myUserId]) return;
+
+                const isOutgoing = String(msg.sender) === String(myUserId);
+                const div = document.createElement('div');
+                div.className = `message-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
+                
+                let innerHTML = '';
+                if (msg.replyTo) innerHTML += `<div class="quoted-reply">${escapeHtml(msg.replyTo)}</div>`;
+                innerHTML += `<div>${formatMessage(msg.text)}</div><div class="message-time">${formatTime(msg.timestamp)}</div>`;
+                
+                div.innerHTML = innerHTML;
+                
+                const startPress = (e) => {
+                    clearTimeout(pressTimer);
+                    pressTimer = setTimeout(() => {
+                        openMsgContext(msgKey, msg.text, msg.sender);
+                    }, 1000);
+                };
+                const cancelPress = () => { clearTimeout(pressTimer); };
+
+                div.addEventListener('mousedown', startPress);
+                div.addEventListener('touchstart', startPress, {passive: true});
+                
+                div.addEventListener('mouseup', cancelPress);
+                div.addEventListener('mouseleave', cancelPress);
+                div.addEventListener('touchend', cancelPress);
+                div.addEventListener('touchcancel', cancelPress);
+                div.addEventListener('touchmove', cancelPress, {passive: true});
+                
+                div.oncontextmenu = (e) => { e.preventDefault(); return false; };
+                
+                chatMessagesElement.appendChild(div);
+            });
+            chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+        }
+
+        function loadMessages() {
+            const cachedMessages = localStorage.getItem(`chat_cache_${chatId}`);
+            if (cachedMessages) {
+                try { renderMessages(JSON.parse(cachedMessages)); } catch(e){}
+            }
+
+            if (unsubscribeMessages) db.ref(`chat_messages/${chatId}`).off('value', unsubscribeMessages);
+            unsubscribeMessages = db.ref(`chat_messages/${chatId}`).on('value', (snapshot) => {
+                const messages = snapshot.val();
+                if(messages) {
+                    localStorage.setItem(`chat_cache_${chatId}`, JSON.stringify(messages));
+                    renderMessages(messages);
+                } else {
+                    chatMessagesElement.innerHTML = '';
+                    localStorage.removeItem(`chat_cache_${chatId}`);
+                }
+            });
+        }
+
         function sendRawMessage(text) {
-            if(!text || !myUserId || !chatId) return;
+            if(!text || !myUserId || !chatId || isBlockedByMe || hasBlockedMe) return;
             const timestamp = Date.now();
             const msgRef = db.ref(`chat_messages/${chatId}`).push();
 
             const msgData = { sender: String(myUserId), text: text, timestamp: timestamp, isRead: false };
-            if (activeReplyData) { msgData.replyTo = activeReplyData; cancelReply(); } // Attach reply
+            if (activeReplyData) { msgData.replyTo = activeReplyData; cancelReply(); } 
 
             msgRef.set(msgData).catch(err => {
-                showCustomAlert("Error", "Message Failed to Send! Please check your connection or login status.");
+                showCustomAlert("Error", "Message Failed to Send!");
             });
 
             const chatPreviewData = { chatId: chatId, lastMessage: text, timestamp: timestamp };
@@ -402,21 +524,75 @@
         document.getElementById('btnSend').onclick = () => { const text = messageInput.value.trim(); if(text) sendRawMessage(text); };
         messageInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { const text = messageInput.value.trim(); if(text) sendRawMessage(text); } });
 
-        // Location Features
-        document.getElementById('btnLocation').onclick = () => {
+        function startLiveLocation(isResume = false) {
             if (!navigator.geolocation) return showCustomAlert("Error", "Location sharing not supported.");
-            navigator.geolocation.getCurrentPosition(
-                (pos) => { sendRawMessage(`📍 Shared Location\nmaploc.html?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`); },
-                (err) => { showCustomAlert("Permission Denied", "Could not get your location. Please check your device GPS and browser permissions."); },
-                { enableHighAccuracy: true }
+            if (watchPositionId && !isResume) return showCustomAlert("Notice", "You are already sharing your live location.");
+
+            const liveRef = db.ref(`live_locations/${chatId}/${myUserId}`);
+            
+            // Add onDisconnect hook to automatically remove location if chat is closed
+            liveRef.onDisconnect().remove();
+
+            watchPositionId = navigator.geolocation.watchPosition(
+                (pos) => { 
+                    liveRef.set({
+                        lat: Number(pos.coords.latitude),
+                        lng: Number(pos.coords.longitude),
+                        updatedAt: Date.now()
+                    });
+                },
+                (err) => { 
+                    showCustomAlert("Error", "Failed to get location: " + err.message); 
+                    stopLiveLocation();
+                },
+                { enableHighAccuracy: true, maximumAge: 0 }
             );
+
+            localStorage.setItem('live_tracking_active', 'true');
+            localStorage.setItem('live_tracking_chatId', chatId);
+
+            if (!isResume) {
+                sendRawMessage(`📡 Live Location Sharing\nmapchat.html?liveChatId=${chatId}&targetUserId=${myUserId}`);
+            }
+            
+            document.getElementById('liveLocationBanner').style.display = 'flex';
+            document.getElementById('btnLocation').classList.add('active');
+        }
+
+        document.getElementById('btnLocation').onclick = () => {
+            if(localStorage.getItem('live_tracking_active') === 'true') {
+                showCustomAlert("Notice", "You are already sharing live location.");
+            } else {
+                startLiveLocation(false);
+            }
         };
+        
+        function stopLiveLocation() {
+            if (watchPositionId) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+            localStorage.removeItem('live_tracking_active');
+            localStorage.removeItem('live_tracking_chatId');
+
+            if(chatId && myUserId) {
+                const liveRef = db.ref(`live_locations/${chatId}/${myUserId}`);
+                liveRef.remove();
+                
+                // Cancel the disconnect hook because we manually removed it
+                liveRef.onDisconnect().cancel();
+                
+                sendRawMessage(`🚫 Live Location Ended`);
+            }
+            document.getElementById('liveLocationBanner').style.display = 'none';
+            document.getElementById('btnLocation').classList.remove('active');
+        }
 
         document.getElementById('btnCopyLocation').onclick = () => {
             if (!navigator.geolocation) return showCustomAlert("Error", "Location sharing not supported.");
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    const locLink = `https://www.hulum.online/maploc.html?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`;
+                    const locLink = `https://www.hulum.online/mapchat.html?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`;
                     navigator.clipboard.writeText(locLink).then(() => { showCustomAlert("Success", "📍 Location link copied to clipboard!"); })
                     .catch(() => { showCustomAlert("Notice", "Failed to auto-copy. Link: " + locLink); });
                 },
@@ -425,10 +601,8 @@
             );
         };
 
-        // --- Context Menu (Message Actions) ---
         function openMsgContext(id, text, sender) {
             selectedMsgId = id; selectedMsgText = text; selectedMsgSender = sender;
-            // Only allow "Delete for everyone" if you sent it
             const isMine = String(sender) === String(myUserId);
             document.getElementById('btnDeleteForBoth').style.display = isMine ? 'flex' : 'none';
             msgContextOverlay.classList.add('show');
@@ -437,7 +611,6 @@
         msgContextOverlay.onclick = (e) => { if(e.target === msgContextOverlay) closeMsgContext(); };
         function closeMsgContext() { msgContextOverlay.classList.remove('show'); }
 
-        // Reply Logic
         function initReply() {
             activeReplyData = selectedMsgText;
             document.getElementById('replyBannerText').textContent = activeReplyData;
@@ -446,24 +619,38 @@
         }
         function cancelReply() { activeReplyData = null; document.getElementById('replyBanner').style.display = 'none'; }
 
-        // Share Logic
         function shareMessage() {
-            const txt = selectedMsgText; closeMsgContext();
+            let txt = selectedMsgText; 
+            closeMsgContext();
+            
+            if (txt.includes('mapchat.html')) {
+                txt = txt.replace(/mapchat\.html/g, 'https://www.hulum.online/mapchat.html');
+            }
+
             if (navigator.share) { navigator.share({ title: 'Delala Chat', text: txt }).catch(()=>{}); }
             else { navigator.clipboard.writeText(txt); showCustomAlert("Copied", "Message copied to clipboard!"); }
         }
 
-        // Delete Logic
+        function forwardMessage() {
+            if (selectedMsgText) {
+                sessionStorage.setItem('forward_msg_text', selectedMsgText);
+                closeMsgContext();
+                window.location.href = 'chat.html'; 
+            }
+        }
+
         function promptDeleteForMe() {
             closeMsgContext();
             showCustomAlert("Delete Message", "Delete this message for yourself?", true, () => {
-                db.ref(`chat_messages/${chatId}/${selectedMsgId}/deletedFor/${myUserId}`).set(true);
+                db.ref(`chat_messages/${chatId}/${selectedMsgId}/deletedFor/${myUserId}`).set(true)
+                .catch(err => showCustomAlert("Error", err.message));
             });
         }
         function promptDeleteForBoth() {
             closeMsgContext();
-            showCustomAlert("Delete for Everyone", "This will permanently delete the message for everyone in the chat.", true, () => {
-                db.ref(`chat_messages/${chatId}/${selectedMsgId}`).remove();
+            showCustomAlert("Delete for Everyone", "This will permanently delete the message for everyone.", true, () => {
+                db.ref(`chat_messages/${chatId}/${selectedMsgId}`).remove()
+                    .catch(err => { showCustomAlert("Error", "Failed to delete: " + err.message); });
             });
         }
         function promptClearChat() {
@@ -471,21 +658,31 @@
             showCustomAlert("Clear Chat", "Are you sure you want to permanently delete all messages in this conversation?", true, () => {
                 db.ref(`chat_messages/${chatId}`).remove();
                 db.ref(`user_chats/${myUserId}/${otherUserId}`).remove();
+                localStorage.removeItem(`chat_cache_${chatId}`);
                 showCustomAlert("Cleared", "Chat history has been cleared.");
             });
         }
 
-        // Helpers
         function formatTime(ts) { if(!ts) return ''; return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
         function escapeHtml(text) { const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return text.replace(/[&<>"']/g, function(m) { return map[m]; }); }
+        
         function formatMessage(text) {
             let escaped = escapeHtml(text);
-            const customLocRegex = /📍 Shared Location\nmaploc\.html\?lat=([-\d.]+)&amp;lng=([-\d.]+)/g;
-            if (customLocRegex.test(escaped)) {
-                return escaped.replace(customLocRegex, function(match, lat, lng) {
-                    return `<div class="location-card"><div class="location-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div><div class="location-details"><strong>Live Location</strong><a href="maploc.html?lat=${lat}&lng=${lng}" class="map-btn">View on Map</a></div></div>`;
+            
+            const liveLocRegex = /📡 Live Location Sharing\nmapchat\.html\?liveChatId=([^&]+)&amp;targetUserId=([^&]+)/g;
+            if (liveLocRegex.test(escaped)) {
+                return escaped.replace(liveLocRegex, function(match, lChatId, targetUser) {
+                    return `<div class="location-card"><div class="location-icon-wrapper live"><svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path><circle cx="12" cy="10" r="3"></circle></svg></div><div class="location-details"><strong>Live Location (Active)</strong><a href="mapchat.html?liveChatId=${lChatId}&targetUserId=${targetUser}" class="map-btn">Track Movement</a></div></div>`;
                 });
             }
+
+            const customLocRegex = /📍 Shared Location\nmapchat\.html\?lat=([-\d.]+)&amp;lng=([-\d.]+)/g;
+            if (customLocRegex.test(escaped)) {
+                return escaped.replace(customLocRegex, function(match, lat, lng) {
+                    return `<div class="location-card"><div class="location-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div><div class="location-details"><strong>Pinned Location</strong><a href="mapchat.html?lat=${lat}&lng=${lng}" class="map-btn">View on Map</a></div></div>`;
+                });
+            }
+            
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             return escaped.replace(urlRegex, function(url) { return `<a href="${url}" target="_blank">${url}</a>`; }).replace(/\n/g, '<br>');
         }

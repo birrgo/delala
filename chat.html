@@ -25,10 +25,11 @@
         html, body { width: 100%; height: 100%; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); display: flex; flex-direction: column; z-index: 1; }
 
-        /* --- Dark Blue Shine Header --- */
+        /* --- Dark Blue Shine Header (Fixed for Mobile Status Bar) --- */
         .inbox-header {
             background: linear-gradient(135deg, #091C40 0%, #030B1C 100%);
-            padding: 12px 16px; 
+            /* Added top padding to push content below the system status bar */
+            padding: max(45px, env(safe-area-inset-top)) 16px 12px 16px; 
             display: flex; align-items: center; width: 100%; 
             position: relative; z-index: 20;
             box-shadow: 0 4px 20px rgba(3, 11, 28, 0.2);
@@ -53,7 +54,7 @@
         .search-input-wrapper {
             width: 100%; height: 40px;
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px; /* Sleek pill shape */
+            border-radius: 20px; 
             padding: 0 6px 0 16px; display: flex; align-items: center; gap: 10px;
             position: relative; z-index: 2; transition: all 0.2s ease;
         }
@@ -73,7 +74,7 @@
 
         /* Search Dropdown */
         .search-results-dropdown {
-            position: absolute; top: 60px; left: 16px; right: 16px; background: #FFF; border-radius: 12px; 
+            position: absolute; top: 90px; left: 16px; right: 16px; background: #FFF; border-radius: 12px; 
             max-height: 280px; overflow-y: auto; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 25;
             border: 1px solid #E2E8F0;
         }
@@ -111,8 +112,28 @@
         .chat-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .chat-item-top h3 { font-size: 15px; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .chat-item-top span { font-size: 11px; color: #94A3B8; font-weight: 500; flex-shrink: 0; }
-        .chat-item-msg { font-size: 13px; font-weight: 400; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
+        /* Message Area with Flex to support Unread Badge */
+        .chat-item-bottom { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .chat-item-msg { flex: 1; font-size: 13px; font-weight: 400; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Unread Badge CSS */
+        .unread-badge {
+            background: var(--blue-accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+        }
+
         .pin-icon { width: 14px; height: 14px; fill: var(--blue-accent); display: none; }
         .chat-item.pinned .pin-icon { display: inline-block; }
 
@@ -123,7 +144,6 @@
         .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 6px; }
         .empty-state p { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 240px; }
         .auth-btn-primary { width: 100%; max-width: 200px; background: var(--blue-accent); color: #FFF; border: none; padding: 12px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; transition: opacity 0.2s; }
-        .auth-btn-primary:active { opacity: 0.8; }
 
         /* Bottom Sheet Context Menu */
         .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); z-index: 5000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(4px); }
@@ -133,10 +153,7 @@
         .sheet-handle { width: 40px; height: 4px; background: #E2E8F0; border-radius: 4px; margin: 0 auto 20px; }
         .sheet-menu { display: flex; flex-direction: column; gap: 8px; }
         .sheet-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: none; background: #F8FAFC; color: var(--primary-dark); font-size: 15px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.2s; }
-        .sheet-btn:active { background: #E2E8F0; }
         .sheet-btn.danger { color: var(--danger-color); background: #FEF2F2; }
-        .sheet-btn.danger:active { background: #FEE2E2; }
-        .sheet-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
 
         /* Custom Alert */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -275,6 +292,10 @@
                         const photoURL = uData.photoURL || uData.profilePicture || '';
                         const isOnline = uData.presence ? uData.presence.isOnline : false;
                         
+                        // Extract unread message count from database
+                        const unreadCount = chatInfo.unreadCount || 0;
+                        const unreadBadgeHtml = unreadCount > 0 ? `<div class="unread-badge">${unreadCount > 99 ? '99+' : unreadCount}</div>` : '';
+
                         const item = document.createElement('div');
                         item.className = `chat-item ${chatInfo.isPinned ? 'pinned' : ''}`;
                         
@@ -288,7 +309,10 @@
                                     <h3>${displayName} <svg class="pin-icon" viewBox="0 0 24 24"><path d="M12 2L12 10M12 14L12 22M9 5L15 5M9 19L15 19M16 14C16 11.7909 17.7909 10 20 10V5C17.7909 5 16 3.20914 16 1H8C8 3.20914 6.20914 5 4 5V10C6.20914 10 8 11.7909 8 14V19H16V14Z"></path></svg></h3>
                                     <span>${formatTime(chatInfo.timestamp)}</span>
                                 </div>
-                                <div class="chat-item-msg">${(chatInfo.lastMessage && chatInfo.lastMessage.includes('maploc.html')) ? '📍 Shared Location' : escapeHtml(chatInfo.lastMessage || '')}</div>
+                                <div class="chat-item-bottom">
+                                    <div class="chat-item-msg">${(chatInfo.lastMessage && chatInfo.lastMessage.includes('maploc.html')) ? '📍 Shared Location' : escapeHtml(chatInfo.lastMessage || '')}</div>
+                                    ${unreadBadgeHtml}
+                                </div>
                             </div>
                         `;
 
@@ -307,6 +331,12 @@
 
                         item.onclick = (e) => {
                             if(isHolding) { e.preventDefault(); return; }
+                            
+                            // Reset unread count in Firebase when chat is clicked
+                            if(unreadCount > 0) {
+                                db.ref(`user_chats/${myUserId}/${uid}`).update({ unreadCount: 0 });
+                            }
+                            
                             window.location.href = `chat1.html?userId=${encodeURIComponent(uid)}&userName=${encodeURIComponent(displayName)}`;
                         };
 

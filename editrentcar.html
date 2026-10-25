@@ -528,16 +528,16 @@
         </header>
 
         <main class="app-content">
-            <div class="post-form-card" id="step2Form">
+            <div class="post-form-card" id="step1Form">
                 <div class="step-indicator">
-                    <div class="step-node" id="node-1">1</div>
-                    <div class="step-node active" id="node-2">2</div>
+                    <div class="step-node active" id="node-1">1</div>
+                    <div class="step-node" id="node-2">2</div>
                     <div class="step-node" id="node-3">3</div>
                     <div class="step-node" id="node-4">4</div>
                 </div>
 
-                <div class="form-step-page" id="stepPage2">
-                    <div class="step-title">Step 2: Edit Vehicle Details</div>
+                <div class="form-step-page" id="stepPage1">
+                    <div class="step-title">Step 1: Edit Vehicle Details</div>
 
                     <!-- BOX 1: Category Selection -->
                     <div class="nested-box">
@@ -619,7 +619,7 @@
                     </div>
 
                     <div class="step-actions">
-                        <button type="button" class="btn-next" id="btnNext2">
+                        <button type="button" class="btn-next" id="btnNext1">
                             Next: Location 
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
@@ -689,6 +689,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const urlPostId = urlParams.get('postId');
         const urlDbSource = urlParams.get('db') || 'primary';
+
+        // Block cascading logic from wiping database fields during restoration
+        let isRestoringFromSession = false;
 
         // Category Data Dictionary
         const vehicleCategoryData = {
@@ -801,47 +804,56 @@
             openCustomSelectModal(this);
         }
 
+        function populateBrands() {
+            const categorySelect = document.getElementById('vehicleCategory');
+            const brandSelect = document.getElementById('vehicleBrand');
+            const cat = categorySelect.value;
+            
+            brandSelect.innerHTML = '';
+            const brands = vehicleCategoryData[cat]?.brands || {};
+
+            Object.keys(brands).forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.text = b;
+                brandSelect.appendChild(opt);
+            });
+            populateModels();
+        }
+
+        function populateModels() {
+            const categorySelect = document.getElementById('vehicleCategory');
+            const brandSelect = document.getElementById('vehicleBrand');
+            const modelSelect = document.getElementById('vehicleModelSelect');
+            const customGroup = document.getElementById('customModelGroup');
+            
+            const cat = categorySelect.value;
+            const brand = brandSelect.value;
+            
+            modelSelect.innerHTML = '';
+            const models = vehicleCategoryData[cat]?.brands[brand] || ["Other"];
+
+            models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.text = m;
+                modelSelect.appendChild(opt);
+            });
+
+            if (brand === "Other" || modelSelect.value === "Other") {
+                customGroup.style.display = "block";
+            } else {
+                customGroup.style.display = "none";
+            }
+
+            autoFillPlaceholders();
+        }
+
         function setupCategoryCascade() {
             const categorySelect = document.getElementById('vehicleCategory');
             const brandSelect = document.getElementById('vehicleBrand');
             const modelSelect = document.getElementById('vehicleModelSelect');
             const customGroup = document.getElementById('customModelGroup');
-
-            function populateBrands() {
-                const cat = categorySelect.value;
-                brandSelect.innerHTML = '';
-                const brands = vehicleCategoryData[cat]?.brands || {};
-
-                Object.keys(brands).forEach(b => {
-                    const opt = document.createElement('option');
-                    opt.value = b;
-                    opt.text = b;
-                    brandSelect.appendChild(opt);
-                });
-                populateModels();
-            }
-
-            function populateModels() {
-                const cat = categorySelect.value;
-                const brand = brandSelect.value;
-                modelSelect.innerHTML = '';
-                const models = vehicleCategoryData[cat]?.brands[brand] || ["Other"];
-
-                models.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m;
-                    opt.text = m;
-                    modelSelect.appendChild(opt);
-                });
-
-                if (brand === "Other" || modelSelect.value === "Other") {
-                    customGroup.style.display = "block";
-                } else {
-                    customGroup.style.display = "none";
-                }
-
-                autoFillPlaceholders();
-            }
 
             categorySelect.addEventListener('change', () => {
                 populateBrands();
@@ -862,7 +874,8 @@
                 autoFillPlaceholders();
             });
 
-            populateBrands();
+            // Only run the initial cascade if we are NOT restoring from a session draft
+            if(!isRestoringFromSession) populateBrands();
         }
 
         function getAuthenticatedUser() {
@@ -883,8 +896,10 @@
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            setupCategoryCascade();
+            // Notice setupCategoryCascade is called AFTER restoring the draft
+            // So that the draft populates exactly what's needed without getting reset
             restoreSavedDraft();
+            setupCategoryCascade();
             bindCustomSelectHandlers();
         }
 
@@ -892,7 +907,7 @@
             initClock();
             refreshFormState();
 
-            document.getElementById('btnNext2').addEventListener('click', () => {
+            document.getElementById('btnNext1').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
 
                 const title = document.getElementById('postTitle').value.trim();
@@ -904,12 +919,12 @@
                 }
 
                 saveDraftToSession();
-                window.location.href = `editrentalpost1.html?postId=${urlPostId}&db=${urlDbSource}`;
+                window.location.href = `editrentalpost2.html?postId=${urlPostId}&db=${urlDbSource}`;
             });
         });
 
         window.addEventListener('pageshow', () => {
-            refreshFormState();
+            // refreshFormState();
         });
 
         function saveDraftToSession() {
@@ -935,53 +950,85 @@
             draftData.categorySpecificDetails = catDetails;
             Object.assign(draftData, catDetails); // Merge flatly for compatibility
 
-            draftData.activeCategoryOnStep2 = 'Vehicle';
+            draftData.activeCategoryOnStep1 = 'Vehicle';
 
             sessionStorage.setItem('delalaEditDraftPart1', JSON.stringify(draftData));
         }
 
         function restoreSavedDraft() {
             const rawDraft = sessionStorage.getItem('delalaEditDraftPart1');
-            if (!rawDraft) return;
+            if (!rawDraft) {
+                isRestoringFromSession = false;
+                return;
+            }
 
             try {
+                isRestoringFromSession = true; // Prevent `autoFillPlaceholders` from running and wiping data
                 let draft = JSON.parse(rawDraft);
 
+                // 1. Core Category
                 if (draft.category && document.getElementById('vehicleCategory')) {
                     document.getElementById('vehicleCategory').value = draft.category;
-                    document.getElementById('vehicleCategory').dispatchEvent(new Event('change'));
+                    populateBrands(); // Directly populate cascade without triggering events
                 }
 
-                document.getElementById('postTitle').value = draft.title || '';
-                document.getElementById('rentalPrice').value = draft.price || '';
-                if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
-                document.getElementById('postContent').value = draft.body || '';
-
+                // 2. Specifics (Brand, Model, Transmission)
                 const c = draft.categorySpecificDetails || draft;
                 if (c) {
                     if (c.vehicleBrand && document.getElementById('vehicleBrand')) {
                         document.getElementById('vehicleBrand').value = c.vehicleBrand;
-                        document.getElementById('vehicleBrand').dispatchEvent(new Event('change'));
+                        populateModels(); // Directly populate cascade without triggering events
                     }
+
                     if (c.vehicleModelSelect && document.getElementById('vehicleModelSelect')) {
-                        document.getElementById('vehicleModelSelect').value = c.vehicleModelSelect;
+                        const modelSelect = document.getElementById('vehicleModelSelect');
+                        // Ensure option exists, else fallback to 'Other'
+                        const options = Array.from(modelSelect.options).map(opt => opt.value);
+                        if (options.includes(c.vehicleModelSelect)) {
+                            modelSelect.value = c.vehicleModelSelect;
+                        } else {
+                            modelSelect.value = "Other";
+                        }
                     }
-                    if (c.vehicleModel && document.getElementById('vehicleModel')) {
-                        document.getElementById('vehicleModel').value = c.vehicleModel;
+
+                    // Check custom groups display
+                    if (document.getElementById('vehicleBrand').value === "Other" || document.getElementById('vehicleModelSelect').value === "Other") {
+                        document.getElementById('customModelGroup').style.display = "block";
+                        if (c.vehicleModel && document.getElementById('vehicleModel')) {
+                            // If they typed a custom model that combines brand and model, output here
+                            document.getElementById('vehicleModel').value = c.vehicleModel;
+                        }
                     }
+
                     if (c.transmissionType && document.getElementById('transmissionType')) {
                         document.getElementById('transmissionType').value = c.transmissionType;
                     }
                 }
 
-                autoFillPlaceholders();
+                // 3. Price & Period
+                if (draft.price) document.getElementById('rentalPrice').value = draft.price;
+                if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
+
+                // 4. Overwrite text details LAST so the auto-filler definitely doesn't touch them
+                if (draft.title) {
+                    document.getElementById('postTitle').value = draft.title;
+                }
+                if (draft.body || draft.description) {
+                    document.getElementById('postContent').value = draft.body || draft.description || '';
+                }
+
+                isRestoringFromSession = false;
 
             } catch (err) {
                 console.error("Failed to restore draft", err);
+                isRestoringFromSession = false;
             }
         }
 
         function autoFillPlaceholders() {
+            // Block automatic overwrite if we are currently loading the database snapshot from Session Storage
+            if (isRestoringFromSession) return;
+
             const postTitle = document.getElementById('postTitle');
             const postContent = document.getElementById('postContent');
             const category = document.getElementById('vehicleCategory')?.value || 'Vehicle';

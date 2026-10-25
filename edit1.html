@@ -403,7 +403,6 @@
             overflow-y: auto;
         }
 
-        /* Expanded Category Item Height & Text Size */
         .category-item {
             display: flex;
             align-items: center;
@@ -627,7 +626,7 @@
         </nav>
     </div>
 
-    <!-- Category Modal Content remains exactly the same -->
+    <!-- Category Modal Content -->
     <div class="category-modal-overlay" id="categoryModalOverlay">
         <div class="category-modal-card">
             <div class="category-modal-header">
@@ -635,6 +634,10 @@
                 <div class="custom-radio"></div>
             </div>
             <div class="category-modal-list">
+                <div class="category-item" data-val="Guest House" data-label="Guest House — አልጋ ቤት">
+                    <div class="category-text-group"><span class="category-text-en">Guest House</span><span>—</span><span class="category-text-am">አልጋ ቤት</span></div>
+                    <div class="custom-radio"></div>
+                </div>
                 <div class="category-item" data-val="Residential Property" data-label="Residential Property — የመኖሪያ ቤት">
                     <div class="category-text-group"><span class="category-text-en">Residential Property</span><span>—</span><span class="category-text-am">የመኖሪያ ቤት</span></div>
                     <div class="custom-radio"></div>
@@ -667,7 +670,7 @@
         </div>
     </div>
 
-    <!-- Error Modal remains exactly the same -->
+    <!-- Error Modal -->
     <div class="metal-modal-overlay" id="errorModalOverlay">
         <div class="metal-modal-card">
             <div class="metal-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
@@ -786,10 +789,10 @@
                 
                 saveDraftToSession();
 
-                // Redirect to the new Edit-specific HTML pages (e.g. editrenthome.html instead of renthome.html)
-                // Pass along postId and db for final submission
+                // Redirect to the edit HTML page for the selected category
                 const paramString = `?postId=${urlPostId}&db=${urlDbSource}`;
-                if (category === "Residential Property") window.location.href = 'editrenthome.html' + paramString;
+                if (category === "Guest House") window.location.href = 'editrentguest.html' + paramString;
+                else if (category === "Residential Property") window.location.href = 'editrenthome.html' + paramString;
                 else if (category === "Workplace") window.location.href = 'editrentwork.html' + paramString;
                 else if (category === "Vehicle") window.location.href = 'editrentcar.html' + paramString;
                 else if (category === "Machinery") window.location.href = 'editrentmachine.html' + paramString;
