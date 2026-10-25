@@ -426,6 +426,119 @@
         }
 
         .metal-modal-btn:active { transform: scale(0.96); }
+
+        /* --- Coming Soon Popup Styles --- */
+        .coming-soon-overlay {
+            position: fixed;
+            top: 46px;
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 106px); 
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 900;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            box-sizing: border-box;
+        }
+
+        .coming-soon-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .coming-soon-modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 24px 20px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .coming-soon-modal::-webkit-scrollbar {
+            width: 4px;
+        }
+        .coming-soon-modal::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .coming-soon-title {
+            font-size: 18px;
+            color: #0F172A;
+            margin: 0 0 10px 0;
+            font-weight: 800;
+        }
+
+        .coming-soon-icon {
+            font-size: 36px;
+            margin: 6px 0 12px 0;
+            display: inline-block;
+            animation: floatRocket 3s ease-in-out infinite;
+        }
+
+        .coming-soon-subtitle {
+            font-size: 15px;
+            color: #0284c7;
+            margin: 0 0 8px 0;
+            font-weight: 700;
+        }
+
+        .coming-soon-text {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.5;
+            margin: 0 0 16px 0;
+        }
+
+        .coming-soon-divider {
+            border: 0;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 16px 0;
+        }
+
+        .coming-soon-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .coming-soon-btn:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes floatRocket {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -437,6 +550,24 @@
             </div>
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
         </header>
+
+        <!-- Coming Soon Popup Inserted Here -->
+        <div class="coming-soon-overlay" id="comingSoonOverlay">
+            <div class="coming-soon-modal">
+                <h2 class="coming-soon-title">Hulum Gebeya | ሁሉም ገበያ</h2>
+                <div class="coming-soon-icon">🚀</div>
+                
+                <h3 class="coming-soon-subtitle">Coming Soon!</h3>
+                <p class="coming-soon-text">Everything you need, right in your neighborhood! We are building a platform where you can easily locate and access essential services near you. Stay tuned!</p>
+                
+                <hr class="coming-soon-divider">
+                
+                <h3 class="coming-soon-subtitle">በቅርብ ቀን ይጠብቁን!</h3>
+                <p class="coming-soon-text">ሁሉንም በአቅራቢያችሁ ያሉትን የመንግስት ድርጅቶች፣ የእምነት ተቋማት፣ ሱቆች እና የውበት ሳሎኖች ሆነ የትኛውንም አገልግሎት የምታገኙበት ቦታ፤ አሁን በአቅራቢያችሁ ማግኘት ይችላሉ።</p>
+                
+                <button class="coming-soon-btn" id="closeComingSoonBtn">Okay, Got It!</button>
+            </div>
+        </div>
 
         <main class="app-content">
             <div class="post-form-card" id="test1Form">
@@ -482,7 +613,7 @@
                 <div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
                 <span>Selling</span>
             </a>
-            <a href="rentalpost.html" class="nav-item-post-center active">
+            <a href="post.html" class="nav-item-post-center active">
                 <div class="post-fab-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </div>
@@ -754,6 +885,14 @@
             initClock();
             setupCategoryModal();
             restoreSavedDraft();
+
+            // --- Coming Soon Redirect Logic ---
+            const closeComingSoonBtn = document.getElementById('closeComingSoonBtn');
+            if (closeComingSoonBtn) {
+                closeComingSoonBtn.addEventListener('click', () => {
+                    window.location.href = 'post.html';
+                });
+            }
 
             const btnNext = document.getElementById('btnNext1');
             if (btnNext) {

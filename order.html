@@ -452,7 +452,7 @@
                 </div>
             </div>
 
-            <!-- STEP 5: Scan Receipt (Merged from scaning.html) -->
+            <!-- STEP 5: Scan Receipt -->
             <div class="step-view" id="screen-scan">
                 <div class="centered-popup-card" style="border-radius: 18px; padding: 20px 18px;">
                     <div class="drawer-step-light-title">RECEIPT SCANNING</div>
@@ -628,7 +628,6 @@
 
         // Main logic to determine which flow we are inside
         if (activeStepParam === 'pay') {
-            // Adjust header/layout for clean payment screen
             document.getElementById('mainStepIndicator').style.display = 'none';
             document.getElementById('mainActionArea').style.display = 'none';
             document.getElementById('postSummaryCard').style.display = 'none';
@@ -637,17 +636,14 @@
             Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
             screens.pay.classList.add('active');
             
-            // Read details from URL parameters
             let passedMethod = urlParams.get('method') || 'cbe';
             let passedAmount = urlParams.get('amount') || 0;
             let currentOrderRefLocal = urlParams.get('ref') || 'DL-000000';
             let dbKey = urlParams.get('key');
             let passedPostId = urlParams.get('postId') || postId;
             
-            // Populate UI dynamically
             const rentCategoryNameLocal = pendingPayload.category || localStorage.getItem('pending_delala_category') || 'Rental Posting';
             const rtType = pendingPayload.rentalType || localStorage.getItem('pending_delala_rentType') || 'Residential Rent';
-            const userCityLocal = localStorage.getItem('pending_delala_location') || 'Adama';
             
             document.getElementById('dispCategory').innerText = rentCategoryNameLocal;
             document.getElementById('dispRentType').innerText = rtType;
@@ -655,7 +651,6 @@
             document.getElementById('drawerDispRef').innerText = currentOrderRefLocal;
             document.getElementById('drawerDispFee').innerText = `${passedAmount} Birr`;
 
-            // Retrieve selected bank details & exact prices for OCR Verification
             let categoryPrice = 0;
             let dynamicAdminAccounts = {};
 
@@ -672,17 +667,14 @@
             get(ref(db, `settings/category_prices/${rentCategoryNameLocal}`)).then((snap) => {
                 if (snap.exists()) {
                     const data = snap.val();
-                    // Match the EXACT price for the category and chosen period
                     categoryPrice = data[periodKey] !== undefined ? parseFloat(data[periodKey]) : (typeof data === 'object' ? Math.min(...Object.values(data).map(Number).filter(v => !isNaN(v) && v > 0)) : parseFloat(data));
                     
-                    // Force the displayed UI amount to exact DB price
                     if (categoryPrice > 0) {
                         document.getElementById('drawerDispFee').innerText = `${categoryPrice} Birr`;
                     }
                 }
             });
 
-            // Pay Screen Action Events
             document.getElementById('uploadAreaCard').addEventListener('click', () => document.getElementById('receipt-file').click());
             
             document.getElementById('copyAccBtn').addEventListener('click', () => {
@@ -692,7 +684,6 @@
                 });
             });
 
-            // Handle receipt image processing safely and switch to SCAN mode
             document.getElementById('receipt-file').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if(!file) return;
@@ -715,13 +706,11 @@
                             imgData = canvas.toDataURL('image/jpeg', 0.85);
                             localStorage.setItem('pending_receipt_image_data', imgData);
                             
-                            // Ensure scan variables are maintained
                             localStorage.setItem('pending_delala_orderRef', currentOrderRefLocal);
                             localStorage.setItem('pending_delala_txKey', dbKey);
                             localStorage.setItem('pending_delala_listingKey', passedPostId);
                             localStorage.setItem('pending_delala_collection', 'posts'); 
 
-                            // Move to Scan screen natively
                             document.getElementById('imagePreview').src = imgData;
                             document.getElementById('modalScanImg').src = imgData;
                             document.getElementById('headerTitleText').innerText = 'Verify Receipt';
@@ -739,7 +728,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // Cancellation and Erasure Logic
             document.getElementById('cancelTicketTriggerBtn').addEventListener('click', () => {
                 document.getElementById('cancelModal').style.display = 'flex';
             });
@@ -761,10 +749,6 @@
                         action: "cancelled_and_erased"
                     };
                     
-                    if (passedPostId && !passedPostId.startsWith('TEMP_')) {
-                        updates[`/posts/${passedPostId}`] = null;
-                        updates[`/rentals/${passedPostId}`] = null;
-                    }
                     if (dbKey && completeRawCardSequence) {
                         updates[`/users/${completeRawCardSequence}/transactions/${dbKey}`] = null;
                         updates[`/deposits/${dbKey}`] = null;
@@ -782,7 +766,6 @@
                 }
             });
 
-            // Handle unsubmitted Draft logic
             const draftRaw = localStorage.getItem('delala_payment_draft_info');
             if (draftRaw && JSON.parse(draftRaw).receiptImageSrc) {
                 document.getElementById('draftAlertModal').style.display = 'flex';
@@ -803,24 +786,15 @@
                 screens.scan.classList.add('active');
             });
 
-            // -------------------------------------------------------------
-            // SCANNING PROCESS LOGIC (Tesseract & DB Verification - FINAL STEP)
-            // -------------------------------------------------------------
             document.getElementById('statusAlertCloseBtn').addEventListener('click', () => {
                 document.getElementById('statusAlertModal').classList.remove('active');
                 const title = document.getElementById('statusAlertTitle').innerText;
                 if (title.includes("Verified") || title.includes("Approved")) {
                     localStorage.removeItem('pending_receipt_image_data');
                     localStorage.removeItem('delala_payment_draft_info');
-                    
-                    // DO NOT remove sessionStorage here. We need it for publish.html to save the post!
-                    // sessionStorage.removeItem('delalaPendingListing');
-                    // sessionStorage.removeItem('delalaPaymentPlan');
-                    
                     window.location.href = "publish.html";
                 } else {
                     localStorage.removeItem('pending_receipt_image_data');
-                    // Return back to payment upload
                     document.getElementById('headerTitleText').innerText = 'Delala Premium';
                     document.getElementById('receipt-sub').innerText = "Select screenshot to begin auto-scan";
                     Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
@@ -856,7 +830,6 @@
                     const isAccMatch = merchantAcc.length > 4 && extractedOcrText.replace(/[^A-Z0-9]/ig, '').includes(merchantAcc);
                     
                     const scannedAmount = extractAmountFromOcr(extractedOcrText, categoryPrice);
-                    // Match Exact required Price
                     const isAmountValid = scannedAmount === categoryPrice || extractedOcrText.includes(categoryPrice.toString());
 
                     if (!isNameMatch && !isAccMatch) {
@@ -884,18 +857,14 @@
                         }
                     }
 
-                    // --- ATOMIC PAYMENT SAVE: ONLY SAVE DEPOSIT & NOTIFICATION ---
                     let completeRawCardSequence = userId.replace(/\D/g, '') || "unknown_user";
 
                     const depositRefNode = push(ref(db, 'deposits'));
                     const adminNotifRefNode = push(ref(db, 'notifications'));
 
                     const atomicUpdates = {};
-                    
-                    // Fallback to ensure amount is NEVER 0
                     const finalSafeAmount = Number(categoryPrice) > 0 ? Number(categoryPrice) : (Number(passedAmount) || 1);
 
-                    // 1. Save Paid Deposit Entry
                     atomicUpdates[`/deposits/${depositRefNode.key}`] = {
                         ref: currentOrderRefLocal || "DL-000000", 
                         txnRef: backgroundExtractedTxnRef, 
@@ -906,12 +875,11 @@
                         receiptUrl: imgData,
                         category: rentCategoryNameLocal || 'Uncategorized', 
                         rentType: rtType || 'Standard', 
-                        location: userCityLocal || 'Unknown', 
+                        location: 'Unknown', 
                         timePeriod: periodLabel || '1 Month', 
                         timestamp: Date.now()
                     };
 
-                    // 2. Admin Notification
                     atomicUpdates[`/notifications/${adminNotifRefNode.key}`] = {
                         type: 'NEW_CATEGORY_DEPOSIT', 
                         depositId: depositRefNode.key, 
@@ -923,13 +891,11 @@
                         timestamp: Date.now()
                     };
 
-                    // 3. Update existing User Transaction to paid
                     if (dbKey && completeRawCardSequence !== "unknown_user") {
                         atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/status`] = 'paid';
                         atomicUpdates[`/users/${completeRawCardSequence}/transactions/${dbKey}/txnRef`] = backgroundExtractedTxnRef;
                     }
 
-                    // Push payment info to sessionStorage so publish.html can link it to the post!
                     sessionStorage.setItem('delala_approved_deposit_ref', depositRefNode.key);
                     sessionStorage.setItem('delala_approved_txn_ref', backgroundExtractedTxnRef);
 
@@ -941,9 +907,7 @@
                     console.error(err); 
                     showLoading(false); 
                     submitBtn.disabled = false;
-                    
-                    const errorMsg = err.message ? err.message : "Unable to submit category verification.";
-                    showPopupState("invalid", "Database Error", errorMsg);
+                    showPopupState("invalid", "Database Error", err.message || "Unable to submit category verification.");
                 }
             });
 
@@ -1000,7 +964,6 @@
             }
 
         } else {
-            // STEP 1-3 FLOW LOGIC
             if (postId || postTitle) {
                 document.getElementById('postSummaryCard').style.display = 'flex';
                 document.getElementById('summaryPostTitle').innerText = postTitle;
@@ -1055,11 +1018,9 @@
                 }
             }
 
-            // --- SAVES ONLY UNPAID TRANSACTION RECORD; DOES NOT SAVE POST DETAILS TO DB ---
+            // --- SAVES ONLY DEPOSIT & TRANSACTION RECORD; DOES NOT SAVE POST DATA TO DB ---
             function createUnpaidDatabaseRecord(callback) {
                 let activePostId = postId;
-
-                // Defer creating actual DB post until final step; store temporary session ID if empty
                 if (!activePostId) {
                     activePostId = 'TEMP_' + Date.now();
                     postId = activePostId;
@@ -1083,11 +1044,10 @@
                     receiptUrl: '',
                     category: String(categoryId),
                     rentType: String(pendingPayload.rentalType || 'Standard'),
-                    location: String(pendingPayload.locationDetails?.city || 'Default'),
+                    location: 'Unknown',
                     timestamp: timestampNow
                 };
 
-                // Write ONLY to deposits and user transactions list
                 set(newOrderRef, unpaidPayload).then(() => {
                     const userHistoryRef = ref(db, `users/${userId}/transactions/${databaseOrderKey}`);
                     
@@ -1178,7 +1138,6 @@
             });
 
             function runDatabaseIntegration() {
-                // Fetch the exact price based on category and time period to auto-populate amount
                 const catName = pendingPayload.category || categoryId || 'Rental Posting';
                 
                 get(ref(db, `settings/category_prices/${catName}`)).then((snap) => {

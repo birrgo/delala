@@ -34,16 +34,17 @@
         .header-controls-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             z-index: 2;
+            flex-shrink: 0;
         }
 
         .header-controls-left .location-action-btn,
         .header-controls-left .search-action-btn,
         .header-controls-right .location-action-btn,
         .header-controls-right .search-action-btn {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -61,8 +62,8 @@
         .header-controls-left .search-action-btn svg,
         .header-controls-right .location-action-btn svg,
         .header-controls-right .search-action-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
         }
 
         .header-title-container {
@@ -75,11 +76,13 @@
             justify-content: center;
             text-align: center;
             pointer-events: none;
-            width: 45%;
+            width: 48%; /* Controlled width to prevent button overlap */
+            box-sizing: border-box;
+            padding: 0 4px;
         }
 
         .header-title-main {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 800;
             color: #ffffff;
             line-height: 1.1;
@@ -90,7 +93,7 @@
         }
 
         .header-title-sub {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: #38BDF8;
             line-height: 1.1;
@@ -98,6 +101,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
             text-transform: capitalize;
         }
 
@@ -127,7 +131,9 @@
         .btn-follow-author.following { background-color: #e2e8f0 !important; color: #334155 !important; border-color: #cbd5e1 !important; }
         .social-action-btn.liked svg { fill: #ef4444; stroke: #ef4444; animation: likeHeart 0.3s ease-in-out; }
         @keyframes likeHeart { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        
         .active-filter-indicator { background: rgba(56, 189, 248, 0.3) !important; color: #38BDF8 !important; border-color: #38BDF8 !important; }
+        .active-network-indicator { background: rgba(16, 185, 129, 0.3) !important; color: #10B981 !important; border-color: #10B981 !important; }
 
         .comment-user-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
         .comment-user-initial { width: 22px; height: 22px; border-radius: 50%; background-color: #e2e8f0; color: #334155; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
@@ -198,6 +204,15 @@
             </div>
 
             <div class="header-controls-right">
+                <button class="location-action-btn" id="triggerNetworkFilterBtn" aria-label="Friends Only" title="View posts from people you follow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </button>
+                
                 <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
@@ -272,7 +287,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get, set, remove, runTransaction, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get, set, remove, runTransaction, startAt, endAt, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -307,14 +322,16 @@
         let lastLoadedKey = null;
         let isLoading = false;
         let hasMoreItems = true;
-        let isRefreshingView = false; // Prevents clearing old data until new data arrives
+        let isRefreshingView = false; 
         
         let localCachedBroadcasts = [];
         let currentUserCoordinates = null;
         let isGpsActive = false;
+        let isNetworkFilterActive = false;
 
         let activeCategoryFilter = 'all';
         let activeLocationFilter = null;
+        let activeSearchFilter = null;
         
         let currentActiveUserId = null;
         let currentUserPhoto = '';
@@ -322,6 +339,31 @@
         let userFollowingSet = new Set();
         
         const userProfileCache = {};
+
+        // Constants for Advanced Category Formatting
+        const EVENT_CATEGORY_MAP = {
+            "venues": { label: "Venues, Tents & Stages", subs: [{ id: "tent", name: "Event Tents & Canopies" }, { id: "hall", name: "Venue Spaces & Halls" }, { id: "stage", name: "Modular Stages & Podiums" }] },
+            "furniture": { label: "Furniture & Seating", subs: [{ id: "chair", name: "Chairs & Seat Covers" }, { id: "table", name: "Tables & Tablecloths" }, { id: "vip_lounge", name: "VIP Lounge Furniture" }] },
+            "av": { label: "Audio & Visual Systems", subs: [{ id: "sound", name: "Sound Systems & Microphones" }, { id: "led_screen", name: "LED Screens & Video Walls" }, { id: "projector", name: "Projectors & Projection Screens" }] },
+            "power_lighting": { label: "Lighting & Power", subs: [{ id: "lighting", name: "Lighting Systems & Effects" }, { id: "generator", name: "Backup Power Generators" }] },
+            "decor": { label: "Decor, Culture & Effects", subs: [{ id: "decor_backdrop", name: "Decoration & Backdrops" }, { id: "carpet", name: "Red Carpets & Walkway Runners" }, { id: "sparkler_smoke", name: "Sparkler & Smoke Machines" }, { id: "cultural", name: "Traditional Gear & Cultural Items" }] },
+            "catering": { label: "Catering & Dining", subs: [{ id: "catering_eq", name: "Catering Equipment & Warming Dishes" }, { id: "cutlery", name: "Cutlery, Glassware & Tableware" }] },
+            "vehicles_media": { label: "VIP Vehicles & Media", subs: [{ id: "car", name: "Wedding & VIP Luxury Cars" }, { id: "cameraman", name: "Photography & Videography" }] },
+            "personnel": { label: "Event Staff & Personnel", subs: [{ id: "musician", name: "Musicians & Bands" }, { id: "dj", name: "DJs & Sound Entertainers" }, { id: "ajabi", name: "Ajabi & Bridal Entourage" }, { id: "professional_staff", name: "Professional Staff (Cooking, Cleaning, Security)" }, { id: "other_personnel", name: "Other Event Personnel" }] }
+        };
+
+        const EVENT_SPEC_LABELS = {
+            musicianCount: "Performers", musicGenre: "Genre", djEquipment: "Equipment Status",
+            djHours: "Duration", ajabiCount: "Entourage Size", ajabiAttire: "Attire",
+            staffServiceType: "Service Type", staffCount: "Personnel", otherStaffRole: "Role",
+            otherStaffCount: "Personnel", chairCount: "Chair Amount", chairCover: "Covers Included",
+            chairType: "Chair Style", carModel: "Car Make/Model", carDriver: "Chauffeur",
+            stageArea: "Stage Area (m²)", stageHeight: "Stage Height", venueArea: "Venue Area (m²)",
+            guestCapacity: "Max Capacity", projectorModel: "Projector Model", projectorQuality: "Quality/Brightness",
+            decorTheme: "Theme/Style", decorInstallation: "Setup Service", genPower: "Power Capacity",
+            genOperator: "Operator", soundCapacity: "Coverage Capacity", micCount: "Microphones",
+            itemQuantity: "Available Quantity", itemUnit: "Unit"
+        };
 
         const DOM = {
             container: document.getElementById('broadcastsContainer'),
@@ -332,14 +374,12 @@
             popupIconNode: document.getElementById('popupIconNode'),
             closePopupBtn: document.getElementById('closePopupBtn'),
             gpsBtn: document.getElementById('triggerGpsFilterBtn'),
+            networkBtn: document.getElementById('triggerNetworkFilterBtn'),
             catLinkBtn: document.getElementById('categoryMenuLink'),
             locLinkBtn: document.getElementById('locationMenuLink'),
             headerTitleMain: document.getElementById('headerTitleMain'),
             headerTitleSub: document.getElementById('headerTitleSub')
         };
-
-        const BITS = [16, 8, 4, 2, 1];
-        const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
         function setupNavigationStateSaving() {
             document.querySelectorAll('a').forEach(link => {
@@ -403,20 +443,15 @@
             });
         }
 
-        // BACKGROUND REFRESH: Keeps old items visible until new ones load
         function refreshData() {
             isRefreshingView = true;
-            isLoading = false; // Reset lock just in case
-            
-            // Reset pagination to fetch top newest items, BUT leave DOM alone
+            isLoading = false; 
             lastLoadedTimestamp = null;
             lastLoadedKey = null;
             hasMoreItems = true;
             
             fetchItemsBatch().finally(() => {
-                // Fetch is completely done, hide the spinner
                 isRefreshingView = false;
-                
                 const ptrEl = document.getElementById('ptr-indicator');
                 const ptrIcon = document.querySelector('.ptr-icon');
                 if (ptrEl) ptrEl.style.height = '0px';
@@ -431,26 +466,14 @@
             });
         }
 
-        // --- UPDATED TIMEOUT ---
-        // This is now set to 3 minutes (180,000 ms) and includes the helpful popup
         setTimeout(() => {
             const footerEl = document.getElementById('footerShieldText');
             if (footerEl && footerEl.innerText === 'Loading user...') footerEl.innerText = 'Guest (Timeout)';
             
             if (DOM.triggerEl && DOM.triggerEl.innerText === 'Loading...' && localCachedBroadcasts.length === 0) {
-                // Show the inline error with the Retry button 
                 DOM.triggerEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Network took too long.</span> <button onclick="window.location.reload()" style="margin-left:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>`;
-                
-                // Trigger the popup to explain the delay after 3 minutes
-                if (typeof triggerSystemAlert === 'function') {
-                    triggerSystemAlert(
-                        "Search Complete", 
-                        "The deep search took a long time or no items were found on this network connection. You can tap Retry to try again.", 
-                        "⏳"
-                    );
-                }
             }
-        }, 180000); // 180000 ms = 3 minutes
+        }, 180000); 
 
         document.addEventListener('DOMContentLoaded', () => {
             try {
@@ -460,6 +483,11 @@
                 
                 let requestedCategory = urlParams.get('category');
                 let requestedLocation = urlParams.get('location');
+                let requestedSearch = urlParams.get('search');
+
+                if (requestedSearch) {
+                    activeSearchFilter = requestedSearch.trim().toLowerCase();
+                }
 
                 if (requestedCategory) SafeCache.set('rental_cat_filter', requestedCategory);
                 else requestedCategory = SafeCache.get('rental_cat_filter');
@@ -492,9 +520,38 @@
 
                 setupInfiniteScrollObserver();
                 setupGpsDetectionControl();
+                setupNetworkFilterControl();
                 setupAuthListener();
                 
-                checkCacheAndLoad();
+                // NEW LOGIC: Check if we just returned from gps.html or friend.html
+                const externalFilterData = SafeCache.get('hulum_external_filter');
+                if (externalFilterData) {
+                    try {
+                        const parsedData = JSON.parse(externalFilterData);
+                        if (parsedData.filter === 'gps') {
+                            isGpsActive = true;
+                            currentUserCoordinates = parsedData.coords;
+                            localCachedBroadcasts = parsedData.items;
+                            DOM.gpsBtn.classList.add('active-gps');
+                            renderFilteredListings(localCachedBroadcasts);
+                            if(localCachedBroadcasts.length === 0) renderEmptyState();
+                            if (DOM.triggerEl) DOM.triggerEl.innerText = localCachedBroadcasts.length > 0 ? "All nearby items loaded." : "No items found within 50km.";
+                        } 
+                        else if (parsedData.filter === 'friend') {
+                            isNetworkFilterActive = true;
+                            localCachedBroadcasts = parsedData.items;
+                            DOM.networkBtn.classList.add('active-network-indicator');
+                            renderFilteredListings(localCachedBroadcasts);
+                            if(localCachedBroadcasts.length === 0) renderEmptyState();
+                            if (DOM.triggerEl) DOM.triggerEl.innerText = localCachedBroadcasts.length > 0 ? "All network items loaded." : "No recent posts from your network.";
+                        }
+                    } catch(e) {
+                        checkCacheAndLoad();
+                    }
+                } else {
+                    checkCacheAndLoad();
+                }
+
             } catch (initError) {
                 if (DOM.triggerEl) DOM.triggerEl.innerText = "App encountered an error loading.";
             }
@@ -502,13 +559,16 @@
 
         function saveStateToCache() {
             try {
+                if (isNetworkFilterActive || activeSearchFilter || isGpsActive) return;
+
                 const cacheData = {
                     items: localCachedBroadcasts,
                     lastLoadedTimestamp: lastLoadedTimestamp,
                     lastLoadedKey: lastLoadedKey,
                     categoryFilter: activeCategoryFilter,
                     locationFilter: activeLocationFilter,
-                    hasMoreItems: hasMoreItems
+                    hasMoreItems: hasMoreItems,
+                    cacheTime: Date.now()
                 };
                 SafeCache.set(CACHE_KEY, JSON.stringify(cacheData));
             } catch(e) {}
@@ -516,9 +576,10 @@
 
         function checkCacheAndLoad() {
             const cachedString = SafeCache.get(CACHE_KEY);
+            const savedPos = SafeCache.get('rental_scroll_pos');
             let usedCache = false;
 
-            if (cachedString && !isGpsActive) {
+            if (cachedString && savedPos !== null && !isGpsActive && !isNetworkFilterActive && !activeSearchFilter) {
                 try {
                     const parsed = JSON.parse(cachedString);
                     if (parsed.categoryFilter === activeCategoryFilter && parsed.locationFilter === activeLocationFilter && parsed.items && parsed.items.length > 0) {
@@ -535,33 +596,34 @@
                 } catch(e) {}
             }
 
-            if (!usedCache) fetchItemsBatch();
-        }
-
-        function encodeFastGeohash(latitude, longitude, precision = 7) {
-            let isEven = true, lat = [-90.0, 90.0], lon = [-180.0, 180.0], bit = 0, ch = 0, geohash = "";
-            while (geohash.length < precision) {
-                let mid = isEven ? (lon[0] + lon[1]) / 2 : (lat[0] + lat[1]) / 2;
-                if (isEven) { if (longitude > mid) { ch |= BITS[bit]; lon[0] = mid; } else lon[1] = mid; }
-                else { if (latitude > mid) { ch |= BITS[bit]; lat[0] = mid; } else lat[1] = mid; }
-                isEven = !isEven;
-                if (bit < 4) bit++; else { geohash += BASE32[ch]; bit = 0; ch = 0; }
+            if (!usedCache) {
+                SafeCache.remove(CACHE_KEY);
+                localCachedBroadcasts = [];
+                if (DOM.container) DOM.container.innerHTML = '';
+                lastLoadedTimestamp = null;
+                lastLoadedKey = null;
+                hasMoreItems = true;
+                fetchItemsBatch();
             }
-            return geohash;
         }
-
-        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-            const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1);
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-        function deg2rad(deg) { return deg * (Math.PI / 180); }
 
         function updateHeaderTitleDisplay() {
             if (!DOM.headerTitleMain || !DOM.headerTitleSub) return;
-            const hasCat = activeCategoryFilter && activeCategoryFilter !== 'all';
+            
+            if (activeSearchFilter) {
+                DOM.headerTitleMain.innerText = `Search Results`;
+                DOM.headerTitleSub.innerText = `"${activeSearchFilter}"`;
+                DOM.headerTitleSub.style.display = 'block';
+                return;
+            }
+
+            let formattedCat = '';
+            if (activeCategoryFilter && activeCategoryFilter !== 'all') {
+                formattedCat = activeCategoryFilter === 'guesthouse' ? 'Guest House' : (activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1));
+            }
+            
+            const hasCat = formattedCat.length > 0;
             const hasLoc = activeLocationFilter && activeLocationFilter.length > 0;
-            const formattedCat = hasCat ? (activeCategoryFilter.charAt(0).toUpperCase() + activeCategoryFilter.slice(1)) : '';
             const formattedLoc = hasLoc ? (activeLocationFilter.charAt(0).toUpperCase() + activeLocationFilter.slice(1)) : '';
 
             if (hasCat && hasLoc) {
@@ -582,13 +644,14 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, (user) => {
-                const sessionPhone = SafeLocal.get('auth_session_phone');
-                if (user) {
-                    SafeLocal.remove('user_logged_out');
+                const isUserLoggedOut = SafeLocal.get('user_logged_out') === 'true';
+                
+                if (user && !isUserLoggedOut) {
                     fetchUserData(user.uid, user);
-                } else if (sessionPhone) {
-                    SafeLocal.remove('user_logged_out');
-                    fetchUserByPhone(sessionPhone);
+                } else if (!isUserLoggedOut) {
+                    const sessionPhone = SafeLocal.get('auth_session_phone');
+                    if (sessionPhone) fetchUserByPhone(sessionPhone);
+                    else renderGuestState();
                 } else {
                     renderGuestState();
                 }
@@ -722,8 +785,10 @@
         function getActiveLoggedInUserId() {
             if (currentActiveUserId) return currentActiveUserId;
             if (auth.currentUser) return auth.currentUser.uid;
-            const sessionPhone = SafeLocal.get('auth_session_phone');
-            if (sessionPhone) return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
+            if (SafeLocal.get('user_logged_out') !== 'true') {
+                const sessionPhone = SafeLocal.get('auth_session_phone');
+                if (sessionPhone) return sessionPhone.replace(/\D/g, '').replace(/^0+/, '');
+            }
             return null;
         }
 
@@ -736,9 +801,13 @@
 
         function itemMatchesFilters(item) {
             if (activeCategoryFilter !== 'all') {
-                const catStr = [item.rentalSubCategory, item.subCategory, item.category, item.rentalType, item.title].join(' ').toLowerCase();
-                if (!catStr.includes(activeCategoryFilter)) return false;
+                const rawCatStr = [item.rentalSubCategory, item.subCategory, item.category, item.rentalType, item.title].filter(Boolean).join(' ').toLowerCase();
+                const noSpaceCatStr = rawCatStr.replace(/\s/g, ''); 
+                const targetCat = activeCategoryFilter.toLowerCase().replace(/\s/g, '');
+                
+                if (!rawCatStr.includes(targetCat) && !noSpaceCatStr.includes(targetCat)) return false;
             }
+
             if (activeLocationFilter) {
                 const locStr = [
                     item.address, 
@@ -758,6 +827,18 @@
                 const searchStr = activeLocationFilter.replace(' region', '').trim();
                 if (!locStr.includes(searchStr)) return false;
             }
+
+            if (activeSearchFilter) {
+                const searchStringData = [
+                    item.title, item.category, item.rentalType, item.subCategory, item.rentalSubCategory,
+                    item.location, item.city, item.address, item.description, item.body,
+                    item.authorName, item.userName, item.displayName,
+                    JSON.stringify(item.locationDetails || {}), JSON.stringify(item.categorySpecificDetails || item.specifications || {})
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                if (!searchStringData.includes(activeSearchFilter)) return false;
+            }
+
             return true;
         }
 
@@ -765,7 +846,6 @@
             if (isLoading || !hasMoreItems) return;
             isLoading = true;
             
-            // Do not alter bottom loading text if refreshing top
             if (DOM.triggerEl && !isRefreshingView) DOM.triggerEl.innerText = `Loading...`;
 
             const nodePaths = ['posts', 'delala_new'];
@@ -789,12 +869,9 @@
                 const rawResults = await Promise.all(fetchPromises);
                 const fetchedListings = rawResults.flat();
 
-                // SUCCESSFUL FETCH: If refreshing, NOW it's safe to wipe old data
-                if (isRefreshingView) {
-                    if (DOM.container) DOM.container.innerHTML = '';
-                    localCachedBroadcasts = [];
-                    SafeCache.remove(CACHE_KEY);
-                    isRefreshingView = false; // Turn off immediately so pagination works on recursive calls
+                if (isRefreshingView || activeSearchFilter) {
+                    if (DOM.container && localCachedBroadcasts.length === 0) DOM.container.innerHTML = '';
+                    isRefreshingView = false; 
                 }
 
                 if (fetchedListings.length === 0) {
@@ -837,8 +914,6 @@
                 }
 
             } catch (error) { 
-                console.error("Error loading posts:", error); 
-                // ONLY show bottom error if not refreshing
                 if (DOM.triggerEl && !isRefreshingView) {
                     DOM.triggerEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Network error. Cannot load items.</span> <button onclick="window.location.reload()" style="margin-left:10px; padding:6px 12px; background:#0F2C59; color:white; border-radius:6px; border:none;">Retry</button>`;
                 }
@@ -911,11 +986,21 @@
 
         function renderEmptyState() {
             if (!DOM.container) return;
+            let filterContext = "No active rental listings available matching your current location or category filters.";
+            
+            if (activeSearchFilter) {
+                filterContext = `No matching items found for "${activeSearchFilter}".`;
+            } else if (isNetworkFilterActive) {
+                filterContext = "Your network hasn't posted any matching items recently.";
+            } else if (isGpsActive) {
+                filterContext = "No items found near your current location.";
+            }
+            
             DOM.container.innerHTML = `
                 <article class="featured-broadcast-card">
                     <div class="badge-meta-row"><span class="spotlight-pill">Rental Market</span></div>
                     <h2 class="broadcast-title" style="margin-top:8px;">No Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">No active rental listings available matching your current location or category filters.</p>
+                    <p class="broadcast-body-text" style="color: #64748B; font-size:13px; margin-top:4px;">${filterContext}</p>
                 </article>
             `;
         }
@@ -923,121 +1008,49 @@
         function setupInfiniteScrollObserver() {
             if (!DOM.triggerEl) return;
             const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && !isLoading && hasMoreItems && !isGpsActive && !isRefreshingView) {
+                if (entries[0].isIntersecting && !isLoading && hasMoreItems && !isGpsActive && !isNetworkFilterActive && !isRefreshingView) {
                     fetchItemsBatch();
                 }
             }, { rootMargin: '200px', threshold: 0.1 });
             observer.observe(DOM.triggerEl);
         }
 
-        function extractItemCoordinates(item) {
-            if (item.location && typeof item.location === 'object') {
-                const lat = parseFloat(item.location.latitude); const lng = parseFloat(item.location.longitude);
-                if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-            }
-            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
-            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
-            if (fallbackLat !== undefined && fallbackLng !== undefined) {
-                const pLat = parseFloat(fallbackLat); const pLng = parseFloat(fallbackLng);
-                if (!isNaN(pLat) && !isNaN(pLng)) return { lat: pLat, lng: pLng };
-            }
-            return null;
-        }
-
-        async function fetchNearbyItemsFromDB() {
-            if (!currentUserCoordinates) return;
-            isLoading = true;
-            const userGeohash = encodeFastGeohash(currentUserCoordinates.lat, currentUserCoordinates.lng, 3); 
-            const nodePaths = ['posts', 'delala_new'];
-            const matchingItems = [];
-            const seenIds = new Set(); 
-
-            try {
-                for (const nodePath of nodePaths) {
-                    const q = query(ref(db, nodePath), orderByChild('geohash'), startAt(userGeohash), endAt(userGeohash + '\uf8ff'));
-                    const snapshot = await get(q);
-                    
-                    let itemsFoundByGeohash = false;
-
-                    snapshot.forEach((childSnap) => {
-                        itemsFoundByGeohash = true;
-                        const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
-                        processDistanceCheck(rawItem, seenIds, matchingItems);
-                    });
-
-                    if (!itemsFoundByGeohash) {
-                        const fallbackQ = query(ref(db, nodePath), limitToLast(50));
-                        const fbSnapshot = await get(fallbackQ);
-                        fbSnapshot.forEach((childSnap) => {
-                            const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
-                            processDistanceCheck(rawItem, seenIds, matchingItems);
-                        });
-                    }
-                }
-                
-                if (DOM.container) DOM.container.innerHTML = '';
-                matchingItems.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
-                localCachedBroadcasts = matchingItems; 
-                
-                if(matchingItems.length > 0) renderFilteredListings(matchingItems);
-                else renderEmptyState();
-
-                if (DOM.triggerEl) DOM.triggerEl.innerText = matchingItems.length > 0 ? "All nearby items loaded." : "No items found within 50km.";
-            } catch (error) { 
-                if (DOM.container) DOM.container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Error locating nearby items.</div>';
-            } 
-            finally { isLoading = false; }
-        }
-
-        function processDistanceCheck(rawItem, seenIds, matchingItems) {
-            if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem) && itemMatchesFilters(rawItem)) {
-                const coords = extractItemCoordinates(rawItem);
-                if (coords) {
-                    const dist = calculateDistanceKm(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng);
-                    if (dist <= 50) { 
-                        rawItem._calculatedDistance = dist; 
-                        matchingItems.push(rawItem); 
-                        seenIds.add(rawItem.id); 
-                    }
-                }
-            }
-        }
-
-        window.triggerGpsAcquisition = function(event) {
-            if (event) event.stopPropagation();
-            if (!DOM.gpsBtn) return;
-            if (!navigator.geolocation) return triggerSystemAlert("GPS Unsupported", "Geolocation is not supported.", "⚠️");
-
-            DOM.gpsBtn.style.opacity = "0.5";
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    DOM.gpsBtn.style.opacity = "1";
-                    currentUserCoordinates = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    isGpsActive = true;
-                    DOM.gpsBtn.classList.add('active-gps');
-                    if (DOM.container) DOM.container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:600; color:#64748B;">Searching Database for items within 50km...</div>`;
-                    await fetchNearbyItemsFromDB();
-                },
-                (error) => {
-                    DOM.gpsBtn.style.opacity = "1";
-                    triggerSystemAlert("GPS Error", "Unable to retrieve position.", "");
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        };
-
+        // --- NEW SEPARATED CONTROLS LOGIC ---
         function setupGpsDetectionControl() {
             if (!DOM.gpsBtn) return;
             DOM.gpsBtn.addEventListener('click', () => {
                 if (isGpsActive) {
                     isGpsActive = false;
                     DOM.gpsBtn.classList.remove('active-gps');
+                    SafeCache.remove('hulum_external_filter');
                     
                     if (DOM.container) DOM.container.innerHTML = '';
-                    checkCacheAndLoad();
-                } else { window.triggerGpsAcquisition(); }
+                    checkCacheAndLoad(); // Loads normal posts
+                } else { 
+                    window.location.href = 'gps.html'; 
+                }
             });
         }
+
+        function setupNetworkFilterControl() {
+            if (!DOM.networkBtn) return;
+            DOM.networkBtn.addEventListener('click', () => {
+                const activeUserId = getActiveLoggedInUserId();
+                if (!activeUserId) return triggerSystemAlert("Sign In Required", "Please sign in to view posts from your network.", "🔐");
+                
+                if (isNetworkFilterActive) {
+                    isNetworkFilterActive = false;
+                    DOM.networkBtn.classList.remove('active-network-indicator');
+                    SafeCache.remove('hulum_external_filter');
+                    
+                    if (DOM.container) DOM.container.innerHTML = '';
+                    checkCacheAndLoad(); // Loads normal posts
+                } else {
+                    window.location.href = 'friend.html';
+                }
+            });
+        }
+        // ------------------------------------
 
         function restoreScrollPosition() {
             try {
@@ -1270,11 +1283,71 @@
         }
 
         function buildCategorySpecsHTML(item) {
-            const specsObj = item.categorySpecificDetails || item.specifications || item.specs || item.details;
-            if (specsObj && typeof specsObj === 'object' && Object.keys(specsObj).length > 0) {
-                let html = `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div class="info-terms-list">`;
-                Object.keys(specsObj).slice(0, 3).forEach(key => {
-                    const val = specsObj[key];
+            const specs = item.categorySpecificDetails || item.specifications || item.specs || item.details || {};
+            const isGuestHouse = item.rentalType === "Guest House";
+            const isEventEquipment = item.rentalType === "Event Equipment & Personnel";
+            const isMachinery = item.rentalType === "Machinery" || Boolean(specs.machinerySubCategory);
+            const isClothing = item.rentalType === "Clothing" || Boolean(specs.clothingCategory);
+
+            let html = `<div class="category-specs-container">`;
+
+            if (isMachinery && Object.keys(specs).length > 0) {
+                html += `<div class="category-specs-title" style="margin-bottom:8px;">Machinery Details</div><div class="info-terms-list" style="flex-direction: column; gap: 6px;">`;
+                if (specs.machinerySubCategory) html += `<div style="font-size:12px; color:#334155;">⚙️ Equipment: <strong>${specs.machinerySubCategory}</strong></div>`;
+                if (specs.machineryModel) html += `<div style="font-size:12px; color:#334155;">🔹 Model: <strong>${specs.machineryModel}</strong></div>`;
+                if (specs.powerSource) html += `<div style="font-size:12px; color:#334155;">⚡ Power Source: <strong>${specs.powerSource}</strong></div>`;
+                html += `</div></div>`;
+                return html;
+            }
+
+            if (isClothing && Object.keys(specs).length > 0) {
+                html += `<div class="category-specs-title" style="margin-bottom:8px;">Clothing Details</div><div class="info-terms-list" style="flex-direction: column; gap: 6px;">`;
+                if (specs.clothingCategory) html += `<div style="font-size:12px; color:#334155;">👕 Category: <strong>${specs.clothingCategory}</strong></div>`;
+                if (specs.targetGender) html += `<div style="font-size:12px; color:#334155;">👤 Target: <strong>${specs.targetGender}</strong></div>`;
+                if (specs.clothingSize) html += `<div style="font-size:12px; color:#334155;">📏 Size: <strong>${specs.clothingSize}</strong></div>`;
+                if (specs.quantity) html += `<div style="font-size:12px; color:#334155;">📦 Quantity: <strong>${specs.quantity}</strong></div>`;
+                html += `</div></div>`;
+                return html;
+            }
+
+            if (isGuestHouse && Object.keys(specs).length > 0) {
+                html += `<div class="category-specs-title" style="margin-bottom:8px;">Guest House Details</div><div class="info-terms-list" style="flex-direction: column; gap: 6px;">`;
+                if (specs.guestHouseName) html += `<div style="font-size:12px; color:#334155;">🏨 Name: <strong>${specs.guestHouseName}</strong></div>`;
+                if (specs.totalRooms) html += `<div style="font-size:12px; color:#334155;">🚪 Rooms: <strong>${specs.totalRooms} ${specs.roomTypes ? `(${specs.roomTypes})` : ''}</strong></div>`;
+                if (specs.guestOption) html += `<div style="font-size:12px; color:#334155;">🛏️ Option: <strong>${specs.guestOption}</strong></div>`;
+                if (specs.amenities && Array.isArray(specs.amenities) && specs.amenities.length > 0) {
+                    html += `<div style="font-size:12px; color:#334155;">✨ Amenities: <strong style="font-size:11px;">${specs.amenities.slice(0, 3).join(', ')}${specs.amenities.length > 3 ? '...' : ''}</strong></div>`;
+                }
+                html += `</div></div>`;
+                return html;
+            } 
+            
+            if (isEventEquipment && Object.keys(specs).length > 0) {
+                const mainCatInfo = EVENT_CATEGORY_MAP[item.mainCategory];
+                const mainCatLabel = mainCatInfo ? mainCatInfo.label : item.mainCategory;
+                const subCatObj = mainCatInfo ? mainCatInfo.subs.find(s => s.id === item.subCategory) : null;
+                const subCatLabel = subCatObj ? subCatObj.name : item.subCategory;
+
+                html += `<div class="category-specs-title">Equipment Details</div>`;
+                if (mainCatLabel) {
+                     html += `<div style="font-size:11px; font-weight:800; color:#0284c7; margin-bottom:6px;">${mainCatLabel} <br><span style="color:#64748b; font-size:10px;">↳ ${subCatLabel}</span></div>`;
+                }
+                html += `<div class="info-terms-list">`;
+                let count = 0;
+                for (const [key, val] of Object.entries(specs)) {
+                    if (val && EVENT_SPEC_LABELS[key] && count < 3) {
+                        html += `<div class="info-term-item"><span class="info-term-label">${EVENT_SPEC_LABELS[key]}</span><span class="info-term-value">${val}</span></div>`;
+                        count++;
+                    }
+                }
+                html += `</div></div>`;
+                return html;
+            }
+
+            if (Object.keys(specs).length > 0) {
+                html += `<div class="category-specs-title">Property Specifications</div><div class="info-terms-list">`;
+                Object.keys(specs).slice(0, 3).forEach(key => {
+                    const val = specs[key];
                     if (val !== undefined && val !== null && val !== '') {
                         let displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
                         let displayKey = key.replace(/([A-Z])/g, ' $1').toLowerCase();
@@ -1283,7 +1356,8 @@
                 });
                 return html + `</div></div>`;
             }
-            return `<div class="category-specs-container"><div class="category-specs-title">Property Specifications</div><div style="font-size:11px; color:#64748B; font-weight: 600;">Standard property specifications apply.</div></div>`;
+
+            return `<div class="category-specs-container"><div class="category-specs-title">Specifications</div><div style="font-size:11px; color:#64748B; font-weight: 600;">Standard specifications apply.</div></div>`;
         }
 
         function buildSingleNewsCardHTML(item) {
@@ -1299,6 +1373,8 @@
             const fullLocationStr = extractFullLocationString(item);
             const categorySpecsHTML = buildCategorySpecsHTML(item);
             
+            const specs = item.categorySpecificDetails || {};
+            
             const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
             
             const activeUserId = getActiveLoggedInUserId();
@@ -1313,8 +1389,8 @@
             let imageHTML = allImages.length > 0 ? `<div class="broadcast-image-frame"><div class="image-overlay-subcat-badge">${subCategoryText}</div><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>` : "";
 
             let distanceChipHTML = (isGpsActive && currentUserCoordinates && item._calculatedDistance !== undefined) 
-                ? `<span class="animated-distance-chip" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>${item._calculatedDistance < 1 ? `${Math.round(item._calculatedDistance * 1000)}m` : `${item._calculatedDistance.toFixed(1)}km`}</span></span>`
-                : `<span class="animated-distance-chip no-gps" onclick="triggerGpsAcquisition(event)"><span class="gps-dot"></span><span>GPS</span></span>`;
+                ? `<span class="animated-distance-chip"><span class="gps-dot"></span><span>${item._calculatedDistance < 1 ? `${Math.round(item._calculatedDistance * 1000)}m` : `${item._calculatedDistance.toFixed(1)}km`}</span></span>`
+                : `<span class="animated-distance-chip no-gps"><span class="gps-dot"></span><span>GPS</span></span>`;
             
             let commentsPreviewHTML = commentsList.slice(-2).map(c => {
                 const avatarHTML = c.userPhoto 
@@ -1378,6 +1454,5 @@
             `;
         }
     </script>
-
 </body>
 </html>

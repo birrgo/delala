@@ -112,11 +112,67 @@
             padding-bottom: 10px;
         }
 
+        /* Dark Card Container */
+        .dark-card-box {
+            background: linear-gradient(145deg, #252a34, #181b22);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .dark-card-box .form-label {
+            color: #94A3B8 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-size: 10px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .dark-card-box .form-input,
+        .dark-card-box .form-select {
+            background-color: #101217 !important;
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 12px;
+            height: 48px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 0 14px;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-card-box .form-select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2094A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 16px !important;
+        }
+
+        .dark-card-box .form-input::placeholder {
+            color: #64748B !important;
+        }
+
+        .dark-card-box .form-input:focus,
+        .dark-card-box .form-select:focus {
+            border-color: #38BDF8 !important;
+            background-color: #090a0d !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+        }
+
         .form-group { 
-            margin-bottom: 16px; 
+            margin-bottom: 12px; 
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
         }
 
         .form-label {
@@ -125,12 +181,11 @@
             font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 6px;
-            min-height: 15px;
         }
 
         .form-input, .form-select, .form-textarea {
             width: 100%;
-            height: 44px;
+            height: 46px;
             padding: 0 14px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
@@ -145,23 +200,9 @@
             -webkit-appearance: none;
         }
 
-        .form-select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-            padding-right: 36px;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--primary-dark);
-            background-color: #FFFFFF;
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
-        }
-
         .form-textarea { 
             resize: vertical; 
-            min-height: 100px; 
+            min-height: 90px; 
             height: auto; 
             padding: 12px 14px;
         }
@@ -174,18 +215,18 @@
 
         .form-row .form-group { 
             flex: 1; 
-            margin-bottom: 16px;
+            margin-bottom: 0;
         }
 
         .step-actions { display: flex; margin-top: 22px; }
 
         .btn-next {
             width: 100%;
-            height: 46px;
+            height: 48px;
             padding: 0 13px;
             border-radius: 12px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
             cursor: pointer;
             display: flex;
@@ -336,77 +377,6 @@
             cursor: pointer;
         }
 
-        #dynamicCategoryFieldsContainer {
-            margin-top: 14px;
-            margin-bottom: 14px;
-            animation: fadeIn3D 0.35s ease-out forwards;
-        }
-
-        @keyframes fadeIn3D {
-            from { opacity: 0; transform: translateY(8px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .nested-box {
-            background: linear-gradient(145deg, #2b303a, #1a1d24);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
-            padding: 18px;
-            margin-top: 12px;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.4),
-                inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            position: relative;
-        }
-
-        #dynamicCategoryFieldsContainer .form-label,
-        .nested-box .form-label {
-            color: #CBD5E1 !important;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 10px;
-            margin-bottom: 8px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input,
-        #dynamicCategoryFieldsContainer .form-select,
-        .nested-box .form-input,
-        .nested-box .form-select {
-            background-color: #1a1d24 !important;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 14px center !important;
-            background-size: 16px !important;
-            color: #F8FAFC !important;
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.6),
-                0 1px 0 rgba(255, 255, 255, 0.1) !important;
-            border-radius: 10px;
-            height: 44px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input::placeholder,
-        .nested-box .form-input::placeholder { color: #64748B !important; }
-
-        #dynamicCategoryFieldsContainer .form-input:focus,
-        #dynamicCategoryFieldsContainer .form-select:focus,
-        .nested-box .form-input:focus,
-        .nested-box .form-select:focus {
-            border-color: #38BDF8 !important;
-            background-color: #111318 !important;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
-        }
-
-        #dynamicCategoryFieldsContainer option,
-        .nested-box option,
-        select option {
-            background-color: #1e2228 !important;
-            color: #f1f5f9 !important;
-            padding: 12px;
-        }
-
         .custom-select-modal-overlay {
             position: fixed;
             top: 0;
@@ -476,8 +446,6 @@
             transition: all 0.2s ease;
         }
 
-        .custom-select-modal-close:hover { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; }
-
         .custom-select-options-list {
             overflow-y: auto;
             display: flex;
@@ -500,16 +468,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
-
-        .custom-select-option-item:hover { border-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; }
 
         .custom-select-option-item.selected {
             border-color: #0D9488;
             background: linear-gradient(145deg, #0f2d2a, #0b1f1d);
             color: #2DD4BF;
-            box-shadow: 0 0 12px rgba(13, 148, 136, 0.25);
         }
 
         .custom-select-radio-dot {
@@ -532,7 +496,6 @@
             background: #2DD4BF;
             border-radius: 50%;
             display: block;
-            box-shadow: 0 0 6px #2DD4BF;
         }
     </style>
 </head>
@@ -558,33 +521,78 @@
                 <div class="form-step-page" id="stepPage2">
                     <div class="step-title">Step 2: Clothing Details</div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Traditional / Cultural Clothing" required>
-                    </div>
-
-                    <div class="form-row">
+                    <!-- 1. MAIN CATEGORY BOX -->
+                    <div class="dark-card-box">
                         <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 500" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="Day">Per Day</option>
-                                <option value="1 Month">1 Month</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
+                            <label class="form-label" for="targetGender">CLOTHING CATEGORY / የልብስ ዓይነት *</label>
+                            <select class="form-select custom-styled-select" id="targetGender" required>
+                                <option value="Men | የወንዶች">1. Men's Clothing | የወንዶች አልባሳት</option>
+                                <option value="Women | የሴቶች">2. Women's Clothing | የሴቶች አልባሳት</option>
                             </select>
                         </div>
                     </div>
 
-                    <div id="dynamicCategoryFieldsContainer"></div>
+                    <!-- 2. PRICE & TIME PERIOD BOX -->
+                    <div class="dark-card-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="rentalPrice">PRICE (ETB) / ዋጋ *</label>
+                                <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 500" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="paymentPeriod">TIME PERIOD / የጊዜ ገደብ *</label>
+                                <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                    <option value="Per Hour | በሰዓት">Per Hour (በሰዓት)</option>
+                                    <option value="Per Day | በቀን" selected>Per Day (በቀን)</option>
+                                    <option value="1 Month | ለ1 ወር">1 Month (ለ1 ወር)</option>
+                                    <option value="3 Months | ለ3 ወር">3 Months (ለ3 ወር)</option>
+                                    <option value="6 Months | ለ6 ወር">6 Months (ለ6 ወር)</option>
+                                    <option value="1 Year | ለ1 ዓመት">1 Year (ለ1 ዓመት)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="form-group" style="margin-top: 16px;">
+                    <!-- 3. SUB-CATEGORIES, SIZE & QUANTITY BOX -->
+                    <div class="dark-card-box">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label class="form-label" for="clothingCategory">ATTIRE TYPE & WEDDING CHOICES / የዓይነት ዝርዝር *</label>
+                            <select class="form-select custom-styled-select" id="clothingCategory" required></select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="clothingSize">SIZE / መጠን *</label>
+                                <select class="form-select custom-styled-select" id="clothingSize" required>
+                                    <option value="Small (S) | ትንሽ">Small (S)</option>
+                                    <option value="Medium (M) | መካከለኛ" selected>Medium (M)</option>
+                                    <option value="Large (L) | ትልቅ">Large (L)</option>
+                                    <option value="Extra Large (XL) | በጣም ትልቅ">Extra Large (XL)</option>
+                                    <option value="XXL (2XL) | ድርብ በጣም ትልቅ">XXL (2XL)</option>
+                                    <option value="3XL | 3XL">3XL</option>
+                                    <option value="Set of 2 (Pair) | የ2 ልብስ ስብስብ">Set of 2 Items (የ2 ስብስብ)</option>
+                                    <option value="Set of 3+ (Group) | የ3+ ልብስ ስብስብ">Set of 3+ Items (የ3+ ስብስብ)</option>
+                                    <option value="Free Size | ፍሪ ሳይዝ">Free Size</option>
+                                </select>
+                            </div>
+
+                            <!-- NEW QUANTITY BOX -->
+                            <div class="form-group">
+                                <label class="form-label" for="clothingQuantity">QUANTITY / ብዛት *</label>
+                                <input type="number" class="form-input" id="clothingQuantity" value="1" min="1" placeholder="e.g. 1" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. TITLE & DESCRIPTION -->
+                    <div class="form-group" style="margin-top: 18px;">
+                        <label class="form-label" for="postTitle">Title / Headline *</label>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Traditional / Cultural Clothing" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 14px;">
                         <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or rules (optional)..."></textarea>
+                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, terms, or rules..."></textarea>
                     </div>
 
                     <div class="step-actions">
@@ -656,6 +664,27 @@
 
     <script>
         const PAGE_CATEGORY = "Clothing";
+
+        // Category options including Wedding / Bridal choices: Ye Mushira Libs & Ye Minze Libs
+        const clothingCategoriesMap = {
+            "Men | የወንዶች": [
+                "1. Ye Mushira Libs (Groom) | የሙሽራ ልብስ",
+                "2. Ye Minze Libs (Groomsmen) | የሚዜ ልብስ",
+                "Full Men Suit | ሙሉ የወንድ ሱፍ",
+                "Cultural Cloth | የባህል ልብስ",
+                "Casual Clothes | መደበኛ አልባሳት",
+                "Coat / Jacket | ኮት / ጃኬት",
+                "Random Clothes | የተለያዩ አልባሳት"
+            ],
+            "Women | የሴቶች": [
+                "1. Ye Mushira Libs (Bridal) | የሙሽራ ልብስ",
+                "2. Ye Minze Libs (Bridesmaid) | የሚዜ ልብስ",
+                "Dinner Cloth | የራት ልብስ",
+                "Cultural Cloth | የባህል ልብስ",
+                "Casual Clothes | መደበኛ አልባሳት",
+                "Random Clothes | የተለያዩ አልባሳት"
+            ]
+        };
 
         window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
@@ -732,11 +761,26 @@
             return { phone: userPhone, id: userId || userPhone };
         }
 
+        function updateClothingCategoryOptions(genderKey) {
+            const categorySelect = document.getElementById('clothingCategory');
+            if (!categorySelect) return;
+
+            const options = clothingCategoriesMap[genderKey] || clothingCategoriesMap['Men | የወንዶች'];
+            categorySelect.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        }
+
         function refreshFormState() {
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            renderCategorySpecificFields();
+            const genderSelect = document.getElementById('targetGender');
+            updateClothingCategoryOptions(genderSelect.value);
+
+            genderSelect.addEventListener('change', (e) => {
+                updateClothingCategoryOptions(e.target.value);
+                bindCustomSelectHandlers();
+            });
+
             restoreSavedDraft();
             bindCustomSelectHandlers();
         }
@@ -750,9 +794,10 @@
 
                 const title = document.getElementById('postTitle').value.trim();
                 const price = document.getElementById('rentalPrice').value;
+                const quantity = document.getElementById('clothingQuantity').value;
 
-                if (!title || !price) {
-                    showErrorModal("Please fill in both the listing title and rental price.");
+                if (!title || !price || !quantity || quantity < 1) {
+                    showErrorModal("Please fill in the listing title, price, and valid quantity.");
                     return;
                 }
 
@@ -783,8 +828,10 @@
             draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
             draftData.body = document.getElementById('postContent').value.trim();
             draftData.categorySpecificDetails = {
-                clothingType: document.getElementById('clothingType')?.value || "",
-                clothingSize: document.getElementById('clothingSize')?.value || ""
+                targetGender: document.getElementById('targetGender')?.value || "Men | የወንዶች",
+                clothingCategory: document.getElementById('clothingCategory')?.value || "",
+                clothingSize: document.getElementById('clothingSize')?.value || "",
+                quantity: Number(document.getElementById('clothingQuantity')?.value) || 1
             };
             draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
 
@@ -807,8 +854,19 @@
 
                 if (draft.categorySpecificDetails) {
                     const c = draft.categorySpecificDetails;
-                    if (c.clothingType && document.getElementById('clothingType')) document.getElementById('clothingType').value = c.clothingType;
-                    if (c.clothingSize && document.getElementById('clothingSize')) document.getElementById('clothingSize').value = c.clothingSize;
+                    if (c.targetGender && document.getElementById('targetGender')) {
+                        document.getElementById('targetGender').value = c.targetGender;
+                        updateClothingCategoryOptions(c.targetGender);
+                    }
+                    if (c.clothingCategory && document.getElementById('clothingCategory')) {
+                        document.getElementById('clothingCategory').value = c.clothingCategory;
+                    }
+                    if (c.clothingSize && document.getElementById('clothingSize')) {
+                        document.getElementById('clothingSize').value = c.clothingSize;
+                    }
+                    if (c.quantity && document.getElementById('clothingQuantity')) {
+                        document.getElementById('clothingQuantity').value = c.quantity;
+                    }
                 }
 
                 autoFillPlaceholders();
@@ -828,32 +886,6 @@
             if (!postContent.value) {
                 postContent.value = `[Clothing Overview]: Clean and high quality outfit for rent.\n\n[Terms]: Clean condition, return after event.`;
             }
-        }
-
-        function renderCategorySpecificFields() {
-            const container = document.getElementById('dynamicCategoryFieldsContainer');
-            if (!container) return;
-
-            container.innerHTML = `
-                <div class="nested-box">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="clothingType">Attire Type *</label>
-                            <input type="text" class="form-input" id="clothingType" placeholder="e.g. Cultural Dress, Suit, Wedding Dress" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="clothingSize">Size *</label>
-                            <select class="form-select custom-styled-select" id="clothingSize" required>
-                                <option value="Small (S)">Small (S)</option>
-                                <option value="Medium (M)">Medium (M)</option>
-                                <option value="Large (L)">Large (L)</option>
-                                <option value="Extra Large (XL)">Extra Large (XL)</option>
-                                <option value="Free Size">Free Size</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>`;
-            bindCustomSelectHandlers();
         }
 
         function initClock() {

@@ -113,57 +113,10 @@
         }
 
         .form-group { 
-            margin-bottom: 16px; 
+            margin-bottom: 0px; 
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            min-height: 15px;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            height: 44px;
-            padding: 0 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background: #F8FAFC;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-main);
-            outline: none;
-            box-sizing: border-box;
-            transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-
-        .form-select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-            padding-right: 36px;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--primary-dark);
-            background-color: #FFFFFF;
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
-        }
-
-        .form-textarea { 
-            resize: vertical; 
-            min-height: 100px; 
-            height: auto; 
-            padding: 12px 14px;
         }
 
         .form-row { 
@@ -174,13 +127,12 @@
 
         .form-row .form-group { 
             flex: 1; 
-            margin-bottom: 16px;
         }
 
-        .step-actions { display: flex; gap: 12px; margin-top: 22px; }
+        .step-actions { display: flex; margin-top: 22px; }
 
         .btn-next {
-            flex: 1;
+            width: 100%;
             height: 46px;
             padding: 0 13px;
             border-radius: 12px;
@@ -192,9 +144,133 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            background: var(--primary-dark); 
-            color: #FFFFFF; 
+            background: var(--primary-dark);
+            color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        /* --- Dark 3D Container Cards --- */
+        .dark-3d-card {
+            background: linear-gradient(145deg, #242933, #15181e);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 
+                0 12px 28px rgba(0, 0, 0, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.18);
+        }
+
+        .dark-3d-card .form-label {
+            color: #94A3B8 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-size: 10px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .dark-3d-card .form-input,
+        .dark-3d-card .form-select,
+        .dark-3d-card .form-textarea {
+            width: 100%;
+            background-color: #0d0f13 !important;
+            color: #F8FAFC !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            border-radius: 12px;
+            height: 46px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .dark-3d-card .form-textarea {
+            height: auto;
+            min-height: 90px;
+            padding: 12px 14px;
+            resize: vertical;
+        }
+
+        .dark-3d-card .form-select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2094A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 16px !important;
+            padding-right: 36px;
+        }
+
+        .dark-3d-card .form-input::placeholder,
+        .dark-3d-card .form-textarea::placeholder {
+            color: #475569 !important;
+        }
+
+        .dark-3d-card .form-input:focus,
+        .dark-3d-card .form-select:focus,
+        .dark-3d-card .form-textarea:focus {
+            border-color: #38BDF8 !important;
+            background-color: #07080a !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+        }
+
+        /* --- White 3D Container Cards (for Title & Description) --- */
+        .white-3d-card {
+            background: linear-gradient(145deg, #FFFFFF, #F1F5F9);
+            border: 1px solid #CBD5E1;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.05),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9);
+        }
+
+        .white-3d-card .form-label {
+            color: #475569 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-size: 10px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .white-3d-card .form-input,
+        .white-3d-card .form-textarea {
+            width: 100%;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 12px;
+            height: 46px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        .white-3d-card .form-textarea {
+            height: auto;
+            min-height: 90px;
+            padding: 12px 14px;
+            resize: vertical;
+        }
+
+        .white-3d-card .form-input::placeholder,
+        .white-3d-card .form-textarea::placeholder {
+            color: #94A3B8 !important;
+        }
+
+        .white-3d-card .form-input:focus,
+        .white-3d-card .form-textarea:focus {
+            border-color: #2563EB !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
         }
 
         .bottom-nav {
@@ -336,77 +412,7 @@
             cursor: pointer;
         }
 
-        #dynamicCategoryFieldsContainer {
-            margin-top: 14px;
-            margin-bottom: 14px;
-            animation: fadeIn3D 0.35s ease-out forwards;
-        }
-
-        @keyframes fadeIn3D {
-            from { opacity: 0; transform: translateY(8px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .nested-box {
-            background: linear-gradient(145deg, #2b303a, #1a1d24);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
-            padding: 18px;
-            margin-top: 12px;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.4),
-                inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            position: relative;
-        }
-
-        #dynamicCategoryFieldsContainer .form-label,
-        .nested-box .form-label {
-            color: #CBD5E1 !important;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 10px;
-            margin-bottom: 8px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input,
-        #dynamicCategoryFieldsContainer .form-select,
-        .nested-box .form-input,
-        .nested-box .form-select {
-            background-color: #1a1d24 !important;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 14px center !important;
-            background-size: 16px !important;
-            color: #F8FAFC !important;
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.6),
-                0 1px 0 rgba(255, 255, 255, 0.1) !important;
-            border-radius: 10px;
-            height: 44px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input::placeholder,
-        .nested-box .form-input::placeholder { color: #64748B !important; }
-
-        #dynamicCategoryFieldsContainer .form-input:focus,
-        #dynamicCategoryFieldsContainer .form-select:focus,
-        .nested-box .form-input:focus,
-        .nested-box .form-select:focus {
-            border-color: #38BDF8 !important;
-            background-color: #111318 !important;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
-        }
-
-        #dynamicCategoryFieldsContainer option,
-        .nested-box option,
-        select option {
-            background-color: #1e2228 !important;
-            color: #f1f5f9 !important;
-            padding: 12px;
-        }
-
+        /* Custom Select Dialog */
         .custom-select-modal-overlay {
             position: fixed;
             top: 0;
@@ -453,7 +459,7 @@
         }
 
         .custom-select-modal-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             color: #E2E8F0;
             letter-spacing: 0.5px;
@@ -473,10 +479,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            transition: all 0.2s ease;
         }
-
-        .custom-select-modal-close:hover { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; }
 
         .custom-select-options-list {
             overflow-y: auto;
@@ -500,10 +503,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
-
-        .custom-select-option-item:hover { border-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; }
 
         .custom-select-option-item.selected {
             border-color: #0D9488;
@@ -513,26 +513,26 @@
         }
 
         .custom-select-radio-dot {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid #475569;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
             background: #0F172A;
+            flex-shrink: 0;
+            margin-left: 10px;
         }
 
-        .custom-select-option-item.selected .custom-select-radio-dot { border-color: #2DD4BF; background: #0F172A; }
+        .custom-select-option-item.selected .custom-select-radio-dot { border-color: #2DD4BF; }
         .custom-select-option-item.selected .custom-select-radio-dot::after {
             content: '';
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #2DD4BF;
             border-radius: 50%;
             display: block;
-            box-shadow: 0 0 6px #2DD4BF;
         }
     </style>
 </head>
@@ -558,33 +558,67 @@
                 <div class="form-step-page" id="stepPage2">
                     <div class="step-title">Step 2: Edit Machinery & Equipment Details</div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Heavy Machinery & Tools" required>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 5000" required>
+                    <div class="dark-3d-card">
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label class="form-label" for="machineryCategorySelect">Machinery Category / የካቴጎሪ ዓይነት *</label>
+                            <select class="form-select custom-styled-select" id="machineryCategorySelect" required></select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="Day">Per Day</option>
-                                <option value="1 Month">1 Month</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
-                            </select>
+                            <label class="form-label" for="machinerySubCategorySelect">Sub-Category / ንዑስ ካቴጎሪ *</label>
+                            <select class="form-select custom-styled-select" id="machinerySubCategorySelect" required></select>
                         </div>
                     </div>
 
-                    <div id="dynamicCategoryFieldsContainer"></div>
+                    <div class="dark-3d-card">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                                <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 5000" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="paymentPeriod">Time Period *</label>
+                                <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                    <option value="Per Hour (በሰዓት)">Per Hour (በሰዓት)</option>
+                                    <option value="Per Day (በቀን)">Per Day (በቀን)</option>
+                                    <option value="Per Month (በወር)">Per Month (በወር)</option>
+                                    <option value="3 Months">3 Months</option>
+                                    <option value="6 Months">6 Months</option>
+                                    <option value="1 Year">1 Year</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="form-group" style="margin-top: 16px;">
-                        <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or rules (optional)..."></textarea>
+                    <div class="dark-3d-card">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="machineryModel">Model /  ሞዴል *</label>
+                                <input type="text" class="form-input" id="machineryModel" placeholder="e.g. CAT 320 / FG Wilson" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="powerSource">Power Source *</label>
+                                <select class="form-select custom-styled-select" id="powerSource" required>
+                                    <option value="Diesel / Petrol">Diesel / Petrol</option>
+                                    <option value="Electric">Electric</option>
+                                    <option value="Hydraulic / Manual">Hydraulic / Manual</option>
+                                    <option value="Pneumatic">Pneumatic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="white-3d-card">
+                        <div class="form-group">
+                            <label class="form-label" for="postTitle">Title / Headline *</label>
+                            <input type="text" class="form-input" id="postTitle" placeholder="e.g. Heavy Duty Caterpillar Excavator for Rent" required>
+                        </div>
+                    </div>
+
+                    <div class="white-3d-card">
+                        <div class="form-group">
+                            <label class="form-label" for="postContent">Description & Details (Optional)</label>
+                            <textarea class="form-textarea" id="postContent" placeholder="Describe condition, capacity, location, or operator inclusion..."></textarea>
+                        </div>
                     </div>
 
                     <div class="step-actions">
@@ -656,10 +690,97 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const urlPostId = urlParams.get('postId');
+        const urlPostId = urlParams.get('postId') || '';
         const urlDbSource = urlParams.get('db') || 'primary';
 
         const PAGE_CATEGORY = "Machinery";
+
+        // Complete Machinery Categories with Detailed Specific Basic Machines under Subcategories
+        const machineryCategories = [
+            {
+                id: "cat_1",
+                title: "1. Earthmoving & Heavy Construction Machinery / የኮንስትራክሽን እና የመሬት ቁፋሮ ማሽኖች",
+                subcategories: [
+                    "Excavator (ኤክስካቫተር)",
+                    "Bulldozer (ቡልዶዘር)",
+                    "Wheel Loader (ዊል ላደር)",
+                    "Motor Grader (ሞተር ግሬደር)",
+                    "Backhoe Loader (ባክሆ ላደር)",
+                    "Concrete Mixer (ኮንክሪት ማቀላቀያ)",
+                    "Concrete Pump (ኮንክሪት ፓምፕ)",
+                    "Concrete Vibrator (ኮንክሪት ቫይብሬተር)",
+                    "Road Roller / Compactor (ሮድ ሮለር / ኮምፓክተር)",
+                    "Asphalt Paver (አስፋልት ፓቨር)"
+                ]
+            },
+            {
+                id: "cat_2",
+                title: "2. Lifting, Haulage & Material Handling / የዕቃ ማንሻ፣ የትራንስፖርት እና የከባድ ጭነት ማሽኖች",
+                subcategories: [
+                    "Forklift (ፎርክሊፍት)",
+                    "Telehandler (ቴሌሃንድለር)",
+                    "Mobile Crane (ሞባይል ክሬን)",
+                    "Tower Crane (ታወር ክሬን)",
+                    "Dump Truck (ዳምፕ ትራክ)",
+                    "Flatbed Transport Truck (ፍላትቤድ መኪና)"
+                ]
+            },
+            {
+                id: "cat_3",
+                title: "3. Light & Power Utility Equipment / የብርሃን እና የውኃ ኃይል መሣሪያዎች",
+                subcategories: [
+                    "Diesel Generator (ጀነሬተር - ዲስል)",
+                    "Gasoline Generator (ጀነሬተር - ቤንዚን)",
+                    "Water Pump (የውኃ ፓምፕ)",
+                    "Light Tower (ላይት ታወር)",
+                    "Air Compressor (ኤር ኮምፕሬሰር)"
+                ]
+            },
+            {
+                id: "cat_4",
+                title: "4. Mechanical & Metalworking Machinery / የሜካኒካል እና የብረታ ብረት ማሽኖች",
+                subcategories: [
+                    "Lathe Machine (ለርዝ ማሽን)",
+                    "Arc / TIG / MIG Welding Machine (ዌልዲንግ ማሽን)",
+                    "Plasma Cutter (ፕላዝማ ከተር)",
+                    "Metal Shearing Machine (ብረት መቁረጫ)",
+                    "Metal Bending Machine (ብረት ማጠፊያ)"
+                ]
+            },
+            {
+                id: "cat_5",
+                title: "5. Furniture & Woodworking Machinery / የቤት ዕቃዎች እና የእንጨት ሥራ ማሽኖች",
+                subcategories: [
+                    "Panel Saw / Sliding Table Saw (ፓነል ሶው)",
+                    "Edge Bander (ኤጅ ባንደር)",
+                    "Wood Planer / Jointer (ውድ ፕላነር)",
+                    "Wood Router & Drill Press (እንጨት ድሪል እና ሮተር)",
+                    "Pneumatic Nail Gun (ኔል ጋን)"
+                ]
+            },
+            {
+                id: "cat_6",
+                title: "6. Garment & Textile Machinery / የጨርቃጨርቅ እና አልባሳት ማሽኖች",
+                subcategories: [
+                    "Industrial Sewing Machine (የልብስ ስፌት ማሽን - ነጠላ)",
+                    "Overlock Machine (ኦቨርሎክ ማሽን)",
+                    "Interlock Machine (ኢንተርሎክ ማሽን)",
+                    "Fabric Cutting Machine (ጨርቅ መቁረጫ)",
+                    "Steam Iron & Press (እስቲም እስታይለር / ብረት)"
+                ]
+            },
+            {
+                id: "cat_7",
+                title: "7. Agricultural & Farming Machinery / የግብርና እና የእርሻ ማሽኖች",
+                subcategories: [
+                    "Farm Tractor (ትራክተር)",
+                    "Combine Harvester (ኮምባይን ሃርቨስተር)",
+                    "Thresher Machine (እህል አውድማ ማሽን)",
+                    "Water Pump for Irrigation (የመስኖ ውኃ ፓምፕ)",
+                    "Disc Plough & Harrow (እርሻ ማረሻ መሣሪያ)"
+                ]
+            }
+        ];
 
         window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
@@ -736,11 +857,36 @@
             return { phone: userPhone, id: userId || userPhone };
         }
 
+        function populateCategorySelectors() {
+            const catSelect = document.getElementById('machineryCategorySelect');
+            const subCatSelect = document.getElementById('machinerySubCategorySelect');
+            if (!catSelect || !subCatSelect) return;
+
+            catSelect.innerHTML = machineryCategories.map(cat => 
+                `<option value="${cat.id}">${cat.title}</option>`
+            ).join('');
+
+            function updateSubCategories(selectedCatId) {
+                const found = machineryCategories.find(c => c.id === selectedCatId) || machineryCategories[0];
+                subCatSelect.innerHTML = found.subcategories.map(sub => 
+                    `<option value="${sub}">${sub}</option>`
+                ).join('');
+            }
+
+            catSelect.addEventListener('change', (e) => {
+                updateSubCategories(e.target.value);
+                bindCustomSelectHandlers();
+            });
+
+            updateSubCategories(machineryCategories[0].id);
+            bindCustomSelectHandlers();
+        }
+
         function refreshFormState() {
             const currentUser = getAuthenticatedUser();
             if (!currentUser) return;
 
-            renderCategorySpecificFields();
+            populateCategorySelectors();
             restoreSavedDraft();
             bindCustomSelectHandlers();
         }
@@ -761,7 +907,7 @@
                 }
 
                 saveDraftToSession();
-                window.location.href = `editrentalpost1.html?postId=${urlPostId}&db=${urlDbSource}`;
+                window.location.href = `editrentalpost1.html?postId=${encodeURIComponent(urlPostId)}&db=${encodeURIComponent(urlDbSource)}`;
             });
         });
 
@@ -779,6 +925,9 @@
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
+            const catSelect = document.getElementById('machineryCategorySelect');
+            const selectedCatText = catSelect?.options[catSelect.selectedIndex]?.text || "";
+
             draftData.rentalType = PAGE_CATEGORY;
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
@@ -786,13 +935,17 @@
             draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
             draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
             draftData.body = document.getElementById('postContent').value.trim();
-            
+
             const catDetails = {
-                machineryType: document.getElementById('machineryType')?.value || "",
+                machineryCategory: selectedCatText,
+                machineryCategoryId: catSelect?.value || "",
+                machinerySubCategory: document.getElementById('machinerySubCategorySelect')?.value || "",
+                machineryModel: document.getElementById('machineryModel')?.value || "",
                 powerSource: document.getElementById('powerSource')?.value || ""
             };
+
             draftData.categorySpecificDetails = catDetails;
-            Object.assign(draftData, catDetails); // Merge flatly for compatibility
+            Object.assign(draftData, catDetails);
 
             draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
 
@@ -809,19 +962,35 @@
             try {
                 let draft = JSON.parse(rawDraft);
                 document.getElementById('postTitle').value = draft.title || '';
-                
-                if (document.getElementById('rentalPrice')) {
-                    document.getElementById('rentalPrice').value = draft.price || '';
-                }
+                document.getElementById('rentalPrice').value = draft.price || '';
                 if (draft.paymentPeriod && document.getElementById('paymentPeriod')) {
                     document.getElementById('paymentPeriod').value = draft.paymentPeriod;
                 }
-                
                 document.getElementById('postContent').value = draft.body || draft.description || '';
 
                 const c = draft.categorySpecificDetails || draft;
-                if (c.machineryType && document.getElementById('machineryType')) {
-                    document.getElementById('machineryType').value = c.machineryType;
+                if (c.machineryCategoryId || c.machineryCategory) {
+                    const catSelect = document.getElementById('machineryCategorySelect');
+                    if (catSelect) {
+                        if (c.machineryCategoryId) {
+                            catSelect.value = c.machineryCategoryId;
+                        } else if (c.machineryCategory) {
+                            for (let i = 0; i < catSelect.options.length; i++) {
+                                if (catSelect.options[i].text === c.machineryCategory) {
+                                    catSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                        catSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                if (c.machinerySubCategory && document.getElementById('machinerySubCategorySelect')) {
+                    document.getElementById('machinerySubCategorySelect').value = c.machinerySubCategory;
+                }
+                if (c.machineryModel && document.getElementById('machineryModel')) {
+                    document.getElementById('machineryModel').value = c.machineryModel;
                 }
                 if (c.powerSource && document.getElementById('powerSource')) {
                     document.getElementById('powerSource').value = c.powerSource;
@@ -838,36 +1007,12 @@
             const postContent = document.getElementById('postContent');
 
             if (!postTitle.value) {
-                postTitle.value = 'Heavy Machinery & Tools';
+                postTitle.value = 'Heavy Machinery & Tools for Rent';
             }
 
             if (!postContent.value) {
                 postContent.value = `[Machinery Overview]: Well-serviced equipment ready for project site.\n\n[Terms]: Operator options and rental terms available upon request.`;
             }
-        }
-
-        function renderCategorySpecificFields() {
-            const container = document.getElementById('dynamicCategoryFieldsContainer');
-            if (!container) return;
-
-            container.innerHTML = `
-                <div class="nested-box">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="machineryType">Machinery / Tool Type *</label>
-                            <input type="text" class="form-input" id="machineryType" placeholder="e.g. Excavator, Generator, Concrete Mixer" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="powerSource">Power Source *</label>
-                            <select class="form-select custom-styled-select" id="powerSource" required>
-                                <option value="Diesel / Petrol">Diesel / Petrol</option>
-                                <option value="Electric">Electric</option>
-                                <option value="Manual / Hydraulic">Manual / Hydraulic</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>`;
-            bindCustomSelectHandlers();
         }
 
         function initClock() {

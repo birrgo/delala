@@ -12,50 +12,62 @@
     <style>
         :root { --bg-body: #F1F5F9; --card-bg: #FFFFFF; --text-dark: #0F172A; --text-muted: #64748B; --border-light: #E2E8F0; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); margin: 0; padding: 0; color: var(--text-dark); -webkit-font-smoothing: antialiased; }
-        .nav-header { padding: 6px 16px; height: 46px; min-height: 46px; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-        .back-btn { background: none; border: none; color: var(--text-dark); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
-        .back-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .header-title-text { font-size: 16px; font-weight: 800; margin: 0; color: var(--text-dark); flex: 1; text-align: center; }
-        .header-spacer { width: 30px; }
         
-        .public-profile-header { background: #FFFFFF; padding: 20px 16px; border-bottom: 1px solid var(--border-light); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
-        .avatar-wrapper { position: relative; margin-bottom: 12px; }
-        .profile-avatar-img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.1); background: #CBD5E1; }
+        .nav-header { padding: 6px 16px; height: 46px; min-height: 46px; display: flex; align-items: center; justify-content: center; background: #FFFFFF; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .header-title-text { font-size: 16px; font-weight: 800; margin: 0; color: var(--text-dark); text-align: center; }
         
-        .profile-display-name { font-size: 20px; font-weight: 800; margin: 0 0 2px 0; color: var(--text-dark); }
-        .profile-username { font-size: 13px; color: var(--text-muted); font-weight: 600; margin: 0 0 16px 0; }
+        .public-profile-header { background: #FFFFFF; padding: 16px; border-bottom: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 14px; }
+        .profile-top-row { display: flex; align-items: center; gap: 16px; }
+        .profile-avatar-img { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2px solid #E2E8F0; background: #CBD5E1; }
+        .profile-info { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+        .profile-display-name { font-size: 18px; font-weight: 800; margin: 0 0 4px 0; color: var(--text-dark); line-height: 1.2; }
+        .profile-username { font-size: 13px; color: var(--text-muted); font-weight: 600; margin: 0; }
         
-        .action-btn-group { display: flex; gap: 10px; width: 100%; max-width: 300px; margin-bottom: 20px; }
-        .btn-primary-action { flex: 1; padding: 12px; border-radius: 12px; border: none; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-follow { background: #0F172A; color: #FFFFFF; box-shadow: 0 4px 12px rgba(15,23,42,0.2); }
-        .btn-follow:active { transform: scale(0.96); box-shadow: 0 2px 6px rgba(15,23,42,0.2); }
+        .action-btn-group { display: flex; gap: 10px; width: 100%; }
+        .btn-primary-action { flex: 1; padding: 10px; border-radius: 12px; border: none; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-follow { background: #0F172A; color: #FFFFFF; }
+        .btn-follow:active { transform: scale(0.96); }
         .btn-unfollow { background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; }
-        .btn-unfollow:active { background: #E2E8F0; transform: scale(0.96); }
         .btn-message { background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; flex: 0 0 auto; width: 44px; padding: 0; }
-        .btn-message:active { background: #E2E8F0; transform: scale(0.96); }
         .btn-message svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 
-        .stats-metrics-row { display: flex; align-items: center; justify-content: center; gap: 24px; width: 100%; padding-top: 16px; border-top: 1px solid #F1F5F9; }
-        .metric-block { display: flex; flex-direction: column; align-items: center; cursor: pointer;}
-        .metric-block:active { opacity: 0.6; }
-        .metric-num { font-size: 18px; font-weight: 900; color: #0F172A; }
+        .stats-metrics-row { display: flex; align-items: center; justify-content: space-around; width: 100%; padding-top: 14px; border-top: 1px solid #F1F5F9; }
+        .metric-block { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .metric-num { font-size: 16px; font-weight: 900; color: #0F172A; }
         .metric-label { font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
 
-        .category-tabs-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid var(--border-light); position: sticky; top: 46px; z-index: 99; }
-        .category-pill-btn { padding: 8px 16px; border-radius: 20px; background: transparent; border: none; color: #64748B; font-size: 13px; font-weight: 800; }
+        .category-tabs-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid var(--border-light); }
+        .category-pill-btn { padding: 6px 16px; border-radius: 20px; background: transparent; border: none; color: #64748B; font-size: 13px; font-weight: 800; }
         .category-pill-btn.active { color: #0F172A; position: relative; }
         .category-pill-btn.active::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: #2563EB; border-radius: 3px; }
 
         .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-light); min-height: 200px; }
-        .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: var(--text-dark); overflow: hidden; cursor: pointer; }
+        .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: #E2E8F0; overflow: hidden; cursor: pointer; }
         .post-grid-item img { width: 100%; height: 100%; object-fit: cover; }
         .post-views-count { position: absolute; bottom: 6px; left: 6px; display: flex; align-items: center; gap: 4px; color: #FFF; font-size: 11px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 2; }
         .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
         .empty-grid-msg { grid-column: span 3; text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; font-weight: 600; background: #F8FAFC; }
 
+        .skeleton-item { aspect-ratio: 3/4; background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; }
+        @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Blurred Skeleton Bottom Loader */
+        .bottom-skeleton-container {
+            grid-column: span 3;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            padding-top: 2px;
+            filter: blur(2.5px);
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .bottom-skeleton-container.hidden { display: none; }
+
         .loader-spinner { width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
+        
         .toast-notification { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #0F172A; color: #FFF; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 200000; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -67,6 +79,8 @@
         .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0F172A; }
         .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #64748B; font-weight: 700; }
         .modal-body { padding: 16px 20px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+        #gridSentinel { grid-column: span 3; height: 20px; width: 100%; }
     </style>
 </head>
 <body>
@@ -74,29 +88,26 @@
 
     <div class="app-view">
         <header class="nav-header">
-            <button class="back-btn" onclick="window.history.back()">
-                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
             <h1 class="header-title-text" id="headerTitle">Profile</h1>
-            <div class="header-spacer"></div>
         </header>
 
         <div class="app-content" style="padding: 0 0 20px 0;">
             
             <section class="public-profile-header" id="profileHeaderSection" style="display: none;">
-                <div class="avatar-wrapper">
+                <div class="profile-top-row">
                     <img src="s.png" alt="Profile" class="profile-avatar-img" id="targetAvatarImg">
+                    <div class="profile-info">
+                        <h1 class="profile-display-name" id="targetDisplayName">Loading...</h1>
+                        <p class="profile-username" id="targetHandle">@loading</p>
+                    </div>
                 </div>
-                
-                <h1 class="profile-display-name" id="targetDisplayName">Loading...</h1>
-                <p class="profile-username" id="targetHandle">@loading</p>
 
                 <div class="action-btn-group">
                     <button type="button" class="btn-primary-action btn-follow" id="followActionBtn" onclick="executeFollowToggle()">
                         <svg id="followIcon" viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span id="followText">Follow</span>
                     </button>
-                    <button type="button" class="btn-primary-action btn-message" onclick="window.location.href='chat.html'">
+                    <button type="button" class="btn-primary-action btn-message" id="chatMessageBtn">
                         <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     </button>
                 </div>
@@ -119,18 +130,27 @@
 
             <div id="initialLoader" style="padding: 60px 20px; text-align: center;">
                 <div class="loader-spinner" style="display: block;"></div>
-                <p style="color: var(--text-muted); font-size: 14px; font-weight: 600; margin-top: 16px;">Loading profile...</p>
             </div>
 
             <nav class="category-tabs-bar" id="profileTabs" style="display: none;">
                 <button class="category-pill-btn active">Listings</button>
             </nav>
 
-            <main class="posts-grid" id="targetPostsGrid"></main>
+            <main class="posts-grid" id="targetPostsGrid">
+                <div class="skeleton-item" id="skel1"></div>
+                <div class="skeleton-item" id="skel2"></div>
+                <div class="skeleton-item" id="skel3"></div>
+            </main>
+
+            <!-- Blur Skeleton Loader visual below grid -->
+            <div class="bottom-skeleton-container hidden" id="bottomBlurLoader">
+                <div class="skeleton-item"></div>
+                <div class="skeleton-item"></div>
+                <div class="skeleton-item"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Network Modal -->
     <div class="modal-overlay" id="networkModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -144,7 +164,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get, set, remove, query, orderByChild, equalTo, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const primaryConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
@@ -170,6 +190,13 @@
         let targetProfileData = {};
         let targetPosts = [];
 
+        // Dynamic 3-by-3 Fast Controls
+        let renderedIndex = 0;
+        const INITIAL_BATCH = 9; // Render 9 items (3 rows) on start
+        const CHUNK_BATCH = 3;   // Rapidly stream 3 items (1 row) per batch
+        let scrollObserver = null;
+        let isFetchingBackground = false;
+
         function showToast(message) {
             const toast = document.getElementById('toastNotification');
             document.getElementById('toastMessage').innerText = message;
@@ -184,18 +211,56 @@
             return num.toLocaleString();
         }
 
+        function toggleBlurLoader(show) {
+            const blurContainer = document.getElementById('bottomBlurLoader');
+            if (blurContainer) {
+                if (show) blurContainer.classList.remove('hidden');
+                else blurContainer.classList.add('hidden');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             targetUserId = urlParams.get('userId') || urlParams.get('id');
 
             if (!targetUserId) {
-                document.getElementById('initialLoader').innerHTML = `<p style="color:#DC2626; font-weight:700;">User not found.</p><button onclick="window.history.back()" style="margin-top:12px; padding:8px 16px; border-radius:8px; border:none; background:#0F172A; color:#FFF;">Go Back</button>`;
+                document.getElementById('initialLoader').innerHTML = `<p style="color:#DC2626; font-weight:700;">User not found.</p>`;
                 return;
+            }
+            
+            document.getElementById('chatMessageBtn').addEventListener('click', () => {
+                window.location.href = `chat1.html?userId=${encodeURIComponent(targetUserId)}`;
+            });
+
+            // Cache profile check
+            const cachedProfile = localStorage.getItem(`profileCache_${targetUserId}`);
+            if (cachedProfile) {
+                const parsed = JSON.parse(cachedProfile);
+                targetProfileData = parsed.data;
+                renderProfileHeader(targetProfileData, parsed.followersCount, parsed.followingCount);
+            }
+
+            // Cache posts check
+            const cachedPosts = localStorage.getItem(`postsCache_${targetUserId}`);
+            if (cachedPosts) {
+                targetPosts = JSON.parse(cachedPosts);
+                document.getElementById('targetPostsCount').innerText = formatCount(targetPosts.length);
+                startChunkedRender(targetPosts); 
             }
 
             setupAuthAndLoadData();
+            
             document.getElementById('networkModal').addEventListener('click', (e) => {
                 if (e.target.id === 'networkModal') document.getElementById('networkModal').classList.remove('active');
+            });
+
+            // Scroll Fallback Listener to make sure it never freezes at any item count
+            window.addEventListener('scroll', () => {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                    if (renderedIndex < targetPosts.length) {
+                        renderNextBatch();
+                    }
+                }
             });
         });
 
@@ -236,23 +301,24 @@
                 }
 
                 if (!snap.exists()) {
-                    document.getElementById('initialLoader').innerHTML = `<p style="color:#DC2626; font-weight:700;">Profile no longer exists.</p>`;
+                    if(!localStorage.getItem(`profileCache_${targetUserId}`)) {
+                        document.getElementById('initialLoader').innerHTML = `<p style="color:#DC2626; font-weight:700;">Profile no longer exists.</p>`;
+                    }
                     return;
                 }
 
                 targetProfileData = snap.val();
-                
                 let followingCount = 0; let followersCount = 0;
+                
                 const followingSnap = await get(ref(db, `following/${targetUserId}`));
                 if (followingSnap.exists()) followingCount = Object.keys(followingSnap.val()).filter(k=>k!=='count').length;
                 
                 const followerSnap = await get(ref(db, `followers/${targetUserId}`));
                 if (followerSnap.exists()) followersCount = Object.keys(followerSnap.val()).filter(k=>k!=='count').length;
 
+                localStorage.setItem(`profileCache_${targetUserId}`, JSON.stringify({ data: targetProfileData, followersCount, followingCount }));
                 renderProfileHeader(targetProfileData, followersCount, followingCount);
-            } catch (err) {
-                document.getElementById('initialLoader').innerHTML = `<p style="color:#DC2626; font-weight:700;">Error loading profile.</p>`;
-            }
+            } catch (err) {}
         }
 
         function renderProfileHeader(data, fR, fG) {
@@ -313,53 +379,40 @@
             try {
                 const snap = await get(followingRef);
                 const isCurrentlyFollowing = snap.exists();
-                
                 let rawCountText = followerCountNode.innerText.replace(/[KkMm,]/g, ''); 
                 let currentFollowers = parseFloat(rawCountText) || 0; 
                 let myFollowingCount = parseInt((await get(myFollowingRef)).val()) || 0;
 
                 if (isCurrentlyFollowing) {
-                    await remove(followingRef);
-                    await remove(followerRef);
-                    
+                    await remove(followingRef); await remove(followerRef);
                     const newCount = Math.max(0, currentFollowers - 1);
                     followerCountNode.innerText = formatCount(newCount);
-                    await set(targetUserRef, newCount);
-                    await set(myFollowingRef, Math.max(0, myFollowingCount - 1));
+                    await set(targetUserRef, newCount); await set(myFollowingRef, Math.max(0, myFollowingCount - 1));
                     
                     btn.classList.add('btn-follow'); btn.classList.remove('btn-unfollow');
                     text.innerText = "Follow"; icon.innerHTML = `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`;
                     showToast("Unfollowed User");
-                    
                 } else {
                     const now = Date.now();
-                    
                     let fNameT = targetProfileData.firstName || targetProfileData.first_name || targetProfileData.fullName?.split(' ')[0] || "User";
                     let dNameT = targetProfileData.displayName || fNameT;
                     
-                    await set(followingRef, {
-                        uid: targetUserId, displayName: dNameT, username: targetProfileData.username || targetProfileData.handle || "user",
-                        photoURL: targetProfileData.photoURL || targetProfileData.profilePicture || "s.png", timestamp: now
-                    });
+                    await set(followingRef, { uid: targetUserId, displayName: dNameT, username: targetProfileData.username || targetProfileData.handle || "user", photoURL: targetProfileData.photoURL || targetProfileData.profilePicture || "s.png", timestamp: now });
 
                     let fNameM = myProfileData.firstName || myProfileData.first_name || myProfileData.fullName?.split(' ')[0] || "User";
                     let dNameM = myProfileData.displayName || fNameM;
 
-                    await set(followerRef, {
-                        uid: myLoggedInUid, displayName: dNameM, username: myProfileData.username || myProfileData.handle || "user",
-                        photoURL: myProfileData.photoURL || myProfileData.profilePicture || "s.png", timestamp: now
-                    });
+                    await set(followerRef, { uid: myLoggedInUid, displayName: dNameM, username: myProfileData.username || myProfileData.handle || "user", photoURL: myProfileData.photoURL || myProfileData.profilePicture || "s.png", timestamp: now });
 
                     const newCount = currentFollowers + 1;
                     followerCountNode.innerText = formatCount(newCount);
-                    await set(targetUserRef, newCount);
-                    await set(myFollowingRef, myFollowingCount + 1);
+                    await set(targetUserRef, newCount); await set(myFollowingRef, myFollowingCount + 1);
 
                     btn.classList.remove('btn-follow'); btn.classList.add('btn-unfollow');
-                    text.innerText = "Unfollow"; icon.innerHTML = `<line x1="5" y1="12" x2="19" y2="12"></line>`;
+                    text.innerText = "Unfollow"; icon.innerHTML = `<line x1="12" y1="5" x2="12" y2="19"></line>`;
                     showToast("Following User");
                 }
-            } catch (err) { showToast("Failed to update follow status."); } 
+            } catch (err) { showToast("Failed to update status."); } 
             finally { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }
         };
 
@@ -379,18 +432,13 @@
             modal.classList.add('active');
 
             try {
-                let dataObj = {};
-                let hasData = false;
-
+                let dataObj = {}; let hasData = false;
                 const pathsToCheck = [`${nodeName}/${targetUserId}`, `users/${targetUserId}/${nodeName}List`, `users/${targetUserId}/${nodeName}_list`, `users/${targetUserId}/${nodeName}`];
 
                 for (const path of pathsToCheck) {
                     try {
                         const snap = await get(ref(db, path));
-                        if (snap.exists() && typeof snap.val() === 'object') {
-                            Object.assign(dataObj, snap.val());
-                            hasData = true;
-                        }
+                        if (snap.exists() && typeof snap.val() === 'object') { Object.assign(dataObj, snap.val()); hasData = true; }
                     } catch(e) { }
                 }
 
@@ -399,9 +447,9 @@
                 let validUids = new Set();
                 for (let [k, v] of Object.entries(dataObj)) {
                     if (k === 'count' || String(k).startsWith('_')) continue;
-                    if (typeof v === 'object' && v !== null && (v.uid || v.userId || v.id)) { validUids.add(v.uid || v.userId || v.id); } 
-                    else if (typeof v === 'string') { validUids.add(v); } 
-                    else if (k.length > 5) { validUids.add(k); }
+                    if (typeof v === 'object' && v !== null && (v.uid || v.userId || v.id)) validUids.add(v.uid || v.userId || v.id);
+                    else if (typeof v === 'string') validUids.add(v); 
+                    else if (k.length > 5) validUids.add(k); 
                 }
                 
                 if (validUids.size === 0) { body.innerHTML = `<div class="empty-grid-msg">You have no ${nodeName} to display.</div>`; return; }
@@ -420,8 +468,7 @@
                         if (uSnap.exists()) {
                             validUsersFound = true;
                             const uData = uSnap.val();
-                            let fName = uData.firstName || uData.first_name || uData.fullName?.split(' ')[0] || "User";
-                            let dName = uData.displayName || fName;
+                            let dName = uData.displayName || uData.firstName || "User";
                             let handle = uData.username || uData.handle || dName.toLowerCase().replace(/\s+/g, '');
                             let pUrl = uData.photoURL || uData.profilePicture || "s.png";
                             
@@ -444,86 +491,168 @@
             } catch (error) { body.innerHTML = `<div class="empty-grid-msg">Failed to load data.</div>`; }
         }
 
-        // ==========================================
-        //  AGGRESSIVE POSTS FETCHER FOR TARGET USER
-        // ==========================================
+        function buildPostHTML(post) {
+            const views = post.views || post.viewCount || 0;
+            let mediaSrc = '40789.png'; 
+            if (post.images && post.images.length > 0) mediaSrc = post.images[0];
+            else if (post.imageUrl || post.image || post.mediaUrl || post.photo) mediaSrc = (post.imageUrl || post.image || post.mediaUrl || post.photo);
+            
+            return `<div class="post-grid-item" onclick="window.location.href='rentalfull.html?id=${encodeURIComponent(post.id)}&path=${encodeURIComponent(post._dbPath || 'posts')}'">
+                        <img src="${mediaSrc}" alt="Post" loading="lazy">
+                        <div class="post-views-count">
+                            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <span>${formatCount(views)}</span>
+                        </div>
+                    </div>`;
+        }
+
+        // Fast Step-by-Step 3-by-3 Renderer
+        function startChunkedRender(postsArray) {
+            const container = document.getElementById('targetPostsGrid');
+            renderedIndex = 0;
+            
+            if (!postsArray || postsArray.length === 0) {
+                container.innerHTML = `<div class="empty-grid-msg">No active listings available.</div>`;
+                toggleBlurLoader(false);
+                return;
+            }
+
+            container.innerHTML = '';
+            renderNextBatch();
+            setupInfiniteScrollObserver();
+        }
+
+        function renderNextBatch() {
+            if (renderedIndex >= targetPosts.length) {
+                if (!isFetchingBackground) toggleBlurLoader(false);
+                return;
+            }
+
+            const container = document.getElementById('targetPostsGrid');
+            const batchSize = (renderedIndex === 0) ? INITIAL_BATCH : CHUNK_BATCH;
+            const nextIndex = Math.min(renderedIndex + batchSize, targetPosts.length);
+            const batchItems = targetPosts.slice(renderedIndex, nextIndex);
+
+            const htmlChunk = batchItems.map(buildPostHTML).join('');
+            
+            container.insertAdjacentHTML('beforeend', htmlChunk);
+            renderedIndex = nextIndex;
+
+            // Show blur loader if more items remain or background fetch is busy
+            if (renderedIndex < targetPosts.length || isFetchingBackground) {
+                toggleBlurLoader(true);
+            } else {
+                toggleBlurLoader(false);
+            }
+        }
+
+        function checkAndFillViewport() {
+            const sentinel = document.getElementById('gridSentinel');
+            if (!sentinel) return;
+            
+            const rect = sentinel.getBoundingClientRect();
+            if (rect.top <= window.innerHeight + 400 && renderedIndex < targetPosts.length) {
+                renderNextBatch();
+                requestAnimationFrame(checkAndFillViewport);
+            }
+        }
+
+        function setupInfiniteScrollObserver() {
+            let sentinel = document.getElementById('gridSentinel');
+            if (!sentinel) {
+                sentinel = document.createElement('div');
+                sentinel.id = 'gridSentinel';
+                document.getElementById('targetPostsGrid').after(sentinel);
+            }
+
+            if (scrollObserver) scrollObserver.disconnect();
+
+            scrollObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && renderedIndex < targetPosts.length) {
+                    renderNextBatch();
+                    requestAnimationFrame(checkAndFillViewport);
+                }
+            }, { rootMargin: '400px' });
+
+            scrollObserver.observe(sentinel);
+            setTimeout(checkAndFillViewport, 50);
+        }
+
         async function fetchTargetUserPosts() {
             try {
-                document.getElementById('targetPostsGrid').innerHTML = '<div class="loader-spinner" style="display:block; margin:40px auto;"></div>';
+                isFetchingBackground = true;
+                toggleBlurLoader(true);
 
                 const searchIds = new Set([targetUserId]);
                 if (targetProfileData.cleanPhone) searchIds.add(targetProfileData.cleanPhone);
                 if (targetProfileData.phone) searchIds.add(String(targetProfileData.phone).replace(/\D/g, '').replace(/^0+/, ''));
                 if (targetProfileData.uid) searchIds.add(targetProfileData.uid);
                 
-                targetPosts = [];
-                const seenIds = new Set();
+                // Fast Initial Fetch
+                if (targetPosts.length === 0) {
+                    let fastPosts = [];
+                    const seenFast = new Set();
+                    
+                    for (let searchId of searchIds) {
+                        if (!searchId) continue;
+                        try {
+                            const db1Q = query(ref(db, 'posts'), orderByChild('userId'), equalTo(searchId), limitToLast(12));
+                            const s1 = await get(db1Q);
+                            if (s1.exists()) s1.forEach(c => { if(!c.val().isHidden && !seenFast.has(c.key)) { fastPosts.push({ id: c.key, _dbPath: 'posts', ...c.val() }); seenFast.add(c.key); }});
+                        } catch(err) {}
+
+                        try {
+                            const db2Q = query(ref(serviceDb, 'posts'), orderByChild('userId'), equalTo(searchId), limitToLast(12));
+                            const s2 = await get(db2Q);
+                            if (s2.exists()) s2.forEach(c => { if(!c.val().isHidden && !seenFast.has(c.key)) { fastPosts.push({ id: c.key, _dbPath: 'service', ...c.val() }); seenFast.add(c.key); }});
+                        } catch(err) {}
+                    }
+
+                    if (fastPosts.length > 0) {
+                        fastPosts.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+                        targetPosts = fastPosts;
+                        startChunkedRender(targetPosts); 
+                    }
+                }
+
+                // Complete Background Fetch for all 36+ items
+                let allPosts = [];
+                const seenAll = new Set();
                 
                 for (let searchId of searchIds) {
                     if (!searchId) continue;
-                    
                     try {
                         const db1Q = query(ref(db, 'posts'), orderByChild('userId'), equalTo(searchId));
                         const s1 = await get(db1Q);
-                        if (s1.exists()) { 
-                            s1.forEach(c => { 
-                                if(!c.val().isHidden && !seenIds.has(c.key)) { 
-                                    targetPosts.push({ id: c.key, _dbPath: 'posts', ...c.val() }); 
-                                    seenIds.add(c.key); 
-                                }
-                            }); 
-                        }
+                        if (s1.exists()) s1.forEach(c => { if(!c.val().isHidden && !seenAll.has(c.key)) { allPosts.push({ id: c.key, _dbPath: 'posts', ...c.val() }); seenAll.add(c.key); }});
                     } catch(err) {}
 
                     try {
                         const db2Q = query(ref(serviceDb, 'posts'), orderByChild('userId'), equalTo(searchId));
                         const s2 = await get(db2Q);
-                        if (s2.exists()) { 
-                            s2.forEach(c => { 
-                                if(!c.val().isHidden && !seenIds.has(c.key)) { 
-                                    targetPosts.push({ id: c.key, _dbPath: 'service', ...c.val() }); 
-                                    seenIds.add(c.key); 
-                                }
-                            }); 
-                        }
+                        if (s2.exists()) s2.forEach(c => { if(!c.val().isHidden && !seenAll.has(c.key)) { allPosts.push({ id: c.key, _dbPath: 'service', ...c.val() }); seenAll.add(c.key); }});
                     } catch(err) {}
                 }
 
-                targetPosts.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+                allPosts.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
                 
+                targetPosts = allPosts;
                 document.getElementById('targetPostsCount').innerText = formatCount(targetPosts.length);
-                renderPostsGrid();
+                localStorage.setItem(`postsCache_${targetUserId}`, JSON.stringify(targetPosts));
 
-            } catch(e) { 
-                console.error(e);
-                document.getElementById('targetPostsGrid').innerHTML = `<div class="empty-grid-msg">Failed to load listings.</div>`; 
+                isFetchingBackground = false;
+
+                // Continue 3-by-3 loading seamless stream without resetting current view
+                checkAndFillViewport();
+                if (renderedIndex >= targetPosts.length) {
+                    toggleBlurLoader(false);
+                }
+
+            } catch(e) {
+                isFetchingBackground = false;
+                toggleBlurLoader(false);
+                if(targetPosts.length === 0) document.getElementById('targetPostsGrid').innerHTML = `<div class="empty-grid-msg">Failed to load listings.</div>`; 
             }
-        }
-
-        function renderPostsGrid() {
-            const container = document.getElementById('targetPostsGrid');
-            container.innerHTML = '';
-            
-            if (targetPosts.length === 0) {
-                container.innerHTML = `<div class="empty-grid-msg">No active listings available.</div>`;
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            targetPosts.forEach(post => {
-                const views = post.views || post.viewCount || 0;
-                let mediaSrc = '40789.png'; 
-                if (post.images && post.images.length > 0) mediaSrc = post.images[0];
-                else if (post.imageUrl || post.image || post.mediaUrl || post.photo) mediaSrc = (post.imageUrl || post.image || post.mediaUrl || post.photo);
-                
-                const gridCell = document.createElement('div');
-                gridCell.className = 'post-grid-item';
-                gridCell.innerHTML = `<img src="${mediaSrc}" alt="Post" loading="lazy"><div class="post-views-count"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>${formatCount(views)}</span></div>`;
-                
-                gridCell.onclick = () => { window.location.href = `rentalfull.html?id=${encodeURIComponent(post.id)}&path=${encodeURIComponent(post._dbPath || 'posts')}`; };
-                fragment.appendChild(gridCell);
-            });
-            container.appendChild(fragment);
         }
     </script>
 </body>

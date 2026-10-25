@@ -5,183 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Hulum - Service Items</title>
     
-    <!-- Ultra-Fast Preconnections & Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://tsestlive-default-rtdb.firebaseio.com">
     
-    <!-- Non-blocking Google Font Load -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
-    <!-- External Stylesheets -->
     <link rel="stylesheet" href="news.css">
     <link rel="stylesheet" href="rental.css">
 
     <style>
-        /* Social Action & Author Header Styles */
-        .author-actions-right {
+        /* --- Coming Soon Popup Styles --- */
+        .coming-soon-overlay {
+            position: fixed;
+            top: 36px; /* Reduced to close the white gap below the header */
+            left: 0;
+            width: 100vw;
+            height: calc(110vh - 114px); /* Adjusted to ensure it still perfectly meets the bottom nav */
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex-wrap: nowrap;
+            justify-content: center;
+            z-index: 900;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            box-sizing: border-box;
         }
 
-        /* Animated GPS Distance Chip placed directly before Follow button */
-        .animated-distance-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #0284c7;
-            background: rgba(2, 132, 199, 0.08);
-            border: 1px solid rgba(2, 132, 199, 0.25);
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: distancePulse 2.5s infinite ease-in-out;
+        .coming-soon-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
-        .animated-distance-chip.no-gps {
-            color: #64748b;
-            background: #f1f5f9;
-            border-color: #e2e8f0;
-            animation: none;
+        .coming-soon-modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 24px 20px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
-        .animated-distance-chip .gps-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #0284c7;
-            border-radius: 50%;
+        .coming-soon-modal::-webkit-scrollbar {
+            width: 4px;
+        }
+        .coming-soon-modal::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .coming-soon-title {
+            font-size: 18px;
+            color: #0F172A;
+            margin: 0 0 10px 0;
+            font-weight: 800;
+        }
+
+        .coming-soon-icon {
+            font-size: 36px;
+            margin: 6px 0 12px 0;
             display: inline-block;
-            animation: dotGlow 1.5s infinite;
+            animation: floatRocket 3s ease-in-out infinite;
         }
 
-        .animated-distance-chip.no-gps .gps-dot {
-            background-color: #94a3b8;
-            animation: none;
+        .coming-soon-subtitle {
+            font-size: 15px;
+            color: #0284c7;
+            margin: 0 0 8px 0;
+            font-weight: 700;
         }
 
-        @keyframes distancePulse {
-            0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.25); }
-            50% { box-shadow: 0 0 0 5px rgba(2, 132, 199, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+        .coming-soon-text {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.5;
+            margin: 0 0 16px 0;
         }
 
-        @keyframes dotGlow {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.3); }
+        .coming-soon-divider {
+            border: 0;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 16px 0;
         }
 
-        .btn-follow-author.following {
-            background-color: #e2e8f0 !important;
-            color: #334155 !important;
-            border-color: #cbd5e1 !important;
+        .coming-soon-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 8px;
         }
 
-        .social-action-btn.liked svg {
-            fill: #ef4444;
-            stroke: #ef4444;
-            animation: likeHeart 0.3s ease-in-out;
+        .coming-soon-btn:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3);
         }
 
-        @keyframes likeHeart {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
+        @keyframes popIn {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes floatRocket {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
 
+    <div class="coming-soon-overlay" id="comingSoonOverlay">
+        <div class="coming-soon-modal">
+            <h2 class="coming-soon-title">Hulum Gebeya | ሁሉም ገበያ</h2>
+            <div class="coming-soon-icon">🚀</div>
+            
+            <h3 class="coming-soon-subtitle">Coming Soon!</h3>
+            <p class="coming-soon-text">Everything you need, right in your neighborhood! We are building a platform where you can easily locate and access essential services near you. Stay tuned!</p>
+            
+            <hr class="coming-soon-divider">
+            
+            <h3 class="coming-soon-subtitle">በቅርብ ቀን ይጠብቁን!</h3>
+            <p class="coming-soon-text">ሁሉንም በአቅራቢያችሁ ያሉትን የመንግስት ድርጅቶች፣ የእምነት ተቋማት፣ ሱቆች እና የውበት ሳሎኖች ሆነ የትኛውንም አገልግሎት የምታገኙበት ቦታ፤ አሁን በአቅራቢያችሁ ማግኘት ይችላሉ።</p>
+            
+            <button class="coming-soon-btn" id="closeComingSoonBtn">Okay, I'll Wait!</button>
+        </div>
+    </div>
+
     <div class="app-view">
-        <svg class="bg-wave bg-wave-top" viewBox="0 0 375 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H375V75C375 75 280 155 0 95V0Z" fill="url(#paint0_linear)"/>
-            <defs>
-                <linearGradient id="paint0_linear" x1="187.5" y1="0" x2="187.5" y2="200" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#081B38"/>
-                    <stop offset="1" stop-color="#0F2C59"/>
-                </linearGradient>
-            </defs>
-        </svg>
-
-        <div class="custom-popup-overlay" id="customPopupModule">
-            <div class="custom-popup-modal">
-                <span class="popup-status-icon" id="popupIconNode">ℹ️</span>
-                <h3 class="popup-main-title" id="popupTitleNode">Status Alert</h3>
-                <p class="popup-body-desc" id="popupDescNode">Notification update context.</p>
-                <button class="popup-dismiss-action" id="closePopupBtn">Continue</button>
-            </div>
-        </div>
-
-        <div class="search-modal-overlay" id="searchModalOverlay">
-            <div class="search-box-header">
-                <div class="search-input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" class="search-news-field" id="newsCodeSearchInput" placeholder="Search Title, City, or Category..." autocomplete="off">
-                </div>
-                <button class="close-search-btn" id="closeSearchDrawerBtn">Cancel</button>
-            </div>
-            <div class="search-results-area" id="searchResultsArea">
-                <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                    Type to search service items...
-                </div>
-            </div>
-        </div>
-
         <header class="nav-header">
             <div class="header-left-group">
                 <h1 class="header-title-text">Service Items</h1>
             </div>
             
             <div class="header-live-clock-badge" id="topCornerLiveClock">00:00:00 AM</div>
-
-            <div class="header-actions-group">
-                <button class="location-action-btn" id="categoryMenuToggleBtn" aria-label="Filter Categories" title="Filter by category">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                    </svg>
-                </button>
-
-                <div class="category-dropdown-menu" id="categoryDropdownMenu">
-                    <button class="category-dropdown-item active" data-category="all">All Categories</button>
-                    <button class="category-dropdown-item" data-category="consulting">Consulting</button>
-                    <button class="category-dropdown-item" data-category="repair">Repair & Fix</button>
-                    <button class="category-dropdown-item" data-category="delivery">Delivery</button>
-                    <button class="category-dropdown-item" data-category="cleaning">Cleaning</button>
-                    <button class="category-dropdown-item" data-category="tech">Technology</button>
-                    <button class="category-dropdown-item" data-category="other">Other</button>
-                </div>
-
-                <button class="location-action-btn" id="triggerGpsFilterBtn" aria-label="Near Me GPS Filter" title="Sort posts by proximity">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                </button>
-
-                <button class="search-action-btn" id="openSearchBtn" aria-label="Search Items">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </button>
-            </div>
+            
+            <div class="header-actions-group"></div>
         </header>
 
         <main class="app-content">
             <div class="broadcasts-container" id="broadcastsContainer"></div>
-
-            <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
-                ⏳ Loading...
-            </div>
-
-            <footer class="verified-footer-shield">
-                <span class="footer-shield-text" id="footerShieldText">Delala Secure Matrix Verified</span>
-            </footer>
         </main>
 
-        <!-- Navigation updated for Service active state -->
         <nav class="bottom-nav">
             <a id="nav-rental" href="rental.html" class="nav-item" data-filter="Rental">
                 <div class="icon-bg">
@@ -226,11 +207,20 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, query, orderByChild, limitToLast, endBefore, get, set, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        // Added Auth for the Like/Comment/Follow functionality
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Using the tsestlive Config as requested
+        document.addEventListener('DOMContentLoaded', () => {
+            const comingSoonOverlay = document.getElementById('comingSoonOverlay');
+            const closeComingSoonBtn = document.getElementById('closeComingSoonBtn');
+            
+            if (closeComingSoonBtn && comingSoonOverlay) {
+                closeComingSoonBtn.addEventListener('click', () => {
+                    comingSoonOverlay.classList.add('hidden');
+                });
+            }
+        });
+
         const firebaseConfig = {
             apiKey: "AIzaSyD6vEll_UDNulGF5BalpwhR3SbfME7CJCw",
             authDomain: "tsestlive.firebaseapp.com",
@@ -245,217 +235,20 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        const BATCH_LIMIT = 4;
-        let lastLoadedTimestamp = null;
-        let lastLoadedKey = null;
-        let isLoading = false;
-        let hasMoreItems = true;
-        
-        let localCachedBroadcasts = [];
-        let currentUserCoordinates = null;
-        let isGpsActive = false;
-        let activeCategoryFilter = 'all';
-        
-        // State variables for Auth & Social actions
-        let currentUser = null;
-        let userFollowingSet = new Set();
-
         const DOM = {};
 
-        // --- Social Action Functions --- //
-
-        window.navigateToAuthorProfile = function(event, userId, userName) {
-            if (event) event.stopPropagation();
-            if (!userId || userId === 'unknown') return;
-            window.location.href = `user.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName || 'User')}`;
-        };
-
-        window.toggleFollowUser = async function(event, authorId) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to follow this user.", "🔐");
-                return;
-            }
-            if (currentUser.uid === authorId) {
-                triggerSystemAlert("Action Restricted", "You cannot follow your own account.", "ℹ️");
-                return;
-            }
-
-            const followRef = ref(db, `users/${currentUser.uid}/following/${authorId}`);
-            const isFollowing = userFollowingSet.has(authorId);
-
-            try {
-                if (isFollowing) {
-                    await remove(followRef);
-                    userFollowingSet.delete(authorId);
-                } else {
-                    await set(followRef, true);
-                    userFollowingSet.add(authorId);
-                }
-                updateFollowButtonsUI(authorId, !isFollowing);
-            } catch (err) {
-                console.error("Follow error:", err);
-            }
-        };
-
-        function updateFollowButtonsUI(authorId, isFollowing) {
-            document.querySelectorAll(`.follow-btn-${authorId}`).forEach(btn => {
-                if (isFollowing) {
-                    btn.innerText = "Following";
-                    btn.classList.add('following');
-                } else {
-                    btn.innerText = "+ Follow";
-                    btn.classList.remove('following');
-                }
-            });
-        }
-
-        window.toggleLikePost = async function(event, itemId, path) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to like items.", "❤️");
-                return;
-            }
-
-            const likedByRef = ref(db, `${path}/${itemId}/likedBy/${currentUser.uid}`);
-            const likesCountRef = ref(db, `${path}/${itemId}/likes`);
-
-            try {
-                const snap = await get(likedByRef);
-                const isLiked = snap.exists() && snap.val() === true;
-
-                if (isLiked) {
-                    await remove(likedByRef);
-                    await runTransaction(likesCountRef, (current) => Math.max(0, (current || 1) - 1));
-                } else {
-                    await set(likedByRef, true);
-                    await runTransaction(likesCountRef, (current) => (current || 0) + 1);
-                }
-
-                // Update Local Cache
-                const cachedItem = localCachedBroadcasts.find(i => i.id === itemId);
-                if (cachedItem) {
-                    if (!cachedItem.likedBy) cachedItem.likedBy = {};
-                    if (isLiked) {
-                        delete cachedItem.likedBy[currentUser.uid];
-                        cachedItem.likes = Math.max(0, (cachedItem.likes || 1) - 1);
-                    } else {
-                        cachedItem.likedBy[currentUser.uid] = true;
-                        cachedItem.likes = (cachedItem.likes || 0) + 1;
-                    }
-                }
-
-                // Update UI visually
-                const likeBtn = document.getElementById(`like-btn-${itemId}`);
-                const likeCountNode = document.getElementById(`like-count-${itemId}`);
-                if (likeBtn && likeCountNode) {
-                    let currentCount = parseInt(likeCountNode.innerText || '0', 10);
-                    if (isLiked) {
-                        likeBtn.classList.remove('liked');
-                        likeCountNode.innerText = Math.max(0, currentCount - 1);
-                    } else {
-                        likeBtn.classList.add('liked');
-                        likeCountNode.innerText = currentCount + 1;
-                    }
-                }
-            } catch (err) {
-                console.error("Like toggle failed:", err);
-            }
-        };
-
-        window.toggleCommentBox = function(event, itemId) {
-            if (event) event.stopPropagation();
-            const commentBox = document.getElementById(`comments-box-${itemId}`);
-            if (commentBox) {
-                commentBox.classList.toggle('show');
-            }
-        };
-
-        window.submitInlineComment = async function(event, itemId, path) {
-            if (event) event.stopPropagation();
-            if (!currentUser) {
-                triggerSystemAlert("Sign In Required", "Please sign in to post comments.", "💬");
-                return;
-            }
-
-            const inputEl = document.getElementById(`comment-input-${itemId}`);
-            if (!inputEl || !inputEl.value.trim()) return;
-
-            const commentText = inputEl.value.trim();
-            inputEl.value = '';
-
-            const userFirstName = currentUser.displayName ? currentUser.displayName.trim().split(' ')[0] : 'User';
-            const newCommentRef = ref(db, `${path}/${itemId}/comments/${Date.now()}`);
-
-            try {
-                await set(newCommentRef, {
-                    userId: currentUser.uid,
-                    userName: userFirstName,
-                    text: commentText,
-                    timestamp: Date.now()
-                });
-
-                const listContainer = document.getElementById(`comments-list-${itemId}`);
-                if (listContainer) {
-                    const cItem = document.createElement('div');
-                    cItem.className = 'comment-item-preview';
-                    cItem.innerHTML = `<strong>${userFirstName}:</strong> ${commentText}`;
-                    listContainer.appendChild(cItem);
-                }
-
-                const cCountNode = document.getElementById(`comment-count-${itemId}`);
-                if (cCountNode) {
-                    let currentVal = parseInt(cCountNode.innerText || '0', 10);
-                    cCountNode.innerText = currentVal + 1;
-                }
-            } catch (err) {
-                console.error("Comment submit error:", err);
-            }
-        };
-
-        // --- Initialization --- //
-
         document.addEventListener('DOMContentLoaded', () => {
-            DOM.container = document.getElementById('broadcastsContainer');
-            DOM.triggerEl = document.getElementById('infiniteScrollTrigger');
             DOM.cornerClockNode = document.getElementById('topCornerLiveClock');
-            DOM.popupModal = document.getElementById('customPopupModule');
-            DOM.popupTitleNode = document.getElementById('popupTitleNode');
-            DOM.popupDescNode = document.getElementById('popupDescNode');
-            DOM.popupIconNode = document.getElementById('popupIconNode');
-            DOM.closePopupBtn = document.getElementById('closePopupBtn');
-            DOM.toggleBtn = document.getElementById('categoryMenuToggleBtn');
-            DOM.dropdownMenu = document.getElementById('categoryDropdownMenu');
-            DOM.gpsBtn = document.getElementById('triggerGpsFilterBtn');
-            DOM.openSearchBtn = document.getElementById('openSearchBtn');
-            DOM.closeSearchBtn = document.getElementById('closeSearchDrawerBtn');
-            DOM.searchOverlay = document.getElementById('searchModalOverlay');
-            DOM.searchInput = document.getElementById('newsCodeSearchInput');
-            DOM.searchResultsArea = document.getElementById('searchResultsArea');
-
-            setupSearchEngineControls();
-            setupInfiniteScrollObserver();
-            setupGpsDetectionControl();
-            setupCategoryDropdownMenu();
-            initUserProfile();
-
-            if (DOM.closePopupBtn) {
-                DOM.closePopupBtn.addEventListener('click', () => {
-                    DOM.popupModal.classList.remove('show-popup');
-                });
-            }
             
+            initUserProfile();
             initiateLiveInterfaceClocks();
-            fetchItemsBatch();
         });
 
         function initUserProfile() {
             onAuthStateChanged(auth, async (user) => {
-                currentUser = user;
                 const imgEl = document.getElementById('navProfilePic');
                 const iconEl = document.getElementById('navProfileIcon');
                 const nameEl = document.getElementById('navProfileName');
-                const footerShieldEl = document.getElementById('footerShieldText');
 
                 if (user) {
                     let photoURL = user.photoURL;
@@ -468,9 +261,6 @@
                             if (uData.photoURL) photoURL = uData.photoURL;
                             if (uData.firstName || uData.displayName || uData.name) {
                                 displayName = uData.firstName || uData.displayName || uData.name;
-                            }
-                            if (uData.following && typeof uData.following === 'object') {
-                                userFollowingSet = new Set(Object.keys(uData.following));
                             }
                         }
                     } catch (e) {
@@ -486,121 +276,8 @@
                     }
 
                     if (nameEl) nameEl.innerText = firstName;
-                    if (footerShieldEl) footerShieldEl.innerText = `${firstName} Verified`;
-
-                    // Re-render to show correct Like/Follow button statuses
-                    renderFilteredListings();
-                } else {
-                    userFollowingSet.clear();
-                    if (footerShieldEl) footerShieldEl.innerText = "Guest - Unverified";
-                    renderFilteredListings();
                 }
             });
-        }
-
-        function restoreScrollPosition() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetItemId = urlParams.get('returnId');
-            const savedPos = sessionStorage.getItem('rental_scroll_pos');
-
-            if (targetItemId) {
-                const targetCard = document.getElementById(`item-card-${targetItemId}`);
-                if (targetCard) {
-                    targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    targetCard.style.transition = 'outline 0.3s ease';
-                    targetCard.style.outline = '2px solid #38BDF8';
-                    setTimeout(() => { targetCard.style.outline = 'none'; }, 2000);
-                    return;
-                }
-            }
-
-            if (savedPos !== null) {
-                window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'smooth' });
-                sessionStorage.removeItem('rental_scroll_pos');
-            }
-        }
-
-        function setupCategoryDropdownMenu() {
-            if (!DOM.toggleBtn || !DOM.dropdownMenu) return;
-
-            DOM.toggleBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                DOM.dropdownMenu.classList.toggle('show');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!DOM.dropdownMenu.contains(e.target) && !DOM.toggleBtn.contains(e.target)) {
-                    DOM.dropdownMenu.classList.remove('show');
-                }
-            });
-
-            DOM.dropdownMenu.addEventListener('click', (e) => {
-                const item = e.target.closest('.category-dropdown-item');
-                if (!item) return;
-
-                DOM.dropdownMenu.querySelectorAll('.category-dropdown-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-
-                activeCategoryFilter = item.getAttribute('data-category') || 'all';
-                
-                if (activeCategoryFilter !== 'all') {
-                    DOM.toggleBtn.classList.add('active-category');
-                } else {
-                    DOM.toggleBtn.classList.remove('active-category');
-                }
-
-                DOM.dropdownMenu.classList.remove('show');
-                renderFilteredListings();
-            });
-        }
-
-        function itemMatchesCategory(item) {
-            if (activeCategoryFilter === 'all') return true;
-            // Adjusted logic to look for service properties
-            const itemCat = String(item.subCategory || item.category || item.serviceCategory || item.serviceType || '').trim().toLowerCase();
-            return itemCat.includes(activeCategoryFilter);
-        }
-
-        function renderFilteredListings() {
-            if (!DOM.container) return;
-
-            DOM.container.innerHTML = '';
-            
-            const filtered = localCachedBroadcasts.filter(item => itemMatchesCategory(item));
-
-            if (filtered.length === 0) {
-                DOM.container.innerHTML = `
-                    <article class="featured-broadcast-card">
-                        <div class="badge-meta-row"><span class="spotlight-pill">Service Market</span></div>
-                        <h2 class="broadcast-title">No Service Items Found</h2>
-                        <p class="broadcast-body-text" style="color: #64748B;">No service items found for the selected category.</p>
-                    </article>
-                `;
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            const listToRender = (isGpsActive && currentUserCoordinates) 
-                ? [...filtered].map(item => {
-                    const coords = extractItemCoordinates(item);
-                    return { 
-                        ...item, 
-                        _calculatedDistance: coords ? calculateHaversineDistance(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng) : Infinity 
-                    };
-                }).sort((a, b) => a._calculatedDistance - b._calculatedDistance)
-                : filtered;
-
-            listToRender.forEach(item => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.id = `item-card-${item.id}`;
-                card.setAttribute('onclick', `openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')`);
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                fragment.appendChild(card);
-            });
-            DOM.container.appendChild(fragment);
-
-            restoreScrollPosition();
         }
 
         function initiateLiveInterfaceClocks() {
@@ -612,529 +289,6 @@
                     });
                 }
             }, 1000);
-        }
-
-        function formatExactTimestampWithSeconds(baseEpoch) {
-            const dateObj = new Date(baseEpoch);
-            if (isNaN(dateObj.getTime())) return "Recent";
-            return dateObj.toLocaleDateString(undefined, { 
-                month: 'short', day: 'numeric', year: 'numeric' 
-            });
-        }
-
-        function triggerSystemAlert(title, message, icon = "ℹ️") {
-            if (!DOM.popupModal) return;
-            DOM.popupTitleNode.innerText = title;
-            DOM.popupDescNode.innerText = message;
-            DOM.popupIconNode.innerText = icon;
-            DOM.popupModal.classList.add('show-popup');
-        }
-
-        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        function extractItemCoordinates(item) {
-            if (item.location && typeof item.location === 'object') {
-                const lat = parseFloat(item.location.latitude);
-                const lng = parseFloat(item.location.longitude);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    return { lat, lng };
-                }
-            }
-
-            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
-            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
-
-            if (fallbackLat !== undefined && fallbackLng !== undefined) {
-                const parsedLat = parseFloat(fallbackLat);
-                const parsedLng = parseFloat(fallbackLng);
-                if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-                    return { lat: parsedLat, lng: parsedLng };
-                }
-            }
-
-            return null;
-        }
-
-        function setupGpsDetectionControl() {
-            if (!DOM.gpsBtn) return;
-
-            DOM.gpsBtn.addEventListener('click', async () => {
-                if (isGpsActive) {
-                    isGpsActive = false;
-                    DOM.gpsBtn.classList.remove('active-gps');
-                    renderFilteredListings();
-                    return;
-                }
-
-                if (!navigator.geolocation) {
-                    triggerSystemAlert("GPS Unsupported", "Geolocation services are not supported by your browser.", "⚠️");
-                    return;
-                }
-
-                if (navigator.permissions && navigator.permissions.query) {
-                    try {
-                        const status = await navigator.permissions.query({ name: 'geolocation' });
-                        if (status.state === 'denied') {
-                            triggerSystemAlert(
-                                "Location Permission Required", 
-                                "Location access is currently blocked. Please open your device/browser settings to allow location access for this website.", 
-                                "📍"
-                            );
-                            return;
-                        }
-                    } catch (e) {
-                        console.warn("Permissions API check failed, falling back to navigator.geolocation:", e);
-                    }
-                }
-
-                DOM.gpsBtn.style.opacity = "0.5";
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        DOM.gpsBtn.style.opacity = "1";
-                        currentUserCoordinates = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        isGpsActive = true;
-                        DOM.gpsBtn.classList.add('active-gps');
-                        renderFilteredListings();
-                    },
-                    (error) => {
-                        DOM.gpsBtn.style.opacity = "1";
-                        let errMsg = "Unable to retrieve position.";
-                        if (error.code === error.PERMISSION_DENIED) {
-                            errMsg = "Location permission request was denied. Please allow location access to sort listings by distance.";
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            errMsg = "Location information is unavailable.";
-                        } else if (error.code === error.TIMEOUT) {
-                            errMsg = "Location request timed out. Please try again.";
-                        }
-                        triggerSystemAlert("GPS Error", errMsg, "📍");
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            });
-        }
-
-        function extractAllImages(item) {
-            let list = [];
-            if (item.photo && typeof item.photo === 'string' && item.photo.trim() !== '') {
-                list.push(item.photo.trim());
-            }
-            if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '') {
-                if (!list.includes(item.imageUrl.trim())) list.push(item.imageUrl.trim());
-            }
-            if (item.images) {
-                if (Array.isArray(item.images)) {
-                    item.images.forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
-                        }
-                    });
-                } else if (typeof item.images === 'object') {
-                    Object.values(item.images).forEach(img => {
-                        if (typeof img === 'string' && img.trim() !== '' && !list.includes(img.trim())) {
-                            list.push(img.trim());
-                        }
-                    });
-                }
-            }
-            return list;
-        }
-
-        async function fetchItemsBatch() {
-            if (isLoading || !hasMoreItems) return;
-            isLoading = true;
-
-            if (DOM.triggerEl) DOM.triggerEl.innerText = `⏳ Loading...`;
-
-            const nodePath = 'posts';
-
-            try {
-                const baseRef = ref(db, nodePath);
-                let dbQuery;
-
-                if (lastLoadedTimestamp !== null) {
-                    dbQuery = query(
-                        baseRef,
-                        orderByChild('createdAt'),
-                        endBefore(lastLoadedTimestamp, lastLoadedKey),
-                        limitToLast(BATCH_LIMIT)
-                    );
-                } else {
-                    dbQuery = query(
-                        baseRef,
-                        limitToLast(BATCH_LIMIT)
-                    );
-                }
-
-                const snapshot = await get(dbQuery);
-                const fetchedListings = [];
-
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnap) => {
-                        fetchedListings.push({
-                            id: childSnap.key,
-                            _dbPath: nodePath,
-                            ...childSnap.val()
-                        });
-                    });
-                }
-
-                if (fetchedListings.length === 0) {
-                    hasMoreItems = false;
-                    if (DOM.triggerEl) {
-                        DOM.triggerEl.innerText = localCachedBroadcasts.length === 0 ? "" : "All items loaded.";
-                    }
-                    if (localCachedBroadcasts.length === 0) {
-                        renderEmptyState();
-                    }
-                    return;
-                }
-
-                fetchedListings.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
-
-                const validItems = [];
-                for (const rawItem of fetchedListings) {
-                    const currentTS = rawItem.createdAt || rawItem.timestamp || 0;
-                    if (lastLoadedTimestamp === null || currentTS < lastLoadedTimestamp) {
-                        lastLoadedTimestamp = currentTS;
-                        lastLoadedKey = rawItem.id;
-                    }
-
-                    if (!localCachedBroadcasts.some(b => b.id === rawItem.id)) {
-                        validItems.push(rawItem);
-                    }
-                }
-
-                if (validItems.length > 0) {
-                    localCachedBroadcasts.push(...validItems);
-                    renderFilteredListings();
-                } else if (hasMoreItems) {
-                    isLoading = false;
-                    return fetchItemsBatch();
-                }
-
-                if (DOM.triggerEl) {
-                    DOM.triggerEl.innerText = hasMoreItems ? "⏳ Scroll for more..." : "All items loaded.";
-                }
-
-            } catch (error) {
-                console.error("Error loading posts:", error);
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        function setupInfiniteScrollObserver() {
-            if (!DOM.triggerEl) return;
-
-            const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && !isLoading && hasMoreItems) {
-                    fetchItemsBatch();
-                }
-            }, { rootMargin: '200px', threshold: 0.1 });
-
-            observer.observe(DOM.triggerEl);
-        }
-
-        function renderEmptyState() {
-            if (!DOM.container) return;
-            
-            DOM.container.innerHTML = `
-                <article class="featured-broadcast-card">
-                    <div class="badge-meta-row"><span class="spotlight-pill">Service Market</span></div>
-                    <h2 class="broadcast-title">No Service Items Found</h2>
-                    <p class="broadcast-body-text" style="color: #64748B;">There are currently no active service listings available in the database.</p>
-                </article>
-            `;
-        }
-
-        function extractFullLocationString(item) {
-            let locationParts = [];
-            
-            if (item.zone) locationParts.push(item.zone);
-            if (item.city) locationParts.push(item.city);
-
-            if (item.locationDetails) {
-                if (item.locationDetails.country) locationParts.push(item.locationDetails.country);
-                if (item.locationDetails.region) locationParts.push(item.locationDetails.region);
-                if (item.locationDetails.subcity) locationParts.push(item.locationDetails.subcity);
-            }
-            
-            if (locationParts.length > 0) {
-                return locationParts.join(', ');
-            }
-            return item.location || 'Location not specified';
-        }
-
-        function buildCategorySpecsHTML(item) {
-            const specsObj = item.categorySpecificDetails || item.specifications || item.specs || item.details;
-            
-            if (specsObj && typeof specsObj === 'object' && Object.keys(specsObj).length > 0) {
-                let html = `
-                    <div class="category-specs-container">
-                        <div class="category-specs-title">Service Details</div>
-                        <div class="info-terms-list">
-                `;
-                const keys = Object.keys(specsObj).slice(0, 3);
-                keys.forEach(key => {
-                    const val = specsObj[key];
-                    if (val !== undefined && val !== null && val !== '') {
-                        const formattedLabel = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-                        const formattedVal = typeof val === 'object' ? JSON.stringify(val) : val;
-                        html += `
-                            <div class="info-term-item">
-                                <span class="info-term-label">${formattedLabel}</span>
-                                <span class="info-term-value">${formattedVal}</span>
-                            </div>
-                        `;
-                    }
-                });
-                html += `</div></div>`;
-                return html;
-            }
-
-            return `
-                <div class="category-specs-container">
-                    <div class="category-specs-title">Service Details</div>
-                    <div style="font-size:12px; color:#64748B; font-weight: 500;">Standard service terms apply.</div>
-                </div>
-            `;
-        }
-
-        function buildSingleNewsCardHTML(item) {
-            const headline = item.titleName || item.title || "Service Item";
-            const category = item.category || item.subCategory || "Service";
-            const allImages = extractAllImages(item);
-            let numericalTime = item.createdAt || item.timestamp || Date.now();
-            
-            // Extract Author Details
-            const authorId = item.userId || item.uid || item.postedBy || item.authorId || item.postedById || 'unknown';
-            const fullAuthorName = item.userName || item.displayName || item.authorName || item.postedByName || item.username || 'User';
-            const firstName = fullAuthorName.trim().split(' ')[0] || 'User';
-            const authorPhoto = item.userPhoto || item.authorPhoto || item.userAvatar || item.photoURL || '';
-
-            // Like / Comment processing
-            const likeCount = typeof item.likes === 'number' ? item.likes : (item.likedBy ? Object.keys(item.likedBy).length : 0);
-            const isLikedByMe = !!(currentUser && (
-                (item.likedBy && item.likedBy[currentUser.uid]) ||
-                (typeof item.likes === 'object' && item.likes && item.likes[currentUser.uid])
-            ));
-            
-            const commentsList = item.comments ? Object.values(item.comments) : [];
-            const commentCount = item.commentsCount || commentsList.length;
-            const isFollowingAuthor = userFollowingSet.has(authorId);
-            
-            const fullLocationStr = extractFullLocationString(item);
-            const categorySpecsHTML = buildCategorySpecsHTML(item);
-
-            let imageHTML = "";
-            if (allImages.length > 0) {
-                imageHTML = `<div class="broadcast-image-frame"><img src="${allImages[0]}" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
-            }
-
-            // Construct GPS Distance Logic
-            let distanceChipHTML = "";
-            if (isGpsActive && currentUserCoordinates) {
-                let distVal = item._calculatedDistance;
-                if (distVal === undefined) {
-                    const coords = extractItemCoordinates(item);
-                    if (coords) distVal = calculateHaversineDistance(currentUserCoordinates.lat, currentUserCoordinates.lng, coords.lat, coords.lng);
-                }
-
-                if (distVal !== undefined && distVal !== Infinity) {
-                    const displayDist = distVal < 1 ? `${Math.round(distVal * 1000)}m` : `${distVal.toFixed(1)}km`;
-                    distanceChipHTML = `
-                        <span class="animated-distance-chip" title="Calculated distance">
-                            <span class="gps-dot"></span>
-                            <span>${displayDist}</span>
-                        </span>
-                    `;
-                }
-            } else {
-                distanceChipHTML = `
-                    <span class="animated-distance-chip no-gps" title="GPS Inactive">
-                        <span class="gps-dot"></span>
-                        <span>GPS</span>
-                    </span>
-                `;
-            }
-
-            // Preview recent comments
-            let commentsPreviewHTML = "";
-            if (commentsList.length > 0) {
-                const recentComments = commentsList.slice(-2);
-                recentComments.forEach(c => {
-                    commentsPreviewHTML += `<div class="comment-item-preview"><strong>${c.userName || 'User'}:</strong> ${c.text || ''}</div>`;
-                });
-            }
-
-            return `
-                <!-- Author and Actions Header -->
-                <div class="post-author-header">
-                    <div class="author-info-left" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
-                        ${authorPhoto 
-                            ? `<img class="author-avatar" src="${authorPhoto}" alt="${firstName}">` 
-                            : `<div class="author-avatar">${firstName.charAt(0).toUpperCase()}</div>`
-                        }
-                        <div class="author-name-box">
-                            <span class="author-first-name">${firstName}</span>
-                            <span class="author-sub-label">Posted service</span>
-                        </div>
-                    </div>
-                    
-                    <div class="author-actions-right">
-                        ${distanceChipHTML}
-
-                        ${authorId !== 'unknown' ? `
-                            <button class="btn-follow-author follow-btn-${authorId} ${isFollowingAuthor ? 'following' : ''}" onclick="toggleFollowUser(event, '${authorId}')">
-                                ${isFollowingAuthor ? 'Following' : '+ Follow'}
-                            </button>
-                        ` : ''}
-                        
-                        <button class="btn-view-author-profile" onclick="navigateToAuthorProfile(event, '${authorId}', '${fullAuthorName}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Existing Meta Row -->
-                <div class="badge-meta-row" style="margin-bottom:8px;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span class="spotlight-pill">${category}</span>
-                        ${allImages.length > 1 ? `<span style="font-size:10px; background:#F1F5F9; border:1px solid #E2E8F0; padding:2px 6px; border-radius:10px; color:#0F172A; font-weight:700;">📷 ${allImages.length} Photos</span>` : ''}
-                    </div>
-                    <span class="timestamp-log-text" data-timestamp="${numericalTime}">${formatExactTimestampWithSeconds(numericalTime)}</span>
-                </div>
-
-                ${imageHTML}
-                
-                <div class="clickable-news-content">
-                    <h2 class="broadcast-title">${headline}</h2>
-                    <div style="margin-top: 8px; font-size: 13px; color: #475569; font-weight: 600;">
-                        📍 Location: <span class="location-text-val">${fullLocationStr}</span>
-                    </div>
-                    ${categorySpecsHTML}
-                </div>
-
-                <!-- Social Action Bar -->
-                <div class="post-social-bar">
-                    <div style="display:flex; align-items:center; gap:4px;">
-                        <button class="social-action-btn ${isLikedByMe ? 'liked' : ''}" id="like-btn-${item.id}" onclick="toggleLikePost(event, '${item.id}', '${item._dbPath || 'posts'}')">
-                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            <span id="like-count-${item.id}">${likeCount}</span>
-                        </button>
-
-                        <button class="social-action-btn" onclick="toggleCommentBox(event, '${item.id}')">
-                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            <span id="comment-count-${item.id}">${commentCount}</span>
-                        </button>
-                    </div>
-
-                    <button class="btn-details-dark-flat" onclick="openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')">
-                        Details &rarr;
-                    </button>
-                </div>
-
-                <!-- Comment Input Box -->
-                <div class="quick-comments-preview" id="comments-box-${item.id}">
-                    <div id="comments-list-${item.id}">
-                        ${commentsPreviewHTML}
-                    </div>
-                    <div class="comment-input-inline-box" onclick="event.stopPropagation()">
-                        <input type="text" class="comment-input-field" id="comment-input-${item.id}" placeholder="Ask a question..." />
-                        <button class="comment-submit-btn" onclick="submitInlineComment(event, '${item.id}', '${item._dbPath || 'posts'}')">Post</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        window.openFullNewsReader = function(itemId, path) {
-            sessionStorage.setItem('rental_scroll_pos', window.scrollY.toString());
-            window.location.href = `feedo.html?id=${encodeURIComponent(itemId)}`;
-        };
-
-        function setupSearchEngineControls() {
-            if (DOM.openSearchBtn && DOM.searchOverlay) {
-                DOM.openSearchBtn.addEventListener('click', () => {
-                    DOM.searchOverlay.classList.add('active-search');
-                    if (DOM.searchInput) {
-                        DOM.searchInput.value = '';
-                        DOM.searchInput.focus();
-                    }
-                    executeNewsSearchQuery('');
-                });
-            }
-
-            if (DOM.closeSearchBtn && DOM.searchOverlay) {
-                DOM.closeSearchBtn.addEventListener('click', () => {
-                    DOM.searchOverlay.classList.remove('active-search');
-                });
-            }
-
-            if (DOM.searchInput) {
-                DOM.searchInput.addEventListener('input', (e) => {
-                    executeNewsSearchQuery(e.target.value);
-                });
-            }
-        }
-
-        function executeNewsSearchQuery(query) {
-            if (!DOM.searchResultsArea) return;
-
-            const cleanQuery = query.trim().toLowerCase();
-
-            if (!cleanQuery) {
-                DOM.searchResultsArea.innerHTML = `
-                    <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        Type a keyword, city, or title above to find service items.
-                    </div>
-                `;
-                return;
-            }
-
-            const matchedNews = localCachedBroadcasts.filter(item => {
-                const code = String(item.id || '').toLowerCase();
-                const title = String(item.titleName || item.title || '').toLowerCase();
-                const content = String(item.body || item.content || '').toLowerCase();
-                const locationFull = extractFullLocationString(item).toLowerCase();
-                const subCategory = String(item.subCategory || '').toLowerCase();
-
-                return code.includes(cleanQuery) || title.includes(cleanQuery) || content.includes(cleanQuery) || locationFull.includes(cleanQuery) || subCategory.includes(cleanQuery);
-            });
-
-            if (matchedNews.length === 0) {
-                DOM.searchResultsArea.innerHTML = `
-                    <div style="text-align:center; padding:30px 20px; color:#64748B; font-size:13px; font-weight:600;">
-                        No service listings matching "<strong>${cleanQuery}</strong>" found.
-                    </div>
-                `;
-                return;
-            }
-
-            DOM.searchResultsArea.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            matchedNews.forEach((item) => {
-                const card = document.createElement('article');
-                card.className = "featured-broadcast-card";
-                card.id = `item-card-${item.id}`;
-                card.setAttribute('onclick', `openFullNewsReader('${item.id}', '${item._dbPath || 'posts'}')`);
-                card.innerHTML = buildSingleNewsCardHTML(item);
-                fragment.appendChild(card);
-            });
-            DOM.searchResultsArea.appendChild(fragment);
         }
     </script>
 </body>

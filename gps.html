@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acquiring GPS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background-color: #081B38; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: white; text-align: center; }
+        .loading-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: #38BDF8; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .info-text { font-size: 16px; font-weight: 500; opacity: 0.9; max-width: 80%; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <div class="info-text" id="statusText">Requesting GPS Permission...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, query, limitToLast, get, orderByChild, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
+            authDomain: "delala-1b582.firebaseapp.com",
+            databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com",
+            projectId: "delala-1b582",
+            storageBucket: "delala-1b582.firebasestorage.app",
+            messagingSenderId: "1073041850834",
+            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const BITS = [16, 8, 4, 2, 1];
+        const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+
+        function encodeFastGeohash(latitude, longitude, precision = 3) {
+            let isEven = true, lat = [-90.0, 90.0], lon = [-180.0, 180.0], bit = 0, ch = 0, geohash = "";
+            while (geohash.length < precision) {
+                let mid = isEven ? (lon[0] + lon[1]) / 2 : (lat[0] + lat[1]) / 2;
+                if (isEven) { if (longitude > mid) { ch |= BITS[bit]; lon[0] = mid; } else lon[1] = mid; }
+                else { if (latitude > mid) { ch |= BITS[bit]; lat[0] = mid; } else lat[1] = mid; }
+                isEven = !isEven;
+                if (bit < 4) bit++; else { geohash += BASE32[ch]; bit = 0; ch = 0; }
+            }
+            return geohash;
+        }
+
+        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; const dLat = (lat2 - lat1) * (Math.PI / 180); const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function isRentalCategory(item) {
+            if (!item) return false;
+            const rType = String(item.rentalType || '').trim().toLowerCase();
+            const cat = String(item.category || '').trim().toLowerCase();
+            return rType.length > 0 || cat.includes('rental') || cat.includes('rent');
+        }
+
+        function extractItemCoordinates(item) {
+            if (item.location && typeof item.location === 'object') {
+                const lat = parseFloat(item.location.latitude); const lng = parseFloat(item.location.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+            }
+            const fallbackLat = item.latitude ?? item.lat ?? item.locationDetails?.lat ?? item.coordinates?.lat;
+            const fallbackLng = item.longitude ?? item.lng ?? item.locationDetails?.lng ?? item.coordinates?.lng;
+            if (fallbackLat !== undefined && fallbackLng !== undefined) {
+                const pLat = parseFloat(fallbackLat); const pLng = parseFloat(fallbackLng);
+                if (!isNaN(pLat) && !isNaN(pLng)) return { lat: pLat, lng: pLng };
+            }
+            return null;
+        }
+
+        async function fetchNearbyItems(coords) {
+            document.getElementById('statusText').innerText = "Searching items near you...";
+            const userGeohash = encodeFastGeohash(coords.lat, coords.lng, 3);
+            const nodePaths = ['posts', 'delala_new'];
+            const matchingItems = [];
+            const seenIds = new Set();
+
+            try {
+                for (const nodePath of nodePaths) {
+                    const q = query(ref(db, nodePath), orderByChild('geohash'), startAt(userGeohash), endAt(userGeohash + '\uf8ff'));
+                    const snapshot = await get(q);
+                    
+                    let itemsFound = false;
+                    snapshot.forEach((childSnap) => {
+                        itemsFound = true;
+                        processItem(childSnap, nodePath, coords, seenIds, matchingItems);
+                    });
+
+                    if (!itemsFound) {
+                        const fallbackQ = query(ref(db, nodePath), limitToLast(50));
+                        const fbSnapshot = await get(fallbackQ);
+                        fbSnapshot.forEach((childSnap) => {
+                            processItem(childSnap, nodePath, coords, seenIds, matchingItems);
+                        });
+                    }
+                }
+                
+                matchingItems.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
+                
+                sessionStorage.setItem('hulum_external_filter', JSON.stringify({ filter: 'gps', coords: coords, items: matchingItems }));
+                window.location.replace('rental.html');
+                
+            } catch (error) {
+                window.location.replace('rental.html');
+            }
+        }
+
+        function processItem(childSnap, nodePath, coords, seenIds, matchingItems) {
+            const rawItem = { id: childSnap.key, _dbPath: nodePath, ...childSnap.val() };
+            if (!seenIds.has(rawItem.id) && isRentalCategory(rawItem)) {
+                const itemCoords = extractItemCoordinates(rawItem);
+                if (itemCoords) {
+                    const dist = calculateDistanceKm(coords.lat, coords.lng, itemCoords.lat, itemCoords.lng);
+                    if (dist <= 50) { 
+                        rawItem._calculatedDistance = dist; 
+                        matchingItems.push(rawItem); 
+                        seenIds.add(rawItem.id); 
+                    }
+                }
+            }
+        }
+
+        window.onload = function() {
+            if (!navigator.geolocation) {
+                window.location.replace('rental.html');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    fetchNearbyItems(coords);
+                },
+                (error) => {
+                    // Always redirect back immediately if permission denied/failed
+                    window.location.replace('rental.html');
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
+        };
+    </script>
+</body>
+</html>

@@ -52,61 +52,6 @@
             height: 100vh; 
         }
 
-        /* Top Bar Overlay Controls */
-        .top-left-controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 140px;
-            z-index: 1000;
-        }
-
-        .search-box-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 360px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            color: #FFFFFF;
-            font-size: 13px;
-            outline: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .search-input::placeholder { color: #94A3B8; }
-
-        .search-results-dropdown {
-            position: absolute;
-            top: 48px;
-            left: 0;
-            right: 0;
-            background: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            max-height: 220px;
-            overflow-y: auto;
-            z-index: 1001;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 10px 14px;
-            font-size: 12px;
-            color: var(--primary-dark);
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-result-item:last-child { border-bottom: none; }
-        .search-result-item:hover { background: #F1F5F9; }
-
         .top-right-controls {
             position: absolute;
             top: 20px;
@@ -355,14 +300,6 @@
 <body>
 
     <div class="map-wrapper" id="mapContainer">
-        <!-- Manual Location Search Controls -->
-        <div class="top-left-controls">
-            <div class="search-box-wrapper">
-                <input type="text" id="manualSearchInput" class="search-input" placeholder="Search neighborhood or city manually..." autocomplete="off">
-                <div id="searchResultsDropdown" class="search-results-dropdown"></div>
-            </div>
-        </div>
-
         <div class="top-right-controls">
             <button type="button" class="map-close-btn" id="closeMapFullscreenBtn" onclick="window.location.href='rentalpost1.html'" title="Close Map">✕</button>
             <button type="button" class="save-location-btn" id="saveLocationBtn" disabled>
@@ -371,7 +308,7 @@
         </div>
 
         <div id="rentalMap"></div>
-        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Toggle Real-Time Tracking">
+        <button type="button" class="map-gps-btn" id="mapGpsBtn" title="Retry Real-Time GPS Tracking">
             <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
         </button>
     </div>
@@ -380,7 +317,7 @@
     <div class="modal-overlay" id="confirmLocationModalOverlay">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Confirm Selected Location</h3>
+                <h3>Confirm GPS Location</h3>
                 <button type="button" class="modal-close-btn" id="closeLocationModalCross">✕</button>
             </div>
             <div class="modal-body" id="locationConfirmBody"></div>
@@ -402,11 +339,11 @@
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
                 </div>
-                <div class="error-modal-title" id="errorModalTitle">GPS Error</div>
-                <p class="error-modal-msg" id="errorModalMessage">Unable to retrieve real-time location.</p>
+                <div class="error-modal-title" id="errorModalTitle">GPS Permission Required</div>
+                <p class="error-modal-msg" id="errorModalMessage">Please enable GPS location permission to automatically detect your location.</p>
             </div>
             <div class="modal-footer" style="padding: 12px 20px 20px; background: transparent; border: none;">
-                <button type="button" class="btn-error-dismiss" id="dismissErrorBtn">Got It</button>
+                <button type="button" class="btn-error-dismiss" id="dismissErrorBtn">Enable / Retry GPS</button>
             </div>
         </div>
     </div>
@@ -417,52 +354,33 @@
         let map, mapMarker;
         let watchPositionId = null;
         let isLocationTracked = false;
-        let isManualSelection = false;
         let currentTrackedLat = null;
         let currentTrackedLng = null;
         let currentTrackedAccuracy = null;
         let currentAddressInfo = null;
-        let searchDebounceTimeout = null;
 
-        const BOLE_LAT = 9.0034;
-        const BOLE_LNG = 38.7881;
+        // Default initial center fallback if map initializes before GPS returns
+        const DEFAULT_LAT = 9.0034;
+        const DEFAULT_LNG = 38.7881;
 
         document.addEventListener('DOMContentLoaded', () => {
             initMapLibreMap();
             startRealtimeTracking();
 
             document.getElementById('saveLocationBtn').addEventListener('click', promptLocationConfirmation);
-            document.getElementById('mapGpsBtn').addEventListener('click', toggleRealtimeTracking);
+            document.getElementById('mapGpsBtn').addEventListener('click', startRealtimeTracking);
 
             document.getElementById('closeLocationModalCross').addEventListener('click', () => {
                 document.getElementById('confirmLocationModalOverlay').style.display = 'none';
             });
             document.getElementById('retrackLocationBtn').addEventListener('click', () => {
                 document.getElementById('confirmLocationModalOverlay').style.display = 'none';
-                isManualSelection = false;
                 startRealtimeTracking();
             });
             document.getElementById('acceptLocationBtn').addEventListener('click', saveLocationAndExit);
             document.getElementById('dismissErrorBtn').addEventListener('click', () => {
                 document.getElementById('errorModalOverlay').style.display = 'none';
-            });
-
-            // Manual location search handler
-            const searchInput = document.getElementById('manualSearchInput');
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchDebounceTimeout);
-                const query = e.target.value.trim();
-                if (query.length < 3) {
-                    document.getElementById('searchResultsDropdown').style.display = 'none';
-                    return;
-                }
-                searchDebounceTimeout = setTimeout(() => searchLocationManual(query), 400);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-box-wrapper')) {
-                    document.getElementById('searchResultsDropdown').style.display = 'none';
-                }
+                startRealtimeTracking();
             });
         });
 
@@ -470,72 +388,17 @@
             map = new maplibregl.Map({
                 container: 'rentalMap',
                 style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-                center: [BOLE_LNG, BOLE_LAT], // [lng, lat]
-                zoom: 14,
+                center: [DEFAULT_LNG, DEFAULT_LAT],
+                zoom: 15,
                 attributionControl: false
             });
 
-            // Create custom pulsing dot marker for location selection
             const userDot = document.createElement('div');
             userDot.className = 'user-location-dot';
 
             mapMarker = new maplibregl.Marker({ element: userDot })
-                .setLngLat([BOLE_LNG, BOLE_LAT])
+                .setLngLat([DEFAULT_LNG, DEFAULT_LAT])
                 .addTo(map);
-
-            // Manual selection by clicking directly on the map
-            map.on('click', (e) => {
-                stopRealtimeTracking();
-                isManualSelection = true;
-                const { lng, lat } = e.lngLat;
-                setManualLocation(lat, lng);
-            });
-        }
-
-        function setManualLocation(lat, lng) {
-            currentTrackedLat = lat;
-            currentTrackedLng = lng;
-            currentTrackedAccuracy = null;
-            isLocationTracked = true;
-
-            if (mapMarker) {
-                mapMarker.setLngLat([lng, lat]);
-            }
-            map.flyTo({ center: [lng, lat] });
-
-            enableSaveButton();
-            reverseGeocodeOSM(lat, lng);
-        }
-
-        function searchLocationManual(query) {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
-                .then(res => res.json())
-                .then(data => {
-                    const dropdown = document.getElementById('searchResultsDropdown');
-                    dropdown.innerHTML = '';
-                    if (!data || data.length === 0) {
-                        dropdown.style.display = 'none';
-                        return;
-                    }
-
-                    data.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'search-result-item';
-                        div.innerText = item.display_name;
-                        div.addEventListener('click', () => {
-                            stopRealtimeTracking();
-                            isManualSelection = true;
-                            const lat = parseFloat(item.lat);
-                            const lng = parseFloat(item.lon);
-                            setManualLocation(lat, lng);
-                            dropdown.style.display = 'none';
-                            document.getElementById('manualSearchInput').value = item.display_name.split(',')[0];
-                        });
-                        dropdown.appendChild(div);
-                    });
-                    dropdown.style.display = 'block';
-                })
-                .catch(err => console.error("Search failed:", err));
         }
 
         function enableSaveButton() {
@@ -544,18 +407,9 @@
             saveBtn.innerHTML = `✓ Done`;
         }
 
-        function toggleRealtimeTracking() {
-            isManualSelection = false;
-            if (watchPositionId !== null) {
-                stopRealtimeTracking();
-            } else {
-                startRealtimeTracking();
-            }
-        }
-
         function startRealtimeTracking() {
             if (!navigator.geolocation) {
-                showErrorModal("GPS Error", "Geolocation is not supported by your device or browser.");
+                showErrorModal("GPS Unsupported", "Geolocation is not supported by your device or browser.");
                 return;
             }
 
@@ -568,17 +422,18 @@
 
             const geoOptions = {
                 enableHighAccuracy: true,
-                timeout: 30000,
-                maximumAge: 1000
+                timeout: 20000,
+                maximumAge: 0
             };
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => processGpsSuccess(pos),
                 (err) => {
+                    // Fallback to low accuracy if high accuracy fails/times out
                     navigator.geolocation.getCurrentPosition(
                         (pos) => processGpsSuccess(pos),
                         (err2) => handleGpsError(err2),
-                        { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
+                        { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
                     );
                 },
                 geoOptions
@@ -592,8 +447,6 @@
         }
 
         function processGpsSuccess(pos) {
-            if (isManualSelection) return;
-
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             const accuracy = pos.coords.accuracy;
@@ -615,11 +468,11 @@
         function handleGpsError(err) {
             stopRealtimeTracking();
             if (err.code === 1) {
-                showErrorModal("Permission Blocked", "Location permission was denied. Please enable location access or click manually on the map.");
+                showErrorModal("Permission Blocked", "Location permission was denied. Please turn on location permissions in your browser or device settings to use this feature.");
             } else if (err.code === 2) {
-                showErrorModal("GPS Signal Unavailable", "Unable to acquire a valid GPS fix. Click manually on the map to set location.");
+                showErrorModal("GPS Signal Unavailable", "Unable to acquire a valid GPS fix. Please ensure you are outdoors or have signal enabled.");
             } else {
-                showErrorModal("GPS Connection Timeout", "Real-time location request timed out.");
+                showErrorModal("GPS Connection Timeout", "Real-time location request timed out. Please try again.");
             }
         }
 
@@ -631,7 +484,6 @@
             document.getElementById('mapGpsBtn').classList.remove('tracking-active');
         }
 
-        /* GEOHASH ENCODER FUNCTION */
         function encodeGeohash(latitude, longitude, precision = 9) {
             const B32 = '0123456789bcdefghjkmnpqrstuvwxyz';
             let isEven = true;
@@ -666,32 +518,31 @@
 
         function promptLocationConfirmation() {
             if (!isLocationTracked || !currentTrackedLat || !currentTrackedLng) {
-                showErrorModal("Selection Required", "Please click on the map or wait for GPS location.");
+                showErrorModal("GPS Required", "Waiting for valid GPS coordinates. Please ensure location services are enabled.");
                 return;
             }
 
-            // Generate geohash for preview
             const previewGeohash = encodeGeohash(currentTrackedLat, currentTrackedLng, 9);
             const modalBody = document.getElementById('locationConfirmBody');
-            const accuracyText = isManualSelection ? "Manual Pin Drop" : (currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "Live Sensor Fix");
+            const accuracyText = currentTrackedAccuracy ? `±${Math.round(currentTrackedAccuracy)} meters` : "High Accuracy Fix";
             const city = currentAddressInfo?.city || 'Addis Ababa';
             const country = currentAddressInfo?.country || 'Ethiopia';
             const region = currentAddressInfo?.region || 'Addis Ababa';
 
             modalBody.innerHTML = `
                 <div class="preview-section">
-                    <div class="preview-section-title">SELECTED COORDINATES & GEOHASH</div>
+                    <div class="preview-section-title">GPS COORDINATES & GEOHASH</div>
                     <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Latitude: ${currentTrackedLat.toFixed(6)}</div>
                     <div style="font-size:13px; font-weight:800; color:var(--primary-dark);">Longitude: ${currentTrackedLng.toFixed(6)}</div>
                     <div style="font-size:12px; font-weight:800; color:var(--primary-accent); margin-top:4px;">Geohash: ${previewGeohash}</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Selection Mode: <strong>${accuracyText}</strong></div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Accuracy: <strong>${accuracyText}</strong></div>
                 </div>
                 <div class="preview-section">
                     <div class="preview-section-title">DETECTED ADDRESS</div>
                     <div style="font-size:13px; font-weight:700; color:var(--primary-dark);">${city}, ${region}</div>
                     <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Country: ${country}</div>
                 </div>
-                <p style="font-size:11px; color:var(--text-muted); margin:0;">Confirm if this location matches where your rental item is available.</p>
+                <p style="font-size:11px; color:var(--text-muted); margin:0;">Confirm if this is your current detected GPS location.</p>
             `;
 
             document.getElementById('confirmLocationModalOverlay').style.display = 'flex';
@@ -701,18 +552,16 @@
             document.getElementById('confirmLocationModalOverlay').style.display = 'none';
             stopRealtimeTracking();
 
-            // Generate a 9-character geohash based on the coordinates
             const geohashValue = encodeGeohash(currentTrackedLat, currentTrackedLng, 9);
 
             const locationData = {
                 lat: currentTrackedLat,
                 lng: currentTrackedLng,
-                geohash: geohashValue, // Inject the generated geohash here
+                geohash: geohashValue,
                 address: currentAddressInfo || {},
-                isManual: isManualSelection
+                isManual: false
             };
             
-            // Save to session storage so rentalpost1.html can read the exact structure required by Firebase rules
             sessionStorage.setItem('selectedGpsLocation', JSON.stringify(locationData));
             window.location.href = "rentalpost1.html";
         }
@@ -726,7 +575,7 @@
                         currentAddressInfo = {
                             country: addr.country || "Ethiopia",
                             region: addr.state || addr.region || addr.province || "Addis Ababa",
-                            zone: addr.county || addr.state_district || addr.zone || "Bole",
+                            zone: addr.county || addr.state_district || addr.zone || "",
                             city: addr.city || addr.town || addr.village || "Addis Ababa",
                             subcity: addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || ""
                         };

@@ -1,6 +1,6 @@
 {
   "short_name": "Delala",
-  "name": "Delala Web App",
+  "name": "Delala App",
   "icons": [
     {
       "src": "s.png",
@@ -15,10 +15,10 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "background_color": "#ffffff",
-  "theme_color": "#008000",
+  "start_url": "./index.html",
+  "background_color": "#F8FAFC",
+  "theme_color": "#F8FAFC",
   "display": "standalone",
   "orientation": "portrait",
-  "scope": "/"
+  "scope": "./"
 }

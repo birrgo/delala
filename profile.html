@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="news.css">
     <style>
-        /* Shared Styles Maintained */
-        .nav-header { padding: 6px 16px !important; height: 46px !important; min-height: 46px !important; display: flex; align-items: center; justify-content: space-between; }
+        .nav-header { padding: calc(env(safe-area-inset-top, 24px) + 8px) 16px 8px !important; height: auto !important; min-height: 46px !important; display: flex; align-items: center; justify-content: space-between; background-color: #0F172A; }
         .header-title-text { font-size: 16px !important; margin: 0 !important; }
         .profile-info-section { position: relative; z-index: 5; display: flex; flex-direction: row; align-items: flex-start; gap: 14px; padding: 12px 16px 8px; text-align: left; }
         .profile-left-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 72px; }
@@ -30,51 +29,42 @@
         .metric-block.clickable:active { opacity: 0.6; }
         .metric-num { font-size: 15px; font-weight: 900; color: #0F172A; }
         .metric-label { font-size: 10px; color: #334155; font-weight: 700; }
-        .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); animation: slideDown 0.3s ease; }
+        .upload-progress-card { display: none; background: #FFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px 16px; margin: 12px 16px 4px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); }
         .upload-progress-card.active { display: block; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         .upload-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .upload-card-title { font-size: 12px; font-weight: 800; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
         .upload-card-percent { font-size: 12px; font-weight: 800; color: #2563EB; }
         .upload-progress-bar-bg { width: 100%; height: 8px; background: #F1F5F9; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0; }
-        .upload-progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563EB, #1D4ED8); border-radius: 10px; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .category-tabs-bar { display: flex; align-items: center; justify-content: space-around; gap: 4px; padding: 8px 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border-light, #E2E8F0); }
-        .category-pill-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 10px; border-radius: 12px; background: #F1F5F9; border: 1px solid var(--border-light, #E2E8F0); color: #475569; font-size: 10px; font-weight: 700; text-decoration: none; transition: all 0.2s ease; cursor: pointer; flex: 1; min-width: 52px; }
-        .category-pill-btn:active { transform: scale(0.95); }
-        .category-pill-btn.active { background: var(--metallic-sheen, #1E293B); color: #FFF; border-color: var(--primary-burgundy, #0F172A); box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
+        .upload-progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563EB, #1D4ED8); border-radius: 10px; transition: width 0.2s; }
+        
+        .category-tabs-bar { display: flex; align-items: center; justify-content: space-around; gap: 4px; padding: 8px 12px 12px; overflow-x: auto; border-bottom: 1px solid #E2E8F0; }
+        .category-pill-btn { position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 10px; border-radius: 12px; background: #F1F5F9; border: 1px solid #E2E8F0; color: #475569; font-size: 10px; font-weight: 700; cursor: pointer; flex: 1; min-width: 52px; }
+        .category-pill-btn.active { background: #1E293B; color: #FFF; border-color: #0F172A; box-shadow: 0 3px 8px rgba(37,40,48,0.2); }
         .category-pill-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+        .badge-count { position: absolute; top: 2px; right: 4px; background: #DC2626; color: #FFFFFF; font-size: 9px; font-weight: 900; border-radius: 10px; padding: 1px 5px; min-width: 14px; text-align: center; border: 1.5px solid #FFFFFF; }
         
-        /* Iframe Styles */
-        .posts-iframe-container { width: 100%; min-height: 50vh; display: block; border: none; background: var(--border-light, #E2E8F0); }
-        
+        .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #E2E8F0; width: 100%; min-height: 40vh; }
+        .post-grid-item { position: relative; aspect-ratio: 3 / 4; background: #1E293B; overflow: hidden; cursor: pointer; }
+        .post-grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; background: #0F172A; }
+        .post-views-count { position: absolute; bottom: 5px; left: 5px; display: flex; align-items: center; gap: 3px; color: #FFF; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 2; }
+        .post-views-count svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+        .empty-grid-msg { grid-column: span 3; text-align: center; padding: 40px 16px; color: #64748B; font-size: 13px; font-weight: 600; background: #F8FAFC; }
+
         .menu-wrapper { position: relative; display: inline-block; }
-        .menu-action-btn { background: transparent; border: none; color: #0F172A; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; transition: background-color 0.2s ease; }
-        .menu-action-btn:active { background-color: #F1F5F9; }
+        .menu-action-btn { background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; }
         .menu-action-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-        .profile-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #FFF; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); min-width: 190px; padding: 6px; display: none; flex-direction: column; gap: 2px; z-index: 1050; }
-        .profile-menu-dropdown.show { display: flex; }
-        .dropdown-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.15s ease; text-decoration: none; box-sizing: border-box; color: #0F172A; }
-        .dropdown-menu-item:active { background: #F1F5F9; }
-        .dropdown-menu-item.logout-item { color: #DC2626; }
-        .dropdown-menu-item.logout-item:active { background: #FEF2F2; }
-        .dropdown-menu-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-        .toggle-switch { width: 34px; height: 20px; background: #CBD5E1; border-radius: 20px; position: relative; transition: background 0.3s; flex-shrink: 0; pointer-events: none; }
-        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .toggle-switch.on { background: #10B981; }
-        .toggle-switch.on::after { transform: translateX(14px); }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #E2E8F0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; background: #FFF; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #E2E8F0; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748B; font-size: 11px; font-weight: 600; flex: 1; text-align: center; }
         .nav-item.active { color: #0F172A; }
         .nav-item .icon-bg svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
         .nav-item-post-center { position: relative; top: -14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; z-index: 1010; }
-        .post-fab-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #334155); box-shadow: 0 6px 16px rgba(0,0,0,0.15), 0 0 0 5px #FFF; display: flex; align-items: center; justify-content: center; color: #FFF; transition: transform 0.2s, box-shadow 0.2s; border: none; cursor: pointer; }
-        .post-fab-btn:active { transform: scale(0.92); }
-        .post-fab-btn svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.8; }
+        .post-fab-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #334155); box-shadow: 0 6px 16px rgba(0,0,0,0.15), 0 0 0 5px #FFF; display: flex; align-items: center; justify-content: center; color: #FFF; border: none; cursor: pointer; }
+        .post-fab-btn svg { width: 22px; height: 22px; stroke-width: 2; }
         .post-fab-label { margin-top: 3px; font-size: 10px; font-weight: 700; color: #334155; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 100000; align-items: center; justify-content: center; padding: 16px; }
         .modal-overlay.active { display: flex; }
-        .modal-card { background: #FFF; border-radius: 20px; max-width: 440px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; animation: modalPop 0.25s cubic-bezier(0.16,1,0.3,1); }
-        @keyframes modalPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-card { background: #FFF; border-radius: 20px; max-width: 440px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; }
         .modal-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0F172A; }
         .modal-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #64748B; font-weight: 700; }
@@ -82,28 +72,21 @@
         .preview-section { background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0; }
         .preview-section-title { font-size: 10px; font-weight: 800; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
         .preview-map-box { width: 100%; height: 160px; border-radius: 10px; margin-top: 8px; border: 1px solid #E2E8F0; overflow: hidden; }
-        .delete-post-btn { background: #DC2626; color: #FFF; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 6px rgba(220,38,38,0.2); }
-        .delete-post-btn:active { background: #991B1B; transform: scale(0.98); }
-        .delete-post-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+        .delete-post-btn { background: #DC2626; color: #FFF; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .verify-icon-wrapper { width: 48px; height: 48px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px; border: 1px solid #FEE2E2; }
-        .verify-icon-wrapper svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
         .verify-subtitle { font-size: 12px; color: #64748B; text-align: center; line-height: 1.5; margin: 0 0 12px; font-weight: 500; }
         .verify-input-group { display: flex; flex-direction: column; gap: 6px; }
         .verify-input-label { font-size: 11px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px; }
-        .verify-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #CBD5E1; font-family: inherit; font-size: 16px; font-weight: 700; color: #0F172A; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; background: #FFF; text-align: center; letter-spacing: 4px; }
-        .verify-input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
-        .verify-error-msg { color: #DC2626; font-size: 11px; font-weight: 700; text-align: center; display: none; margin-top: 4px; background: #FEF2F2; padding: 8px; border-radius: 8px; border: 1px solid #FEE2E2; }
+        .verify-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #CBD5E1; font-size: 16px; font-weight: 700; color: #0F172A; background: #FFF; text-align: center; letter-spacing: 4px; box-sizing: border-box; outline: none; }
+        .verify-error-msg { color: #DC2626; font-size: 11px; font-weight: 700; text-align: center; display: none; margin-top: 4px; background: #FEF2F2; padding: 8px; border-radius: 8px; }
         .verify-btn-group { display: flex; gap: 10px; margin-top: 8px; }
-        .btn-secondary { flex: 1; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; transition: background 0.15s; }
-        .btn-secondary:active { background: #E2E8F0; }
-        .btn-danger { flex: 1; background: #DC2626; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(220,38,38,0.2); transition: background 0.15s; }
-        .btn-danger:active { background: #991B1B; }
+        .btn-secondary { flex: 1; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; }
+        .btn-danger { flex: 1; background: #DC2626; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center; }
         .auth-prompt-card { text-align: center; padding: 8px; }
         .auth-prompt-icon { width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
-        .auth-prompt-icon svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; }
-        .auth-btn-primary { width: 100%; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; box-shadow: 0 4px 12px rgba(15,23,42,0.15); }
+        .auth-btn-primary { width: 100%; background: #0F172A; color: #FFF; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; }
         .auth-btn-secondary { width: 100%; background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: none; display: block; margin-top: 8px; }
-        .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: #0F172A; color: #FFF; padding: 10px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 200000; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: #0F172A; color: #FFF; padding: 10px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; z-index: 200000; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; display: flex; align-items: center; gap: 8px; }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
@@ -112,36 +95,13 @@
 
     <div class="app-view">
         <header class="nav-header">
-            <h1 class="header-title-text">Profile</h1>
+            <h1 class="header-title-text" style="color: white;">Profile</h1>
             <div class="header-left-group" style="justify-content: flex-end; display: flex; align-items: center; gap: 8px;">
-                <div class="header-live-clock-badge" id="topCornerLiveClock">--:--:--</div>
+                <div class="header-live-clock-badge" id="topCornerLiveClock" style="color: white;">--:--:--</div>
                 <div class="menu-wrapper">
-                    <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu">
+                    <button class="menu-action-btn" id="openMenuBtn" aria-label="Open Menu" style="color: white;">
                         <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
                     </button>
-                    <!-- 3-Dot Dropdown -->
-                    <div class="profile-menu-dropdown" id="profileMenuDropdown">
-                        <div class="dropdown-menu-item" id="togglePrivacyBtn" style="justify-content: space-between;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                <span>Public Network</span>
-                            </div>
-                            <div class="toggle-switch on" id="privacySwitch"></div>
-                        </div>
-                        <hr style="border:none; border-top:1px solid #E2E8F0; margin:2px 0;">
-                        <a href="broker.html" class="dropdown-menu-item" id="brokerMenuBtn">
-                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
-                            <span>Broker Portal</span>
-                        </a>
-                        <a href="usera.html" class="dropdown-menu-item payment-item">
-                            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                            <span>Payment</span>
-                        </a>
-                        <button class="dropdown-menu-item logout-item" id="logoutBtn">
-                            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            <span>Logout</span>
-                        </button>
-                    </div>
                 </div>
             </div>
         </header>
@@ -155,7 +115,6 @@
                 <div class="upload-progress-bar-bg"><div class="upload-progress-bar-fill" id="uploadProgressFill"></div></div>
             </div>
 
-            <!-- Profile Info Section -->
             <section class="profile-info-section">
                 <div class="profile-left-col">
                     <div class="avatar-container" id="avatarClickGroup" onclick="window.location.href='edit.html'">
@@ -169,7 +128,7 @@
                 </div>
 
                 <div class="profile-right-col">
-                    <h1 class="profile-display-name" id="userDisplayName">User</h1>
+                    <h1 class="profile-display-name" id="userDisplayName">User Profile</h1>
                     <p class="profile-username" id="userHandle">@user</p>
 
                     <div class="stats-metrics-row">
@@ -181,17 +140,18 @@
                 </div>
             </section>
 
-            <!-- Navigation Tabs Bar with Targets -->
             <nav class="category-tabs-bar" aria-label="Profile Navigation Filter">
-                <button type="button" class="category-pill-btn active" data-category="all" data-src="all.html">
+                <button type="button" class="category-pill-btn active" data-category="all">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
                     <span>All</span>
                 </button>
                 <button type="button" class="category-pill-btn" data-category="activity" data-src="active.html">
+                    <span class="badge-count" id="activityBadge" style="display: none;">0</span>
                     <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                     <span>Activity</span>
                 </button>
                 <button type="button" class="category-pill-btn" data-category="chat" data-src="chat.html">
+                    <span class="badge-count" id="chatBadge" style="display: none;">0</span>
                     <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     <span>Chat</span>
                 </button>
@@ -199,36 +159,29 @@
                     <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
                     <span>App</span>
                 </button>
-                <button type="button" class="category-pill-btn" data-category="hidden" data-src="hidden.html">
+                <button type="button" class="category-pill-btn" data-category="hidden">
                     <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     <span>Hidden</span>
                 </button>
             </nav>
 
-            <!-- Replaced Grid with Iframe -->
-            <iframe id="postsIframe" src="all.html" class="posts-iframe-container"></iframe>
+            <main class="posts-grid" id="postsGridContainer"></main>
         </div>
 
         <nav class="bottom-nav">
             <a id="nav-rental" href="rental.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span>Rental</span></a>
             <a id="nav-selling" href="selling.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><span>Selling</span></a>
-            <a id="nav-post" href="rentalpost.html" class="nav-item-post-center" aria-label="Post Item"><div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="post-fab-label">Post</span></a>
-            <a id="nav-service" href="service.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span>Service</span></a>
+            <a id="nav-post" href="post.html" class="nav-item-post-center" aria-label="Post Item"><div class="post-fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="post-fab-label">Post</span></a>
+            <a id="nav-service" href="service.html" class="nav-item"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></div><span>Service</span></a>
             <a id="nav-profile" href="profile.html" class="nav-item active"><div class="icon-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
         </nav>
     </div>
 
-    <!-- Modals -->
     <div class="modal-overlay" id="authPromptModal">
         <div class="modal-card">
-            <div class="modal-header">
-                <h3>Account Required</h3>
-                <button type="button" class="modal-close-btn" id="closeAuthModalBtn">✕</button>
-            </div>
+            <div class="modal-header"><h3>Account Required</h3><button type="button" class="modal-close-btn" id="closeAuthModalBtn">✕</button></div>
             <div class="modal-body auth-prompt-card">
-                <div class="auth-prompt-icon">
-                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
+                <div class="auth-prompt-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                 <h4 style="font-size:16px; font-weight:800; color:#0F172A; margin:0 0 6px;">Sign in to Delala</h4>
                 <p style="color:#64748B; font-size:12px; margin:0 0 18px; line-height:1.4;">Please log in or create a new account to view profile posts, manage listings, and upload content.</p>
                 <a href="login.html" class="auth-btn-primary">Log In</a>
@@ -263,25 +216,50 @@
         </div>
     </div>
 
+    <div id="menuIframeOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 10049;"></div>
+    <iframe id="menuIframe" src="menu.html" style="position: fixed; top: 0; right: -75%; width: 75%; height: 100vh; z-index: 10050; border: none; background: white; transition: right 0.3s ease;"></iframe>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // EXPOSE TO GLOBAL FOR IFRAMES TO ACCESS
         window.allUserPosts = [];
-        window.formatCount = formatCount;
-        window.openPreviewModal = openPreviewModal;
+        window.currentDisplayedPosts = [];
+        window.activeCategory = localStorage.getItem('delala_active_category') || 'all';
+        window.isPostsLoaded = false;
+        
+        function formatCount(count) {
+            const num = parseInt(count) || 0;
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        function hydrateCachedPosts() {
+            try {
+                const cachedPosts = localStorage.getItem('delala_cached_posts');
+                if (cachedPosts && localStorage.getItem('user_logged_out') !== 'true') {
+                    const parsed = JSON.parse(cachedPosts);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        window.allUserPosts = parsed;
+                        let totalLikes = 0;
+                        parsed.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
+                        const likesEl = document.getElementById('likesCount');
+                        if (likesEl) likesEl.innerText = formatCount(totalLikes);
+                        return true;
+                    }
+                }
+            } catch(e) {}
+            return false;
+        }
 
         const primaryConfig = { 
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q", 
             authDomain: "delala-1b582.firebaseapp.com", 
             databaseURL: "https://delala-1b582-default-rtdb.firebaseio.com", 
-            projectId: "delala-1b582", 
-            storageBucket: "delala-1b582.firebasestorage.app", 
-            messagingSenderId: "1073041850834", 
-            appId: "1:1073041850834:web:fe5d0095c3ff1b238f480b", 
-            measurementId: "G-2XW8F8FKBT" 
+            projectId: "delala-1b582"
         };
         const app = initializeApp(primaryConfig);
         const auth = getAuth(app);
@@ -298,10 +276,16 @@
 
         let previewMapInstance = null;
         let myLoggedInUid = null;
+        let currentPrivacyState = true;
         let postsUnsubscribe = null, servicePostsUnsubscribe = null, isUploadingActive = false, 
             pendingPostToDelete = null, isLoggedInUser = false;
         let primaryPosts = [];
         let servicePosts = [];
+        let activityUnsub = null, chatUnsub = null;
+
+        window.formatCount = formatCount;
+        window.openPreviewModal = openPreviewModal;
+        window.openPost = openPost;
 
         async function hashPin(pin) {
             const data = new TextEncoder().encode(pin);
@@ -319,29 +303,29 @@
             let firstName = userData.firstName || userData.first_name || "", middleName = userData.middleName || userData.middle_name || userData.fatherName || "";
             if (!firstName && userData.fullName) { const parts = userData.fullName.trim().split(/\s+/); firstName = parts[0] || ""; middleName = parts[1] || ""; }
 
-            const displayName = `${firstName} ${middleName}`.trim() || userData.displayName || "User";
-            const handle = userData.username || userData.handle || (firstName ? firstName.toLowerCase() : "user");
+            const displayName = `${firstName} ${middleName}`.trim() || userData.displayName || "User Profile";
+            const fallbackHandle = myLoggedInUid ? String(myLoggedInUid) : "guest";
+            const handle = userData.username || userData.handle || (firstName ? firstName.toLowerCase() : fallbackHandle);
             
-            document.getElementById('userDisplayName').innerText = displayName;
-            document.getElementById('userHandle').innerText = "@" + handle.replace(/^@/, '');
-            if (userData.photoURL || userData.profilePicture) document.getElementById('userAvatarImg').src = userData.photoURL || userData.profilePicture;
-
-            document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
-            document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
-            document.getElementById('ratingCount').innerText = (userData.rating || "0.0") + " ★";
-            
-            const privacySwitch = document.getElementById('privacySwitch');
-            if (userData.hasOwnProperty('isNetworkPublic')) {
-                if (userData.isNetworkPublic) privacySwitch.classList.add('on');
-                else privacySwitch.classList.remove('on');
-            } else {
-                privacySwitch.classList.add('on'); 
+            if (document.getElementById('userDisplayName')) document.getElementById('userDisplayName').innerText = displayName;
+            if (document.getElementById('userHandle')) document.getElementById('userHandle').innerText = "@" + handle.replace(/^@/, '');
+            if ((userData.photoURL || userData.profilePicture) && document.getElementById('userAvatarImg')) {
+                document.getElementById('userAvatarImg').src = userData.photoURL || userData.profilePicture;
             }
+
+            if (document.getElementById('followingCount')) document.getElementById('followingCount').innerText = formatCount(userData.following || 0);
+            if (document.getElementById('followersCount')) document.getElementById('followersCount').innerText = formatCount(userData.followers || 0);
+            if (document.getElementById('ratingCount')) document.getElementById('ratingCount').innerText = (userData.rating || "0.0") + " ★";
+            
+            currentPrivacyState = userData.hasOwnProperty('isNetworkPublic') ? userData.isNetworkPublic : true;
         }
 
-        hydrateCachedProfile();
-
         document.addEventListener('DOMContentLoaded', () => {
+            hydrateCachedProfile();
+            hydrateCachedPosts();
+            restoreCachedTabState();
+            renderNativeGrid();
+
             setupAuthListener(); 
             setupMenuHandlers(); 
             setupModalHandlers(); 
@@ -354,6 +338,140 @@
                 checkAndRunPendingUpload();
             });
         });
+
+        function renderNativeGrid() {
+            const container = document.getElementById('postsGridContainer');
+            if (!container) return;
+
+            const category = window.activeCategory || 'all';
+            let filtered = [];
+
+            if (category === 'hidden') {
+                filtered = (window.allUserPosts || []).filter(p => p && p.isHidden === true);
+            } else {
+                filtered = (window.allUserPosts || []).filter(p => p && p.isHidden !== true);
+            }
+
+            window.currentDisplayedPosts = filtered;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-grid-msg">${category === 'hidden' ? 'No hidden posts.' : 'No active items found.'}</div>`;
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < filtered.length; i++) {
+                const post = filtered[i];
+                const views = post.views || post.viewCount || 0;
+                
+                // FIXED: Enhanced media source resolver checking all possible image paths
+                const mediaSrc = (post.images && Array.isArray(post.images) && post.images.length > 0) 
+                    ? post.images[0] 
+                    : (post.imageUrl || post.image || post.mediaUrl || post.photo || post.profilePicture || '40789.png');
+
+                html += `
+                    <div class="post-grid-item" onclick="openPost(${i})">
+                        <img src="${mediaSrc}" alt="Post" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='40789.png';">
+                        <div class="post-views-count">
+                            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <span>${formatCount(views)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function openPost(index) {
+            const post = window.currentDisplayedPosts[index];
+            if (post) openPreviewModal(post);
+        }
+
+        function formatBadgeCount(val) {
+            const count = parseInt(val) || 0;
+            if (count <= 0) return '';
+            if (count > 99) return '99+';
+            return String(count);
+        }
+
+        function updateBadgeUI(elementId, count) {
+            const badge = document.getElementById(elementId);
+            if (!badge) return;
+            const text = formatBadgeCount(count);
+            if (text) {
+                badge.innerText = text;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.innerText = '0';
+                badge.style.display = 'none';
+            }
+        }
+
+        function setupUnreadTracking(userId) {
+            if (activityUnsub) activityUnsub();
+            if (chatUnsub) chatUnsub();
+
+            const lastReadActivity = parseInt(localStorage.getItem(`delala_read_activity_${userId}`) || '0');
+            const lastReadChat = parseInt(localStorage.getItem(`delala_read_chat_${userId}`) || '0');
+
+            activityUnsub = onValue(ref(db, `user_activities/${userId}`), (snapshot) => {
+                if (!snapshot.exists()) { updateBadgeUI('activityBadge', 0); return; }
+                let unread = 0;
+                snapshot.forEach(child => {
+                    const item = child.val();
+                    const ts = item.timestamp || item.createdAt || 0;
+                    if (ts > lastReadActivity && !item.isRead) unread++;
+                });
+                updateBadgeUI('activityBadge', unread);
+            });
+
+            chatUnsub = onValue(ref(db, `user_chats/${userId}`), (snapshot) => {
+                if (!snapshot.exists()) { updateBadgeUI('chatBadge', 0); return; }
+                let unread = 0;
+                snapshot.forEach(child => {
+                    const item = child.val();
+                    const unreadNum = parseInt(item.unreadCount || item.unread) || 0;
+                    const ts = item.lastMessageTime || item.timestamp || 0;
+                    if (unreadNum > 0 || ts > lastReadChat) unread += (unreadNum || 1);
+                });
+                updateBadgeUI('chatBadge', unread);
+            });
+        }
+
+        window.togglePrivacy = async function() {
+            if (!isLoggedInUser || !myLoggedInUid) return;
+            const newValue = !currentPrivacyState;
+            currentPrivacyState = newValue;
+            
+            const iframe = document.getElementById('menuIframe');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.updateToggle) {
+                iframe.contentWindow.updateToggle(currentPrivacyState);
+            }
+            
+            try {
+                await update(ref(db, `users/${myLoggedInUid}`), { isNetworkPublic: newValue });
+                showToast(`Network visibility is now ${newValue ? 'Public' : 'Private'}`);
+            } catch(err) {
+                currentPrivacyState = !newValue;
+                if (iframe && iframe.contentWindow && iframe.contentWindow.updateToggle) {
+                    iframe.contentWindow.updateToggle(currentPrivacyState);
+                }
+                showToast("Failed to update privacy settings.");
+            }
+        };
+
+        window.handleLogout = async function() {
+            try {
+                localStorage.setItem('user_logged_out', 'true'); 
+                localStorage.removeItem('auth_session_phone'); 
+                localStorage.removeItem('auth_session_user_id'); 
+                localStorage.removeItem('delala_cached_profile');
+                localStorage.removeItem('delala_cached_posts');
+                localStorage.removeItem('delala_active_category');
+                sessionStorage.clear(); 
+                await signOut(auth);
+            } catch (error) {} finally { window.location.href = 'rental.html'; }
+        };
 
         function showAuthModal() {
             const overlay = document.getElementById('authPromptModal');
@@ -403,24 +521,60 @@
                     if (hasUploaded) return;
                     hasUploaded = true;
                     fill.style.width = '100%'; percent.innerText = '100%';
+                    
                     try {
-                        const postCategory = uploadTask.payload.rentalType || uploadTask.payload.category || "Rental";
+                        let postCategory = uploadTask.payload.rentalType || uploadTask.payload.category || "Rental";
+                        let testCat = postCategory.toLowerCase().replace(/\s/g, '');
+                        if (testCat.includes('guest') || testCat.includes('guset')) {
+                            postCategory = "Guest House";
+                        }
+
                         const targetDbRef = (postCategory.toLowerCase() === 'service') ? serviceDb : db;
                         const newPostRef = push(ref(targetDbRef, 'posts'));
                         
-                        await set(newPostRef, { ...uploadTask.payload, id: newPostRef.key, category: postCategory, isHidden: false });
+                        const activeOwnerId = auth.currentUser?.uid || localStorage.getItem('auth_session_phone')?.replace(/\D/g, '') || myLoggedInUid;
+                        
+                        const rawPayload = { 
+                            ...uploadTask.payload, 
+                            id: newPostRef.key, 
+                            category: postCategory, 
+                            userId: activeOwnerId,
+                            postedByPhone: activeOwnerId,
+                            isHidden: false 
+                        };
+                        
+                        if (rawPayload.rentalType || testCat.includes('guest') || testCat.includes('guset')) {
+                            rawPayload.rentalType = postCategory;
+                        }
+
+                        const safePayload = JSON.parse(JSON.stringify(rawPayload));
+                        await set(newPostRef, safePayload);
                         
                         title.innerText = "Published Successfully!";
-                        showToast("Listing published successfully!");
+                        showToast(postCategory + " published successfully!");
                         setTimeout(() => { card.classList.remove('active'); isUploadingActive = false; }, 1200);
+                        
                     } catch (error) {
-                        title.innerText = "Upload Failed. Please try again."; percent.innerText = "Error"; isUploadingActive = false;
-                        showToast("Upload failed. Please try again.");
+                        title.innerText = "Upload Failed. Please try again."; 
+                        percent.innerText = "Error"; 
+                        isUploadingActive = false;
+                        showToast("Failed: " + (error.message || "Network Error"));
                     }
                 } else {
                     fill.style.width = `${progress}%`; percent.innerText = `${progress}%`;
                 }
             }, 250);
+        }
+
+        function restoreCachedTabState() {
+            const cachedCat = localStorage.getItem('delala_active_category') || 'all';
+            window.activeCategory = cachedCat;
+
+            const targetBtn = document.querySelector(`.category-pill-btn[data-category="${cachedCat}"]`);
+            if (targetBtn) {
+                document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
+                targetBtn.classList.add('active');
+            }
         }
 
         function setupCategoryFilterButtons() {
@@ -432,19 +586,25 @@
                     const category = btn.getAttribute('data-category');
                     const targetSrc = btn.getAttribute('data-src');
 
-                    // Navigate if it's an external page
+                    if (category === 'activity' && myLoggedInUid) {
+                        localStorage.setItem(`delala_read_activity_${myLoggedInUid}`, Date.now().toString());
+                        updateBadgeUI('activityBadge', 0);
+                    } else if (category === 'chat' && myLoggedInUid) {
+                        localStorage.setItem(`delala_read_chat_${myLoggedInUid}`, Date.now().toString());
+                        updateBadgeUI('chatBadge', 0);
+                    }
+
                     if (['chat', 'app', 'activity'].includes(category) && targetSrc) {
                         window.location.href = targetSrc;
                         return;
                     }
 
-                    // Otherwise switch the iframe contents
                     document.querySelectorAll('.category-tabs-bar .category-pill-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    if(targetSrc) {
-                        document.getElementById('postsIframe').src = targetSrc;
-                    }
+                    window.activeCategory = category;
+                    localStorage.setItem('delala_active_category', category);
+                    renderNativeGrid();
                 });
             });
         }
@@ -540,68 +700,39 @@
         }
 
         function setupMenuHandlers() {
-            const menuBtn = document.getElementById('openMenuBtn'), dropdown = document.getElementById('profileMenuDropdown');
-            menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); });
+            const menuBtn = document.getElementById('openMenuBtn');
+            const iframe = document.getElementById('menuIframe');
+            const overlay = document.getElementById('menuIframeOverlay');
             
-            document.addEventListener('click', (e) => { 
-                if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) dropdown.classList.remove('show'); 
-            });
-            
-            document.getElementById('brokerMenuBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                if (!isLoggedInUser) {
-                    showAuthModal();
-                    dropdown.classList.remove('show');
-                } else {
-                    window.location.href = 'broker.html';
-                }
-            });
-
-            const privacyBtn = document.getElementById('togglePrivacyBtn');
-            const privacySwitch = document.getElementById('privacySwitch');
-            
-            privacyBtn.addEventListener('click', async (e) => {
+            menuBtn.addEventListener('click', (e) => { 
                 e.stopPropagation(); 
-                if (!isLoggedInUser || !myLoggedInUid) return;
-                
-                const isCurrentlyOn = privacySwitch.classList.contains('on');
-                const newValue = !isCurrentlyOn;
-                
-                if(newValue) privacySwitch.classList.add('on');
-                else privacySwitch.classList.remove('on');
-                
-                try {
-                    await update(ref(db, `users/${myLoggedInUid}`), { isNetworkPublic: newValue });
-                    showToast(`Network visibility is now ${newValue ? 'Public' : 'Private'}`);
-                } catch(err) {
-                    if(!newValue) privacySwitch.classList.add('on');
-                    else privacySwitch.classList.remove('on');
-                    showToast("Failed to update privacy settings.");
+                const isShowing = iframe.style.right === '0px';
+                if (isShowing) {
+                    iframe.style.right = '-75%';
+                    overlay.style.display = 'none';
+                } else {
+                    iframe.style.right = '0px';
+                    overlay.style.display = 'block';
+                    if (iframe.contentWindow && iframe.contentWindow.updateToggle) {
+                        iframe.contentWindow.updateToggle(currentPrivacyState);
+                    }
                 }
             });
-
-            document.getElementById('logoutBtn').addEventListener('click', async () => {
-                try {
-                    localStorage.setItem('user_logged_out', 'true'); 
-                    localStorage.removeItem('auth_session_phone'); 
-                    localStorage.removeItem('delala_cached_profile');
-                    localStorage.removeItem('delala_cached_posts');
-                    sessionStorage.clear(); 
-                    await signOut(auth);
-                } catch (error) {} finally { window.location.href = 'rental.html'; }
+            
+            overlay.addEventListener('click', () => {
+                iframe.style.right = '-75%';
+                overlay.style.display = 'none';
             });
-        }
-
-        function formatCount(count) {
-            const num = parseInt(count) || 0;
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return num.toLocaleString();
         }
 
         function renderLoggedOutGuestState() {
+            if (localStorage.getItem('user_logged_out') === 'true') {
+                localStorage.removeItem('delala_cached_profile');
+                localStorage.removeItem('delala_cached_posts');
+                window.allUserPosts = [];
+            }
             isLoggedInUser = false;
-            localStorage.removeItem('delala_cached_profile');
+            window.isPostsLoaded = true;
             
             if (document.getElementById('userDisplayName')) document.getElementById('userDisplayName').innerText = 'Guest User';
             document.getElementById('userHandle').innerText = "@guest";
@@ -611,14 +742,7 @@
             document.getElementById('likesCount').innerText = '0';
             document.getElementById('ratingCount').innerText = '0.0 ★';
             
-            window.allUserPosts = [];
-            
-            // Reload the iframe to update the empty state
-            const iframe = document.getElementById('postsIframe');
-            if (iframe && iframe.contentWindow && iframe.contentWindow.renderGrid) {
-                iframe.contentWindow.renderGrid();
-            }
-            
+            renderNativeGrid();
             showAuthModal();
         }
 
@@ -635,6 +759,7 @@
             if (myLoggedInUid) {
                 isLoggedInUser = true;
                 localStorage.removeItem('user_logged_out');
+                setupUnreadTracking(myLoggedInUid);
             } else {
                 isLoggedInUser = false;
             }
@@ -646,7 +771,7 @@
 
             if (myLoggedInUid) {
                 fetchUserDataAndPosts(myLoggedInUid);
-            } else {
+            } else if (localStorage.getItem('user_logged_out') === 'true') {
                 renderLoggedOutGuestState();
             }
         }
@@ -664,11 +789,9 @@
                     applyProfileToDOM(snapshot.val());
                     localStorage.setItem('delala_cached_profile', JSON.stringify(snapshot.val()));
                 } else if (auth.currentUser) {
-                    const fallbackProfile = { displayName: auth.currentUser.displayName || "User", photoURL: auth.currentUser.photoURL || 's.png', following: 0, followers: 0 };
+                    const fallbackProfile = { displayName: auth.currentUser.displayName || "User Profile", photoURL: auth.currentUser.photoURL || 's.png', following: 0, followers: 0 };
                     applyProfileToDOM(fallbackProfile);
                     localStorage.setItem('delala_cached_profile', JSON.stringify(fallbackProfile));
-                } else {
-                    renderLoggedOutGuestState();
                 }
             }).catch(() => { });
             
@@ -679,10 +802,16 @@
             if (postsUnsubscribe) postsUnsubscribe();
             if (servicePostsUnsubscribe) servicePostsUnsubscribe();
 
+            let primaryLoaded = false;
+            let serviceLoaded = false;
+
             const isPostBelongingToUser = (post) => {
                 if (!post) return false;
-                const pUserId = String(post.userId || post.uid || post.user_id || '');
-                return pUserId === String(userId) || (post.postedByPhone && post.postedByPhone.includes(userId));
+                const cleanTargetId = String(userId).trim();
+                const pUserId = String(post.userId || post.uid || post.user_id || '').trim();
+                const pUserPhone = String(post.postedByPhone || '').trim();
+                
+                return pUserId === cleanTargetId || (pUserPhone && pUserPhone === cleanTargetId);
             };
 
             const parseTimestamp = (p) => {
@@ -693,42 +822,48 @@
                 return isNaN(new Date(val).getTime()) ? 0 : new Date(val).getTime();
             };
 
-            const updateGrid = () => {
+            const updateGridData = () => {
+                if (!primaryLoaded || !serviceLoaded) return;
+
                 let postsList = [...primaryPosts, ...servicePosts];
                 postsList.sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
                 
                 let totalLikes = 0;
                 postsList.forEach(item => totalLikes += (parseInt(item.likesCount) || parseInt(item.likes) || 0));
-                document.getElementById('likesCount').innerText = formatCount(totalLikes);
                 
-                // Expose to window for the child iframes to read
+                const likesEl = document.getElementById('likesCount');
+                if (likesEl) likesEl.innerText = formatCount(totalLikes);
+                
                 window.allUserPosts = postsList;
+                window.isPostsLoaded = true;
+
+                try {
+                    localStorage.setItem('delala_cached_posts', JSON.stringify(postsList));
+                } catch(e) {}
                 
-                // Tell the currently visible iframe to re-render
-                const iframe = document.getElementById('postsIframe');
-                if (iframe && iframe.contentWindow && iframe.contentWindow.renderGrid) {
-                    iframe.contentWindow.renderGrid();
-                }
+                renderNativeGrid();
             };
             
             postsUnsubscribe = onValue(ref(db, 'posts'), (snapshot) => {
+                primaryLoaded = true;
                 primaryPosts = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(c => {
                         if (isPostBelongingToUser(c.val())) primaryPosts.push({ id: c.key, _dbSource: 'primary', ...c.val() });
                     });
                 }
-                updateGrid();
+                updateGridData();
             });
 
             servicePostsUnsubscribe = onValue(ref(serviceDb, 'posts'), (snapshot) => {
+                serviceLoaded = true;
                 servicePosts = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(c => {
                         if (isPostBelongingToUser(c.val())) servicePosts.push({ id: c.key, _dbSource: 'service', ...c.val() });
                     });
                 }
-                updateGrid();
+                updateGridData();
             });
         }
 
@@ -764,7 +899,7 @@
                 
                 <div class="preview-section" style="border-color: #CBD5E1; background: #F8FAFC; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px;">
                     <button type="button" class="btn-secondary" id="editPostBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; color: #0F172A; border: 1px solid #CBD5E1;">
-                        <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>Edit Post</span>
                     </button>
                     <button type="button" class="btn-secondary" id="hidePostBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; color: #0F172A; border: 1px solid #CBD5E1;">

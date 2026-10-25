@@ -1,12 +1,11 @@
-const CACHE_NAME = 'delala-cache-v4'; // Updated to 'v4' to force browsers to save the new index.html
+const CACHE_NAME = 'delala-cache-v4';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/rental.html',
-  '/news.css',
-  '/s.png',
-  '/manifest.json'
-  // Removed offline.html and low.html since they are now popups inside index.html
+  './',
+  './index.html',
+  './rental.html',
+  './news.css',
+  './s.png',
+  './manifest.json'
 ];
 
 // Install Event: Cache essential app assets
@@ -17,7 +16,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting(); // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 // Activate Event: Clean up outdated caches
@@ -34,7 +33,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim(); // Take control of all clients immediately
+  self.clients.claim();
 });
 
 // Fetch Event: Bypass non-GET & API requests, serve cached static assets offline
@@ -43,26 +42,23 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // 1. Bypass Service Worker entirely for POST/PUT requests or backend API routes
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/')) {
-    return; // Direct browser network call
+  if (request.method !== 'GET' || url.pathname.includes('/api/')) {
+    return;
   }
 
   // 2. Handle static GET assets caching
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      // Return cached asset if found
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // 3. If not in cache, fetch from the network
+      // 3. Network fetch fallback
       return fetch(request).catch(() => {
-        
-        // 4. Fallback Logic: If the network completely fails (offline) during navigation
+        // 4. Navigation Fallback: Serve cached index.html when offline
         if (request.mode === 'navigate') {
           console.log('[Service Worker] Network failed, serving cached index.html');
-          // Serve the main app shell. The JS inside index.html will trigger the offline popup instantly!
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       });
     })

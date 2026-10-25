@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Delala - Post Event Equipment Rental</title>
+    <title>Delala - Post Event Equipment & Personnel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
@@ -112,6 +112,71 @@
             padding-bottom: 10px;
         }
 
+        .dark-3d-card {
+            background: linear-gradient(145deg, #1e242d, #14171d);
+            border-radius: 20px;
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        }
+
+        .dark-3d-card .form-group {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dark-3d-card .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .dark-3d-card .form-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            color: #94A3B8;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .dark-3d-card .form-input, 
+        .dark-3d-card .form-select {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: #11141a;
+            font-size: 13px;
+            font-weight: 600;
+            color: #FFFFFF;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-3d-card .form-select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2094A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+
+        .dark-3d-card .form-input::placeholder { color: #64748B; }
+
+        .dark-3d-card .form-input:focus, 
+        .dark-3d-card .form-select:focus {
+            border-color: #38BDF8;
+            background-color: #0b0d12;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
         .form-group { 
             margin-bottom: 16px; 
             display: flex;
@@ -125,10 +190,9 @@
             font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 6px;
-            min-height: 15px;
         }
 
-        .form-input, .form-select, .form-textarea {
+        .form-input, .form-textarea {
             width: 100%;
             height: 44px;
             padding: 0 14px;
@@ -141,22 +205,6 @@
             outline: none;
             box-sizing: border-box;
             transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-
-        .form-select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-            padding-right: 36px;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--primary-dark);
-            background-color: #FFFFFF;
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
         }
 
         .form-textarea { 
@@ -174,7 +222,7 @@
 
         .form-row .form-group { 
             flex: 1; 
-            margin-bottom: 16px;
+            margin-bottom: 0;
         }
 
         .step-actions { display: flex; gap: 12px; margin-top: 22px; }
@@ -337,74 +385,12 @@
         }
 
         #dynamicCategoryFieldsContainer {
-            margin-top: 14px;
-            margin-bottom: 14px;
             animation: fadeIn3D 0.35s ease-out forwards;
         }
 
         @keyframes fadeIn3D {
-            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            from { opacity: 0; transform: translateY(12px) scale(0.97); }
             to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .nested-box {
-            background: linear-gradient(145deg, #2b303a, #1a1d24);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
-            padding: 18px;
-            margin-top: 12px;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.4),
-                inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            position: relative;
-        }
-
-        #dynamicCategoryFieldsContainer .form-label,
-        .nested-box .form-label {
-            color: #CBD5E1 !important;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 10px;
-            margin-bottom: 8px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input,
-        #dynamicCategoryFieldsContainer .form-select,
-        .nested-box .form-input,
-        .nested-box .form-select {
-            background-color: #1a1d24 !important;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%20CBD5E1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 14px center !important;
-            background-size: 16px !important;
-            color: #F8FAFC !important;
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.6),
-                0 1px 0 rgba(255, 255, 255, 0.1) !important;
-            border-radius: 10px;
-            height: 44px;
-        }
-
-        #dynamicCategoryFieldsContainer .form-input::placeholder,
-        .nested-box .form-input::placeholder { color: #64748B !important; }
-
-        #dynamicCategoryFieldsContainer .form-input:focus,
-        #dynamicCategoryFieldsContainer .form-select:focus,
-        .nested-box .form-input:focus,
-        .nested-box .form-select:focus {
-            border-color: #38BDF8 !important;
-            background-color: #111318 !important;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.8) !important;
-        }
-
-        #dynamicCategoryFieldsContainer option,
-        .nested-box option,
-        select option {
-            background-color: #1e2228 !important;
-            color: #f1f5f9 !important;
-            padding: 12px;
         }
 
         .custom-select-modal-overlay {
@@ -556,35 +542,63 @@
                 </div>
 
                 <div class="form-step-page" id="stepPage2">
-                    <div class="step-title">Step 2: Event Equipment Details</div>
+                    <div class="step-title">Step 2: Event Details</div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">Title / Headline *</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., Event Sound System or Generator" required>
-                    </div>
-
-                    <div class="form-row">
+                    <!-- 3D CARD 1: CATEGORY SELECTIONS -->
+                    <div class="dark-3d-card">
                         <div class="form-group">
-                            <label class="form-label" for="rentalPrice">Price (ETB) *</label>
-                            <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 5000" required>
+                            <label class="form-label" for="mainCategorySelect">Main Category / ዋና ምድብ *</label>
+                            <select class="form-select custom-styled-select" id="mainCategorySelect" required>
+                                <option value="" disabled selected>Select Main Category / ዋና ምድብ ይምረጡ</option>
+                                <option value="venues">1. Venues, Tents & Stages | ቦታዎች፣ ድንኳን እና መድረክ</option>
+                                <option value="furniture">2. Furniture & Seating | ወንበሮች፣ ጠረጴዛዎች እና አልባሳት</option>
+                                <option value="av">3. Audio & Visual Systems | የድምፅ እና ምስል እቃዎች</option>
+                                <option value="power_lighting">4. Lighting & Power | መብራት እና ጄኔሬተር</option>
+                                <option value="decor">5. Decor, Culture & Effects | ጌጣጌጥ፣ ባህል እና ድምቀት</option>
+                                <option value="catering">6. Catering & Dining | ኬተሪንግ እና ምግብ እቃዎች</option>
+                                <option value="vehicles_media">7. VIP Vehicles & Media | የሰርግ መኪኖች እና ቪዲዮ</option>
+                                <option value="personnel">8. Event Staff & Personnel | የዝግጅት አገልጋዮች እና ባለሙያዎች</option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="paymentPeriod">Payment Period *</label>
-                            <select class="form-select custom-styled-select" id="paymentPeriod" required>
-                                <option value="Day">Per Day</option>
-                                <option value="1 Month">1 Month</option>
-                                <option value="3 Months">3 Months</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
+
+                        <div class="form-group" id="subCategoryGroup" style="display: none; margin-top: 14px;">
+                            <label class="form-label" for="exactSubCategorySelect">Subcategory / ንዑስ ምድብ *</label>
+                            <select class="form-select custom-styled-select" id="exactSubCategorySelect" required>
+                                <option value="" disabled selected>Select Subcategory / ንዑስ ምድብ ይምረጡ</option>
                             </select>
                         </div>
                     </div>
 
+                    <!-- 3D CARD 2: PRICE & TIME PERIOD -->
+                    <div class="dark-3d-card">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="rentalPrice">Price (ETB) *</label>
+                                <input type="number" class="form-input" id="rentalPrice" placeholder="e.g. 3500" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="paymentPeriod">Time Period *</label>
+                                <select class="form-select custom-styled-select" id="paymentPeriod" required>
+                                    <option value="Hour">Per Hour / በሰዓት</option>
+                                    <option value="Day" selected>Per Day / በቀን</option>
+                                    <option value="Event">Per Event / በዝግጅት</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DYNAMIC 3D ITEM-SPECIFIC FIELDS -->
                     <div id="dynamicCategoryFieldsContainer"></div>
 
-                    <div class="form-group" style="margin-top: 16px;">
+                    <!-- OUTSIDE TITLE & DESCRIPTION -->
+                    <div class="form-group" style="margin-top: 18px;">
+                        <label class="form-label" for="postTitle">Title / Headline *</label>
+                        <input type="text" class="form-input" id="postTitle" placeholder="e.g., VIP Wedding Tent, DJ Performance, or Security Staff" required>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label" for="postContent">Description & Additional Details (Optional)</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or rules (optional)..."></textarea>
+                        <textarea class="form-textarea" id="postContent" placeholder="Describe condition, specifications, capacity, or setup terms..."></textarea>
                     </div>
 
                     <div class="step-actions">
@@ -655,7 +669,74 @@
     </div>
 
     <script>
-        const PAGE_CATEGORY = "Event Equipment";
+        const PAGE_CATEGORY = "Event Equipment & Personnel";
+
+        const CATEGORY_MAP = {
+            "venues": {
+                label: "Venues, Tents & Stages | ቦታዎች፣ ድንኳን እና መድረክ",
+                subs: [
+                    { id: "tent", name: "Event Tents & Canopies | ድንኳን እና ጥላዎች" },
+                    { id: "hall", name: "Venue Spaces & Halls | የዝግጅት አዳራሽ እና ቦታዎች" },
+                    { id: "stage", name: "Modular Stages & Podiums | መድረክ እና ፖዲየም" }
+                ]
+            },
+            "furniture": {
+                label: "Furniture & Seating | ወንበሮች፣ ጠረጴዛዎች እና አልባሳት",
+                subs: [
+                    { id: "chair", name: "Chairs & Seat Covers | ወንበሮች እና የሽፋን ጨርቆች" },
+                    { id: "table", name: "Tables & Tablecloths | ጠረጴዛዎች እና የጠረጴዛ አልባሳት" },
+                    { id: "vip_lounge", name: "VIP Lounge Furniture | የቪ.አይ.ፒ (VIP) ፈርኒቸሮች" }
+                ]
+            },
+            "av": {
+                label: "Audio & Visual Systems | የድምፅ እና ምስል እቃዎች",
+                subs: [
+                    { id: "sound", name: "Sound Systems & Microphones | የድምፅ ማጉያ እና ኦዲዮ እቃዎች" },
+                    { id: "led_screen", name: "LED Screens & Video Walls | ኤል.ኢ.ዲ ቪዲዮ ስክሪን" },
+                    { id: "projector", name: "Projectors & Projection Screens | ፕሮጀክተር እና የስክሪን መጋረጆች" }
+                ]
+            },
+            "power_lighting": {
+                label: "Lighting & Power | መብራት እና ጄኔሬተር",
+                subs: [
+                    { id: "lighting", name: "Lighting Systems & Effects | የብርሃንና የመብራት ስርዓት" },
+                    { id: "generator", name: "Backup Power Generators | ጄኔሬተር" }
+                ]
+            },
+            "decor": {
+                label: "Decor, Culture & Effects | ጌጣጌጥ፣ ባህል እና ድምቀት",
+                subs: [
+                    { id: "decor_backdrop", name: "Decoration & Backdrops | የጌጣጌጥ እና የጀርባ ዲዛይን እቃዎች" },
+                    { id: "carpet", name: "Red Carpets & Walkway Runners | ቀይ ምንጣፍ እና የመተላለፊያ ምንጣፎች" },
+                    { id: "sparkler_smoke", name: "Sparkler & Smoke Machines | የጭስ እና የቀዝቃዛ እሳት ማሽኖች" },
+                    { id: "cultural", name: "Traditional Gear & Cultural Items | የባህል ቁሳቁሶች" }
+                ]
+            },
+            "catering": {
+                label: "Catering & Dining | ኬተሪንግ እና ምግብ እቃዎች",
+                subs: [
+                    { id: "catering_eq", name: "Catering Equipment & Warming Dishes | የኬተሪንግ እና የምግብ ማሞቂያ እቃዎች" },
+                    { id: "cutlery", name: "Cutlery, Glassware & Tableware | ሳህኖች፣ ብርጭቆዎች እና የመመገቢያ ቁሳቁሶች" }
+                ]
+            },
+            "vehicles_media": {
+                label: "VIP Vehicles & Media | የሰርግ መኪኖች እና ቪዲዮ",
+                subs: [
+                    { id: "car", name: "Wedding & VIP Luxury Cars | የሰርግ እና የክብር እንግዳ መኪኖች" },
+                    { id: "cameraman", name: "Photography & Videography | ፎቶ እና ቪዲዮግራፊ (ካሜራማን)" }
+                ]
+            },
+            "personnel": {
+                label: "Event Staff & Personnel | የዝግጅት አገልጋዮች እና ባለሙያዎች",
+                subs: [
+                    { id: "musician", name: "Musicians & Bands | ሙዚቀኞች እና ባንድ" },
+                    { id: "dj", name: "DJs & Sound Entertainers | ዲጄ (DJ)" },
+                    { id: "ajabi", name: "Ajabi & Bridal Entourage | አጃቢዎች" },
+                    { id: "professional_staff", name: "Professional Staff (Cooking, Cleaning, Security) | ምግብ አዘጋጅ፣ ጽዳት እና ጥበቃ" },
+                    { id: "other_personnel", name: "Other Event Personnel | ሌሎች የዝግጅት አገልጋዮች" }
+                ]
+            }
+        };
 
         window.showErrorModal = function(message, title = "Validation Error") {
             document.getElementById('errorModalTitle').innerText = title;
@@ -678,6 +759,7 @@
             optionsList.innerHTML = '';
 
             Array.from(selectElem.options).forEach(opt => {
+                if (opt.disabled && !opt.value) return; 
                 const item = document.createElement('div');
                 item.className = `custom-select-option-item ${opt.selected ? 'selected' : ''}`;
                 item.innerHTML = `
@@ -732,27 +814,30 @@
             return { phone: userPhone, id: userId || userPhone };
         }
 
-        function refreshFormState() {
-            const currentUser = getAuthenticatedUser();
-            if (!currentUser) return;
-
-            renderCategorySpecificFields();
-            restoreSavedDraft();
-            bindCustomSelectHandlers();
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             refreshFormState();
+
+            document.getElementById('mainCategorySelect').addEventListener('change', (e) => {
+                const mainKey = e.target.value;
+                populateSubCategories(mainKey);
+            });
+
+            document.getElementById('exactSubCategorySelect').addEventListener('change', (e) => {
+                const subId = e.target.value;
+                renderDynamic3DFields(subId);
+            });
 
             document.getElementById('btnNext2').addEventListener('click', () => {
                 if (!getAuthenticatedUser()) return;
 
                 const title = document.getElementById('postTitle').value.trim();
                 const price = document.getElementById('rentalPrice').value;
+                const mainCat = document.getElementById('mainCategorySelect').value;
+                const subCat = document.getElementById('exactSubCategorySelect').value;
 
-                if (!title || !price) {
-                    showErrorModal("Please fill in both the listing title and rental price.");
+                if (!title || !price || !mainCat || !subCat) {
+                    showErrorModal("Please select both the Main Category and Subcategory.");
                     return;
                 }
 
@@ -760,6 +845,283 @@
                 window.location.href = 'rentalpost1.html';
             });
         });
+
+        function populateSubCategories(mainKey, selectedSubValue = "") {
+            const subSelect = document.getElementById('exactSubCategorySelect');
+            const subGroup = document.getElementById('subCategoryGroup');
+            
+            if (!mainKey || !CATEGORY_MAP[mainKey]) {
+                subGroup.style.display = 'none';
+                return;
+            }
+
+            subSelect.innerHTML = '<option value="" disabled selected>Select Subcategory / ንዑስ ምድብ ይምረጡ</option>';
+            CATEGORY_MAP[mainKey].subs.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub.id;
+                opt.innerText = sub.name;
+                if (selectedSubValue === sub.id) opt.selected = true;
+                subSelect.appendChild(opt);
+            });
+
+            subGroup.style.display = 'flex';
+            bindCustomSelectHandlers();
+
+            if (selectedSubValue) {
+                renderDynamic3DFields(selectedSubValue);
+            } else {
+                document.getElementById('dynamicCategoryFieldsContainer').innerHTML = '';
+            }
+        }
+
+        function renderDynamic3DFields(subId) {
+            const container = document.getElementById('dynamicCategoryFieldsContainer');
+            if (!container) return;
+
+            let html = `<div class="dark-3d-card">`;
+
+            switch (subId) {
+                case 'musician':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="musicianCount">Performers Count / የሙዚቀኞች ብዛት *</label>
+                                <input type="number" class="form-input" id="musicianCount" placeholder="e.g. 5" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="musicGenre">Genre / የሙዚቃ ዓይነት *</label>
+                                <input type="text" class="form-input" id="musicGenre" placeholder="e.g. Cultural, Jazz, Gospel" required>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'dj':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="djEquipment">Equipment Included? / የራሳቸው የድምፅ እቃ ያላቸው *</label>
+                                <select class="form-select custom-styled-select" id="djEquipment" required>
+                                    <option value="Includes Sound System">Includes Sound System / ከነ ማጉያው</option>
+                                    <option value="DJ Only">DJ Only / ዲጄ ብቻ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="djHours">Performance Duration / የሰዓት ቆይታ</label>
+                                <input type="text" class="form-input" id="djHours" placeholder="e.g. 6 Hours">
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'ajabi':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="ajabiCount">Entourage Size / የአጃቢ ብዛት *</label>
+                                <input type="number" class="form-input" id="ajabiCount" placeholder="e.g. 10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="ajabiAttire">Traditional / Custom Attire / የልብስ አልባሳት *</label>
+                                <select class="form-select custom-styled-select" id="ajabiAttire" required>
+                                    <option value="Attire Included">Attire Included / ከነ ልብሱ</option>
+                                    <option value="Personnel Only">Personnel Only / ያለ ልብስ</option>
+                                </select>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'professional_staff':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="staffServiceType">Service Type / የአገልግሎት ዓይነት *</label>
+                                <select class="form-select custom-styled-select" id="staffServiceType" required>
+                                    <option value="Cooking & Catering">Cooking & Catering / ምግብ አዘጋጅ</option>
+                                    <option value="Cleaning & Teardown">Cleaning & Sanitation / ጽዳት ሰራተኞች</option>
+                                    <option value="Security & Guards">Security & Guard / ጥበቃ እና ደህንነት</option>
+                                    <option value="Waiters & Hospitality">Waiters & Serving / አስተናጋጆች</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="staffCount">Number of Personnel / የሰው ብዛት *</label>
+                                <input type="number" class="form-input" id="staffCount" placeholder="e.g. 6" required>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'other_personnel':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="otherStaffRole">Role Title / የሥራ መደብ *</label>
+                                <input type="text" class="form-input" id="otherStaffRole" placeholder="e.g. Protocol, Usher, MC" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="otherStaffCount">Number of Personnel / የሰው ብዛት *</label>
+                                <input type="number" class="form-input" id="otherStaffCount" placeholder="e.g. 2" required>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'chair':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="chairCount">Chair Amount / የወንበር ብዛት *</label>
+                                <input type="number" class="form-input" id="chairCount" placeholder="e.g. 200" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="chairCover">Includes Covers? / የጨርቅ ሽፋን ያለው *</label>
+                                <select class="form-select custom-styled-select" id="chairCover" required>
+                                    <option value="Yes - Covers Included">Yes - With Covers / አዎ ሽፋን አለው</option>
+                                    <option value="No - Chairs Only">No - Chairs Only / ወንበር ብቻ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 14px;">
+                            <label class="form-label" for="chairType">Chair Model/Style / የወንበር ዓይነት</label>
+                            <input type="text" class="form-input" id="chairType" placeholder="e.g. Plastic, VIP Cushioned, Chiavari">
+                        </div>`;
+                    break;
+
+                case 'car':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="carModel">Car Make & Model / የመኪናው አይነት *</label>
+                                <input type="text" class="form-input" id="carModel" placeholder="e.g. Mercedes S-Class, Prado" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="carDriver">Chauffeur Service / ሹፌር ያለው *</label>
+                                <select class="form-select custom-styled-select" id="carDriver" required>
+                                    <option value="With Driver">With Driver / ከነ ሹፌሩ</option>
+                                    <option value="Self Drive">Self Drive / ያለ ሹፌር</option>
+                                </select>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'stage':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="stageArea">Stage Area Size / የመድረክ ስፋት (m²) *</label>
+                                <input type="number" class="form-input" id="stageArea" placeholder="e.g. 36 (6x6 meters)" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="stageHeight">Stage Height / የመድረክ ከፍታ (cm/m)</label>
+                                <input type="text" class="form-input" id="stageHeight" placeholder="e.g. 1 Meter">
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'hall':
+                case 'tent':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="venueArea">Total Area / የስፋት መጠን (m²) *</label>
+                                <input type="number" class="form-input" id="venueArea" placeholder="e.g. 500" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="guestCapacity">Max Guest Capacity / የሰው መጠን *</label>
+                                <input type="number" class="form-input" id="guestCapacity" placeholder="e.g. 400 People" required>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'projector':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="projectorModel">Projector Model / የፕሮጀክተር ሞዴል *</label>
+                                <input type="text" class="form-input" id="projectorModel" placeholder="e.g. Epson EB-2250U" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="projectorQuality">Brightness & Quality / ጥራት *</label>
+                                <select class="form-select custom-styled-select" id="projectorQuality" required>
+                                    <option value="4K Ultra HD">4K Ultra HD</option>
+                                    <option value="Full HD 1080p">Full HD 1080p (3500 Lumens)</option>
+                                    <option value="Standard HD">Standard HD (2500 Lumens)</option>
+                                </select>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'decor_backdrop':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="decorTheme">Decor Style & Theme / የጌጣጌጥ ዲዛይን *</label>
+                                <input type="text" class="form-input" id="decorTheme" placeholder="e.g. Wedding Stage Floral" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="decorInstallation">Setup Service / ገጣጣሚ ያለው *</label>
+                                <select class="form-select custom-styled-select" id="decorInstallation" required>
+                                    <option value="Includes Full Setup & Teardown">Full Setup Included</option>
+                                    <option value="Rental Only">Equipment Only</option>
+                                </select>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'generator':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="genPower">Power Capacity (KVA) / የኃይል መጠን *</label>
+                                <input type="text" class="form-input" id="genPower" placeholder="e.g. 50 KVA" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="genOperator">Fuel & Operator / ኦፕሬተር *</label>
+                                <select class="form-select custom-styled-select" id="genOperator" required>
+                                    <option value="With Operator">With Operator / ከነ ኦፕሬተሩ</option>
+                                    <option value="Generator Only">Generator Only / ጄኔሬተር ብቻ</option>
+                                </select>
+                            </div>
+                        </div>`;
+                    break;
+
+                case 'sound':
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="soundCapacity">Coverage Capacity / የሚበቃው የሰው ብዛት *</label>
+                                <input type="text" class="form-input" id="soundCapacity" placeholder="e.g. 500 - 1000 People" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="micCount">Microphones / የማይክ ብዛት</label>
+                                <input type="number" class="form-input" id="micCount" placeholder="e.g. 4 Mics">
+                            </div>
+                        </div>`;
+                    break;
+
+                default:
+                    html += `
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="itemQuantity">Available Quantity / የዕቃው ብዛት *</label>
+                                <input type="number" class="form-input" id="itemQuantity" placeholder="e.g. 10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="itemUnit">Unit Measurement / መለኪያ</label>
+                                <input type="text" class="form-input" id="itemUnit" placeholder="e.g. Sets / People / Pieces">
+                            </div>
+                        </div>`;
+                    break;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+            bindCustomSelectHandlers();
+        }
+
+        function refreshFormState() {
+            const currentUser = getAuthenticatedUser();
+            if (!currentUser) return;
+
+            restoreSavedDraft();
+            bindCustomSelectHandlers();
+        }
 
         window.addEventListener('pageshow', () => {
             refreshFormState();
@@ -775,18 +1137,49 @@
             const userPhone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             const userId = localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId') || "";
 
+            const subId = document.getElementById('exactSubCategorySelect')?.value || "";
+
             draftData.rentalType = PAGE_CATEGORY;
             draftData.postedByPhone = userPhone;
             draftData.userId = userId;
             draftData.title = document.getElementById('postTitle').value.trim();
             draftData.price = Number(document.getElementById('rentalPrice').value) || 0;
             draftData.paymentPeriod = document.getElementById('paymentPeriod').value;
+            draftData.mainCategory = document.getElementById('mainCategorySelect').value;
+            draftData.subCategory = subId;
             draftData.body = document.getElementById('postContent').value.trim();
+
             draftData.categorySpecificDetails = {
-                equipmentType: document.getElementById('equipmentType')?.value || "",
-                itemQuantity: document.getElementById('itemQuantity')?.value || ""
+                musicianCount: document.getElementById('musicianCount')?.value || "",
+                musicGenre: document.getElementById('musicGenre')?.value || "",
+                djEquipment: document.getElementById('djEquipment')?.value || "",
+                djHours: document.getElementById('djHours')?.value || "",
+                ajabiCount: document.getElementById('ajabiCount')?.value || "",
+                ajabiAttire: document.getElementById('ajabiAttire')?.value || "",
+                staffServiceType: document.getElementById('staffServiceType')?.value || "",
+                staffCount: document.getElementById('staffCount')?.value || "",
+                otherStaffRole: document.getElementById('otherStaffRole')?.value || "",
+                otherStaffCount: document.getElementById('otherStaffCount')?.value || "",
+                chairCount: document.getElementById('chairCount')?.value || "",
+                chairCover: document.getElementById('chairCover')?.value || "",
+                chairType: document.getElementById('chairType')?.value || "",
+                carModel: document.getElementById('carModel')?.value || "",
+                carDriver: document.getElementById('carDriver')?.value || "",
+                stageArea: document.getElementById('stageArea')?.value || "",
+                stageHeight: document.getElementById('stageHeight')?.value || "",
+                venueArea: document.getElementById('venueArea')?.value || "",
+                guestCapacity: document.getElementById('guestCapacity')?.value || "",
+                projectorModel: document.getElementById('projectorModel')?.value || "",
+                projectorQuality: document.getElementById('projectorQuality')?.value || "",
+                decorTheme: document.getElementById('decorTheme')?.value || "",
+                decorInstallation: document.getElementById('decorInstallation')?.value || "",
+                genPower: document.getElementById('genPower')?.value || "",
+                genOperator: document.getElementById('genOperator')?.value || "",
+                soundCapacity: document.getElementById('soundCapacity')?.value || "",
+                micCount: document.getElementById('micCount')?.value || "",
+                itemQuantity: document.getElementById('itemQuantity')?.value || "",
+                itemUnit: document.getElementById('itemUnit')?.value || ""
             };
-            draftData.activeCategoryOnStep2 = PAGE_CATEGORY;
 
             sessionStorage.setItem('delalaDraftPart1', JSON.stringify(draftData));
         }
@@ -805,10 +1198,19 @@
                 if (draft.paymentPeriod) document.getElementById('paymentPeriod').value = draft.paymentPeriod;
                 document.getElementById('postContent').value = draft.body || '';
 
+                if (draft.mainCategory) {
+                    document.getElementById('mainCategorySelect').value = draft.mainCategory;
+                    populateSubCategories(draft.mainCategory, draft.subCategory || "");
+                }
+
                 if (draft.categorySpecificDetails) {
                     const c = draft.categorySpecificDetails;
-                    if (c.equipmentType && document.getElementById('equipmentType')) document.getElementById('equipmentType').value = c.equipmentType;
-                    if (c.itemQuantity && document.getElementById('itemQuantity')) document.getElementById('itemQuantity').value = c.itemQuantity;
+                    setTimeout(() => {
+                        Object.keys(c).forEach(key => {
+                            const el = document.getElementById(key);
+                            if (el && c[key]) el.value = c[key];
+                        });
+                    }, 50);
                 }
 
                 autoFillPlaceholders();
@@ -822,32 +1224,12 @@
             const postContent = document.getElementById('postContent');
 
             if (!postTitle.value) {
-                postTitle.value = 'Event Equipment for Rent';
+                postTitle.value = 'Event Equipment or Service';
             }
 
             if (!postContent.value) {
-                postContent.value = `[Equipment Overview]: Quality rental items for events and ceremonies.\n\n[Terms]: Available for daily or event-based rental agreements.`;
+                postContent.value = `[Service / Equipment Overview]: High-quality event services or equipment available for rental.\n\n[Terms]: Available for hourly, daily, or event-based rental agreements.`;
             }
-        }
-
-        function renderCategorySpecificFields() {
-            const container = document.getElementById('dynamicCategoryFieldsContainer');
-            if (!container) return;
-
-            container.innerHTML = `
-                <div class="nested-box">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="equipmentType">Equipment Category *</label>
-                            <input type="text" class="form-input" id="equipmentType" placeholder="e.g. Chairs, Tents, Sound System" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="itemQuantity">Quantity Available *</label>
-                            <input type="number" class="form-input" id="itemQuantity" placeholder="e.g. 50 Sets" required>
-                        </div>
-                    </div>
-                </div>`;
-            bindCustomSelectHandlers();
         }
 
         function initClock() {

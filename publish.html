@@ -198,6 +198,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -212,18 +213,42 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
         let currentUser = null;
-        let previewMapInstance = null;
         let pendingPayload = null;
         let isPublishing = false;
         let isInitialized = false;
+
+        const CATEGORY_MAP = {
+            "venues": { label: "Venues, Tents & Stages", subs: [{ id: "tent", name: "Event Tents & Canopies" }, { id: "hall", name: "Venue Spaces & Halls" }, { id: "stage", name: "Modular Stages & Podiums" }] },
+            "furniture": { label: "Furniture & Seating", subs: [{ id: "chair", name: "Chairs & Seat Covers" }, { id: "table", name: "Tables & Tablecloths" }, { id: "vip_lounge", name: "VIP Lounge Furniture" }] },
+            "av": { label: "Audio & Visual Systems", subs: [{ id: "sound", name: "Sound Systems & Microphones" }, { id: "led_screen", name: "LED Screens & Video Walls" }, { id: "projector", name: "Projectors & Projection Screens" }] },
+            "power_lighting": { label: "Lighting & Power", subs: [{ id: "lighting", name: "Lighting Systems & Effects" }, { id: "generator", name: "Backup Power Generators" }] },
+            "decor": { label: "Decor, Culture & Effects", subs: [{ id: "decor_backdrop", name: "Decoration & Backdrops" }, { id: "carpet", name: "Red Carpets & Walkway Runners" }, { id: "sparkler_smoke", name: "Sparkler & Smoke Machines" }, { id: "cultural", name: "Traditional Gear & Cultural Items" }] },
+            "catering": { label: "Catering & Dining", subs: [{ id: "catering_eq", name: "Catering Equipment & Warming Dishes" }, { id: "cutlery", name: "Cutlery, Glassware & Tableware" }] },
+            "vehicles_media": { label: "VIP Vehicles & Media", subs: [{ id: "car", name: "Wedding & VIP Luxury Cars" }, { id: "cameraman", name: "Photography & Videography" }] },
+            "personnel": { label: "Event Staff & Personnel", subs: [{ id: "musician", name: "Musicians & Bands" }, { id: "dj", name: "DJs & Sound Entertainers" }, { id: "ajabi", name: "Ajabi & Bridal Entourage" }, { id: "professional_staff", name: "Professional Staff (Cooking, Cleaning, Security)" }, { id: "other_personnel", name: "Other Event Personnel" }] }
+        };
+
+        const EVENT_SPEC_LABELS = {
+            musicianCount: "Performers Count", musicGenre: "Genre", djEquipment: "Equipment Status",
+            djHours: "Duration", ajabiCount: "Entourage Size", ajabiAttire: "Attire",
+            staffServiceType: "Service Type", staffCount: "Personnel Count", otherStaffRole: "Role Title",
+            otherStaffCount: "Personnel Count", chairCount: "Chair Amount", chairCover: "Includes Covers",
+            chairType: "Chair Style", carModel: "Car Make/Model", carDriver: "Chauffeur",
+            stageArea: "Stage Area (m²)", stageHeight: "Stage Height", venueArea: "Venue Area (m²)",
+            guestCapacity: "Max Capacity", projectorModel: "Projector Model", projectorQuality: "Quality/Brightness",
+            decorTheme: "Theme/Style", decorInstallation: "Setup Service", genPower: "Power Capacity",
+            genOperator: "Operator", soundCapacity: "Coverage Capacity", micCount: "Microphones",
+            itemQuantity: "Available Quantity", itemUnit: "Unit"
+        };
 
         function sanitizePath(value) {
             return (value || "").toString().replace(/[.#$\[\]]/g, "_");
         }
 
-        function getAccountDetails() {
+        async function getAccountDetails() {
             const phone = localStorage.getItem('auth_session_phone') || localStorage.getItem('userPhone') || "";
             let id = currentUser ? currentUser.uid : (localStorage.getItem('auth_session_user_id') || localStorage.getItem('userId'));
             
@@ -235,7 +260,20 @@
                 id = sanitizePath(id);
             }
 
-            return { phone, id };
+            let realName = "User";
+            if (id !== "anonymous") {
+                try {
+                    const userSnap = await get(ref(db, `users/${id}`));
+                    if (userSnap.exists()) {
+                        const uData = userSnap.val();
+                        realName = uData.displayName || uData.fullName || uData.firstName || "User";
+                    }
+                } catch(e) {
+                    console.error("Error fetching user data:", e);
+                }
+            }
+
+            return { phone, id, name: realName };
         }
 
         function getUniquePostId() {
@@ -251,7 +289,6 @@
             return Array.from(new Set((arr || []).filter(Boolean)));
         }
 
-        // BFCache (Back-Forward Cache) recovery to unlock ghost state
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 isPublishing = false;
@@ -273,7 +310,6 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Un-stick any potential locks left over from previous visits
             sessionStorage.removeItem('delalaSubmitLock');
             isPublishing = false;
 
@@ -293,10 +329,10 @@
         });
 
         function goBackToEdit() {
-            window.location.href = 'rentalpost3.html';
+            window.location.href = 'rentalpost.html';
         }
 
-        function buildAndRenderData() {
+        async function buildAndRenderData() {
             const rawDraft = sessionStorage.getItem('delalaDraftPart1');
             if (!rawDraft) {
                 alert("Draft missing. Redirecting to start...");
@@ -310,7 +346,9 @@
             const gpsData = rawGps ? JSON.parse(rawGps) : {};
 
             const part1Data = JSON.parse(rawDraft);
-            const acc = getAccountDetails();
+            
+            // Wait for accurate account details from Firebase
+            const acc = await getAccountDetails();
 
             const rawImages = [
                 ...(part1Data.images || []),
@@ -318,7 +356,6 @@
             ];
             const cleanImages = removeDuplicates(rawImages);
 
-            // Safely extract from nested structure from previous step
             const locDetails = part2Data.locationDetails || {};
             let country = locDetails.country || part2Data.country || (gpsData.address && gpsData.address.country) || "";
             let region = locDetails.region || part2Data.region || (gpsData.address && gpsData.address.region) || "";
@@ -327,41 +364,50 @@
             let subcity = locDetails.subcity || part2Data.subcity || "";
             let uniqueName = locDetails.uniqueName || part2Data.uniqueName || "";
 
-            // Extract lat/lng from nested structure
             const coords = part2Data.location || {};
             let lat = coords.latitude || part2Data.lat || gpsData.lat || 0;
             let lng = coords.longitude || part2Data.lng || gpsData.lng || 0;
             
-            // Extract geohash
             let geohash = part2Data.geohash || gpsData.geohash || "";
 
             if (region.toLowerCase() === city.toLowerCase()) region = "";
             if (zone.toLowerCase() === region.toLowerCase() || zone.toLowerCase() === city.toLowerCase()) zone = "";
             if (subcity.toLowerCase() === city.toLowerCase()) subcity = "";
 
+            let catSpecifics = part1Data.categorySpecificDetails || {};
+            if (part1Data.guestOption) {
+                catSpecifics.guestOption = part1Data.guestOption;
+            }
+
+            if (part2Data.rentalType === "Guest House" || part1Data.rentalType === "Guest House") {
+                catSpecifics.guestHouseName = part2Data.guestHouseName || "";
+                catSpecifics.totalRooms = part2Data.totalRooms || "";
+                catSpecifics.roomTypes = part2Data.roomTypes || "";
+                catSpecifics.minPrice = part2Data.minPrice || "";
+                catSpecifics.maxPrice = part2Data.maxPrice || "";
+                catSpecifics.amenities = part2Data.amenities || [];
+            }
+
+            const finalTitle = part2Data.title || part1Data.title || "";
+            const finalBody = part2Data.description || part1Data.body || "";
+            const finalPrice = part1Data.price || part2Data.minPrice || 0; 
+            const finalPaymentPeriod = part1Data.paymentPeriod || (part2Data.rentalType === "Guest House" ? "Night" : "Month");
+
             pendingPayload = {
                 id: getUniquePostId(),
-                rentalType: part1Data.rentalType || "Rental",
+                rentalType: part1Data.rentalType || "Machinery",
+                mainCategory: part1Data.mainCategory || "",
+                subCategory: catSpecifics.machinerySubCategory || part1Data.subCategory || "",
                 images: cleanImages,
                 imageUrl: cleanImages[0] || "",
-                title: part1Data.title || "",
-                price: part1Data.price || 0,
-                paymentPeriod: part1Data.paymentPeriod || "Month",
-                body: part1Data.body || "",
-                geohash: geohash, // Uploaded to Database here!
-                categorySpecificDetails: part1Data.categorySpecificDetails || {},
-                locationDetails: {
-                    country,
-                    region,
-                    zone,
-                    city,
-                    subcity,
-                    uniqueName
-                },
-                location: {
-                    latitude: Number(lat),
-                    longitude: Number(lng)
-                },
+                title: finalTitle,
+                price: finalPrice,
+                paymentPeriod: finalPaymentPeriod,
+                body: finalBody,
+                geohash: geohash, 
+                categorySpecificDetails: catSpecifics, 
+                locationDetails: { country, region, zone, city, subcity, uniqueName },
+                location: { latitude: Number(lat), longitude: Number(lng) },
                 contactInfo: {
                     phone: part2Data.phone || acc.phone || "",
                     telegram: part2Data.telegram || "",
@@ -373,20 +419,13 @@
                 likes: 0,
                 userId: acc.id,
                 postedByPhone: acc.phone || part2Data.phone || "",
-                authorName: currentUser ? (currentUser.displayName || "Verified User") : "Verified User",
+                authorName: acc.name, // Uses accurately fetched name directly from the DB
                 createdAt: Date.now()
             };
 
             renderPublishContent(pendingPayload);
-
-            setTimeout(() => {
-                if(typeof initPreviewMap === 'function') {
-                    initPreviewMap(pendingPayload.location.latitude, pendingPayload.location.longitude);
-                }
-            }, 200);
         }
 
-        // --- UPDATED renderPublishContent FUNCTION ---
         function renderPublishContent(data) {
             const container = document.getElementById('publishContainer');
 
@@ -404,35 +443,100 @@
             const locHeader = [data.locationDetails.city, data.locationDetails.region, data.locationDetails.country].filter(Boolean).join(', ');
             const locSubText = [data.locationDetails.zone, data.locationDetails.subcity].filter(Boolean).join(' • ');
 
+            const specs = data.categorySpecificDetails || {};
+            const isMachinery = data.rentalType === "Machinery" || Boolean(specs.machinerySubCategory);
+            const isGuestHouse = data.rentalType === "Guest House";
+            const isEventEquipment = data.rentalType === "Event Equipment & Personnel";
+            const isClothing = data.rentalType === "Clothing";
+            
+            let dynamicDetailsHTML = '';
+            let priceDisplay = data.price ? `${data.price} ETB / ${data.paymentPeriod}` : 'Price Negotiable';
+
+            const topSubCategoryLabel = specs.machinerySubCategory || data.subCategory || data.rentalType;
+
+            if (isMachinery) {
+                dynamicDetailsHTML = `
+                    <div style="margin-top: 12px; padding: 12px; background: #F1F5F9; border-radius: 10px; border: 1px solid #CBD5E1;">
+                        <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-bottom:8px;">
+                            ⚙️ ${specs.machinerySubCategory || 'Machinery Equipment'}
+                        </div>
+                        ${specs.machineryModel ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🔹 Model / ሞዴል: <strong>${specs.machineryModel}</strong></div>` : ''}
+                        ${specs.powerSource ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🔹 Power Source: <strong>${specs.powerSource}</strong></div>` : ''}
+                    </div>
+                `;
+            } else if (isGuestHouse) {
+                if (specs.minPrice && specs.maxPrice) {
+                    priceDisplay = `${specs.minPrice} - ${specs.maxPrice} ETB / Night`;
+                }
+                
+                dynamicDetailsHTML = `
+                    <div style="margin-top: 12px; padding: 12px; background: #EFF6FF; border-radius: 8px; border: 1px solid #BFDBFE;">
+                        <div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🏨 Name: <strong>${specs.guestHouseName || 'N/A'}</strong></div>
+                        <div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🚪 Rooms: <strong>${specs.totalRooms || 'N/A'} (${specs.roomTypes || 'N/A'})</strong></div>
+                        ${specs.amenities && specs.amenities.length > 0 ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">✨ Amenities: <strong>${specs.amenities.join(', ')}</strong></div>` : ''}
+                        ${specs.guestOption ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark);">🛏️ Guest Option: <strong>${specs.guestOption}</strong></div>` : ''}
+                    </div>
+                `;
+            } else if (isEventEquipment && data.subCategory) {
+                const mainCatInfo = CATEGORY_MAP[data.mainCategory];
+                const subCatObj = mainCatInfo ? mainCatInfo.subs.find(s => s.id === data.subCategory) : null;
+                const subCatLabel = subCatObj ? subCatObj.name : data.subCategory;
+
+                let specHtml = '';
+                for (const [key, val] of Object.entries(specs)) {
+                    if (val && EVENT_SPEC_LABELS[key]) {
+                        specHtml += `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🔹 ${EVENT_SPEC_LABELS[key]}: <strong>${val}</strong></div>`;
+                    }
+                }
+
+                dynamicDetailsHTML = `
+                    <div style="margin-top: 12px; padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+                        <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-bottom:8px;">
+                            🏷️ ${subCatLabel}
+                        </div>
+                        ${specHtml}
+                    </div>
+                `;
+            } else if (isClothing) {
+                dynamicDetailsHTML = `
+                    <div style="margin-top: 12px; padding: 12px; background: #F5F3FF; border-radius: 8px; border: 1px solid #DDD6FE;">
+                        <div style="font-size:12px; font-weight:800; color:var(--primary-dark); margin-bottom:8px;">
+                            👕 ${specs.clothingCategory || 'Clothing Details'}
+                        </div>
+                        ${specs.targetGender ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🔹 Category: <strong>${specs.targetGender}</strong></div>` : ''}
+                        ${specs.clothingSize ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">🔹 Size: <strong>${specs.clothingSize}</strong></div>` : ''}
+                        ${specs.quantity ? `<div style="font-size:12px; font-weight:600; color:var(--primary-dark);">🔹 Quantity: <strong>${specs.quantity}</strong></div>` : ''}
+                    </div>
+                `;
+            }
+
             container.innerHTML = `
                 ${imagesHTML}
                 <div class="preview-section">
                     <div class="preview-section-title">LISTING DETAILS</div>
                     <div style="font-size:15px; font-weight:800; color:var(--primary-dark);">${data.title || 'Untitled Rental'}</div>
-                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${data.price ? data.price + ' ETB / ' + data.paymentPeriod : 'Price Negotiable'}</div>
-                    <p style="margin:8px 0 0; color:var(--text-muted); font-size:12px; line-height:1.4;">${data.body || 'No description provided.'}</p>
+                    <div style="font-size:13px; font-weight:800; color:var(--primary-accent); margin-top:2px;">${priceDisplay}</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--text-muted); margin-top:4px;">Sub-Category: ${topSubCategoryLabel}</div>
+                    ${dynamicDetailsHTML}
+                    <p style="margin:10px 0 0; color:var(--text-muted); font-size:12px; line-height:1.5; white-space: pre-wrap;">${data.body || 'No description provided.'}</p>
                 </div>
 
                 <div class="preview-section">
-                    <div class="preview-section-title">EXACT MAP LOCATION DETECTED FOR USERS</div>
+                    <div class="preview-section-title">LOCATION DETECTED</div>
                     <div style="font-weight:700; color:var(--primary-dark);">${locHeader || 'N/A'}</div>
                     ${locSubText ? `<div style="color:var(--text-muted); margin-top:2px; font-size:12px;">${locSubText}</div>` : ''}
                     ${data.locationDetails.uniqueName ? `<div style="color:var(--text-muted); font-style:italic; font-size:12px;">Landmark: ${data.locationDetails.uniqueName}</div>` : ''}
                     <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Coordinates: ${data.location.latitude}, ${data.location.longitude}</div>
-                    
-                    <!-- NEW LINE TO DISPLAY GEOHASH -->
                     ${data.geohash ? `<div style="font-size:11px; color:var(--primary-accent); font-weight: 800; margin-top:4px;">Geohash: ${data.geohash}</div>` : ''}
-                    
-                    <div id="userPreviewMap" class="preview-map-box"></div>
                 </div>
 
                 <div class="preview-section">
                     <div class="preview-section-title">CONTACT INFORMATION</div>
-                    ${data.contactInfo.phone ? `<div style="font-size:12px;">📞 Phone: <strong>${data.contactInfo.phone}</strong></div>` : ''}
-                    ${data.contactInfo.telegram ? `<div style="font-size:12px;">✈️ Telegram: <strong>${data.contactInfo.telegram}</strong></div>` : ''}
-                    ${data.contactInfo.whatsapp ? `<div style="font-size:12px;">💬 WhatsApp: <strong>${data.contactInfo.whatsapp}</strong></div>` : ''}
-                    ${data.contactInfo.email ? `<div style="font-size:12px;">✉️ Email: <strong>${data.contactInfo.email}</strong></div>` : ''}
-                    ${data.contactInfo.instagram ? `<div style="font-size:12px;">📷 Instagram: <strong>${data.contactInfo.instagram}</strong></div>` : ''}
+                    ${data.contactInfo.phone ? `<div style="font-size:12px; margin-bottom:4px;">📞 Phone: <strong>${data.contactInfo.phone}</strong></div>` : ''}
+                    ${data.contactInfo.telegram ? `<div style="font-size:12px; margin-bottom:4px;">✈️ Telegram: <strong>${data.contactInfo.telegram}</strong></div>` : ''}
+                    ${data.contactInfo.whatsapp ? `<div style="font-size:12px; margin-bottom:4px;">💬 WhatsApp: <strong>${data.contactInfo.whatsapp}</strong></div>` : ''}
+                    ${data.contactInfo.email ? `<div style="font-size:12px; margin-bottom:4px;">✉️ Email: <strong>${data.contactInfo.email}</strong></div>` : ''}
+                    ${data.contactInfo.instagram ? `<div style="font-size:12px; margin-bottom:4px;">📷 Instagram: <strong>${data.contactInfo.instagram}</strong></div>` : ''}
                 </div>
             `;
         }
@@ -444,7 +548,6 @@
                 if (e.stopImmediatePropagation) e.stopImmediatePropagation();
             }
 
-            // Enhanced multi-click block
             if (!pendingPayload || isPublishing || sessionStorage.getItem('delalaSubmitLock') === 'true') {
                 return;
             }
@@ -452,7 +555,6 @@
             isPublishing = true;
             sessionStorage.setItem('delalaSubmitLock', 'true');
 
-            // Hard disable all UI elements safely
             const publishBtn = document.getElementById('confirmPublishBtn');
             const editBtn = document.getElementById('cancelModalBtn');
             
@@ -469,22 +571,18 @@
             const uploadTask = {
                 uploadId: pendingPayload.id,
                 payload: pendingPayload,
-                status: 'pending', // Set to pending so profile.html knows it's a fresh task
+                status: 'pending',
                 progress: 0,
                 timestamp: Date.now()
             };
 
-            // Safely write to payload
             localStorage.setItem('delalaActiveUpload', JSON.stringify(uploadTask));
 
-            // Obliterate drafts to prevent ghost recreation
             sessionStorage.removeItem('delalaDraftPart1');
             sessionStorage.removeItem('delalaDraftPart2');
             sessionStorage.removeItem('selectedGpsLocation');
             sessionStorage.removeItem('delalaCurrentPostId');
 
-            // Force a 150ms delay. In mobile webviews, instant location.replace() can sometimes 
-            // sever the thread before localStorage completes writing, causing weird retries in profile.html
             setTimeout(() => {
                 window.location.replace("profile.html");
             }, 150);

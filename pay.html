@@ -8,12 +8,12 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Styling -->
     <style>
         :root {
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-main: 'Plus Jakarta Sans', 'Noto Sans Ethiopic', sans-serif;
             --primary-dark: #0F172A;
             --primary-accent: #2563EB;
             --bg-body: #F8FAFC;
@@ -21,6 +21,7 @@
             --border-color: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
+            --danger-color: #DC2626;
         }
 
         * {
@@ -104,7 +105,7 @@
 
         .step-line {
             height: 2px;
-            width: 40px;
+            width: 50px;
             background: #CBD5E1;
         }
 
@@ -116,15 +117,15 @@
         .step-view.active { display: block; }
 
         .screen-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 800;
             color: var(--primary-dark);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .screen-subtitle {
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 16px;
         }
@@ -184,76 +185,65 @@
             font-weight: 700;
         }
 
-        /* Form Inputs & Guide */
-        .input-group {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-        }
-
-        .currency-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .amount-input {
-            width: 100%;
-            background: #F8FAFC;
-            border: 1px solid var(--border-color);
-            color: var(--primary-dark);
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 800;
-            outline: none;
-            margin-bottom: 8px;
-        }
-
+        /* Rules & Instructions Guide */
         .guide-box {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .guide-item {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 14px;
             display: flex;
             gap: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
         }
 
         .guide-number {
             background: var(--primary-dark);
             color: #FFFFFF;
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 11px;
+            font-weight: 800;
+            font-size: 12px;
             flex-shrink: 0;
         }
 
-        .guide-text {
-            font-size: 12px;
-            font-weight: 700;
+        .guide-item.warning .guide-number {
+            background: var(--danger-color);
+        }
+
+        .guide-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .guide-title {
+            font-size: 13px;
+            font-weight: 800;
             color: var(--primary-dark);
         }
 
-        .guide-text span {
-            display: block;
-            font-weight: 500;
+        .guide-text-en {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.4;
+        }
+
+        .guide-text-am {
             font-size: 11px;
+            font-weight: 500;
             color: var(--text-muted);
-            margin-top: 2px;
+            line-height: 1.4;
         }
 
         /* Action Buttons */
@@ -373,9 +363,6 @@
             cursor: pointer;
         }
     </style>
-    
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -414,21 +401,19 @@
             <span id="summaryDurationBadge" style="font-size: 10px; background: #DBEAFE; color: #1E40AF; padding: 4px 8px; border-radius: 6px; font-weight: 700;">Pending Payment</span>
         </div>
 
-        <!-- Step Progress Dots -->
+        <!-- Step Progress Dots (2 Steps Now) -->
         <div class="step-indicator">
             <div class="step-dot active" id="dot-1"></div>
             <div class="step-line" id="line-1"></div>
             <div class="step-dot" id="dot-2"></div>
-            <div class="step-line" id="line-2"></div>
-            <div class="step-dot" id="dot-3"></div>
         </div>
 
         <div class="main-body-content">
 
-            <!-- STEP 1: Payment Method -->
+            <!-- STEP 1: Payment Method Selection -->
             <div class="step-view active" id="screen-method">
                 <div class="screen-title">Select Payment Method</div>
-                <div class="screen-subtitle">Choose your payment method to activate your listing</div>
+                <div class="screen-subtitle">የክፍያ አማራጭዎን ይምረጡ</div>
                 
                 <div class="p2p-list">
                     <div class="p2p-card" id="card-cbe" onclick="selectMethod('cbe')">
@@ -473,45 +458,36 @@
                 </div>
             </div>
 
-            <!-- STEP 2: Amount Entry -->
-            <div class="step-view" id="screen-amount">
-                <div class="screen-title">Publishing Fee</div>
-                <div class="screen-subtitle">Required duration fee to publish your listing</div>
-                
-                <div class="input-group">
-                    <div class="currency-label">FEE AMOUNT</div>
-                    <div class="amount-input-wrapper">
-                        <input type="number" id="depositAmount" class="amount-input" placeholder="Amount" readonly>
-                    </div>
-                    <div class="currency-label" style="font-weight: 600;">Ethiopian Birr (ETB)</div>
-                </div>
-            </div>
-
-            <!-- STEP 3: Instructions Guide -->
+            <!-- STEP 2: Instructions & Rules Guide -->
             <div class="step-view" id="screen-guide">
-                <div class="screen-title">How It Works</div>
-                <div class="screen-subtitle">Read the payment instructions carefully to complete publication</div>
+                <div class="screen-title">Payment Rules & Guidelines</div>
+                <div class="screen-subtitle">የክፍያ ደንቦች እና መመሪያዎች</div>
                 
                 <div class="guide-box">
                     <div class="guide-item">
                         <div class="guide-number">1</div>
-                        <div class="guide-text">
-                            Retrieve Account Details
-                            <span>The next page provides recipient details for payment.</span>
+                        <div class="guide-content">
+                            <div class="guide-title">Make Payment to Next Account</div>
+                            <div class="guide-text-en">Transfer the exact required amount using the account details shown on the next page.</div>
+                            <div class="guide-text-am">በሚቀጥለው ገጽ ላይ የሚገለጸውን የባንክ ሂሳብ ቁጥር በመጠቀም ትክክለኛውን የክፍያ መጠን ይላኩ።</div>
                         </div>
                     </div>
+
                     <div class="guide-item">
                         <div class="guide-number">2</div>
-                        <div class="guide-text">
-                            Make Transfer & Upload Receipt
-                            <span>Pay ETB amount and submit screenshot receipt.</span>
+                        <div class="guide-content">
+                            <div class="guide-title">Submit Receipt to Finish</div>
+                            <div class="guide-text-en">After completing your transfer, upload your payment receipt to submit your post.</div>
+                            <div class="guide-text-am">ክፍያውን እንደፈጸሙ የክፍያ ማረጋገጫ ደረሰኝ (Receipt) በመጫን ሂደቱን ያጠናቅቁ።</div>
                         </div>
                     </div>
-                    <div class="guide-item">
+
+                    <div class="guide-item warning">
                         <div class="guide-number">3</div>
-                        <div class="guide-text">
-                            Admin Verification & Auto-Publish
-                            <span>Your listing will go live as soon as admin approves payment.</span>
+                        <div class="guide-content">
+                            <div class="guide-title" style="color: var(--danger-color);">Admin Verification & Deletion Warning</div>
+                            <div class="guide-text-en">All transactions are strictly verified. Submitting a fake receipt or incorrect amount will result in the <strong>permanent deletion</strong> of your post.</div>
+                            <div class="guide-text-am">ሁሉም ክፍያዎች በአስተዳዳሪዎች በጥብቅ ይረጋገጣሉ። የሐሰት ደረሰኝ ወይም ያልተሟላ ክፍያ ማቅረብ ማስታወቂያዎ <strong>በዘላቂነት እንዲሰረዝ</strong> ያደርጋል።</div>
                         </div>
                     </div>
                 </div>
@@ -521,7 +497,7 @@
 
         <div class="action-area">
             <button id="primaryBtn" class="btn-primary" style="display:none;">
-                <span id="primaryBtnText">Continue</span>
+                <span id="primaryBtnText">Continue to Payment / ወደ ክፍያ ቀጥል</span>
             </button>
         </div>
 
@@ -555,7 +531,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBXoIY6Q1Cf3Dw0jU5VImIqxchW79OME6Q",
@@ -586,9 +562,7 @@
 
             const categoryId = urlParams.get('cat') || paymentPlan.categoryId || pending.category || '1';
             const periodKey = urlParams.get('period') || paymentPlan.periodKey || '1m';
-            
             const amountParam = urlParams.get('amount') || paymentPlan.amount || '';
-            
             const title = pending.title || localStorage.getItem("pending_post_title") || "New Listing";
             const postId = pending.id || pending.postId || localStorage.getItem("pending_post_id") || "";
 
@@ -596,7 +570,7 @@
                 categoryId: categoryId,
                 periodKey: periodKey,
                 periodLabel: paymentPlan.periodLabel || `${periodKey.toUpperCase()} Period`,
-                amount: amountParam ? parseFloat(amountParam) : '',
+                amount: amountParam ? parseFloat(amountParam) : 0,
                 postId: postId,
                 title: title,
                 listingData: pending
@@ -617,21 +591,18 @@
         let currentStep = 'method'; 
         let selectedMethodId = '';
         let orderReferenceId = '';
-        let databaseOrderKey = '';
 
         // Initialize history state on load for the first screen
         history.replaceState({ step: 'method' }, "Method", "");
 
         const screens = {
             method: document.getElementById('screen-method'),
-            amount: document.getElementById('screen-amount'),
             guide: document.getElementById('screen-guide')
         };
-        const steps = ['method', 'amount', 'guide'];
+        const steps = ['method', 'guide'];
 
         const primaryBtn = document.getElementById('primaryBtn');
         const primaryBtnText = document.getElementById('primaryBtnText');
-        const depositAmountInput = document.getElementById('depositAmount');
 
         let paymentConfigs = {
             cbe: { name: 'Commercial Bank of Ethiopia', account: '', holder_name: '' },
@@ -661,8 +632,11 @@
 
         window.selectMethod = function(method) {
             selectedMethodId = method;
-            history.pushState({ step: 'amount' }, "Amount", "");
-            showScreen('amount');
+            orderReferenceId = generateOrderRef();
+            updatePaymentSession();
+            
+            history.pushState({ step: 'guide' }, "Guide", "");
+            showScreen('guide');
         };
 
         function generateOrderRef() {
@@ -671,7 +645,7 @@
 
         function updateProgressIndicator() {
             const index = steps.indexOf(currentStep);
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 2; i++) {
                 const dot = document.getElementById(`dot-${i}`);
                 const line = document.getElementById(`line-${i}`);
                 if (i <= index + 1) dot.classList.add('active');
@@ -697,12 +671,31 @@
                 primaryBtn.style.display = "none"; 
             } else {
                 primaryBtn.style.display = "block";
-                if (currentStep === 'amount') {
-                    primaryBtnText.innerText = "Continue";
-                } else if (currentStep === 'guide') {
-                    primaryBtnText.innerText = "Proceed to Payment";
+                if (currentStep === 'guide') {
+                    primaryBtnText.innerText = "Proceed to Payment / ወደ ክፍያ ቀጥል";
                 }
             }
+        }
+
+        // Save session state to sessionStorage without touching Firebase DB
+        function updatePaymentSession() {
+            const methodName = paymentConfigs[selectedMethodId] ? paymentConfigs[selectedMethodId].name : selectedMethodId.toUpperCase();
+            
+            const sessionPayload = {
+                orderReferenceId: orderReferenceId,
+                selectedMethodId: selectedMethodId,
+                methodName: methodName,
+                amount: Number(transactionAmount),
+                categoryId: String(categoryId),
+                periodKey: String(periodKey),
+                periodLabel: String(periodLabel),
+                postId: postId,
+                postTitle: postTitle,
+                userId: String(userId),
+                pendingPayload: pendingPayload
+            };
+
+            sessionStorage.setItem('delalaPaymentSession', JSON.stringify(sessionPayload));
         }
 
         // Listen for phone back button / swipe back action
@@ -714,153 +707,18 @@
             }
         });
 
-        // Save listing and duration order record to Firebase Realtime Database
-        function createUnpaidDatabaseRecord(callback) {
-            let activePostId = postId;
-
-            if (!activePostId && pendingPayload && Object.keys(pendingPayload).length > 0) {
-                const postsRef = ref(db, 'posts');
-                const newPostRef = push(postsRef);
-                activePostId = newPostRef.key;
-                postId = activePostId;
-
-                const fullPostRecord = {
-                    ...pendingPayload,
-                    id: activePostId,
-                    status: 'pending_payment',
-                    category: categoryId,
-                    periodKey: periodKey,
-                    periodLabel: periodLabel,
-                    createdAt: Date.now()
-                };
-
-                set(newPostRef, fullPostRecord);
-            }
-
-            const globalDepositsRef = ref(db, 'deposits');
-            const newOrderRef = push(globalDepositsRef);
-            databaseOrderKey = newOrderRef.key;
-
-            const timestampNow = Date.now();
-            const methodName = paymentConfigs[selectedMethodId] ? paymentConfigs[selectedMethodId].name : selectedMethodId.toUpperCase();
-
-            const unpaidPayload = {
-                ref: orderReferenceId,
-                txnRef: orderReferenceId,
-                method: methodName,
-                userId: String(userId),
-                amount: Number(transactionAmount),
-                status: 'Unpaid',
-                receiptUrl: '',
-                category: String(categoryId),
-                rentType: String(pendingPayload.rentalType || 'Standard'),
-                location: String(pendingPayload.locationDetails?.city || 'Default'),
-                timestamp: timestampNow
-            };
-
-            set(newOrderRef, unpaidPayload).then(() => {
-                const userHistoryRef = ref(db, `users/${userId}/transactions/${databaseOrderKey}`);
-                
-                const userTxData = {
-                    status: 'unpaid',
-                    depositRef: databaseOrderKey,
-                    txnRef: orderReferenceId,
-                    title: `Listing Payment [${postTitle}] (${periodLabel})`,
-                    amount: Number(transactionAmount),
-                    type: 'expense',
-                    timestamp: timestampNow,
-                    sortingTime: timestampNow,
-                    orderRef: orderReferenceId,
-                    ticketNum: orderReferenceId,
-                    userRead: false,
-                    reason: ''
-                };
-
-                set(userHistoryRef, userTxData).then(() => {
-                    if (activePostId) {
-                        const postRef = ref(db, `posts/${activePostId}`);
-                        update(postRef, {
-                            status: 'pending_payment',
-                            periodKey: periodKey,
-                            paymentOrderRef: orderReferenceId,
-                            paymentOrderKey: databaseOrderKey
-                        }).then(() => callback()).catch(() => callback());
-                    } else {
-                        callback();
-                    }
-                }).catch(() => callback());
-            }).catch(err => {
-                console.error("Database initialization failed:", err);
-                callback();
-            });
-        }
-
-        function sendAdminNotificationAndRedirect() {
-            const emailConfigRef = ref(db, 'settings/email_config');
-            
-            const goToOrder = () => {
-                window.location.href = `order.html?step=pay&method=${selectedMethodId}&amount=${transactionAmount}&ref=${orderReferenceId}&key=${databaseOrderKey}&postId=${postId}`;
-            };
-
-            onValue(emailConfigRef, (snapshot) => {
-                const emailConfig = snapshot.val();
-
-                if (emailConfig && emailConfig.emailjs_public_key) {
-                    try {
-                        window.emailjs.init(emailConfig.emailjs_public_key);
-                        
-                        const templateParams = {
-                            name: userId, 
-                            email: emailConfig.alert_email_target || "admin@delala.app",
-                            amount: transactionAmount,
-                            post_id: postId || "N/A",
-                            post_title: postTitle || "Rental Listing",
-                            period_label: periodLabel,
-                            user_os: navigator.platform,
-                            user_browser: navigator.userAgent
-                        };
-
-                        window.emailjs.send(
-                            emailConfig.emailjs_service_id, 
-                            emailConfig.emailjs_template_id, 
-                            templateParams
-                        )
-                        .then(() => goToOrder())
-                        .catch((err) => {
-                            console.error("EmailJS sending failed:", err);
-                            goToOrder();
-                        });
-                    } catch (e) {
-                        goToOrder();
-                    }
-                } else {
-                    goToOrder();
-                }
-            }, { onlyOnce: true });
-        }
-
         primaryBtn.addEventListener('click', () => {
-            if (currentStep === 'amount') {
-                const amount = parseFloat(depositAmountInput.value);
-                if (isNaN(amount) || amount <= 0) {
-                    showCustomAlert("Validation Error", "Please enter a valid amount.");
-                    return;
-                }
-                transactionAmount = amount;
-                orderReferenceId = generateOrderRef(); 
+            if (currentStep === 'guide') {
+                // Keep session updated before redirecting
+                updatePaymentSession();
 
-                createUnpaidDatabaseRecord(() => {
-                    history.pushState({ step: 'guide' }, "Guide", "");
-                    showScreen('guide');
-                });
-            } else if (currentStep === 'guide') {
-                sendAdminNotificationAndRedirect();
+                // Pass along session details via URL query to order.html
+                window.location.href = `order.html?step=pay&method=${selectedMethodId}&amount=${transactionAmount}&ref=${orderReferenceId}&postId=${postId}`;
             }
         });
 
+        // Read active payment account settings from Firebase DB (Read-Only)
         function runDatabaseIntegration() {
-            depositAmountInput.value = transactionAmount;
-
             const dynamicAccountsRef = ref(db, 'settings/accounts');
             onValue(dynamicAccountsRef, (snapshot) => {
                 let availableMethods = [];
