@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Side by Side Images</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .image-container {
+      display: flex;
+      gap: 20px;
+      max-width: 1200px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+    .image-card {
+      flex: 1;
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .image-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      display: block;
+    }
+    /* Responsive design for smaller screens */
+    @media (max-width: 600px) {
+      .image-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="image-container">
+    <div class="image-card">
+      <img src="naol1.png" alt="Naol 1">
+    </div>
+    <div class="image-card">
+      <img src="naol2.png" alt="Naol 2">
+    </div>
+  </div>
+
+</body>
+</html>
