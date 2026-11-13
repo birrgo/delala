@@ -1,11 +1,11 @@
-Privacy Policy for Tariqa Pro
+Privacy Policy for Birr Go
 Effective Date: August 2026
 1. Introduction
-Welcome to Tariqa Pro. We respect your privacy and are committed to protecting your information. Tariqa Pro provides users with technology guides, tips, and tutorials. This privacy policy explains how our mobile application handles user data.
+Welcome to Birr Go. We respect your privacy and are committed to protecting your information. Birr Go provides users with technology guides, tips, and tutorials. This privacy policy explains how our mobile application handles user data.
 2. Information We Collect
  * Device & Usage Information: We collect non-personal technical data such as your device model, operating system version, and general usage statistics (such as article views and screen taps) to maintain stability, fix bugs, and optimize content delivery.
  * Advertising Identifiers: We automatically collect your device's unique Advertising ID (such as the Android Advertising ID) to support native advertising features.
- * No Personal Information or Location Data: Tariqa Pro does not require user registration, does not create accounts, and does not request or track your device's GPS or location data.
+ * No Personal Information or Location Data: Birr Go does not require user registration, does not create accounts, and does not request or track your device's GPS or location data.
 3. How We Use Information
  * To deliver, maintain, and improve our tech tips and instructional content.
  * To monitor app stability, diagnose crashes, and ensure system reliability.
